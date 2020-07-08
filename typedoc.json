@@ -1,0 +1,15 @@
+{
+  "name": "yarn-audit-fix",
+  "mode": "modules",
+  "out": "./docs",
+  "target": "ES6",
+  "exclude": ["test", "node_modules"],
+  "externalPattern": "**/node_modules/**",
+  "excludePrivate": true,
+  "excludeNotExported": true,
+  "moduleResolution": "node",
+  "module": "commonjs",
+  "hideGenerator": true,
+  "readme": "none",
+  "ignoreCompilerErrors": true
+}
