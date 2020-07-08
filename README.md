@@ -18,4 +18,10 @@ $ yarn add yarn-audit-fix -D
 ## Usage
 ```shell script
 $ yarn-audit-fix
+
+Applying npm audit fix...
+Removing yarn.lock
+Generating new yarn.lock from package-lock.json
+Removing package-lock.json
+Done
 ```
