@@ -38,7 +38,7 @@
     "yarn-audit-fix",
     "yarn audit fix",
     "audit",
-    "vunlerability"
+    "vulnerability"
   ],
   "files": [
     "README.md",
@@ -80,8 +80,7 @@
     "verifyConditions": [
       "@semantic-release/changelog",
       "@semantic-release/npm",
-      "@semantic-release/git",
-      "@qiwi/semantic-release-gh-pages-plugin"
+      "@semantic-release/git"
     ],
     "prepare": [
       "@semantic-release/changelog",
@@ -90,8 +89,7 @@
     ],
     "publish": [
       "@semantic-release/npm",
-      "@semantic-release/github",
-      "@qiwi/semantic-release-gh-pages-plugin"
+      "@semantic-release/github"
     ]
   }
 }
