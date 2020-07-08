@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.0.0...v1.1.0) (2020-07-08)
+
+
+### Features
+
+* replace npm i with synp convertion ([7272a9c](https://github.com/antongolub/yarn-audit-fix/commit/7272a9ce6f241e37fa23955806ca3b7dc041b498))
+
 # 1.0.0 (2020-07-08)
 
 
