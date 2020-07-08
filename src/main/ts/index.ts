@@ -7,8 +7,8 @@ type Stage = [
 
 export const stages: Stage[] = [
   [
-    'Generating package-lock.json...',
-    ['npm', ['i', '--package-lock-only']],
+    'Generating package-lock.json from yarn.lock',
+    ['node_modules/.bin/synp', ['yarn.lock']],
   ],
   [
     'Applying npm audit fix...',

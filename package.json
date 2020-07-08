@@ -50,8 +50,9 @@
   "author": "Anton Golub <golub.anton@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "tslib": "^2.0.0",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "synp": "^1.7.0",
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@qiwi/libdefkit": "^1.0.2",

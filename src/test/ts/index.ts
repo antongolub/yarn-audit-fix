@@ -13,7 +13,7 @@ describe('yarn-audit-fix', () => {
     it('invokes cmd queue with proper args', () => {
       require('../../main/ts/cli')
 
-      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['i', '--package-lock-only'])
+      expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/synp', ['yarn.lock'])
       expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix'])
       expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/rimraf', ['yarn.lock'])
       expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import'])
