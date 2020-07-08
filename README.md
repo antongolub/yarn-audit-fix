@@ -7,7 +7,7 @@ Strictly `yarn` cannot be a drop-in replacement for `npm`.
 Authors suggest using `depedabot` for security patches. Well, it is very inconvenient in some situations, to say the least of it.
 The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075)
 
-Fortunately, there's a workaround: [stackoverflow/60878037](https://stackoverflow.com/a/60878037).
+Fortunately, there's a workaround: [stackoverflow/60878037](https://stackoverflow.com/a/60878037) (thanks to Gianfranco P.).
 `yarn-audit-fix` is just a composition of these steps into a single utility.
 
 ## Install
@@ -19,6 +19,7 @@ $ yarn add yarn-audit-fix -D
 ```shell script
 $ yarn-audit-fix
 
+Generating package-lock.json...
 Applying npm audit fix...
 Removing yarn.lock
 Generating new yarn.lock from package-lock.json
