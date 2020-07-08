@@ -28,7 +28,7 @@
     "coveralls:push": "cat ./coverage/lcov.info | coveralls || exit 0",
     "docs": "typedoc --readme README.md --tsconfig tsconfig.json src/main --ignoreCompilerErrors || exit 0",
     "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
-    "postupdate": "yarn && yarn build && yarn test"
+    "postupdate": "yarn && yarn build && node target/es5/cli.js && yarn test"
   },
   "repository": {
     "type": "git",
@@ -56,14 +56,14 @@
   "devDependencies": {
     "@qiwi/libdefkit": "^1.0.2",
     "@qiwi/license": "^1.1.3",
-    "@qiwi/semantic-release-gh-pages-plugin": "^3.0.0",
+    "@qiwi/semantic-release-gh-pages-plugin": "^4.0.0",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/git": "^9.0.0",
     "@semantic-release/github": "^7.0.7",
     "@semantic-release/npm": "^7.0.5",
     "@swissquote/crafty-preset-jest": "^1.11.1",
-    "@types/jest": "^26.0.3",
-    "@types/node": "^14.0.14",
+    "@types/jest": "^26.0.4",
+    "@types/node": "^14.0.20",
     "coveralls": "^3.1.0",
     "jest": "^26.1.0",
     "semantic-release": "^17.1.1",
@@ -73,7 +73,7 @@
     "tslint-config-qiwi": "^1.5.0",
     "typedoc": "^0.17.8",
     "typedoc-plugin-external-module-name": "^4.0.3",
-    "typescript": "3.9.5"
+    "typescript": "3.9.6"
   },
   "release": {
     "branch": "master",
