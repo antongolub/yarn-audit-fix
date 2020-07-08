@@ -15,9 +15,9 @@ describe('yarn-audit-fix', () => {
 
       expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['i', '--package-lock-only'])
       expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix'])
-      expect(cp.spawnSync).toHaveBeenCalledWith('rm', ['yarn.lock'])
+      expect(cp.spawnSync).toHaveBeenCalledWith('rimraf', ['yarn.lock'])
       expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import'])
-      expect(cp.spawnSync).toHaveBeenCalledWith('rm', ['package-lock.json'])
+      expect(cp.spawnSync).toHaveBeenCalledWith('rimraf', ['package-lock.json'])
     })
   })
 })

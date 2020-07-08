@@ -16,7 +16,7 @@ export const stages: Stage[] = [
   ],
   [
     'Removing yarn.lock',
-    ['rm', ['yarn.lock']]
+    ['rimraf', ['yarn.lock']]
   ],
   [
     'Generating new yarn.lock from package-lock.json',
@@ -24,7 +24,7 @@ export const stages: Stage[] = [
   ],
   [
     'Removing package-lock.json',
-    ['rm', ['package-lock.json']]
+    ['rimraf', ['package-lock.json']]
   ],
   [
     'Done'
