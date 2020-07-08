@@ -4,7 +4,7 @@ jest.mock('child_process')
 
 beforeAll(() => {
   // @ts-ignore
-  cp.spawnSync.mockImplementation(() => {})
+  cp.spawnSync.mockImplementation(() => { /* noop */ })
 })
 afterAll(jest.clearAllMocks)
 
