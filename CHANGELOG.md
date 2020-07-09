@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.1.0...v1.1.1) (2020-07-09)
+
+
+### Bug Fixes
+
+* fix synp source arg, apply audit fix to lockfile only ([#1](https://github.com/antongolub/yarn-audit-fix/issues/1)) ([c2bd0fc](https://github.com/antongolub/yarn-audit-fix/commit/c2bd0fce3a61a0c3c46d1601b7aa75120760cbd4))
+
 # [1.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.0.0...v1.1.0) (2020-07-08)
 
 
