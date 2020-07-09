@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.2.0...v1.2.1) (2020-07-09)
+
+
+### Bug Fixes
+
+* raplace yarm import to synp converter to handle workspaces issue ([c921179](https://github.com/antongolub/yarn-audit-fix/commit/c9211797bb3ab7fc346fff99e0215026f503664d))
+
 # [1.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.1.1...v1.2.0) (2020-07-09)
 
 
