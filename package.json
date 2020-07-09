@@ -28,7 +28,7 @@
     "coveralls:push": "cat ./coverage/lcov.info | coveralls || exit 0",
     "docs": "typedoc --readme README.md --tsconfig tsconfig.json src/main --ignoreCompilerErrors || exit 0",
     "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
-    "postupdate": "yarn && yarn build && node target/es5/cli.js && yarn test"
+    "postupdate": "yarn build && node target/es5/cli.js && yarn test"
   },
   "repository": {
     "type": "git",
