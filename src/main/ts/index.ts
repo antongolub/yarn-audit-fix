@@ -20,7 +20,7 @@ export const stages: Stage[] = [
   ],
   [
     'Generating new yarn.lock from package-lock.json',
-    ['yarn', ['import']],
+    ['node_modules/.bin/synp', ['-s', 'package-lock.json']],
   ],
   [
     'Removing package-lock.json',
