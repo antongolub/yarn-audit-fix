@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.1.1...v1.2.0) (2020-07-09)
+
+
+### Features
+
+* use yarn import for package-lock converting ([e9fccd8](https://github.com/antongolub/yarn-audit-fix/commit/e9fccd8798be6c2570c46ddc086c23bc1e69f854))
+
 ## [1.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.1.0...v1.1.1) (2020-07-09)
 
 
