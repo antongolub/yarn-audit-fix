@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/antongolub/yarn-audit-fix/compare/v1.2.1...v1.2.2) (2020-07-10)
+
+
+### Bug Fixes
+
+* fix worlspaces issue ([221f17b](https://github.com/antongolub/yarn-audit-fix/commit/221f17b8f922c46efb0012c3acb8969dda15b711)), closes [#2](https://github.com/antongolub/yarn-audit-fix/issues/2) [#3](https://github.com/antongolub/yarn-audit-fix/issues/3)
+
 ## [1.2.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.2.0...v1.2.1) (2020-07-09)
 
 
