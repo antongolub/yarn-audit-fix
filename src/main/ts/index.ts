@@ -57,10 +57,10 @@ export const stages: TStage[] = [
     'Updating yarn.lock from package-lock.json...',
     yarnImport,
     clearTempData,
-    applyYarn
+    applyYarn,
   ],
   [
-    'Done'
+    'Done',
   ],
 ]
 
