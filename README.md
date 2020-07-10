@@ -14,6 +14,10 @@ Fortunately, there's a workaround: [stackoverflow/60878037](https://stackoverflo
 ```shell script
 $ yarn add yarn-audit-fix -D
 ```
+or even better
+```
+npx yarn-audit-fix
+```
 
 ## Usage
 ```shell script
