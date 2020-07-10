@@ -1,40 +1,75 @@
-import cp from 'child_process'
+import fs from 'fs-extra'
+import synp from 'synp'
+import {invoke} from './invoke'
 
-type Stage = [
-  string,
-  [string, string[] | undefined]?
-]
+type TContext = { cwd: string }
 
-export const stages: Stage[] = [
+type TCallback = (cxt: TContext) => void
+
+type TStage = [string, ...TCallback[]]
+
+const fixWorkspaces: TCallback = ({cwd}: TContext) => {
+  // save original file for rollback
+  fs.copyFileSync('package.json', 'origin.package.json')
+
+  // https://github.com/antongolub/yarn-audit-fix/issues/2
+  const pkgJsonData = JSON.parse(fs.readFileSync('package.json', 'utf-8').trim())
+  delete pkgJsonData.workspaces
+
+  fs.writeFileSync('package.json', JSON.stringify(pkgJsonData, null, 2))
+}
+
+const clearTempData: TCallback = () => {
+  fs.copyFileSync('origin.package.json', 'package.json')
+  fs.removeSync('origin.package.json')
+  fs.removeSync('package-lock.json')
+}
+
+const applyYarn: TCallback = ({cwd}) =>
+  invoke('yarn', [], cwd)
+
+const yarnImport: TCallback = ({cwd}) => {
+  fs.removeSync('yarn.lock')
+  invoke('yarn', ['import'], cwd)
+}
+
+const npmAuditFix: TCallback = ({cwd}) =>
+    invoke('npm', ['audit', 'fix', '--package-lock-only'], cwd)
+
+const yarnLockToPkgLock: TCallback = ({cwd}) => {
+  const pgkLockJsonData = synp.yarnToNpm(cwd)
+
+  fs.writeFileSync('package-lock.json', pgkLockJsonData)
+}
+
+export const stages: TStage[] = [
   [
-    'Generating package-lock.json from yarn.lock',
-    ['node_modules/.bin/synp', ['-s', 'yarn.lock']],
-  ],
-  [
-    'Removing yarn.lock',
-    ['node_modules/.bin/rimraf', ['yarn.lock']],
+    'Generating package-lock.json from yarn.lock...',
+    applyYarn,
+    fixWorkspaces,
+    yarnLockToPkgLock,
   ],
   [
     'Applying npm audit fix...',
-    ['npm', ['audit', 'fix', '--package-lock-only']],
+    npmAuditFix,
   ],
   [
-    'Generating new yarn.lock from package-lock.json',
-    ['node_modules/.bin/synp', ['-s', 'package-lock.json']],
+    'Updating yarn.lock from package-lock.json...',
+    yarnImport,
+    clearTempData,
+    applyYarn
   ],
   [
-    'Removing package-lock.json',
-    ['node_modules/.bin/rimraf', ['package-lock.json']],
-  ],
-  [
-    'Done',
+    'Done'
   ],
 ]
 
-export const run = () => stages.forEach(([description, [cmd, args] = []]) => {
-  console.log(description)
+export const run = () => {
+  const cxt = {cwd: process.cwd()}
 
-  if (cmd) {
-    cp.spawnSync(cmd, args)
-  }
-})
+  stages.forEach(([description, ...cbs]) => {
+    console.log(description)
+
+    cbs.forEach(cb => cb(cxt))
+  })
+}

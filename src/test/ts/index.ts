@@ -1,23 +1,59 @@
 import cp from 'child_process'
+import fs from 'fs-extra'
+import synp from 'synp'
+import {run} from '../../main/ts'
 
 jest.mock('child_process')
-
-beforeAll(() => {
-  // @ts-ignore
-  cp.spawnSync.mockImplementation(() => { /* noop */ })
-})
-afterAll(jest.clearAllMocks)
+jest.mock('fs-extra')
+jest.mock('synp')
 
 describe('yarn-audit-fix', () => {
+
+  beforeAll(() => {
+    // @ts-ignore
+    fs.copyFileSync.mockImplementation(() => { /* noop */ })
+    // @ts-ignore
+    fs.readFileSync.mockImplementation(() => '{}')
+    // @ts-ignore
+    fs.removeSync.mockImplementation(() => { /* noop */ })
+    // @ts-ignore
+    synp.yarnToNpm.mockImplementation(() => '{}')
+    // @ts-ignore
+    cp.spawnSync.mockImplementation(() => ({status: 0}))
+  })
+  afterAll(jest.clearAllMocks)
+
   describe('runner', () => {
     it('invokes cmd queue with proper args', () => {
+      const expectedOpts = {cwd: process.cwd()}
+
       require('../../main/ts/cli')
 
-      expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/synp', ['-s', 'yarn.lock'])
-      expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/rimraf', ['yarn.lock'])
-      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only'])
-      expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/synp', ['-s', 'package-lock.json'])
-      expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/rimraf', ['package-lock.json'])
+      // Generating package-lock.json from yarn.lock...
+      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', [], expectedOpts)
+      expect(fs.copyFileSync).toHaveBeenCalledWith('package.json', 'origin.package.json')
+      expect(fs.writeFileSync).toHaveBeenCalledWith('package.json', '{}')
+
+      // Applying npm audit fix...
+      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only'], expectedOpts)
+
+      // Updating yarn.lock from package-lock.json...
+      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import'], expectedOpts)
+      expect(fs.copyFileSync).toHaveBeenCalledWith('origin.package.json', 'package.json')
+      expect(fs.removeSync).toHaveBeenCalledWith('origin.package.json')
+      expect(fs.removeSync).toHaveBeenCalledWith('package-lock.json')
+    })
+
+    it('throws exception if occurs', () => {
+      // @ts-ignore
+      cp.spawnSync.mockImplementation(() => ({error: new Error('foobar')}))
+
+      expect(run).toThrow('foobar')
+
+      // @ts-ignore
+      cp.spawnSync.mockImplementation(() => ({status: 1}))
+
+      expect(run).toThrowError()
     })
   })
 })
