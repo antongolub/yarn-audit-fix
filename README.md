@@ -1,4 +1,5 @@
 # yarn-audit-fix
+
 [![Build Status](https://travis-ci.com/antongolub/yarn-audit-fix.svg?branch=master)](https://travis-ci.com/antongolub/yarn-audit-fix)
 [![npm (tag)](https://img.shields.io/npm/v/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 [![deps](https://img.shields.io/david/antongolub/yarn-audit-fix)](https://david-dm.org/antongolub/yarn-audit-fix)
@@ -17,6 +18,7 @@ The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075)
 
 Fortunately, there's a workaround: [stackoverflow/60878037](https://stackoverflow.com/a/60878037) (thanks to Gianfranco P.).
 `yarn-audit-fix` is just a composition of these steps into a single utility.
+More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
 
 ## Install
 ```shell script
@@ -36,3 +38,6 @@ Applying npm audit fix...
 Generating new yarn.lock from package-lock.json...
 Done
 ```
+
+## License
+[MIT](./LICENSE)
