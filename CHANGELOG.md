@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.2.2...v1.3.0) (2020-07-13)
+
+
+### Features
+
+* print invocation details to stdout ([f92b18a](https://github.com/antongolub/yarn-audit-fix/commit/f92b18a70498ad3aa03ba853260e84de675920a2))
+
 ## [1.2.2](https://github.com/antongolub/yarn-audit-fix/compare/v1.2.1...v1.2.2) (2020-07-10)
 
 
