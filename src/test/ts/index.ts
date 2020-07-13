@@ -19,7 +19,7 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     synp.yarnToNpm.mockImplementation(() => '{}')
     // @ts-ignore
-    cp.spawnSync.mockImplementation(() => ({status: 0}))
+    cp.spawnSync.mockImplementation(() => ({status: 0, stdout: 'foobar'}))
   })
   afterAll(jest.clearAllMocks)
 
