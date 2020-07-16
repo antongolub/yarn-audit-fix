@@ -75,7 +75,7 @@
     "tslint-config-qiwi": "^1.5.0",
     "typedoc": "^0.17.8",
     "typedoc-plugin-external-module-name": "^4.0.3",
-    "typescript": "3.9.6"
+    "typescript": "3.9.7"
   },
   "release": {
     "branch": "master",
