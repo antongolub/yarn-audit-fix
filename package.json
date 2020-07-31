@@ -50,7 +50,9 @@
   "author": "Anton Golub <golub.anton@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@types/find-cache-dir": "^3.2.0",
     "@types/fs-extra": "^9.0.1",
+    "find-cache-dir": "^3.3.1",
     "fs-extra": "^9.0.1",
     "synp": "^1.7.1",
     "tslib": "^2.0.0"
