@@ -1,6 +1,10 @@
 import fs from 'fs-extra'
 import synp from 'synp'
-import {invoke} from './invoke'
+import {
+  invoke,
+  promisify,
+  asyncForEach,
+} from './util'
 
 type TContext = { cwd: string }
 
@@ -64,12 +68,12 @@ export const stages: TStage[] = [
   ],
 ]
 
-export const run = () => {
+export const run = async() => {
   const cxt = {cwd: process.cwd()}
 
-  stages.forEach(([description, ...cbs]) => {
+  return asyncForEach(stages, async([description, ...cbs]) => {
     console.log(description)
 
-    cbs.forEach(cb => cb(cxt))
+    return asyncForEach(cbs, async(cb) => promisify(cb)(cxt))
   })
 }
