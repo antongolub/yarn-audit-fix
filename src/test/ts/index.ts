@@ -24,10 +24,10 @@ describe('yarn-audit-fix', () => {
   afterAll(jest.clearAllMocks)
 
   describe('runner', () => {
-    it('invokes cmd queue with proper args', () => {
+    it('invokes cmd queue with proper args', async() => {
       const expectedOpts = {cwd: process.cwd()}
 
-      require('../../main/ts/cli')
+      await require('../../main/ts/cli')
 
       // Generating package-lock.json from yarn.lock...
       expect(cp.spawnSync).toHaveBeenCalledWith('yarn', [], expectedOpts)
@@ -44,16 +44,16 @@ describe('yarn-audit-fix', () => {
       expect(fs.removeSync).toHaveBeenCalledWith('package-lock.json')
     })
 
-    it('throws exception if occurs', () => {
+    it('throws exception if occurs', async() => {
       // @ts-ignore
       cp.spawnSync.mockImplementation(() => ({error: new Error('foobar')}))
 
-      expect(run).toThrow('foobar')
+      await expect(run()).rejects.toThrow('foobar')
 
       // @ts-ignore
       cp.spawnSync.mockImplementation(() => ({status: 1}))
 
-      expect(run).toThrowError()
+      await expect(run()).rejects.toThrowError()
     })
   })
 })

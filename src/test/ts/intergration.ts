@@ -1,5 +1,5 @@
 describe('cli', () => {
-  it('applies cli to self repo', () => {
-    require('../../main/ts/cli')
+  it('applies cli to self repo', async() => {
+    await require('../../main/ts/cli')
   })
 })
