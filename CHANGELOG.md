@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.3.0...v1.4.0) (2020-08-03)
+
+
+### Features
+
+* add async handlers support ([71eab4e](https://github.com/antongolub/yarn-audit-fix/commit/71eab4e8ac2c3bcedc985244f1845dedd967ca2a))
+* perform most operations on temporary entities ([213b4f5](https://github.com/antongolub/yarn-audit-fix/commit/213b4f5086b9a3572994ce5f311acf7d6b09d84e)), closes [#6](https://github.com/antongolub/yarn-audit-fix/issues/6)
+
 # [1.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.2.2...v1.3.0) (2020-07-13)
 
 
