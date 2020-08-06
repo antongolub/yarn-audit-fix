@@ -4,8 +4,6 @@ import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import {
   invoke,
-  promisify,
-  asyncForEach,
 } from './util'
 
 type TContext = { cwd: string, temp: string }
@@ -14,8 +12,8 @@ type TCallback = (cxt: TContext) => void
 
 type TStage = [string, ...TCallback[]]
 
+// https://github.com/antongolub/yarn-audit-fix/issues/2
 const fixWorkspaces: TCallback = ({temp}) => {
-  // https://github.com/antongolub/yarn-audit-fix/issues/2
   const pkgJsonData = JSON.parse(fs.readFileSync(join(temp, 'package.json'), 'utf-8').trim())
   delete pkgJsonData.workspaces
 
@@ -77,14 +75,14 @@ export const stages: TStage[] = [
 ]
 
 export const run = async() => {
-  const cxt = {
+  const ctx = {
     cwd: process.cwd(),
     temp: findCacheDir({name: 'yarn-audit-fix', create: true}) + '',
   }
 
-  return asyncForEach(stages, async([description, ...cbs]) => {
+  for (const [description, ...steps] of stages) {
     console.log(description)
 
-    return asyncForEach(cbs, async(cb) => promisify(cb)(cxt))
-  })
+    for (const step of steps) step(ctx)
+  }
 }

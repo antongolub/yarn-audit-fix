@@ -9,6 +9,8 @@ jest.mock('child_process')
 jest.mock('fs-extra')
 jest.mock('synp')
 
+const stdio = ['inherit', 'inherit', 'inherit']
+
 describe('yarn-audit-fix', () => {
 
   beforeAll(() => {
@@ -34,7 +36,7 @@ describe('yarn-audit-fix', () => {
       const temp = findCacheDir({name: 'yarn-audit-fix', create: true}) + ''
       const cwd = process.cwd()
 
-      await require('../../main/ts/cli')
+      await run()
 
       // Preparing...
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
@@ -47,25 +49,25 @@ describe('yarn-audit-fix', () => {
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only'], {cwd: temp})
+      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only'], {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
-      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import'], {cwd: temp})
+      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import'], {cwd: temp, stdio})
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
-      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', [], {cwd})
+      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', [], {cwd, stdio})
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
     })
 
     it('throws exception if occurs', async() => {
+      let reason = {error: new Error('foobar')} as any
       // @ts-ignore
-      cp.spawnSync.mockImplementation(() => ({error: new Error('foobar')}))
+      cp.spawnSync.mockImplementation(() => reason)
+      await expect(run()).rejects.toBe(reason)
 
-      await expect(run()).rejects.toThrow('foobar')
-
+      reason = {status: 1}
       // @ts-ignore
-      cp.spawnSync.mockImplementation(() => ({status: 1}))
-
-      await expect(run()).rejects.toThrowError()
+      cp.spawnSync.mockImplementation(() => reason)
+      await expect(run()).rejects.toBe(reason)
     })
   })
 })
