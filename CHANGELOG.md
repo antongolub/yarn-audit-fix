@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.4.0...v1.4.1) (2020-08-06)
+
+
+### Bug Fixes
+
+* exit with non-zero if anything fails ([#11](https://github.com/antongolub/yarn-audit-fix/issues/11)) ([3e7eb93](https://github.com/antongolub/yarn-audit-fix/commit/3e7eb931816c18eaa781565a25624599aef94f69)), closes [#10](https://github.com/antongolub/yarn-audit-fix/issues/10)
+
 # [1.4.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.3.0...v1.4.0) (2020-08-03)
 
 
