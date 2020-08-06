@@ -2,13 +2,7 @@
 
 import {run} from './index'
 
-let promise
-
-// tslint:disable-next-line:no-floating-promises
-(async() => {
-  promise = run()
-
-  await promise
-})()
-
-module.exports = promise
+run().catch(reason => {
+  console.error(reason)
+  process.exit(reason.status || 1)
+})
