@@ -9,7 +9,6 @@
 
 Apply `npm audit fix` logic to `yarn.lock`
 
-
 ## Motivation
 `yarn audit` detects vulnerabilities, but cannot fix them.
 Strictly `yarn` cannot be a drop-in replacement for `npm`.
@@ -36,7 +35,7 @@ $ yarn-audit-fix
 <b>Preparing temp assets...</b>
 <b>Generating package-lock.json from yarn.lock...</b>
 <b>Applying npm audit fix...</b>
-<b>invoke npm audit fix --package-lock-only</b>
+<b>invoke</b> npm audit fix --package-lock-only
 added 14 packages, removed 195 packages and updated 1245 packages in 4.795s
 fixed 3 of 26 vulnerabilities in 1370 scanned packages
   23 vulnerabilities required manual review and could not be updated
