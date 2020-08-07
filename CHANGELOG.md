@@ -1,3 +1,11 @@
+## [1.5.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.5.0...v1.5.1) (2020-08-07)
+
+
+### Bug Fixes
+
+* **readme:** update usage example ([8d25680](https://github.com/antongolub/yarn-audit-fix/commit/8d256800d3542ee0d9ff60d1d72be6232bb7a2fc))
+* print invoke cmd before its output ([dfe82fb](https://github.com/antongolub/yarn-audit-fix/commit/dfe82fb4de711dcddc0feb497c7ade66d4ef717d))
+
 # [1.5.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.4.1...v1.5.0) (2020-08-07)
 
 
