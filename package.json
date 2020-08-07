@@ -73,6 +73,7 @@
     "@types/jest": "^26.0.8",
     "@types/node": "^14.0.27",
     "coveralls": "^3.1.0",
+    "inside-out-promise": "^2.1.0",
     "jest": "^26.2.2",
     "semantic-release": "^17.1.1",
     "terser": "^4.8.0",

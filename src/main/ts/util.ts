@@ -1,7 +1,7 @@
 import cp from 'child_process'
 
-export const invoke = (cmd: string, args: string[], cwd: string) => {
-  const result = cp.spawnSync(cmd, args, {cwd, stdio: ['inherit', 'inherit', 'inherit']})
+export const invoke = (cmd: string, args: string[], cwd: string, stdio: any[] = ['inherit', 'inherit', 'inherit']) => {
+  const result = cp.spawnSync(cmd, args, {cwd, stdio})
 
   console.log('invoke', cmd, ...args)
 

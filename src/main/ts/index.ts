@@ -3,9 +3,7 @@ import synp from 'synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {
-  invoke,
-} from './util'
+import {invoke} from './util'
 
 type TContext = { cwd: string, temp: string }
 

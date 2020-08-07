@@ -4,5 +4,5 @@ import {run} from './index'
 
 run().catch(reason => {
   console.error(reason)
-  process.exit(reason.status || 1)
+  process.exit(+reason.status || 1)
 })

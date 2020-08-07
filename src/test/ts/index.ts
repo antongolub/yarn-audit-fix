@@ -1,19 +1,19 @@
 import cp from 'child_process'
+import {join} from 'path'
 import fs from 'fs-extra'
 import synp from 'synp'
 import findCacheDir from 'find-cache-dir'
-import {join} from 'path'
+import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
 jest.mock('synp')
 
-const stdio = ['inherit', 'inherit', 'inherit']
-
 describe('yarn-audit-fix', () => {
-
-  beforeAll(() => {
+  beforeEach(() => {
+    // @ts-ignore
+    jest.spyOn(process, 'exit').mockImplementation(() => { /* noop */ })
     // @ts-ignore
     fs.emptyDirSync.mockImplementation(() => { /* noop */ })
     // @ts-ignore
@@ -29,14 +29,14 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     cp.spawnSync.mockImplementation(() => ({status: 0, stdout: 'foobar'}))
   })
-  afterAll(jest.clearAllMocks)
+  afterEach(jest.clearAllMocks)
+  afterAll(jest.resetAllMocks)
 
-  describe('runner', () => {
-    it('invokes cmd queue with proper args', async() => {
+  describe('flow', () => {
+    const checkFlow = () => {
       const temp = findCacheDir({name: 'yarn-audit-fix', create: true}) + ''
       const cwd = process.cwd()
-
-      await run()
+      const stdio = ['inherit', 'inherit', 'inherit']
 
       // Preparing...
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
@@ -56,18 +56,60 @@ describe('yarn-audit-fix', () => {
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
       expect(cp.spawnSync).toHaveBeenCalledWith('yarn', [], {cwd, stdio})
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
+    }
+
+    describe('runner', () => {
+      it('invokes cmd queue with proper args', async() => {
+        await run()
+        checkFlow()
+      })
+
+      it('throws exception if occurs', async() => {
+        let reason = {error: new Error('foobar')} as any
+        // @ts-ignore
+        cp.spawnSync.mockImplementation(() => reason)
+        await expect(run()).rejects.toBe(reason)
+
+        reason = {status: 1}
+        // @ts-ignore
+        cp.spawnSync.mockImplementation(() => reason)
+        await expect(run()).rejects.toBe(reason)
+      })
     })
 
-    it('throws exception if occurs', async() => {
-      let reason = {error: new Error('foobar')} as any
-      // @ts-ignore
-      cp.spawnSync.mockImplementation(() => reason)
-      await expect(run()).rejects.toBe(reason)
+    describe('cli', () => {
+      it('invokes cmd queue with proper args', () => {
+        jest.isolateModules(() => require('../../main/ts/cli'))
+        checkFlow()
+      })
 
-      reason = {status: 1}
-      // @ts-ignore
-      cp.spawnSync.mockImplementation(() => reason)
-      await expect(run()).rejects.toBe(reason)
+      describe('on error', () => {
+        const checkExit = (reason: any, code: number) => {
+          const {promise, resolve} = iop()
+          // @ts-ignore
+          cp.spawnSync.mockImplementationOnce(() => {
+            setImmediate(() => {
+              expect(process.exit).toHaveBeenCalledWith(code)
+              // @ts-ignore
+              resolve()
+            })
+
+            return reason
+          })
+
+          jest.isolateModules(() => require('../../main/ts/cli'))
+
+          return promise
+        }
+
+        it('returns exit code if passed', async() => {
+          await checkExit({status: 2}, 2)
+        })
+
+        it('sets code to 1 otherwise', async() => {
+          await checkExit({error: new Error('foobar')}, 1)
+        })
+      })
     })
   })
 })
