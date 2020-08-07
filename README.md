@@ -1,4 +1,12 @@
-# yarn-audit-fix
+<p align="center">
+  <a href="https://yarnpkg.com/">
+    <img alt="Yarn fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true?raw=true" width="546">
+  </a>
+</p>
+
+<h1 align="center">
+  yarn-audit-fix
+</h1>
 
 [![Build Status](https://travis-ci.com/antongolub/yarn-audit-fix.svg?branch=master)](https://travis-ci.com/antongolub/yarn-audit-fix)
 [![npm (tag)](https://img.shields.io/npm/v/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
