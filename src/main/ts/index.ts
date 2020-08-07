@@ -2,6 +2,7 @@ import fs from 'fs-extra'
 import synp from 'synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
+import chalk from 'chalk'
 import {
   invoke,
 } from './util'
@@ -81,7 +82,7 @@ export const run = async() => {
   }
 
   for (const [description, ...steps] of stages) {
-    console.log(description)
+    console.log(chalk.bold(description))
 
     for (const step of steps) step(ctx)
   }
