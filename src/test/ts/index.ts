@@ -84,7 +84,7 @@ describe('yarn-audit-fix', () => {
       })
 
       describe('on error', () => {
-        const checkExit = (reason: any, code: number) => {
+        const checkExit = (reason: any, code: number): Promise<any> => {
           const {promise, resolve} = iop()
           // @ts-ignore
           cp.spawnSync.mockImplementationOnce(() => {
