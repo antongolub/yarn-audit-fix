@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.4.1...v1.5.0) (2020-08-07)
+
+
+### Features
+
+* highlight steps in the output for better readability ([7abff28](https://github.com/antongolub/yarn-audit-fix/commit/7abff2850a3cfe8ffaa99fd97bec3b2f8c45a3af))
+
 ## [1.4.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.4.0...v1.4.1) (2020-08-06)
 
 
