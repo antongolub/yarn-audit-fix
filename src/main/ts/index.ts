@@ -113,7 +113,7 @@ export const stages: TStage[] = [
 /**
  * Public static void main.
  */
-export const run = async(flags: Record<string, any>) => {
+export const run = async(flags: Record<string, any> = {}) => {
   const ctx = {
     cwd: process.cwd(),
     temp: findCacheDir({name: 'yarn-audit-fix', create: true}) + '',

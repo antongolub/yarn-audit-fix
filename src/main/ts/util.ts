@@ -12,21 +12,22 @@ export const invoke = (cmd: string, args: string[], cwd: string) => {
   }
 }
 
-export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): string[] => Object.keys(flags).reduce<string[]>((memo, key: string) => {
-  if (key !== '_' && key !== '--' && (!picklist.length || picklist.includes(key))) {
-    const value = flags[key]
-    const flag = (key.length === 1 ? '-' : '--') + key
+export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): string[] =>
+  Object.keys(flags).reduce<string[]>((memo, key: string) => {
+    if (key !== '_' && key !== '--' && (!picklist.length || picklist.includes(key))) {
+      const value = flags[key]
+      const flag = (key.length === 1 ? '-' : '--') + key
 
-    if (value === true) {
-      memo.push(flag)
+      if (value === true) {
+        memo.push(flag)
+      }
+      else {
+        memo.push(flag, value)
+      }
     }
-    else {
-      memo.push(flag, value)
-    }
-  }
 
-  return memo
-}, [])
+    return memo
+  }, [])
 
 export const isWindows = () => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
