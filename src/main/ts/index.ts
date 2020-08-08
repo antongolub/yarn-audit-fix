@@ -3,9 +3,9 @@ import synp from 'synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke} from './invoke'
+import {invoke, formatFlags} from './util'
 
-type TContext = { cwd: string, temp: string }
+type TContext = { cwd: string, temp: string, flags: Record<string, any> }
 
 type TCallback = (cxt: TContext) => void
 
@@ -36,7 +36,7 @@ const fixWorkspaces: TCallback = ({temp}) => {
 }
 
 /**
- * Convert yarn.lock to package.json for further audit.
+ * Convert yarn.lock to package-lock.json for further audit.
  * @param {TContext} cxt
  * @return {void}
  */
@@ -52,16 +52,19 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const npmAuditFix: TCallback = ({temp}) =>
-  invoke('npm', ['audit', 'fix', '--package-lock-only'], temp)
+const npmAuditFix: TCallback = ({temp, flags}) =>
+  invoke('npm', [
+    'audit', 'fix', '--package-lock-only',
+    ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level'),
+  ], temp)
 
 /**
  * Generate yarn.lock by package-lock.json data.
  * @param {TContext} cxt
  * @return {void}
  */
-const yarnImport: TCallback = ({temp}) => {
-  invoke('yarn', ['import'], temp)
+const yarnImport: TCallback = ({temp, flags}) => {
+  invoke('yarn', ['import', ...formatFlags(flags, 'verbose')], temp)
   fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
 }
 
@@ -70,8 +73,8 @@ const yarnImport: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const yarnInstall: TCallback = ({cwd}) =>
-  invoke('yarn', [], cwd)
+const yarnInstall: TCallback = ({cwd, flags}) =>
+  invoke('yarn', [...formatFlags(flags, 'verbose')], cwd)
 
 /**
  * Clean up temporaries.
@@ -110,10 +113,11 @@ export const stages: TStage[] = [
 /**
  * Public static void main.
  */
-export const run = async() => {
+export const run = async(flags: Record<string, any>) => {
   const ctx = {
     cwd: process.cwd(),
     temp: findCacheDir({name: 'yarn-audit-fix', create: true}) + '',
+    flags,
   }
 
   for (const [description, ...steps] of stages) {
