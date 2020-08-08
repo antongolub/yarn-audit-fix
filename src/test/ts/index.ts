@@ -49,18 +49,18 @@ describe('yarn-audit-fix', () => {
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only'], {cwd: temp, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only', '--verbose'], {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
-      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import'], {cwd: temp, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import', '--verbose'], {cwd: temp, stdio})
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
-      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', [], {cwd, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['--verbose'], {cwd, stdio})
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
     }
 
     describe('runner', () => {
       it('invokes cmd queue with proper args', async() => {
-        await run({})
+        await run({verbose: true, foo: 'bar'})
         checkFlow()
       })
 
@@ -79,7 +79,10 @@ describe('yarn-audit-fix', () => {
 
     describe('cli', () => {
       it('invokes cmd queue with proper args', () => {
-        jest.isolateModules(() => require('../../main/ts/cli'))
+        jest.isolateModules(() => {
+          process.argv.push('--verbose')
+          require('../../main/ts/cli')
+        })
         checkFlow()
       })
 
