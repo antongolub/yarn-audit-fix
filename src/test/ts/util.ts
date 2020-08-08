@@ -1,5 +1,8 @@
-import {formatFlags, getSymlinkType} from '../../main/ts/util'
-import minimist from 'minimist'
+import {
+  formatFlags,
+  getSymlinkType,
+  parseFlags,
+} from '../../main/ts/util'
 
 describe('util', () => {
   describe('#formatArgs', () => {
@@ -11,7 +14,7 @@ describe('util', () => {
         [{verbose: true}, [], ['--verbose']],
         [{f: true, foo: 'bar', b: true, baz: 'qux'}, ['f', 'baz'], ['-f', '--baz', 'qux']],
         [
-          minimist([
+          parseFlags([
             '-w',
             '1',
             '--force',

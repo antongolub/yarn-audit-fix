@@ -1,6 +1,7 @@
 import cp from 'child_process'
 import chalk from 'chalk'
 import {FsSymlinkType} from 'fs-extra'
+import minimist from 'minimist'
 
 export const invoke = (cmd: string, args: string[], cwd: string) => {
   console.log(chalk.bold('invoke'), cmd, ...args)
@@ -12,10 +13,12 @@ export const invoke = (cmd: string, args: string[], cwd: string) => {
   }
 }
 
-const formatFlag = (key: string): string => (key.length === 1 ? '-' : '--') + key
+export const parseFlags = minimist
 
-const checkByLists = (value: any, omitlist: any[] = [], picklist: any[] = []): boolean =>
+const checkByLists = (value: any, omitlist: any[], picklist: any[]): boolean =>
   !omitlist.includes(value) && (!picklist.length || picklist.includes(value))
+
+const formatFlag = (key: string): string => (key.length === 1 ? '-' : '--') + key
 
 export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): string[] =>
   Object.keys(flags).reduce<string[]>((memo, key: string) => {
