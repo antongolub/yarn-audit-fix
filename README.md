@@ -69,6 +69,7 @@ success Already up-to-date.
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
 |`--audit-level` | Include a vulnerability with a level as defined or higher | moderate
+|`--symlink` | Specify symlink type for temp assets: `dir` or `junction` (Windows only) | dir
 
 ## License
 [MIT](./LICENSE)

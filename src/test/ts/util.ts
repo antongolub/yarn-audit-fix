@@ -1,4 +1,4 @@
-import {formatFlags} from '../../main/ts/util'
+import {formatFlags, getSymlinkType} from '../../main/ts/util'
 import minimist from 'minimist'
 
 describe('util', () => {
@@ -26,6 +26,20 @@ describe('util', () => {
       cases.forEach(([input, picklist, output]) => {
         expect(formatFlags(input, ...picklist)).toEqual(output)
       })
+    })
+  })
+
+  describe('#getSymlinkType', () => {
+    it('resolves type by system profile and arg', () => {
+      process.env.OSTYPE = 'msys'
+      expect(getSymlinkType('junction')).toBe('junction')
+      expect(getSymlinkType('foo')).toBe('dir')
+      expect(getSymlinkType()).toBe('dir')
+
+      process.env.OSTYPE = 'unknown'
+      expect(getSymlinkType('junction')).toBe('dir')
+      expect(getSymlinkType('foo')).toBe('dir')
+      expect(getSymlinkType()).toBe('dir')
     })
   })
 })
