@@ -68,12 +68,12 @@ describe('yarn-audit-fix', () => {
         let reason = {error: new Error('foobar')} as any
         // @ts-ignore
         cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({})).rejects.toBe(reason)
+        await expect(run()).rejects.toBe(reason)
 
         reason = {status: 1}
         // @ts-ignore
         cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({})).rejects.toBe(reason)
+        await expect(run()).rejects.toBe(reason)
       })
     })
 
