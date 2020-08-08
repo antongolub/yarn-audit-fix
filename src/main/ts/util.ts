@@ -12,24 +12,29 @@ export const invoke = (cmd: string, args: string[], cwd: string) => {
   }
 }
 
+const formatFlag = (key: string): string => (key.length === 1 ? '-' : '--') + key
+
+const checkByLists = (value: any, omitlist: any[] = [], picklist: any[] = []): boolean =>
+  !omitlist.includes(value) && (!picklist.length || picklist.includes(value))
+
 export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): string[] =>
   Object.keys(flags).reduce<string[]>((memo, key: string) => {
-    if (key !== '_' && key !== '--' && (!picklist.length || picklist.includes(key))) {
-      const value = flags[key]
-      const flag = (key.length === 1 ? '-' : '--') + key
+    const omitlist = ['_', '--']
+    const value = flags[key]
+    const flag = formatFlag(key)
 
-      if (value === true) {
-        memo.push(flag)
-      }
-      else {
-        memo.push(flag, value)
+    if (checkByLists(key, omitlist, picklist)) {
+      memo.push(flag)
+
+      if (value !== true) {
+        memo.push(value)
       }
     }
 
     return memo
   }, [])
 
-export const isWindows = () => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
+const isWindows = () => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
 export const getSymlinkType = (type?: string): FsSymlinkType =>
   type === 'junction' && isWindows()
