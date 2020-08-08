@@ -1,5 +1,6 @@
 import cp from 'child_process'
 import chalk from 'chalk'
+import {FsSymlinkType} from 'fs-extra'
 
 export const invoke = (cmd: string, args: string[], cwd: string) => {
   console.log(chalk.bold('invoke'), cmd, ...args)
@@ -26,3 +27,10 @@ export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): 
 
   return memo
 }, [])
+
+export const isWindows = () => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
+
+export const getSymlinkType = (type?: string): FsSymlinkType =>
+  type === 'junction' && isWindows()
+    ? type
+    : 'dir'

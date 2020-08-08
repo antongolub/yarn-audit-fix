@@ -1,9 +1,9 @@
-import fs from 'fs-extra'
+import fs, {SymlinkType} from 'fs-extra'
 import synp from 'synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke, formatFlags} from './util'
+import {invoke, formatFlags, getSymlinkType} from './util'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any> }
 
@@ -16,10 +16,10 @@ type TStage = [string, ...TCallback[]]
  * @param {TContext} cxt
  * @return {void}
  */
-const createTempAssets: TCallback = ({temp}) => {
+const createTempAssets: TCallback = ({temp, flags}) => {
   fs.copyFileSync('yarn.lock', join(temp, 'yarn.lock'))
   fs.copyFileSync('package.json', join(temp, 'package.json'))
-  fs.createSymlinkSync('node_modules', join(temp, 'node_modules'), 'dir')
+  fs.createSymlinkSync('node_modules', join(temp, 'node_modules'), getSymlinkType(flags.symlink) as SymlinkType) // TODO fix fs-extra typings issue
 }
 
 /**
