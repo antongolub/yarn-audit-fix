@@ -55,7 +55,7 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
 const npmAuditFix: TCallback = ({temp, flags}) =>
   invoke('npm', [
     'audit', 'fix', '--package-lock-only',
-    ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level'),
+    ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ], temp)
 
 /**
@@ -64,7 +64,7 @@ const npmAuditFix: TCallback = ({temp, flags}) =>
  * @return {void}
  */
 const yarnImport: TCallback = ({temp, flags}) => {
-  invoke('yarn', ['import', ...formatFlags(flags, 'verbose')], temp)
+  invoke('yarn', ['import', ...formatFlags(flags, 'verbose', 'silent')], temp)
   fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
 }
 
@@ -74,7 +74,7 @@ const yarnImport: TCallback = ({temp, flags}) => {
  * @return {void}
  */
 const yarnInstall: TCallback = ({cwd, flags}) =>
-  invoke('yarn', [...formatFlags(flags, 'verbose')], cwd)
+  invoke('yarn', [...formatFlags(flags, 'verbose', 'silent')], cwd)
 
 /**
  * Clean up temporaries.
@@ -121,7 +121,7 @@ export const run = async(flags: Record<string, any> = {}) => {
   }
 
   for (const [description, ...steps] of stages) {
-    console.log(chalk.bold(description))
+    !flags.silent && console.log(chalk.bold(description))
 
     for (const step of steps) step(ctx)
   }

@@ -3,8 +3,8 @@ import chalk from 'chalk'
 import {FsSymlinkType} from 'fs-extra'
 import minimist from 'minimist'
 
-export const invoke = (cmd: string, args: string[], cwd: string) => {
-  console.log(chalk.bold('invoke'), cmd, ...args)
+export const invoke = (cmd: string, args: string[], cwd: string, silent= false) => {
+  !silent && console.log(chalk.bold('invoke'), cmd, ...args)
 
   const result = cp.spawnSync(cmd, args, {cwd, stdio: ['inherit', 'inherit', 'inherit']})
 
