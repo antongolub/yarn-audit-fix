@@ -13,7 +13,7 @@ export const invoke = (cmd: string, args: string[], cwd: string, silent= false) 
   }
 }
 
-export const parseFlags = minimist
+export const parseFlags = (argv: string[]) => minimist(argv, {'--': true})
 
 const checkByLists = (value: any, omitlist: any[], picklist: any[]): boolean =>
   !omitlist.includes(value) && (!picklist.length || picklist.includes(value))

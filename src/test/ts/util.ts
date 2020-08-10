@@ -20,8 +20,12 @@ describe('util', () => {
             '--force',
             '--audit-level=moderate',
             '--only=dev',
+            '--',
+            '--bar',
+            '-b',
+            '2',
           ]),
-          ['force', 'audit-level', 'only'],
+          ['force', 'audit-level', 'only', 'bar', 'b'],
           ['--force', '--audit-level', 'moderate', '--only', 'dev'],
         ],
       ]
