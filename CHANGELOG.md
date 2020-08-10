@@ -1,3 +1,18 @@
+# [1.6.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.5.1...v1.6.0) (2020-08-10)
+
+
+### Bug Fixes
+
+* discard flags after -- break ([4ee89e0](https://github.com/antongolub/yarn-audit-fix/commit/4ee89e03d59bd928e577859302689339ba666687))
+* **cli:** handle `silent` flag at the top level promise ([08534ed](https://github.com/antongolub/yarn-audit-fix/commit/08534ed93091ea795d9d015c6eeb34224d4c7d89))
+
+
+### Features
+
+* **cli:** add symlink type customization ([bfb2747](https://github.com/antongolub/yarn-audit-fix/commit/bfb2747dbde5f1bceb6e9c9cbd3d915cb4a84dc6)), closes [#13](https://github.com/antongolub/yarn-audit-fix/issues/13)
+* **cli:** pass optional flags to npm/yarn invocations ([cd2efab](https://github.com/antongolub/yarn-audit-fix/commit/cd2efab225261d07e4f193c29bd8cf6db91f9e32)), closes [#12](https://github.com/antongolub/yarn-audit-fix/issues/12)
+* **cli:** provide `silent` flag support ([2a646bc](https://github.com/antongolub/yarn-audit-fix/commit/2a646bca6ef6b4918f3a3c56e94b2e98a9e9af46))
+
 ## [1.5.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.5.0...v1.5.1) (2020-08-07)
 
 
