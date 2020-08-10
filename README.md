@@ -65,6 +65,7 @@ success Already up-to-date.
 | Flag | Description | Default |
 |---|---|---|
 |`--verbose` | Switch log level to verbose/debug | false |
+|`--silent` | Disable log output | false |
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties)
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
