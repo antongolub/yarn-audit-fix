@@ -74,6 +74,13 @@ describe('yarn-audit-fix', () => {
         // @ts-ignore
         cp.spawnSync.mockImplementation(() => reason)
         await expect(run({silent: true})).rejects.toBe(reason)
+
+        reason = new TypeError('foo')
+        // @ts-ignore
+        cp.spawnSync.mockImplementation(() => {
+          throw reason
+        })
+        await expect(run()).rejects.toBe(reason)
       })
     })
 
