@@ -1,0 +1,203 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>yarn-audit-fix</title>
+	<meta name="description" content="Documentation for yarn-audit-fix">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">yarn-audit-fix</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>yarn-audit-fix</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<p align="center">
+					<a href="https://yarnpkg.com/">
+						<img alt="Yarn fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true?raw=true" width="546">
+					</a>
+				</p>
+				<h1 align="center">
+					yarn-audit-fix
+				</h1>
+				<p><a href="https://travis-ci.com/antongolub/yarn-audit-fix"><img src="https://travis-ci.com/antongolub/yarn-audit-fix.svg?branch=master" alt="Build Status"></a>
+					<a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/v/yarn-audit-fix" alt="npm (tag)"></a>
+					<a href="https://david-dm.org/antongolub/yarn-audit-fix"><img src="https://img.shields.io/david/antongolub/yarn-audit-fix" alt="deps"></a>
+					<a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability" alt="Maintainability"></a>
+					<a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage" alt="Test Coverage"></a>
+				<a href="https://github.com/qiwi/tslint-config-qiwi"><img src="https://img.shields.io/badge/code%20style-tslint--config--qiwi-brightgreen.svg" alt="CodeStyle"></a></p>
+				<p>Apply <code>npm audit fix</code> logic to <code>yarn.lock</code></p>
+				<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
+					<h2>Motivation</h2>
+				</a>
+				<p><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
+					Strictly <code>yarn</code> cannot be a drop-in replacement for <code>npm</code>.
+					Authors suggest using <a href="https://dependabot.com/">Depedabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
+				The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a></p>
+				<p>Fortunately, there&#39;s a workaround: <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a> (thanks to Gianfranco P.).
+					<code>yarn-audit-fix</code> is just a composition of these steps into a single utility.
+				More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></p>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h2>Install</h2>
+				</a>
+				<pre><code class="language-shell"><span class="hljs-meta">$</span><span class="bash"> yarn add yarn-audit-fix -D</span></code></pre>
+				<p>or even better</p>
+				<pre><code>npx yarn-audit-<span class="hljs-built_in">fix</span></code></pre>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<pre>
+$ yarn-audit-fix
+
+<b>Preparing temp assets...</b>
+<b>Generating package-lock.json from yarn.lock...</b>
+<b>Applying npm audit fix...</b>
+<b>invoke</b> npm audit fix --package-lock-only
+added 14 packages, removed 195 packages and updated 1245 packages in 4.795s
+fixed 3 of 26 vulnerabilities in 1370 scanned packages
+  23 vulnerabilities required manual review and could not be updated
+<b>Updating yarn.lock from package-lock.json...</b>
+<b>invoke</b> yarn import
+info found npm package-lock.json, converting to yarn.lock
+warning synp > request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+warning tslint-config-qiwi > tslint-react@5.0.0: tslint-react is deprecated along with TSLint
+warning @qiwi/libdefkit > @types/read-pkg@5.1.0: This is a stub types definition. read-pkg provides its own type definitions, so you do not need this installed.
+...
+success Saved lockfile.
+<b>invoke</b> yarn
+[1/4] 🔍  Resolving packages...
+success Already up-to-date.
+<b>Done</b>
+</pre>
+				<a href="#cli" id="cli" style="color: inherit; text-decoration: none;">
+					<h3>CLI</h3>
+				</a>
+				<table>
+					<thead>
+						<tr>
+							<th>Flag</th>
+							<th>Description</th>
+							<th>Default</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td><code>--verbose</code></td>
+							<td>Switch log level to verbose/debug</td>
+							<td>false</td>
+						</tr>
+						<tr>
+							<td><code>--silent</code></td>
+							<td>Disable log output</td>
+							<td>false</td>
+						</tr>
+						<tr>
+							<td><code>--loglevel</code></td>
+							<td>Set custom <a href="https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties">log level</a></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td><code>--only</code></td>
+							<td>Set package <a href="https://docs.npmjs.com/cli/audit">updating scope</a>: <code>dev</code>/<code>prod</code></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td><code>--force</code></td>
+							<td>Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones</td>
+							<td>false</td>
+						</tr>
+						<tr>
+							<td><code>--audit-level</code></td>
+							<td>Include a vulnerability with a level as defined or higher</td>
+							<td>moderate</td>
+						</tr>
+						<tr>
+							<td><code>--symlink</code></td>
+							<td>Specify symlink type for temp assets: <code>dir</code> or <code>junction</code> (Windows only)</td>
+							<td>dir</td>
+						</tr>
+				</tbody></table>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h2>License</h2>
+				</a>
+				<p><a href="./LICENSE">MIT</a></p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-not-exported">
+						<a href="modules/reflection-24.html">&lt;em&gt;<wbr>Module&lt;/em&gt;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer>
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+		</div>
+	</div>
+</footer>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
