@@ -6,6 +6,6 @@ import {parseFlags} from './util'
 const flags = parseFlags(process.argv.slice(2))
 
 run(flags).catch(reason => {
-  console.error(reason)
+  !flags.silent && console.error(reason)
   process.exit(+reason.status || 1)
 })

@@ -56,7 +56,7 @@ const npmAuditFix: TCallback = ({temp, flags}) =>
   invoke('npm', [
     'audit', 'fix', '--package-lock-only',
     ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
-  ], temp)
+  ], temp, flags.silent)
 
 /**
  * Generate yarn.lock by package-lock.json data.
@@ -64,7 +64,7 @@ const npmAuditFix: TCallback = ({temp, flags}) =>
  * @return {void}
  */
 const yarnImport: TCallback = ({temp, flags}) => {
-  invoke('yarn', ['import', ...formatFlags(flags, 'verbose', 'silent')], temp)
+  invoke('yarn', ['import', ...formatFlags(flags, 'verbose', 'silent')], temp, flags.silent)
   fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
 }
 
@@ -74,7 +74,7 @@ const yarnImport: TCallback = ({temp, flags}) => {
  * @return {void}
  */
 const yarnInstall: TCallback = ({cwd, flags}) =>
-  invoke('yarn', [...formatFlags(flags, 'verbose', 'silent')], cwd)
+  invoke('yarn', [...formatFlags(flags, 'verbose', 'silent')], cwd, flags.silent)
 
 /**
  * Clean up temporaries.
