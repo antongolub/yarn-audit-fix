@@ -1,14 +1,14 @@
 import cp from 'child_process'
 import {join} from 'path'
 import fs from 'fs-extra'
-import synp from 'synp'
+import synp from '@antongolub/synp'
 import findCacheDir from 'find-cache-dir'
 import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
-jest.mock('synp')
+jest.mock('@antongolub/synp')
 
 describe('yarn-audit-fix', () => {
   beforeEach(() => {
@@ -45,16 +45,16 @@ describe('yarn-audit-fix', () => {
       expect(fs.createSymlinkSync).toHaveBeenCalledWith('node_modules', join(temp, 'node_modules'), 'dir')
 
       // Generating package-lock.json from yarn.lock...
-      expect(fs.writeFileSync).toHaveBeenCalledWith(join(temp, 'package.json'), '{}')
+      // expect(fs.writeFileSync).toHaveBeenCalledWith(join(temp, 'package.json'), '{}')
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
       expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only', '--verbose'], {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
-      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import', '--verbose'], {cwd: temp, stdio})
+      // expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import', '--verbose'], {cwd: temp, stdio})
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
-      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['--verbose'], {cwd, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['--update-checksums', '--verbose'], {cwd, stdio})
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
     }
 
