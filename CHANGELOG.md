@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.6.0...v1.6.1) (2020-08-17)
+
+
+### Performance Improvements
+
+* **package:** tech release ([1243032](https://github.com/antongolub/yarn-audit-fix/commit/12430323b881c2067b249e19cc2a55b9247376bc))
+
 # [1.6.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.5.1...v1.6.0) (2020-08-10)
 
 
