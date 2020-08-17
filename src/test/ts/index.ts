@@ -5,6 +5,7 @@ import synp from '@antongolub/synp'
 import findCacheDir from 'find-cache-dir'
 import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
+import {getNpmBin} from '../../main/ts/util'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
@@ -38,6 +39,7 @@ describe('yarn-audit-fix', () => {
     const checkFlow = () => {
       const temp = findCacheDir({name: 'yarn-audit-fix', create: true}) + ''
       const cwd = process.cwd()
+      const npmBinPath = getNpmBin()
       const stdio = ['inherit', 'inherit', 'inherit']
 
       // Preparing...
@@ -52,7 +54,7 @@ describe('yarn-audit-fix', () => {
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/npm', ['audit', 'fix', '--package-lock-only', '--verbose'], {cwd: temp, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith(npmBinPath, ['audit', 'fix', '--package-lock-only', '--verbose'], {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
       // expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import', '--verbose'], {cwd: temp, stdio})

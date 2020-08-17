@@ -3,7 +3,7 @@ import synp from '@antongolub/synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke, formatFlags, getSymlinkType} from './util'
+import {invoke, formatFlags, getSymlinkType, getNpmBin} from './util'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any> }
 
@@ -26,19 +26,6 @@ const createTempAssets: TCallback = ({temp, flags}) => {
 }
 
 /**
- * Remove workspace field from package.json due to npm issue.
- * https://github.com/antongolub/yarn-audit-fix/issues/2
- * @param {TContext} cxt
- * @return {void}
- */
-const fixWorkspaces: TCallback = ({temp}) => {
-  // const pkgJsonData = JSON.parse(fs.readFileSync(join(temp, 'package.json'), 'utf-8').trim())
-  // delete pkgJsonData.workspaces
-
-  // fs.writeFileSync(join(temp, 'package.json'), JSON.stringify(pkgJsonData, null, 2))
-}
-
-/**
  * Convert yarn.lock to package-lock.json for further audit.
  * @param {TContext} cxt
  * @return {void}
@@ -56,8 +43,7 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @return {void}
  */
 const npmAuditFix: TCallback = ({temp, flags}) => {
-  // npm.load({})
-  invoke('node_modules/.bin/npm', [
+  invoke(getNpmBin(), [
     'audit', 'fix', '--package-lock-only',
     ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ], temp, flags.silent)
@@ -96,7 +82,6 @@ export const stages: TStage[] = [
     'Preparing temp assets...',
     clear,
     createTempAssets,
-    fixWorkspaces,
   ],
   [
     'Generating package-lock.json from yarn.lock...',
