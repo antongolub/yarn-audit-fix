@@ -23,6 +23,8 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     fs.removeSync.mockImplementation(() => { /* noop */ })
     // @ts-ignore
+    fs.existsSync.mockImplementation(() => true)
+    // @ts-ignore
     fs.createSymlinkSync.mockImplementation(() => { /* noop */ })
     // @ts-ignore
     synp.yarnToNpm.mockImplementation(() => '{}')
@@ -43,13 +45,14 @@ describe('yarn-audit-fix', () => {
       expect(fs.copyFileSync).toHaveBeenCalledWith('yarn.lock', join(temp, 'yarn.lock'))
       expect(fs.copyFileSync).toHaveBeenCalledWith('package.json', join(temp, 'package.json'))
       expect(fs.createSymlinkSync).toHaveBeenCalledWith('node_modules', join(temp, 'node_modules'), 'dir')
+      expect(fs.createSymlinkSync).toHaveBeenCalledWith('packages', join(temp, 'packages'), 'dir')
 
       // Generating package-lock.json from yarn.lock...
       // expect(fs.writeFileSync).toHaveBeenCalledWith(join(temp, 'package.json'), '{}')
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith('npm', ['audit', 'fix', '--package-lock-only', '--verbose'], {cwd: temp, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith('node_modules/.bin/npm', ['audit', 'fix', '--package-lock-only', '--verbose'], {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
       // expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['import', '--verbose'], {cwd: temp, stdio})
