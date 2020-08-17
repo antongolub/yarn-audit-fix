@@ -1,5 +1,5 @@
 import fs, {SymlinkType} from 'fs-extra'
-import synp from 'synp'
+import synp from '@antongolub/synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
@@ -29,10 +29,10 @@ const createTempAssets: TCallback = ({temp, flags}) => {
  * @return {void}
  */
 const fixWorkspaces: TCallback = ({temp}) => {
-  const pkgJsonData = JSON.parse(fs.readFileSync(join(temp, 'package.json'), 'utf-8').trim())
-  delete pkgJsonData.workspaces
+  // const pkgJsonData = JSON.parse(fs.readFileSync(join(temp, 'package.json'), 'utf-8').trim())
+  // delete pkgJsonData.workspaces
 
-  fs.writeFileSync(join(temp, 'package.json'), JSON.stringify(pkgJsonData, null, 2))
+  // fs.writeFileSync(join(temp, 'package.json'), JSON.stringify(pkgJsonData, null, 2))
 }
 
 /**
@@ -64,7 +64,9 @@ const npmAuditFix: TCallback = ({temp, flags}) =>
  * @return {void}
  */
 const yarnImport: TCallback = ({temp, flags}) => {
-  invoke('yarn', ['import', ...formatFlags(flags, 'verbose', 'silent')], temp, flags.silent)
+  const yarnLockData = synp.npmToYarn(temp)
+  fs.writeFileSync(join(temp, 'yarn.lock'), yarnLockData)
+  // invoke('yarn', ['import', ...formatFlags(flags, 'verbose', 'silent')], temp, flags.silent)
   fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
 }
 
@@ -73,9 +75,9 @@ const yarnImport: TCallback = ({temp, flags}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const yarnInstall: TCallback = ({cwd, flags}) =>
-  invoke('yarn', [...formatFlags(flags, 'verbose', 'silent')], cwd, flags.silent)
-
+const yarnInstall: TCallback = ({cwd, flags}) => {
+  invoke('yarn', ['--update-checksums', ...formatFlags(flags, 'verbose', 'silent')], cwd, flags.silent)
+}
 /**
  * Clean up temporaries.
  * @param {TContext} cxt
