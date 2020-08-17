@@ -20,6 +20,9 @@ const createTempAssets: TCallback = ({temp, flags}) => {
   fs.copyFileSync('yarn.lock', join(temp, 'yarn.lock'))
   fs.copyFileSync('package.json', join(temp, 'package.json'))
   fs.createSymlinkSync('node_modules', join(temp, 'node_modules'), getSymlinkType(flags.symlink) as SymlinkType) // TODO fix fs-extra typings issue
+  if (fs.existsSync('packages')) {
+    fs.createSymlinkSync('packages', join(temp, 'packages'), getSymlinkType(flags.symlink) as SymlinkType)
+  }
 }
 
 /**
@@ -52,11 +55,13 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const npmAuditFix: TCallback = ({temp, flags}) =>
-  invoke('npm', [
+const npmAuditFix: TCallback = ({temp, flags}) => {
+  // npm.load({})
+  invoke('node_modules/.bin/npm', [
     'audit', 'fix', '--package-lock-only',
     ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ], temp, flags.silent)
+}
 
 /**
  * Generate yarn.lock by package-lock.json data.
