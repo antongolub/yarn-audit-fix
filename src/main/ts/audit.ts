@@ -14,7 +14,7 @@ export const audit = (auditArgs: string[], cwd: string, silent: boolean) => {
     prefix: cwd,
   }
 
-  !silent && console.log(chalk.bold('invoke'), 'npm', ...auditArgs, '--prefix', cwd)
+  !silent && console.log(chalk.bold('invoke'), 'npm', 'audit', ...auditArgs, '--prefix', cwd)
 
   npm.load(config, (err) => {
     if (err) {

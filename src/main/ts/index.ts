@@ -60,8 +60,8 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  */
 const npmAuditFix: TCallback = async({temp, flags}) => {
   const auditArgs = [
-    'audit', 'fix', '--package-lock-only',
-    ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
+    'fix',
+    ...formatFlags(flags, 'package-lock-only', 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ]
 
   await audit(auditArgs, temp, flags.silent)
