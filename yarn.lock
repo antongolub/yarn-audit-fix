@@ -1017,6 +1017,11 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/bash-glob@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/bash-glob/-/bash-glob-2.0.0.tgz#bba8dcad40e615f33e400170fa551daa40ee3c6a"
+  integrity sha1-u6jcrUDmFfM+QAFw+lUdqkDuPGo=
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
@@ -7860,7 +7865,7 @@ tar@^4.4.10, tar@^4.4.12, tar@^4.4.13:
 tar@^6.0.1, tar@^6.0.2:
   version "6.0.5"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.0.5.tgz#bde815086e10b39f1dcd298e89d596e1535e200f"
-  integrity sha512-0b4HOimQHj9nXNEAA7zWwMM91Zhhba3pspja6sQbgTpynOJf+bkjBnfybNYzbpLbnwXnbyB4LOREvlyXLkCHSg==
+  integrity sha1-vegVCG4Qs58dzSmOidWW4VNeIA8=
   dependencies:
     chownr "^2.0.0"
     fs-minipass "^2.0.0"
