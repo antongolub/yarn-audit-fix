@@ -1,9 +1,10 @@
 import cp from 'child_process'
 import chalk from 'chalk'
-import {FsSymlinkType} from 'fs-extra'
+import {FsSymlinkType, readFileSync} from 'fs-extra'
 import minimist from 'minimist'
 import {join} from 'path'
 import {sync as pkgDir} from 'pkg-dir'
+import glob, {Options as GlobOptions} from 'bash-glob'
 
 export const invoke = (cmd: string, args: string[], cwd: string, silent= false) => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
@@ -47,3 +48,29 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
     : 'dir'
 
 export const getNpmBin = () => join(pkgDir(__dirname) as string, 'node_modules/.bin/npm')
+
+export const getWorkspaces = (cwd: string) => {
+  const manifest = readJson(join(cwd, 'package.json'))
+
+  let packages = manifest.workspaces
+  if (packages && packages.packages) {
+    packages = packages.packages
+  }
+
+  if (!packages || !packages.length) {
+    return []
+  }
+
+  // Turn workspaces into list of package.json files.
+  return glob.sync(
+    packages.map((p: string) => p.replace(/\/?$/, '/package.json')),
+    {
+      cwd,
+      realpath: true,
+      ignore: '**/node_modules/**',
+    } as GlobOptions,
+  )
+}
+
+export const readJson = (path: string): any =>
+  JSON.parse(readFileSync(path).toString('utf-8').trim())
