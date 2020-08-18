@@ -2,13 +2,14 @@ import cp from 'child_process'
 import {join} from 'path'
 import fs from 'fs-extra'
 import synp from '@antongolub/synp'
+import npm from 'npm'
 import findCacheDir from 'find-cache-dir'
 import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
-import {getNpmBin} from '../../main/ts/util'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
+jest.mock('npm')
 jest.mock('@antongolub/synp')
 
 describe('yarn-audit-fix', () => {
@@ -31,6 +32,17 @@ describe('yarn-audit-fix', () => {
     synp.yarnToNpm.mockImplementation(() => '{}')
     // @ts-ignore
     cp.spawnSync.mockImplementation(() => ({status: 0, stdout: 'foobar'}))
+
+    // @ts-ignore
+    npm.load.mockImplementation((cfg, cb) => {
+      cb()
+    })
+    npm.commands = {
+      // @ts-ignore
+      audit: jest.fn((args: any, cb: any) => {
+        cb()
+      }),
+    }
   })
   afterEach(jest.clearAllMocks)
   afterAll(jest.resetAllMocks)
@@ -39,7 +51,6 @@ describe('yarn-audit-fix', () => {
     const checkFlow = () => {
       const temp = findCacheDir({name: 'yarn-audit-fix', create: true}) + ''
       const cwd = process.cwd()
-      const npmBinPath = getNpmBin()
       const stdio = ['inherit', 'inherit', 'inherit']
 
       // Preparing...
@@ -53,7 +64,10 @@ describe('yarn-audit-fix', () => {
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith(npmBinPath, ['audit', 'fix', '--package-lock-only', '--verbose'], {cwd: temp, stdio})
+      expect(npm.load).toHaveBeenCalledWith({prefix: temp}, expect.any(Function))
+
+      // @ts-ignore
+      expect(npm.commands.audit).toHaveBeenCalledWith(['audit', 'fix', '--package-lock-only', '--verbose'], expect.any(Function))
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
@@ -67,23 +81,42 @@ describe('yarn-audit-fix', () => {
         checkFlow()
       })
 
-      it('throws exception if occurs', async() => {
-        let reason = {error: new Error('foobar')} as any
-        // @ts-ignore
-        cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({silent: true})).rejects.toBe(reason)
+      describe('handles exceptions of', () => {
+        it('invoke', async() => {
+          let reason = {error: new Error('foobar')} as any
+          // @ts-ignore
+          cp.spawnSync.mockImplementation(() => reason)
+          await expect(run({silent: true})).rejects.toBe(reason)
 
-        reason = {status: 1}
-        // @ts-ignore
-        cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({silent: true})).rejects.toBe(reason)
+          reason = {status: 1}
+          // @ts-ignore
+          cp.spawnSync.mockImplementation(() => reason)
+          await expect(run({silent: true})).rejects.toBe(reason)
 
-        reason = new TypeError('foo')
-        // @ts-ignore
-        cp.spawnSync.mockImplementation(() => {
-          throw reason
+          reason = new TypeError('foo')
+          // @ts-ignore
+          cp.spawnSync.mockImplementation(() => {
+            throw reason
+          })
+          await expect(run()).rejects.toBe(reason)
         })
-        await expect(run()).rejects.toBe(reason)
+      })
+
+      it('npm api', async() => {
+        const reason = new Error()
+        npm.commands = {
+          // @ts-ignore
+          audit: jest.fn((args: any, cb: any) => {
+            cb(reason)
+          }),
+        }
+        await expect(run({silent: true})).rejects.toBe(reason)
+
+        // @ts-ignore
+        npm.load.mockImplementation((cfg, cb) => {
+          cb(reason)
+        })
+        await expect(run({silent: true})).rejects.toBe(reason)
       })
     })
 
@@ -93,7 +126,6 @@ describe('yarn-audit-fix', () => {
           process.argv.push('--verbose')
           require('../../main/ts/cli')
         })
-        checkFlow()
       })
 
       describe('on error', () => {
