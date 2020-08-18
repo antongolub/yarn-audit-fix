@@ -3,11 +3,12 @@ import synp from '@antongolub/synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke, formatFlags, getSymlinkType, getNpmBin, getWorkspaces} from './util'
+import {audit} from './audit'
+import {invoke, formatFlags, getSymlinkType, getWorkspaces} from './util'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any> }
 
-type TCallback = (cxt: TContext) => void
+type TCallback = (cxt: TContext) => void | Promise<void>
 
 type TStage = [string, ...TCallback[]]
 
@@ -57,13 +58,13 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const npmAuditFix: TCallback = ({temp, flags}) => {
+const npmAuditFix: TCallback = async({temp, flags}) => {
   const auditArgs = [
     'audit', 'fix', '--package-lock-only',
     ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ]
 
-  invoke(getNpmBin(), auditArgs, temp, flags.silent)
+  await audit(auditArgs, temp)
 }
 
 /**
@@ -133,6 +134,6 @@ export const run = async(flags: Record<string, any> = {}) => {
   for (const [description, ...steps] of stages) {
     !flags.silent && console.log(chalk.bold(description))
 
-    for (const step of steps) step(ctx)
+    for (const step of steps) await step(ctx)
   }
 }

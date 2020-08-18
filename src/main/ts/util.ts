@@ -46,8 +46,6 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
     ? type
     : 'dir'
 
-export const getNpmBin = () => resolve(require.resolve('npm'), '../../../.bin/npm')
-
 export const getWorkspaces = (cwd: string) => {
   const manifest = readJson(join(cwd, 'package.json'))
 
