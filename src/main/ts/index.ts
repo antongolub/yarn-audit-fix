@@ -64,7 +64,7 @@ const npmAuditFix: TCallback = async({temp, flags}) => {
     ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ]
 
-  await audit(auditArgs, temp)
+  await audit(auditArgs, temp, flags.silent)
 }
 
 /**

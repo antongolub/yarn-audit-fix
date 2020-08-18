@@ -1,6 +1,7 @@
 import npm from 'npm'
+import chalk from 'chalk'
 
-export const audit = (auditArgs: string[], cwd: string) => {
+export const audit = (auditArgs: string[], cwd: string, silent: boolean) => {
   let _reject: any
   let _resolve: any
 
@@ -12,6 +13,8 @@ export const audit = (auditArgs: string[], cwd: string) => {
   const config = {
     prefix: cwd,
   }
+
+  !silent && console.log(chalk.bold('invoke'), 'npm', ...auditArgs, '--prefix', cwd)
 
   npm.load(config, (err) => {
     if (err) {

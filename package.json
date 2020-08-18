@@ -32,7 +32,8 @@
     "docs": "typedoc --readme README.md --tsconfig tsconfig.json src/main --ignoreCompilerErrors || exit 0",
     "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
     "postupdate": "yarn && yarn build && yarn test",
-    "publish:beta": "npm publish --no-git-tag-version --tag beta"
+    "publish:beta": "npm publish --no-git-tag-version --tag beta",
+    "publish:rc": "npm publish --no-git-tag-version --tag rc"
   },
   "repository": {
     "type": "git",
@@ -57,7 +58,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@antongolub/synp": "^2.0.10",
+    "@antongolub/synp": "^2.0.11",
     "@types/bash-glob": "^2.0.0",
     "@types/find-cache-dir": "^3.2.0",
     "@types/fs-extra": "^9.0.1",
@@ -85,7 +86,7 @@
     "inside-out-promise": "^2.1.0",
     "jest": "^26.4.0",
     "semantic-release": "^17.1.1",
-    "terser": "^5.1.0",
+    "terser": "^5.2.0",
     "ts-jest": "^26.2.0",
     "tslint": "6.1.3",
     "tslint-config-qiwi": "^1.5.0",
