@@ -58,10 +58,12 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @return {void}
  */
 const npmAuditFix: TCallback = ({temp, flags}) => {
-  invoke(getNpmBin(), [
+  const auditArgs = [
     'audit', 'fix', '--package-lock-only',
     ...formatFlags(flags, 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
-  ], temp, flags.silent)
+  ]
+
+  invoke(getNpmBin(), auditArgs, temp, flags.silent)
 }
 
 /**
