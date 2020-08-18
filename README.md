@@ -65,6 +65,7 @@ success Already up-to-date.
 | Flag | Description | Default |
 |---|---|---|
 |`--verbose` | Switch log level to verbose/debug | false |
+|`--package-lock-only` | Run audit fix without modifying `node_modules` | false |
 |`--silent` | Disable log output | false |
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties)
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`

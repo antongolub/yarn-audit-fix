@@ -67,7 +67,7 @@ describe('yarn-audit-fix', () => {
       expect(npm.load).toHaveBeenCalledWith({prefix: temp}, expect.any(Function))
 
       // @ts-ignore
-      expect(npm.commands.audit).toHaveBeenCalledWith(['audit', 'fix', '--package-lock-only', '--verbose'], expect.any(Function))
+      expect(npm.commands.audit).toHaveBeenCalledWith(['fix', '--verbose', '--package-lock-only'], expect.any(Function))
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
@@ -77,7 +77,7 @@ describe('yarn-audit-fix', () => {
 
     describe('runner', () => {
       it('invokes cmd queue with proper args', async() => {
-        await run({verbose: true, foo: 'bar'})
+        await run({verbose: true, foo: 'bar', ['package-lock-only']: true})
         checkFlow()
       })
 
@@ -123,7 +123,7 @@ describe('yarn-audit-fix', () => {
     describe('cli', () => {
       it('invokes cmd queue with proper args', () => {
         jest.isolateModules(() => {
-          process.argv.push('--verbose')
+          process.argv.push('--verbose --package-lock-only')
           require('../../main/ts/cli')
         })
       })
