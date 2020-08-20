@@ -37,3 +37,6 @@ deploy:
   skip_cleanup: true
   script:
     - npx semantic-release
+
+after_success:
+  - travis_terminate 0
