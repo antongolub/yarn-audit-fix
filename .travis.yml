@@ -4,19 +4,16 @@ os:
   - windows
 
 node_js:
-  - '10'
-
-before_install:
-  - npm install -g yarn
+  - '12'
 
 before_script:
-  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  - chmod +x ./cc-test-reporter
-  - ./cc-test-reporter before-build
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then chmod +x ./cc-test-reporter ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./cc-test-reporter before-build ; fi
 
 after_script:
-  - ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
 
 install:
   - yarn cache clean
