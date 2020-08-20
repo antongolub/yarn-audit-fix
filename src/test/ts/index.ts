@@ -2,7 +2,6 @@ import cp from 'child_process'
 import {join} from 'path'
 import fs from 'fs-extra'
 import synp from '@antongolub/synp'
-import npm from 'npm'
 import findCacheDir from 'find-cache-dir'
 import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
@@ -31,18 +30,9 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     synp.yarnToNpm.mockImplementation(() => '{}')
     // @ts-ignore
-    cp.spawnSync.mockImplementation(() => ({status: 0, stdout: 'foobar'}))
-
+    synp.npmToYarn.mockImplementation(() => '{}')
     // @ts-ignore
-    npm.load.mockImplementation((cfg, cb) => {
-      cb()
-    })
-    npm.commands = {
-      // @ts-ignore
-      audit: jest.fn((args: any, cb: any) => {
-        cb()
-      }),
-    }
+    cp.spawnSync.mockImplementation(() => ({status: 0, stdout: 'foobar'}))
   })
   afterEach(jest.clearAllMocks)
   afterAll(jest.resetAllMocks)
@@ -64,10 +54,14 @@ describe('yarn-audit-fix', () => {
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(npm.load).toHaveBeenCalledWith({prefix: temp}, expect.any(Function))
-
-      // @ts-ignore
-      expect(npm.commands.audit).toHaveBeenCalledWith(['fix', '--verbose', '--package-lock-only'], expect.any(Function))
+      expect(cp.spawnSync).toHaveBeenCalledWith('node', [
+        'node_modules/npm/bin/npm-cli.js',
+        'audit',
+        'fix',
+        '--verbose',
+        '--package-lock-only',
+        `--prefix=${temp}`,
+      ], {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
@@ -81,51 +75,33 @@ describe('yarn-audit-fix', () => {
         checkFlow()
       })
 
-      describe('handles exceptions of', () => {
-        it('invoke', async() => {
-          let reason = {error: new Error('foobar')} as any
-          // @ts-ignore
-          cp.spawnSync.mockImplementation(() => reason)
-          await expect(run({silent: true})).rejects.toBe(reason)
-
-          reason = {status: 1}
-          // @ts-ignore
-          cp.spawnSync.mockImplementation(() => reason)
-          await expect(run({silent: true})).rejects.toBe(reason)
-
-          reason = new TypeError('foo')
-          // @ts-ignore
-          cp.spawnSync.mockImplementation(() => {
-            throw reason
-          })
-          await expect(run()).rejects.toBe(reason)
-        })
-      })
-
-      it('npm api', async() => {
-        const reason = new Error()
-        npm.commands = {
-          // @ts-ignore
-          audit: jest.fn((args: any, cb: any) => {
-            cb(reason)
-          }),
-        }
-        await expect(run({silent: true})).rejects.toBe(reason)
-
+      it('handles exceptions', async() => {
+        let reason = {error: new Error('foobar')} as any
         // @ts-ignore
-        npm.load.mockImplementation((cfg, cb) => {
-          cb(reason)
-        })
+        cp.spawnSync.mockImplementation(() => reason)
         await expect(run({silent: true})).rejects.toBe(reason)
+
+        reason = {status: 1}
+        // @ts-ignore
+        cp.spawnSync.mockImplementation(() => reason)
+        await expect(run({silent: true})).rejects.toBe(reason)
+
+        reason = new TypeError('foo')
+        // @ts-ignore
+        cp.spawnSync.mockImplementation(() => {
+          throw reason
+        })
+        await expect(run()).rejects.toBe(reason)
       })
     })
 
     describe('cli', () => {
       it('invokes cmd queue with proper args', () => {
         jest.isolateModules(() => {
-          process.argv.push('--verbose --package-lock-only')
+          process.argv.push('--verbose', '--package-lock-only')
           require('../../main/ts/cli')
         })
+        checkFlow()
       })
 
       describe('on error', () => {
