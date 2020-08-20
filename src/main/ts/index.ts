@@ -3,7 +3,6 @@ import synp from '@antongolub/synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {audit} from './audit'
 import {invoke, formatFlags, getSymlinkType, getWorkspaces} from './util'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any> }
@@ -58,13 +57,13 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const npmAuditFix: TCallback = async({temp, flags}) => {
+const npmAuditFix: TCallback = ({temp, flags}) => {
   const auditArgs = [
+    'audit',
     'fix',
     ...formatFlags(flags, 'package-lock-only', 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ]
-
-  await audit(auditArgs, temp, flags.silent)
+  invoke('node', ['node_modules/npm/bin/npm-cli.js', ...auditArgs, `--prefix=${temp}`], temp, flags.silent)
 }
 
 /**
@@ -134,6 +133,6 @@ export const run = async(flags: Record<string, any> = {}) => {
   for (const [description, ...steps] of stages) {
     !flags.silent && console.log(chalk.bold(description))
 
-    for (const step of steps) await step(ctx)
+    for (const step of steps) step(ctx)
   }
 }
