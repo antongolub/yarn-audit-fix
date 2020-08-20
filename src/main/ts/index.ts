@@ -3,7 +3,7 @@ import synp from '@antongolub/synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke, formatFlags, getSymlinkType, getWorkspaces} from './util'
+import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn} from './util'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any> }
 
@@ -84,7 +84,7 @@ const yarnImport: TCallback = ({temp, flags}) => {
  * @return {void}
  */
 const yarnInstall: TCallback = ({cwd, flags}) => {
-  invoke('yarn', ['--update-checksums', ...formatFlags(flags, 'verbose', 'silent')], cwd, flags.silent)
+  invoke(getYarn(), ['--update-checksums', ...formatFlags(flags, 'verbose', 'silent')], cwd, flags.silent)
 }
 /**
  * Clean up temporaries.

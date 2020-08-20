@@ -46,6 +46,9 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
     ? type
     : 'dir'
 
+// https://github.com/facebook/jest/issues/2993
+export const getYarn = () => isWindows() ? 'yarn.cmd' : 'yarn'
+
 export const getWorkspaces = (cwd: string) => {
   const manifest = readJson(join(cwd, 'package.json'))
 

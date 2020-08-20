@@ -5,6 +5,7 @@ import synp from '@antongolub/synp'
 import findCacheDir from 'find-cache-dir'
 import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
+import {getYarn} from '../../main/ts/util'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
@@ -65,7 +66,7 @@ describe('yarn-audit-fix', () => {
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
-      expect(cp.spawnSync).toHaveBeenCalledWith('yarn', ['--update-checksums', '--verbose'], {cwd, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith(getYarn(), ['--update-checksums', '--verbose'], {cwd, stdio})
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
     }
 
