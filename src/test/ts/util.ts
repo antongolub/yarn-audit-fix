@@ -44,7 +44,7 @@ describe('util', () => {
       expect(getSymlinkType()).toBe('dir')
 
       process.env.OSTYPE = 'unknown'
-      expect(getSymlinkType('junction')).toBe('dir')
+      expect(getSymlinkType('junction')).toBe(process.platform === 'win32' ? 'junction' : 'dir')
       expect(getSymlinkType('foo')).toBe('dir')
       expect(getSymlinkType()).toBe('dir')
     })
