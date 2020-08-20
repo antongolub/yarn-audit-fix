@@ -6,6 +6,9 @@ os:
 node_js:
   - '12'
 
+git:
+  depth: 50
+
 before_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then chmod +x ./cc-test-reporter ; fi
