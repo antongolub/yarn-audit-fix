@@ -46,7 +46,7 @@ const createSymlinks: TCallback = ({temp, flags, cwd}) => {
  * @return {void}
  */
 const yarnLockToPkgLock: TCallback = ({temp}) => {
-  const pgkLockJsonData = synp.yarnToNpm(temp)
+  const pgkLockJsonData = synp.yarnToNpm(temp, true)
 
   fs.writeFileSync(join(temp, 'package-lock.json'), pgkLockJsonData)
   fs.removeSync(join(temp, 'yarn.lock'))
@@ -72,7 +72,7 @@ const npmAuditFix: TCallback = ({temp, flags}) => {
  * @return {void}
  */
 const yarnImport: TCallback = ({temp, flags}) => {
-  const yarnLockData = synp.npmToYarn(temp)
+  const yarnLockData = synp.npmToYarn(temp, true)
 
   fs.writeFileSync(join(temp, 'yarn.lock'), yarnLockData)
   fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
