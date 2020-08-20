@@ -6,6 +6,9 @@ os:
 node_js:
   - '12'
 
+env:
+  - YARN_GPG=no
+
 git:
   depth: 50
 
