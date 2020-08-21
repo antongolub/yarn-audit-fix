@@ -49,6 +49,8 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = () => isWindows() ? 'yarn.cmd' : 'yarn'
 
+export const getNpm = () => resolve(require.resolve('npm'), '../../../.bin', isWindows() ? 'npm.cmd' : 'npm')
+
 export const getWorkspaces = (cwd: string) => {
   const manifest = readJson(join(cwd, 'package.json'))
 

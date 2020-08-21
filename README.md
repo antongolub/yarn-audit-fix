@@ -70,7 +70,7 @@ success Already up-to-date.
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties)
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
-|`--audit-level` | Include a vulnerability with a level as defined or higher | moderate
+|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
 |`--symlink` | Specify symlink type for temp assets: `dir` or `junction` (Windows only) | dir
 
 ## License

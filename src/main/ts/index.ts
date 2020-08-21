@@ -3,7 +3,7 @@ import synp from '@antongolub/synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn} from './util'
+import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn, getNpm} from './util'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any> }
 
@@ -63,7 +63,8 @@ const npmAuditFix: TCallback = ({temp, flags}) => {
     'fix',
     ...formatFlags(flags, 'package-lock-only', 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ]
-  invoke('node', ['node_modules/npm/bin/npm-cli.js', ...auditArgs, `--prefix=${temp}`], temp, flags.silent)
+
+  invoke(getNpm(), [...auditArgs, `--prefix=${temp}`], temp, flags.silent)
 }
 
 /**
