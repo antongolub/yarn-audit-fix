@@ -5,7 +5,7 @@ import synp from '@antongolub/synp'
 import findCacheDir from 'find-cache-dir'
 import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
-import {getYarn} from '../../main/ts/util'
+import {getYarn, getNpm} from '../../main/ts/util'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
@@ -55,8 +55,7 @@ describe('yarn-audit-fix', () => {
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith('node', [
-        'node_modules/npm/bin/npm-cli.js',
+      expect(cp.spawnSync).toHaveBeenCalledWith(getNpm(), [
         'audit',
         'fix',
         '--verbose',
