@@ -33,7 +33,8 @@
     "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
     "postupdate": "yarn && yarn build && yarn test",
     "publish:beta": "npm publish --no-git-tag-version --tag beta",
-    "publish:rc": "npm publish --no-git-tag-version --tag rc"
+    "publish:rc": "npm publish --no-git-tag-version --tag rc",
+    "release": "semantic-release"
   },
   "repository": {
     "type": "git",

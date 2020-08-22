@@ -58,7 +58,7 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @return {void}
  */
 const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
-  const requireNpmBeta = !!manifest.packages
+  const requireNpmBeta = !!manifest.workspaces
   const auditArgs = [
     'audit',
     'fix',

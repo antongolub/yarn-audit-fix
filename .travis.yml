@@ -30,7 +30,7 @@ script:
 deploy:
   provider: script
   script:
-    - DEBUG="semantic-release:*" npx semantic-release
+    - yarn release
   skip_cleanup: true
   on:
     branch: master
