@@ -2,7 +2,7 @@ import cp from 'child_process'
 import chalk from 'chalk'
 import {FsSymlinkType, readFileSync} from 'fs-extra'
 import minimist from 'minimist'
-import {join, resolve} from 'path'
+import {resolve} from 'path'
 import glob, {Options as GlobOptions} from 'bash-glob'
 
 export const invoke = (cmd: string, args: string[], cwd: string, silent= false) => {
@@ -57,9 +57,7 @@ export const getNpm = (requireNpmBeta?: boolean) => {
     : cmd
 }
 
-export const getWorkspaces = (cwd: string) => {
-  const manifest = readJson(join(cwd, 'package.json'))
-
+export const getWorkspaces = (cwd: string, manifest: Record<string, any>) => {
   let packages = manifest.workspaces
   if (packages && packages.packages) {
     packages = packages.packages

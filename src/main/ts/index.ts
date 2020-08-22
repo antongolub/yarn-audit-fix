@@ -5,7 +5,7 @@ import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
 import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn, getNpm, readJson} from './util'
 
-type TContext = { cwd: string, temp: string, flags: Record<string, any> }
+type TContext = { cwd: string, temp: string, flags: Record<string, any>, manifest: Record<string, any>}
 
 type TCallback = (cxt: TContext) => void | Promise<void>
 
@@ -26,9 +26,9 @@ const createTempAssets: TCallback = ({temp, flags}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const createSymlinks: TCallback = ({temp, flags, cwd}) => {
+const createSymlinks: TCallback = ({temp, flags, cwd, manifest}) => {
   const symlinkType = getSymlinkType(flags.symlink) as SymlinkType // TODO fix fs-extra typings issue
-  const workspaces = getWorkspaces(cwd)
+  const workspaces = getWorkspaces(cwd, manifest)
   const links = [join(cwd, 'node_modules'), ...workspaces]
 
   links.forEach((pkgPath: string) => {
@@ -57,8 +57,7 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const npmAuditFix: TCallback = ({temp, flags, cwd}) => {
-  const manifest = readJson(join(cwd, 'package.json'))
+const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
   const requireNpmBeta = !!manifest.packages
   const auditArgs = [
     'audit',
@@ -127,10 +126,13 @@ export const stages: TStage[] = [
  * Public static void main.
  */
 export const run = async(flags: Record<string, any> = {}) => {
+  const cwd = process.cwd()
+  const manifest = readJson(join(cwd, 'package.json'))
   const ctx = {
-    cwd: process.cwd(),
+    cwd,
     temp: findCacheDir({name: 'yarn-audit-fix', create: true}) + '',
     flags,
+    manifest,
   }
 
   for (const [description, ...steps] of stages) {
