@@ -24,13 +24,13 @@ install:
   - yarn
 
 script:
-  - yarn build
-  - yarn test:report
+  - npm run build
+  - npm run test:report
 
 deploy:
   provider: script
   script:
-    - yarn release
+    - npx semantic-release
   skip_cleanup: true
   on:
     branch: master
