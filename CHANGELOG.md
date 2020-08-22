@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.3...v2.0.4) (2020-08-22)
+
+
+### Bug Fixes
+
+* fix workspaces detection ([f766f5d](https://github.com/antongolub/yarn-audit-fix/commit/f766f5dee18e436d9d628b55189f109e467f2fa9))
+
 ## [2.0.3](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.2...v2.0.3) (2020-08-22)
 
 
