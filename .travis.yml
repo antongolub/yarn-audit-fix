@@ -28,7 +28,9 @@ script:
   - yarn test:report
 
 deploy:
-  if: branch = master AND os = linux
   provider: script
   script:
     - npx semantic-release
+  on:
+    branch: master
+    condition: $TRAVIS_OS_NAME = linux
