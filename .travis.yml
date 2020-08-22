@@ -28,10 +28,7 @@ script:
   - yarn test:report
 
 deploy:
-  on:
-    os: linux
-    branch: master
+  if: branch = master AND os = linux
   provider: script
-  skip_cleanup: true
   script:
-    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then npx semantic-release ; fi
+    - npx semantic-release

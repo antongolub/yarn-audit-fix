@@ -1,18 +1,9 @@
 {
   "branch": "master",
-  "verifyConditions": [
-    "@semantic-release/changelog",
+  "plugins": [
     "@semantic-release/npm",
+    "@semantic-release/changelog",
     "@semantic-release/git",
-    "@qiwi/semantic-release-gh-pages-plugin"
-  ],
-  "prepare": [
-    "@semantic-release/changelog",
-    "@semantic-release/npm",
-    "@semantic-release/git"
-  ],
-  "publish": [
-    "@semantic-release/npm",
     "@semantic-release/github",
     "@qiwi/semantic-release-gh-pages-plugin"
   ]
