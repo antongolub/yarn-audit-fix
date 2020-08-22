@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.5...v2.1.0) (2020-08-22)
+
+
+### Features
+
+* introduce --inherit-npm flag ([b54ded4](https://github.com/antongolub/yarn-audit-fix/commit/b54ded4a1d5f5225676a0f7b9faf81f3bbad6e08))
+
 ## [2.0.5](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.4...v2.0.5) (2020-08-22)
 
 
