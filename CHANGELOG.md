@@ -1,3 +1,29 @@
+# [2.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v1.6.1...v2.0.0) (2020-08-22)
+
+
+### Bug Fixes
+
+* adapt yarn cmd invocation to win runtime ([d02d69f](https://github.com/antongolub/yarn-audit-fix/commit/d02d69f74cbaf5e12af6e1263df2d68af4f1e0b5))
+* fix checksums ([d2a280d](https://github.com/antongolub/yarn-audit-fix/commit/d2a280d4036c81fd5bd89f15475a3700d397d9b5))
+
+
+### Features
+
+* **cli:** let --package-lock-only be configurable ([c457a18](https://github.com/antongolub/yarn-audit-fix/commit/c457a1859f3cf12d17eba169319d0e1250269b09))
+* provide workspaces deps update ([a64fc95](https://github.com/antongolub/yarn-audit-fix/commit/a64fc95496998607cc8c50b5de73e4326c457c4e)), closes [#16](https://github.com/antongolub/yarn-audit-fix/issues/16)
+* support custom workspace paths ([96bde5d](https://github.com/antongolub/yarn-audit-fix/commit/96bde5d7ad237bc9bc56c7820d9a1529fded6e02))
+
+
+### Performance Improvements
+
+* deps revision ([c35b253](https://github.com/antongolub/yarn-audit-fix/commit/c35b253b08a9e2592e0cf963a13b5bd32b1c4b67))
+* tweak up npm audit invoker ([197ca96](https://github.com/antongolub/yarn-audit-fix/commit/197ca96f91a1c8d93e55afa3e9b6a957c72e51fe))
+
+
+### BREAKING CHANGES
+
+* --package-lock-only is disabled by default
+
 ## [1.6.1](https://github.com/antongolub/yarn-audit-fix/compare/v1.6.0...v1.6.1) (2020-08-17)
 
 
