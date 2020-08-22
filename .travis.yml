@@ -34,4 +34,4 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
-    - npx semantic-release
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then npx semantic-release ; fi
