@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.2...v2.0.3) (2020-08-22)
+
+
+### Performance Improvements
+
+* add manifest to cxt ([b8761e7](https://github.com/antongolub/yarn-audit-fix/commit/b8761e7c6c11490a09c6a31fbc96c104aaced109))
+
 ## [2.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.0...v2.0.1) (2020-08-22)
 
 
