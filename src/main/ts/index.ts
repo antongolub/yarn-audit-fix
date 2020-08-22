@@ -59,13 +59,14 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  */
 const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
   const requireNpmBeta = !!manifest.workspaces
+  const inheritNpm = flags['inherit-npm']
   const auditArgs = [
     'audit',
     'fix',
     ...formatFlags(flags, 'package-lock-only', 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ]
 
-  invoke(getNpm(requireNpmBeta), [...auditArgs, `--prefix=${temp}`], temp, flags.silent)
+  invoke(getNpm(requireNpmBeta, inheritNpm), [...auditArgs, `--prefix=${temp}`], temp, flags.silent)
 }
 
 /**

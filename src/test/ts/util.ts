@@ -1,7 +1,9 @@
+import {resolve} from 'path'
 import {
   formatFlags,
   getSymlinkType,
   parseFlags,
+  getNpm,
 } from '../../main/ts/util'
 
 describe('util', () => {
@@ -47,6 +49,23 @@ describe('util', () => {
       expect(getSymlinkType('junction')).toBe(process.platform === 'win32' ? 'junction' : 'dir')
       expect(getSymlinkType('foo')).toBe('dir')
       expect(getSymlinkType()).toBe('dir')
+    })
+  })
+
+  describe('#getNpm', () => {
+    it('properly resolves npm ref', () => {
+      const localNpm = resolve(__dirname, '../../../node_modules/.bin/npm')
+      const cases: [boolean, boolean, boolean, string][] = [
+        [true, false, false, localNpm],
+        [true, false, true, localNpm + '.cmd'],
+        [true, true, false, 'npm'],
+        [false, false, false, 'npm'],
+        [false, false, true, 'npm.cmd'],
+      ]
+
+      cases.forEach(([requireNpm, inheritNpm, isWindows, result]) => {
+        expect(getNpm(requireNpm, inheritNpm, isWindows)).toBe(result)
+      })
     })
   })
 })

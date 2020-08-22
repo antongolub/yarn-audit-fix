@@ -49,10 +49,10 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = () => isWindows() ? 'yarn.cmd' : 'yarn'
 
-export const getNpm = (requireNpmBeta?: boolean) => {
-  const cmd = isWindows() ? 'npm.cmd' : 'npm'
+export const getNpm = (requireNpmBeta?: boolean, inheritNpm?: boolean, isWin = isWindows()) => {
+  const cmd = isWin ? 'npm.cmd' : 'npm'
 
-  return requireNpmBeta
+  return requireNpmBeta && !inheritNpm
     ? resolve(require.resolve('npm'), '../../../.bin', cmd)
     : cmd
 }
