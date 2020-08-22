@@ -1,5 +1,5 @@
 import fs, {SymlinkType} from 'fs-extra'
-import synp from '@antongolub/synp'
+import synp from 'synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
