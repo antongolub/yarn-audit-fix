@@ -1,7 +1,7 @@
 import cp from 'child_process'
 import {join} from 'path'
 import fs from 'fs-extra'
-import synp from '@antongolub/synp'
+import synp from 'synp'
 import findCacheDir from 'find-cache-dir'
 import {factory as iop} from 'inside-out-promise'
 import {run} from '../../main/ts'
@@ -10,7 +10,7 @@ import {getYarn, getNpm} from '../../main/ts/util'
 jest.mock('child_process')
 jest.mock('fs-extra')
 jest.mock('npm')
-jest.mock('@antongolub/synp')
+jest.mock('synp')
 
 describe('yarn-audit-fix', () => {
   beforeEach(() => {

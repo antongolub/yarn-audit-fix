@@ -2,21 +2,6 @@
 # yarn lockfile v1
 
 
-"@antongolub/synp@^2.0.17":
-  version "2.0.17"
-  resolved "https://registry.yarnpkg.com/@antongolub/synp/-/synp-2.0.17.tgz#2e8b71ff1312b86e7ee93793f4f39f01c78be838"
-  integrity sha1-Lotx/xMSuG5+6TeT9POfAceL6Dg=
-  dependencies:
-    "@yarnpkg/lockfile" "^1.1.0"
-    bash-glob "^2.0.0"
-    colors "^1.4.0"
-    commander "^6.0.0"
-    eol "^0.9.1"
-    lodash "4.17.20"
-    nmtree "^1.0.6"
-    request "^2.88.2"
-    sort-object-keys "^1.1.3"
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.8.3":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.10.4.tgz#168da1a36e90da68ae8d49c0f1b48c7c6249213a"
@@ -8060,6 +8045,21 @@ sync-rpc@^1.2.1:
   dependencies:
     get-port "^3.1.0"
 
+synp@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/synp/-/synp-1.8.1.tgz#88d10ede51293561e2bca2617f74a46be25334b9"
+  integrity sha1-iNEO3lEpNWHivKJhf3Ska+JTNLk=
+  dependencies:
+    "@yarnpkg/lockfile" "^1.1.0"
+    bash-glob "^2.0.0"
+    colors "^1.4.0"
+    commander "^6.0.0"
+    eol "^0.9.1"
+    lodash "4.17.20"
+    nmtree "^1.0.6"
+    request "^2.88.2"
+    sort-object-keys "^1.1.3"
+
 tar@^4.4.10, tar@^4.4.12, tar@^4.4.13:
   version "4.4.13"
   resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.13.tgz#43b364bc52888d555298637b10d60790254ab525"
@@ -8076,7 +8076,7 @@ tar@^4.4.10, tar@^4.4.12, tar@^4.4.13:
 tar@^6.0.1, tar@^6.0.2:
   version "6.0.5"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.0.5.tgz#bde815086e10b39f1dcd298e89d596e1535e200f"
-  integrity sha1-vegVCG4Qs58dzSmOidWW4VNeIA8=
+  integrity sha512-0b4HOimQHj9nXNEAA7zWwMM91Zhhba3pspja6sQbgTpynOJf+bkjBnfybNYzbpLbnwXnbyB4LOREvlyXLkCHSg==
   dependencies:
     chownr "^2.0.0"
     fs-minipass "^2.0.0"
