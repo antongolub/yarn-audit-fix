@@ -1,3 +1,10 @@
+## [2.0.5](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.4...v2.0.5) (2020-08-22)
+
+
+### Performance Improvements
+
+* rm npm bins before semrel start, tech release ([3ce0106](https://github.com/antongolub/yarn-audit-fix/commit/3ce0106600b3f2626c0c1f832ce30e3ef753d146))
+
 ## [2.0.4](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.3...v2.0.4) (2020-08-22)
 
 
