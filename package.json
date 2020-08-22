@@ -58,7 +58,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@antongolub/synp": "^2.0.18",
+    "@antongolub/synp": "^2.0.19",
     "@types/bash-glob": "^2.0.0",
     "@types/find-cache-dir": "^3.2.0",
     "@types/fs-extra": "^9.0.1",
@@ -85,7 +85,7 @@
     "coveralls": "^3.1.0",
     "cpy-cli": "^3.1.1",
     "inside-out-promise": "^2.1.0",
-    "jest": "^26.4.1",
+    "jest": "^26.4.2",
     "mkdirp": "^1.0.4",
     "semantic-release": "^17.1.1",
     "terser": "^5.2.1",
