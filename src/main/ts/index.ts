@@ -3,7 +3,7 @@ import synp from '@antongolub/synp'
 import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn, getNpm} from './util'
+import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn, getNpm, readJson} from './util'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any> }
 
@@ -57,14 +57,16 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const npmAuditFix: TCallback = ({temp, flags}) => {
+const npmAuditFix: TCallback = ({temp, flags, cwd}) => {
+  const manifest = readJson(join(cwd, 'package.json'))
+  const requireNpmBeta = !!manifest.packages
   const auditArgs = [
     'audit',
     'fix',
     ...formatFlags(flags, 'package-lock-only', 'verbose', 'loglevel', 'only', 'force', 'audit-level', 'silent'),
   ]
 
-  invoke(getNpm(), [...auditArgs, `--prefix=${temp}`], temp, flags.silent)
+  invoke(getNpm(requireNpmBeta), [...auditArgs, `--prefix=${temp}`], temp, flags.silent)
 }
 
 /**
