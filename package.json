@@ -19,7 +19,7 @@
     "test:unit": "yarn jest",
     "test:integration": "node ./target/es5/cli.js --package-lock-only",
     "test:integration-build": "yarn build:es5 && yarn test:integration",
-    "test": "yarn lint && yarn test:unit && yarn test:integration",
+    "test": "yarn lint && yarn test:unit",
     "clean": "rimraf target typings flow-typed buildcache",
     "build": "yarn clean && yarn build:es5 && yarn build:es6 && yarn build:ts && yarn build:libdef && yarn docs",
     "build:es5": "mkdirp target/es5 && tsc -p tsconfig.es5.json",

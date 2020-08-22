@@ -20,17 +20,16 @@ after_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
 
 install:
-  - yarn cache clean
-  - yarn
+  - npm install
 
 script:
-  - yarn build
-  - yarn test:report
+  - npm run build
+  - npm run test:report
 
 deploy:
   provider: script
   script:
-    - yarn release
+    - npx semantic-release
   skip_cleanup: true
   on:
     branch: master
