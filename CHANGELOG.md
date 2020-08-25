@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v2.1.0...v2.1.1) (2020-08-25)
+
+
+### Performance Improvements
+
+* **package:** up deps ([8da9fec](https://github.com/antongolub/yarn-audit-fix/commit/8da9fec1bd8ec0003776c0de1618f782447528bb))
+
 # [2.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v2.0.5...v2.1.0) (2020-08-22)
 
 
