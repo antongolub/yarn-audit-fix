@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@antongolub/synp@^2.0.19":
-  version "2.0.19"
-  resolved "https://registry.yarnpkg.com/@antongolub/synp/-/synp-2.0.19.tgz#903b77908373e55edd6a9d286391b01a849f6576"
-  integrity sha512-LsmEL3kvoFf7lpFIwaGEwTdLB+PCfk2RUWZMu5IIyU8mGgukM3qp3newakbCDNtMH0M3anGwqW0vWcnGcJF+sA==
+"@antongolub/synp@^2.0.20":
+  version "2.0.20"
+  resolved "https://registry.yarnpkg.com/@antongolub/synp/-/synp-2.0.20.tgz#da3bfaf837a7658297e8bccb3039efe173b72373"
+  integrity sha512-WVtqma+EOHmxZSN3sphrejNioB47rRsHlorz1gp29XE5sGecAaC55DtNj3QS6gb6BUK5wm6q92O/NqSVxAcAdw==
   dependencies:
     "@yarnpkg/lockfile" "^1.1.0"
     bash-glob "^2.0.0"
@@ -6283,10 +6283,10 @@ npm-user-validate@~1.0.0:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.0.tgz#8ceca0f5cea04d4e93519ef72d0557a75122e951"
   integrity sha1-jOyg9c6gTU6TUZ73LQVXp1Ei6VE=
 
-npm@7.0.0-beta.6:
-  version "7.0.0-beta.6"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-beta.6.tgz#53b6e0de40106e4436309ef41dca5e8a0d04dd42"
-  integrity sha512-1CRwKtK4qDboo/e5/62D9YJSs57QgFiwWtBDqr+BqDsO9S1NKJeGk3wlbAYq4sw0bxgKb6Mk09BrhvExkDHl3w==
+npm@7.0.0-beta.7:
+  version "7.0.0-beta.7"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-beta.7.tgz#1aa4ee6aab1a9237b9b73a8656e393288b36407b"
+  integrity sha512-uZPtmfBKosIia5LsYr0B12n1zN+LUyMB3Eit5j4aniZwebM3uQ7wGMBQHyDUHPibG3e9Fx4soHPWerJ7DF4ffQ==
   dependencies:
     "@npmcli/arborist" "^0.0.17"
     "@npmcli/ci-detect" "^1.2.0"
