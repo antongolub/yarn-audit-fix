@@ -171,6 +171,29 @@ success Already up-to-date.
 							<td></td>
 						</tr>
 				</tbody></table>
+				<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
+					<h3>Troubleshooting</h3>
+				</a>
+				<p>In some cases <strong>npm audit fix</strong> makes <code>node_modules</code> to become inconsistent. This is expected. <strong>yarn</strong> and <strong>npm</strong> organize the directory space slightly differently.</p>
+				<pre><code><span class="hljs-built_in">npm</span> WARN rm <span class="hljs-keyword">not</span> removing <span class="hljs-regexp">/Users/antongolub/projects/queuefy/node_modules/</span>.cache<span class="hljs-regexp">/yarn-audit-fix/node_modules/npm/node_modules/</span>.bin<span class="hljs-regexp">/node-gyp as it wasn&#x27;t installed by /Users/antongolub/projects/queuefy/node_modules/</span>.cache/yarn-audit-fix/node_modules/<span class="hljs-built_in">npm</span>/node_modules/node-gyp
+<span class="hljs-built_in">npm</span> WARN rm <span class="hljs-keyword">not</span> removing <span class="hljs-regexp">/Users/antongolub/projects/queuefy/node_modules/</span>.cache<span class="hljs-regexp">/yarn-audit-fix/node_modules/npm/node_modules/</span>.bin<span class="hljs-regexp">/uuid as it wasn&#x27;t installed by /Users/antongolub/projects/queuefy/node_modules/</span>.cache/yarn-audit-fix/node_modules/<span class="hljs-built_in">npm</span>/node_modules/uuid
+<span class="hljs-built_in">npm</span> ERR! code ENOENT
+<span class="hljs-built_in">npm</span> ERR! syscall chmod
+<span class="hljs-built_in">npm</span> ERR! path <span class="hljs-regexp">/Users/antongolub/projects/queuefy/node_modules/</span>.cache<span class="hljs-regexp">/yarn-audit-fix/node_modules/</span>@qiwi/libdefkit/node_modules/flowgen/lib/cli/index.js
+<span class="hljs-built_in">npm</span> ERR! errno -<span class="hljs-number">2</span>
+<span class="hljs-built_in">npm</span> ERR! enoent ENOENT: <span class="hljs-literal">no</span> such file <span class="hljs-keyword">or</span> directory, chmod <span class="hljs-string">&#x27;/Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/@qiwi/libdefkit/node_modules/flowgen/lib/cli/index.js&#x27;</span>
+<span class="hljs-built_in">npm</span> ERR! enoent This <span class="hljs-keyword">is</span> related <span class="hljs-keyword">to</span> <span class="hljs-built_in">npm</span> <span class="hljs-keyword">not</span> being able <span class="hljs-keyword">to</span> find a file.
+<span class="hljs-built_in">npm</span> ERR! enoent 
+<span class="hljs-built_in">npm</span> ERR!     <span class="hljs-regexp">/Users/antongolub/</span>.<span class="hljs-built_in">npm</span>/_logs/<span class="hljs-number">2020</span>-<span class="hljs-number">08</span>-<span class="hljs-number">23</span>T07_09_26_924Z-debug.log
+{
+  status: <span class="hljs-number">254</span>,
+  signal: <span class="hljs-literal">null</span>,
+  output: [ <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span> ]</code></pre>
+				<p>Let&#39;s try this workaround:</p>
+				<ul>
+					<li>Restore the original <code>node_modules</code> state. <code>yarn --force</code> or <code>rm-rf node_modules &amp;&amp; yarn</code>.</li>
+					<li>Apply <code>npx yarn-audit-fix --package-lock-only</code>. The last param should instruct <strong>npm</strong> not to modify <code>node_modules</code> contents.</li>
+				</ul>
 				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
 					<h2>License</h2>
 				</a>
