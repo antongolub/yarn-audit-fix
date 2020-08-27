@@ -39,7 +39,7 @@ describe('yarn-audit-fix', () => {
   afterAll(jest.resetAllMocks)
 
   describe('flow', () => {
-    const checkFlow = () => {
+    const checkFlow = (skipPkgLockOnly?: boolean) => {
       const temp = findCacheDir({name: 'yarn-audit-fix', create: true}) + ''
       const cwd = process.cwd()
       const stdio = ['inherit', 'inherit', 'inherit']
@@ -49,19 +49,18 @@ describe('yarn-audit-fix', () => {
       expect(fs.copyFileSync).toHaveBeenCalledWith('yarn.lock', join(temp, 'yarn.lock'))
       expect(fs.copyFileSync).toHaveBeenCalledWith('package.json', join(temp, 'package.json'))
       expect(fs.createSymlinkSync).toHaveBeenCalledWith(join(cwd, 'node_modules'), join(temp, 'node_modules'), 'dir')
-      // expect(fs.createSymlinkSync).toHaveBeenCalledWith(join(cwd, 'packages/foo'), join(temp, 'packages/foo'), 'dir')
 
       // Generating package-lock.json from yarn.lock...
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith(getNpm(), [
+      expect(cp.spawnSync).toHaveBeenCalledWith(getNpm(), ([
         'audit',
         'fix',
+        skipPkgLockOnly ? null : '--package-lock-only',
         '--verbose',
-        '--package-lock-only',
         `--prefix=${temp}`,
-      ], {cwd: temp, stdio})
+      ]).filter(v => v !== null), {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
@@ -98,10 +97,10 @@ describe('yarn-audit-fix', () => {
     describe('cli', () => {
       it('invokes cmd queue with proper args', () => {
         jest.isolateModules(() => {
-          process.argv.push('--verbose', '--package-lock-only')
+          process.argv.push('--verbose', '--package-lock-only=false')
           require('../../main/ts/cli')
         })
-        checkFlow()
+        checkFlow(true)
       })
 
       describe('on error', () => {

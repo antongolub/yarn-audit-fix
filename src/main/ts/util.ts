@@ -17,8 +17,8 @@ export const invoke = (cmd: string, args: string[], cwd: string, silent= false) 
 
 export const parseFlags = (argv: string[]) => minimist(argv, {'--': true})
 
-const checkByLists = (value: any, omitlist: any[], picklist: any[]): boolean =>
-  !omitlist.includes(value) && (!picklist.length || picklist.includes(value))
+const checkValue = (key: string, value: any, omitlist: any[], picklist: any[]): boolean =>
+  value !== 'false' && !omitlist.includes(key) && (!picklist.length || picklist.includes(key))
 
 const formatFlag = (key: string): string => (key.length === 1 ? '-' : '--') + key
 
@@ -28,7 +28,7 @@ export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): 
     const value = flags[key]
     const flag = formatFlag(key)
 
-    if (checkByLists(key, omitlist, picklist)) {
+    if (checkValue(key, value, omitlist, picklist)) {
       memo.push(flag)
 
       if (value !== true) {
