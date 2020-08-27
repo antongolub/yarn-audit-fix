@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v2.1.1...v2.2.0) (2020-08-27)
+
+
+### Features
+
+* enable package-lock-only by default ([d927735](https://github.com/antongolub/yarn-audit-fix/commit/d927735d40fb4d40cc3a8d11f151fb0cc6ba6435)), closes [#23](https://github.com/antongolub/yarn-audit-fix/issues/23)
+
 ## [2.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v2.1.0...v2.1.1) (2020-08-25)
 
 
