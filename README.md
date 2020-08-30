@@ -74,6 +74,7 @@ success Already up-to-date.
 |`--inherit-npm` | Use `npm` version from the environment |
 
 ### Troubleshooting
+#### enoent: no such file or directory
 In some cases **npm audit fix** makes `node_modules` to become inconsistent. This is expected. **yarn** and **npm** organize the directory space slightly differently.
 ```
 npm WARN rm not removing /Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/npm/node_modules/.bin/node-gyp as it wasn't installed by /Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/npm/node_modules/node-gyp
@@ -95,5 +96,9 @@ Let's try this workaround:
 * Restore the original `node_modules` state. `yarn --force` or `rm-rf node_modules && yarn`.
 * Apply `npx yarn-audit-fix --package-lock-only`. The last param should instruct **npm** not to modify `node_modules` contents.
 
+#### yarn-audit-fix command not found
+After installation the package may not be found. This is probably an issue with $PATH finding `node_modules/.bin` contents or smth like that.
+A bit annoying, but it's easy to handle. You're able to run the cmd through **yarn**: `yarn yarn-audit-fix`. Or even simply invoke `node_modules/.bin/yarn-audit-fix` script.
+  
 ## License
 [MIT](./LICENSE)
