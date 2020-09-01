@@ -2,21 +2,6 @@
 # yarn lockfile v1
 
 
-"@antongolub/synp@^2.0.20":
-  version "2.0.20"
-  resolved "https://registry.yarnpkg.com/@antongolub/synp/-/synp-2.0.20.tgz#da3bfaf837a7658297e8bccb3039efe173b72373"
-  integrity sha512-WVtqma+EOHmxZSN3sphrejNioB47rRsHlorz1gp29XE5sGecAaC55DtNj3QS6gb6BUK5wm6q92O/NqSVxAcAdw==
-  dependencies:
-    "@yarnpkg/lockfile" "^1.1.0"
-    bash-glob "^2.0.0"
-    colors "^1.4.0"
-    commander "^6.0.0"
-    eol "^0.9.1"
-    lodash "4.17.20"
-    nmtree "^1.0.6"
-    request "^2.88.2"
-    sort-object-keys "^1.1.3"
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.8.3":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.10.4.tgz#168da1a36e90da68ae8d49c0f1b48c7c6249213a"
@@ -1182,10 +1167,18 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@26.x", "@types/jest@^26.0.10":
+"@types/jest@26.x":
   version "26.0.10"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.10.tgz#8faf7e9756c033c39014ae76a7329efea00ea607"
   integrity sha512-i2m0oyh8w/Lum7wWK/YOZJakYF8Mx08UaKA1CtbmFeDquVhAEdA7znacsVSf2hJ1OQ/OfVMGN90pw/AtzF8s/Q==
+  dependencies:
+    jest-diff "^25.2.1"
+    pretty-format "^25.2.1"
+
+"@types/jest@^26.0.12":
+  version "26.0.12"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.12.tgz#0f20fef9e74f55a312530284e6178f3b3254f501"
+  integrity sha512-vZOFjm562IPb1EmaKxMjdcouxVb1l3NqoUH4XC4tDQ2R/AWde+0HXBUhyfc6L+7vc3mJ393U+5vr3nH2CLSVVg==
   dependencies:
     jest-diff "^25.2.1"
     pretty-format "^25.2.1"
@@ -2212,10 +2205,10 @@ commander@^5.1.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-5.1.0.tgz#46abbd1652f8e059bddaef99bbdcb2ad9cf179ae"
   integrity sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==
 
-commander@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-6.0.0.tgz#2b270da94f8fb9014455312f829a1129dbf8887e"
-  integrity sha512-s7EA+hDtTYNhuXkTlhqew4txMZVdszBmKWSPEMxGr8ru8JXR7bLUFIAtPhcSuFdJQ0ILMxnJi8GkQL0yvDy/YA==
+commander@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-6.1.0.tgz#f8d722b78103141006b66f4c7ba1e97315ba75bc"
+  integrity sha512-wl7PNrYWd2y5mp1OK/LhTlv8Ff4kQJQRXXAvF+uU/TPNiVJUxZLRYGj/B0y/lPGAVcSbJqH2Za/cvHmrPMC8mA==
 
 common-ancestor-path@^1.0.1:
   version "1.0.1"
@@ -6590,7 +6583,7 @@ onetime@^5.1.0:
 opener@^1.5.1:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
-  integrity "sha1-XTfh81B3udysQwE3InGv3rKhNZg= sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A=="
+  integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
 optionator@^0.8.1:
   version "0.8.3"
@@ -7879,7 +7872,7 @@ socks-proxy-agent@^5.0.0:
 socks@^2.3.3:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/socks/-/socks-2.4.2.tgz#f19431c8e4faa06f245dbeed0a7b5d25bef37a1c"
-  integrity "sha1-8ZQxyOT6oG8kXb7tCntdJb7zehw= sha512-cE6P9R+/CET9XhIMvqhRgaNT1GXKIahioMjwwhgYOd+8UQWP50rrFm+faqG/4xkZsjTdVeBYr0Tb246BSC9/fg=="
+  integrity sha512-cE6P9R+/CET9XhIMvqhRgaNT1GXKIahioMjwwhgYOd+8UQWP50rrFm+faqG/4xkZsjTdVeBYr0Tb246BSC9/fg==
   dependencies:
     ip "^1.1.5"
     smart-buffer "^4.1.0"
@@ -8310,6 +8303,21 @@ sync-rpc@^1.2.1:
   integrity sha512-J8jTXuZzRlvU7HemDgHi3pGnh/rkoqR/OZSjhTyyZrEkkYQbk7Z33AXp37mkPfPpfdOuj7Ex3H/TJM1z48uPQw==
   dependencies:
     get-port "^3.1.0"
+
+synp@^1.8.2:
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/synp/-/synp-1.8.2.tgz#ee191f7c935ebf81020c41ee019e61d409bd8b3d"
+  integrity sha512-BynZmRh5NDcTJtheXO4GKJqd3Ee4A+aKScx4R/oRcJQUU65kYgEgKgPY0VS6r612+cR99ZYY2jef9FaU6C+EQw==
+  dependencies:
+    "@yarnpkg/lockfile" "^1.1.0"
+    bash-glob "^2.0.0"
+    colors "^1.4.0"
+    commander "^6.1.0"
+    eol "^0.9.1"
+    lodash "4.17.20"
+    nmtree "^1.0.6"
+    request "^2.88.2"
+    sort-object-keys "^1.1.3"
 
 tar@^4.4.10, tar@^4.4.12, tar@^4.4.13:
   version "4.4.13"
