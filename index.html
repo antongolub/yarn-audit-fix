@@ -172,7 +172,10 @@ success Already up-to-date.
 						</tr>
 				</tbody></table>
 				<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
-					<h3>Troubleshooting</h3>
+					<h2>Troubleshooting</h2>
+				</a>
+				<a href="#enoent-no-such-file-or-directory" id="enoent-no-such-file-or-directory" style="color: inherit; text-decoration: none;">
+					<h4>enoent: no such file or directory</h4>
 				</a>
 				<p>In some cases <strong>npm audit fix</strong> makes <code>node_modules</code> to become inconsistent. This is expected. <strong>yarn</strong> and <strong>npm</strong> organize the directory space slightly differently.</p>
 				<pre><code><span class="hljs-built_in">npm</span> WARN rm <span class="hljs-keyword">not</span> removing <span class="hljs-regexp">/Users/antongolub/projects/queuefy/node_modules/</span>.cache<span class="hljs-regexp">/yarn-audit-fix/node_modules/npm/node_modules/</span>.bin<span class="hljs-regexp">/node-gyp as it wasn&#x27;t installed by /Users/antongolub/projects/queuefy/node_modules/</span>.cache/yarn-audit-fix/node_modules/<span class="hljs-built_in">npm</span>/node_modules/node-gyp
@@ -190,9 +193,18 @@ success Already up-to-date.
   signal: <span class="hljs-literal">null</span>,
   output: [ <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span> ]</code></pre>
 				<p>Let&#39;s try this workaround:</p>
-				<ul>
+				<ol>
 					<li>Restore the original <code>node_modules</code> state. <code>yarn --force</code> or <code>rm-rf node_modules &amp;&amp; yarn</code>.</li>
 					<li>Apply <code>npx yarn-audit-fix --package-lock-only</code>. The last param should instruct <strong>npm</strong> not to modify <code>node_modules</code> contents.</li>
+				</ol>
+				<a href="#yarn-audit-fix-command-not-found" id="yarn-audit-fix-command-not-found" style="color: inherit; text-decoration: none;">
+					<h4>yarn-audit-fix command not found</h4>
+				</a>
+				<p>After installation the package may not be found. This is probably an issue with $PATH finding <code>node_modules/.bin</code> contents or smth like that.
+				A bit annoying, but it&#39;s easy to handle in several ways. </p>
+				<ul>
+					<li>You&#39;re able to run the cmd through <strong>yarn</strong>: <code>yarn yarn-audit-fix</code>. </li>
+					<li>Simply invoke <code>node_modules/.bin/yarn-audit-fix</code> script.</li>
 				</ul>
 				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
 					<h2>License</h2>
