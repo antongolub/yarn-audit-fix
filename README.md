@@ -73,7 +73,7 @@ success Already up-to-date.
 |`--inherit-npm` | Use `npm` version from the environment |
 
 ## Troubleshooting
-#### enoent: no such file or directory
+### enoent: no such file or directory
 In some cases **npm audit fix** makes `node_modules` to become inconsistent. This is expected. **yarn** and **npm** organize the directory space slightly differently.
 ```
 npm WARN rm not removing /Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/npm/node_modules/.bin/node-gyp as it wasn't installed by /Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/npm/node_modules/node-gyp
@@ -95,13 +95,13 @@ Let's try this workaround:
 1. Restore the original `node_modules` state. `yarn --force` or `rm-rf node_modules && yarn`.
 2. Apply `npx yarn-audit-fix --package-lock-only`. The last param should instruct **npm** not to modify `node_modules` contents.
 
-#### yarn-audit-fix command not found
+### yarn-audit-fix command not found
 After installation the package may not be found. This is probably an issue with $PATH finding `node_modules/.bin` contents or smth like that ([npm/issues/957](https://github.com/npm/npm/issues/957)).
 A bit annoying, but it's easy to handle in several ways. 
 * You're able to run the cmd through **yarn**: `yarn yarn-audit-fix`. 
 * Simply invoke `node_modules/.bin/yarn-audit-fix` script.
 
-#### --force did not force the update
+### --force did not force the update
 The problem only concerns repositories with `workspaces` (monorepos). 
 `npm audit fix --force` throws 1 status code and suggests running `npm audit fix --force`. This quite ironic behaviour is exactly what **npm** (arborist) [does now](https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373). 
 So you need, as the message says, to manually change the dependency versions. **npm@7** is still in beta, perhaps this logic will be changed later. 
