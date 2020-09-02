@@ -19,7 +19,6 @@ Apply `npm audit fix` logic to `yarn.lock`
 
 ## Motivation
 `yarn audit` detects vulnerabilities, but cannot fix them.
-Strictly `yarn` cannot be a drop-in replacement for `npm`.
 Authors suggest using [Depedabot](https://dependabot.com/) or [Snyk](https://snyk.io/) for security patches. Well, it is very inconvenient in some situations, to say the least of it.
 The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075)
 
@@ -97,7 +96,7 @@ Let's try this workaround:
 2. Apply `npx yarn-audit-fix --package-lock-only`. The last param should instruct **npm** not to modify `node_modules` contents.
 
 #### yarn-audit-fix command not found
-After installation the package may not be found. This is probably an issue with $PATH finding `node_modules/.bin` contents or smth like that.
+After installation the package may not be found. This is probably an issue with $PATH finding `node_modules/.bin` contents or smth like that ([npm/issues/957](https://github.com/npm/npm/issues/957)).
 A bit annoying, but it's easy to handle in several ways. 
 * You're able to run the cmd through **yarn**: `yarn yarn-audit-fix`. 
 * Simply invoke `node_modules/.bin/yarn-audit-fix` script.
