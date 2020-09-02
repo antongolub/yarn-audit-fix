@@ -100,6 +100,52 @@ After installation the package may not be found. This is probably an issue with 
 A bit annoying, but it's easy to handle in several ways. 
 * You're able to run the cmd through **yarn**: `yarn yarn-audit-fix`. 
 * Simply invoke `node_modules/.bin/yarn-audit-fix` script.
-  
+
+#### --force did not force the update
+The problem only concerns repositories with `workspaces` (monorepos). 
+`npm audit fix --force` throws 1 status code and suggests running `npm audit fix --force`. This quite ironic behaviour is exactly what **npm** (arborist) [does now](https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373). 
+So you need, as the message says, to manually change the dependency versions. **npm@7** is still in beta, perhaps this logic will be changed later. 
+```
+$$ yarn-audit-fix --force          
+ Preparing temp assets...
+ Generating package-lock.json from yarn.lock...
+ Applying npm audit fix...
+ invoke /home/qwelias/.nvm/versions/node/v12.18.1/lib/node_modules/yarn-audit-fix/node_modules/.bin/npm audit fix --package-lock-only --force --prefix=/home/qwelias/prj/stuff/test-yarn-audit-fix/node_modules/.cache/yarn-audit-fix
+ npm WARN using --force Recommended protections disabled.
+ npm WARN audit Updating lodash to 4.17.20,which is outside your stated dependency range.
+ npm WARN audit Manual fix required in linked project at ./packages/bar for lodash@<=4.17.18.
+ npm WARN audit 'cd ./packages/bar' and run 'npm audit' for details.
+ npm WARN audit Manual fix required in linked project at ./packages/foo for lodash@<=4.17.18.
+ npm WARN audit 'cd ./packages/foo' and run 'npm audit' for details.
+ 
+ up to date, audited 7 packages in 2s
+ 
+ # npm audit report
+ 
+ lodash  <=4.17.18
+ Severity: high
+ Prototype Pollution - https://npmjs.com/advisories/782
+ Prototype Pollution - https://npmjs.com/advisories/1065
+ Prototype Pollution - https://npmjs.com/advisories/577
+ Prototype Pollution - https://npmjs.com/advisories/1523
+ fix available via `npm audit fix --force`
+ Will install lodash@4.17.20, which is outside the stated dependency range
+ packages/bar/node_modules/lodash
+ packages/foo/node_modules/lodash
+ 
+ 1 high severity vulnerability
+ 
+ To address all issues, run:
+   npm audit fix --force
+ {
+   status: 1,
+   signal: null,
+   output: [ null, null, null ],
+   pid: 176019,
+   stdout: null,
+   stderr: null
+ }
+```
+
 ## License
 [MIT](./LICENSE)
