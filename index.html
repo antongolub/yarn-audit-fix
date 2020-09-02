@@ -81,7 +81,6 @@
 					<h2>Motivation</h2>
 				</a>
 				<p><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
-					Strictly <code>yarn</code> cannot be a drop-in replacement for <code>npm</code>.
 					Authors suggest using <a href="https://dependabot.com/">Depedabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
 				The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a></p>
 				<p>Fortunately, there&#39;s a workaround: <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a> (thanks to Gianfranco P.).
@@ -200,7 +199,7 @@ success Already up-to-date.
 				<a href="#yarn-audit-fix-command-not-found" id="yarn-audit-fix-command-not-found" style="color: inherit; text-decoration: none;">
 					<h4>yarn-audit-fix command not found</h4>
 				</a>
-				<p>After installation the package may not be found. This is probably an issue with $PATH finding <code>node_modules/.bin</code> contents or smth like that.
+				<p>After installation the package may not be found. This is probably an issue with $PATH finding <code>node_modules/.bin</code> contents or smth like that (<a href="https://github.com/npm/npm/issues/957">npm/issues/957</a>).
 				A bit annoying, but it&#39;s easy to handle in several ways. </p>
 				<ul>
 					<li>You&#39;re able to run the cmd through <strong>yarn</strong>: <code>yarn yarn-audit-fix</code>. </li>
