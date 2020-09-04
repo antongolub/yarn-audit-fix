@@ -174,7 +174,7 @@ success Already up-to-date.
 					<h2>Troubleshooting</h2>
 				</a>
 				<a href="#enoent-no-such-file-or-directory" id="enoent-no-such-file-or-directory" style="color: inherit; text-decoration: none;">
-					<h4>enoent: no such file or directory</h4>
+					<h3>enoent: no such file or directory</h3>
 				</a>
 				<p>In some cases <strong>npm audit fix</strong> makes <code>node_modules</code> to become inconsistent. This is expected. <strong>yarn</strong> and <strong>npm</strong> organize the directory space slightly differently.</p>
 				<pre><code><span class="hljs-built_in">npm</span> WARN rm <span class="hljs-keyword">not</span> removing <span class="hljs-regexp">/Users/antongolub/projects/queuefy/node_modules/</span>.cache<span class="hljs-regexp">/yarn-audit-fix/node_modules/npm/node_modules/</span>.bin<span class="hljs-regexp">/node-gyp as it wasn&#x27;t installed by /Users/antongolub/projects/queuefy/node_modules/</span>.cache/yarn-audit-fix/node_modules/<span class="hljs-built_in">npm</span>/node_modules/node-gyp
@@ -197,7 +197,7 @@ success Already up-to-date.
 					<li>Apply <code>npx yarn-audit-fix --package-lock-only</code>. The last param should instruct <strong>npm</strong> not to modify <code>node_modules</code> contents.</li>
 				</ol>
 				<a href="#yarn-audit-fix-command-not-found" id="yarn-audit-fix-command-not-found" style="color: inherit; text-decoration: none;">
-					<h4>yarn-audit-fix command not found</h4>
+					<h3>yarn-audit-fix command not found</h3>
 				</a>
 				<p>After installation the package may not be found. This is probably an issue with $PATH finding <code>node_modules/.bin</code> contents or smth like that (<a href="https://github.com/npm/npm/issues/957">npm/issues/957</a>).
 				A bit annoying, but it&#39;s easy to handle in several ways. </p>
@@ -205,6 +205,51 @@ success Already up-to-date.
 					<li>You&#39;re able to run the cmd through <strong>yarn</strong>: <code>yarn yarn-audit-fix</code>. </li>
 					<li>Simply invoke <code>node_modules/.bin/yarn-audit-fix</code> script.</li>
 				</ul>
+				<a href="#--force-did-not-force-the-update" id="--force-did-not-force-the-update" style="color: inherit; text-decoration: none;">
+					<h3>--force did not force the update</h3>
+				</a>
+				<p>The problem only concerns repositories with <code>workspaces</code> (monorepos).
+					<code>npm audit fix --force</code> throws 1 status code and suggests running <code>npm audit fix --force</code>. This quite ironic behaviour is exactly what <strong>npm</strong> (arborist) <a href="https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373">does now</a>.
+				So you need, as the message says, to manually change the dependency versions. <strong>npm@7</strong> is still in beta, perhaps this logic will be changed later. </p>
+				<pre><code>$$ yarn-audit-fix --force
+ Preparing temp assets...
+ Generating package-lock.json from yarn.lock...
+ Applying npm audit fix...
+ invoke <span class="hljs-regexp">/home/</span>qwelias<span class="hljs-regexp">/.nvm/</span>versions<span class="hljs-regexp">/node/</span>v12.<span class="hljs-number">18.1</span><span class="hljs-regexp">/lib/</span>node_modules<span class="hljs-regexp">/yarn-audit-fix/</span>node_modules<span class="hljs-regexp">/.bin/</span>npm audit fix --package-lock-only --force --prefix=<span class="hljs-regexp">/home/</span>qwelias<span class="hljs-regexp">/prj/</span>stuff<span class="hljs-regexp">/test-yarn-audit-fix/</span>node_modules<span class="hljs-regexp">/.cache/y</span>arn-audit-fix
+ npm WARN using --force Recommended protections disabled.
+ npm WARN audit Updating lodash to <span class="hljs-number">4.17</span>.<span class="hljs-number">20</span>,which is outside your stated dependency range.
+ npm WARN audit Manual fix required <span class="hljs-keyword">in</span> linked project at .<span class="hljs-regexp">/packages/</span>bar <span class="hljs-keyword">for</span> lodash@&lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>.
+ npm WARN audit <span class="hljs-string">&#x27;cd ./packages/bar&#x27;</span> and run <span class="hljs-string">&#x27;npm audit&#x27;</span> <span class="hljs-keyword">for</span> details.
+ npm WARN audit Manual fix required <span class="hljs-keyword">in</span> linked project at .<span class="hljs-regexp">/packages/</span>foo <span class="hljs-keyword">for</span> lodash@&lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>.
+ npm WARN audit <span class="hljs-string">&#x27;cd ./packages/foo&#x27;</span> and run <span class="hljs-string">&#x27;npm audit&#x27;</span> <span class="hljs-keyword">for</span> details.
+
+ up to date, audited <span class="hljs-number">7</span> packages <span class="hljs-keyword">in</span> <span class="hljs-number">2</span>s
+
+ <span class="hljs-comment"># npm audit report</span>
+
+ lodash  &lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>
+ Severity: high
+ Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">782</span>
+ Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">1065</span>
+ Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">577</span>
+ Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">1523</span>
+ fix available via `npm audit fix --force`
+ Will install lodash@<span class="hljs-number">4.17</span>.<span class="hljs-number">20</span>, which is outside the stated dependency range
+ packages<span class="hljs-regexp">/bar/</span>node_modules/lodash
+ packages<span class="hljs-regexp">/foo/</span>node_modules/lodash
+
+ <span class="hljs-number">1</span> high severity vulnerability
+
+ To address all issues, run:
+   npm audit fix --force
+ {
+   status: <span class="hljs-number">1</span>,
+   signal: null,
+   output: [ null, null, null ],
+   pid: <span class="hljs-number">176019</span>,
+   stdout: null,
+   stderr: null
+ }</code></pre>
 				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
 					<h2>License</h2>
 				</a>
