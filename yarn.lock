@@ -630,10 +630,10 @@
     "@nodelib/fs.scandir" "2.1.3"
     fastq "^1.6.0"
 
-"@npmcli/arborist@1 || 0", "@npmcli/arborist@^0.0.19":
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-0.0.19.tgz#76a5db66bcc6ceb05fe59e59e8733b3e68cd29be"
-  integrity sha512-Y8JY1FnE3HoCZDBTXN1TIqMoGnywV9l0L21cBZQPx+MEAJoF87gfhg56RAwEICUD8wca6X1v4/A2fqPPMGzscw==
+"@npmcli/arborist@1 || 0", "@npmcli/arborist@^0.0.21":
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-0.0.21.tgz#5f1a99791d16efe39c6e9df80f8a88f2a2496b26"
+  integrity sha512-5yZ9xL4yDqqmjaJmql5HQ99lA/zMPZJL9DrmABiHAp22U5hR08e0E4DYBRlnLy/mdjjiopJ+aAm0hIgcD56vdg==
   dependencies:
     "@npmcli/installed-package-contents" "^1.0.5"
     "@npmcli/map-workspaces" "0.0.0-pre.1"
@@ -642,6 +642,7 @@
     bin-links "^2.1.2"
     cacache "^15.0.3"
     common-ancestor-path "^1.0.1"
+    json-parse-even-better-errors "^2.3.1"
     json-stringify-nice "^1.1.1"
     mkdirp-infer-owner "^2.0.0"
     npm-install-checks "^4.0.0"
@@ -654,7 +655,7 @@
     read-package-json-fast "^1.2.1"
     readdir-scoped-modules "^1.1.0"
     semver "^7.1.2"
-    treeverse "^1.0.1"
+    treeverse "^1.0.4"
     walk-up-path "^1.0.0"
 
 "@npmcli/ci-detect@^1.0.0", "@npmcli/ci-detect@^1.2.0":
@@ -675,7 +676,7 @@
 "@npmcli/git@^2.0.1":
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/@npmcli/git/-/git-2.0.4.tgz#725f5e32864f3849420e84baf130e426a707cbb7"
-  integrity "sha1-cl9eMoZPOElCDoS68TDkJqcHy7c= sha512-OJZCmJ9DNn1cz9HPXXsPmUBnqaArot3CGYo63CyajHQk+g87rPXVOJByGsskQJhPsUUEXJcsZ2Q6bWd2jSwnBA=="
+  integrity sha512-OJZCmJ9DNn1cz9HPXXsPmUBnqaArot3CGYo63CyajHQk+g87rPXVOJByGsskQJhPsUUEXJcsZ2Q6bWd2jSwnBA==
   dependencies:
     "@npmcli/promise-spawn" "^1.1.0"
     lru-cache "^6.0.0"
@@ -1175,10 +1176,10 @@
     jest-diff "^25.2.1"
     pretty-format "^25.2.1"
 
-"@types/jest@^26.0.12":
-  version "26.0.12"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.12.tgz#0f20fef9e74f55a312530284e6178f3b3254f501"
-  integrity sha512-vZOFjm562IPb1EmaKxMjdcouxVb1l3NqoUH4XC4tDQ2R/AWde+0HXBUhyfc6L+7vc3mJ393U+5vr3nH2CLSVVg==
+"@types/jest@^26.0.13":
+  version "26.0.13"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-26.0.13.tgz#5a7b9d5312f5dd521a38329c38ee9d3802a0b85e"
+  integrity sha512-sCzjKow4z9LILc6DhBvn5AkIfmQzDZkgtVVKmGwVrs5tuid38ws281D4l+7x1kP487+FlKDh5kfMZ8WSPAdmdA==
   dependencies:
     jest-diff "^25.2.1"
     pretty-format "^25.2.1"
@@ -1222,10 +1223,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.28.tgz#0e36d718a29355ee51cec83b42d921299200f6d9"
   integrity sha512-dzjES1Egb4c1a89C7lKwQh8pwjYmlOAG9dW1pBgxEk57tMrLnssOfEthz8kdkNaBd7lIqQx7APm5+mZ619IiCQ==
 
-"@types/node@^14.6.2":
-  version "14.6.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.6.2.tgz#264b44c5a28dfa80198fc2f7b6d3c8a054b9491f"
-  integrity sha512-onlIwbaeqvZyniGPfdw/TEhKIh79pz66L1q06WUQqJLnAb6wbjvOtepLYTGHTqzdXgBYIE3ZdmqHDGsRsbBz7A==
+"@types/node@^14.6.4":
+  version "14.6.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.6.4.tgz#a145cc0bb14ef9c4777361b7bbafa5cf8e3acb5a"
+  integrity sha512-Wk7nG1JSaMfMpoMJDKUsWYugliB2Vy55pdjLpmLixeyMi7HizW2I/9QoxsPCkXl3dO+ZOVqPumKaDUv5zJu2uQ==
 
 "@types/node@^8.0.0":
   version "8.10.62"
@@ -4969,10 +4970,10 @@ json-parse-better-errors@^1.0.0, json-parse-better-errors@^1.0.1, json-parse-bet
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
   integrity sha512-mrqyZKfX5EhL7hvqcV6WG1yYjnjeuYDzDhhcAAUrq8Po85NBQBJP+ZDUT75qZQ98IkUoBqdkExkukOU7Ts2wrw==
 
-json-parse-even-better-errors@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.0.tgz#371873c5ffa44304a6ba12419bcfa95f404ae081"
-  integrity sha512-o3aP+RsWDJZayj1SbHNQAI8x0v3T3SKiGoZlNYfbUP1S3omJQ6i9CnqADqkSPaOAxwua4/1YWx5CM7oiChJt2Q==
+json-parse-even-better-errors@^2.3.0, json-parse-even-better-errors@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/json-parse-even-better-errors/-/json-parse-even-better-errors-2.3.1.tgz#7c47805a94319928e05777405dc12e1f7a4ee02d"
+  integrity sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==
 
 json-schema-traverse@^0.4.1:
   version "0.4.1"
@@ -6106,10 +6107,10 @@ npm-audit-report@^1.3.3:
     cli-table3 "^0.5.0"
     console-control-strings "^1.1.0"
 
-npm-audit-report@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/npm-audit-report/-/npm-audit-report-2.1.3.tgz#8a08c5621515522b5f9853b7a0e3410cc6baf0f9"
-  integrity sha512-X1WrROU3xvHhxVJY5yIcpDHevnOE/IGg68igib/DPdO8CIPVPr0aeG4Hsn3mQxNvSUGJ02sy53G1uLuCUaN0MQ==
+npm-audit-report@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/npm-audit-report/-/npm-audit-report-2.1.4.tgz#b14c4625131fb7bcacc4b1c83842af1f58c92c98"
+  integrity sha512-Tz7rnfskSdZ0msTzt2mENC/B+H2QI8u0jN0ck7o3zDsQYIQrek/l3MjEc+CARer+64LsVTU6ZIqNuh0X55QPhw==
   dependencies:
     chalk "^4.0.0"
 
@@ -6281,12 +6282,12 @@ npm-user-validate@~1.0.0:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.0.tgz#8ceca0f5cea04d4e93519ef72d0557a75122e951"
   integrity sha1-jOyg9c6gTU6TUZ73LQVXp1Ei6VE=
 
-npm@7.0.0-beta.8:
-  version "7.0.0-beta.8"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-beta.8.tgz#d1b334f6d662ddf5cc5186001443ec412c41222f"
-  integrity sha512-BhHML4TMNt6JpVn5yOuyR8sF0a/wgiydrqvdQ4TvIaf5M9Gl3Zb+wjDHp9bFFIxaLbqwLvJSsoEvkqgXEYGS2A==
+npm@7.0.0-beta.9:
+  version "7.0.0-beta.9"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-beta.9.tgz#339ef22fb276fb0dd1fb76cc2f2e03a6136e433e"
+  integrity sha512-gFUTuvSAtFpBzUhutymVVnIOn0kBgSbj+5ietpgkgj+vaJ7GjEO+hoZEtn/K6768Vqzaz0zqWT4x4s64+oFKsg==
   dependencies:
-    "@npmcli/arborist" "^0.0.19"
+    "@npmcli/arborist" "^0.0.21"
     "@npmcli/ci-detect" "^1.2.0"
     "@npmcli/config" "^1.1.7"
     "@npmcli/run-script" "^1.5.0"
@@ -6331,7 +6332,7 @@ npm@7.0.0-beta.8:
     mkdirp-infer-owner "^2.0.0"
     ms "^2.1.2"
     nopt "^5.0.0"
-    npm-audit-report "^2.1.3"
+    npm-audit-report "^2.1.4"
     npm-package-arg "^8.0.1"
     npm-pick-manifest "^6.1.0"
     npm-profile "^5.0.1"
@@ -6339,7 +6340,7 @@ npm@7.0.0-beta.8:
     npm-user-validate "~1.0.0"
     npmlog "~4.1.2"
     once "~1.4.0"
-    opener "^1.5.1"
+    opener "^1.5.2"
     pacote "^11.1.10"
     parse-conflict-json "^1.1.1"
     qrcode-terminal "^0.12.0"
@@ -6580,7 +6581,7 @@ onetime@^5.1.0:
   dependencies:
     mimic-fn "^2.1.0"
 
-opener@^1.5.1:
+opener@^1.5.1, opener@^1.5.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
@@ -8374,10 +8375,10 @@ terminal-link@^2.0.0:
     ansi-escapes "^4.2.1"
     supports-hyperlinks "^2.0.0"
 
-terser@^5.2.1:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.2.1.tgz#40b971b8d28b4fe98c9e8c0d073ab48e7bb96cd8"
-  integrity sha512-/AOtjRtAMNGO0fIF6m8HfcvXTw/2AKpsOzDn36tA5RfhRdeXyb4RvHxJ5Pah7iL6dFkLk+gOnCaNHGwJPl6TrQ==
+terser@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-5.3.0.tgz#c481f4afecdcc182d5e2bdd2ff2dc61555161e81"
+  integrity sha512-XTT3D3AwxC54KywJijmY2mxZ8nJiEjBHVYzq8l9OaYuRFWeQNBwvipuzzYEP4e+/AVcd1hqG/CqgsdIRyT45Fg==
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"
@@ -8526,7 +8527,7 @@ traverse@~0.6.6:
   resolved "https://registry.yarnpkg.com/traverse/-/traverse-0.6.6.tgz#cbdf560fd7b9af632502fed40f918c157ea97137"
   integrity sha1-y99WD9e5r2MlAv7UD5GMFX6pcTc=
 
-treeverse@^1.0.1:
+treeverse@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/treeverse/-/treeverse-1.0.4.tgz#a6b0ebf98a1bca6846ddc7ecbc900df08cb9cd5f"
   integrity sha512-whw60l7r+8ZU8Tu/Uc2yxtc4ZTZbR/PF3u1IPNKGQ6p8EICLb3Z2lAgoqw9bqYd8IkgnsaOcLzYHFckjqNsf0g==
