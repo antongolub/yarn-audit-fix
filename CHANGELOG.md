@@ -1,3 +1,10 @@
+## [2.2.4](https://github.com/antongolub/yarn-audit-fix/compare/v2.2.3...v2.2.4) (2020-09-08)
+
+
+### Performance Improvements
+
+* **deps:** up npm to 7.0.0-beta.10 ([84ff0a8](https://github.com/antongolub/yarn-audit-fix/commit/84ff0a8fd568fba85a1336c436a1efa1eab57b8f))
+
 ## [2.2.3](https://github.com/antongolub/yarn-audit-fix/compare/v2.2.2...v2.2.3) (2020-09-04)
 
 
