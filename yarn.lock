@@ -1007,7 +1007,7 @@
 "@semantic-release/npm@^7.0.0", "@semantic-release/npm@^7.0.6":
   version "7.0.6"
   resolved "https://registry.npmjs.org/@semantic-release/npm/-/npm-7.0.6.tgz"
-  integrity "sha1-EwG9V9JG6uBI1xBKc1Rnuwgp89g= sha512-F4judxdeLe8f7+vDva1TkqNc5Tb2tcltZYW0tLtvP2Xt7CD/gGiz7UxAWEOPsXBvIqAP+uTidvGLPl9U3/uRoQ=="
+  integrity sha512-F4judxdeLe8f7+vDva1TkqNc5Tb2tcltZYW0tLtvP2Xt7CD/gGiz7UxAWEOPsXBvIqAP+uTidvGLPl9U3/uRoQ==
   dependencies:
     "@semantic-release/error" "^2.2.0"
     aggregate-error "^3.0.0"
@@ -6304,10 +6304,10 @@ npm-user-validate@~1.0.0:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.0.tgz#8ceca0f5cea04d4e93519ef72d0557a75122e951"
   integrity sha1-jOyg9c6gTU6TUZ73LQVXp1Ei6VE=
 
-npm@7.0.0-beta.9:
-  version "7.0.0-beta.9"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-beta.9.tgz#339ef22fb276fb0dd1fb76cc2f2e03a6136e433e"
-  integrity sha512-gFUTuvSAtFpBzUhutymVVnIOn0kBgSbj+5ietpgkgj+vaJ7GjEO+hoZEtn/K6768Vqzaz0zqWT4x4s64+oFKsg==
+npm@7.0.0-beta.10:
+  version "7.0.0-beta.10"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-beta.10.tgz#91aba9b8895d205dc4f3a14788232ccf5bd6e162"
+  integrity sha512-yf0cPxtKBNtU3FRXvupjdaXu61FJGEda89yMgKVD9+JrSfIyIkzwGNXlBqZ70qUMT7YHcJ6bmexW5HpnXsZkeQ==
   dependencies:
     "@npmcli/arborist" "^0.0.21"
     "@npmcli/ci-detect" "^1.2.0"
