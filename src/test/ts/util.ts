@@ -4,6 +4,7 @@ import {
   getSymlinkType,
   parseFlags,
   getNpm,
+  isWindows,
 } from '../../main/ts/util'
 
 describe('util', () => {
@@ -54,18 +55,18 @@ describe('util', () => {
 
   describe('#getNpm', () => {
     it('properly resolves npm ref', () => {
-      const localNpm = resolve(__dirname, '../../../node_modules/.bin/npm')
+      const cmd = isWindows() ? 'npm.cmd' : 'npm'
+      const localNpm = resolve(__dirname, '../../../node_modules/.bin', cmd)
       const cases: [boolean, boolean, boolean, string][] = [
         [true, true, false, localNpm],
-        [true, true, true, localNpm + '.cmd'],
         [true, false, false, 'npm'],
         [false, true, false, 'npm'],
-        [false, false, true, 'npm.cmd'],
       ]
 
       cases.forEach(([requireNpm7, allowNpm7, isWindows, result]) => {
         expect(getNpm(requireNpm7, allowNpm7, isWindows)).toBe(result)
       })
+
     })
   })
 })

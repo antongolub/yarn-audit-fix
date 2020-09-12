@@ -1,10 +1,11 @@
+import fs, {FsSymlinkType, readFileSync} from 'fs-extra'
 import cp, {StdioOptions} from 'child_process'
 import chalk from 'chalk'
-import {FsSymlinkType, readFileSync} from 'fs-extra'
 import minimist from 'minimist'
 import {resolve} from 'path'
 import glob, {Options as GlobOptions} from 'bash-glob'
 import {sync as pkgDir} from 'pkg-dir'
+import {sync as findUp} from 'find-up'
 
 export const invoke = (cmd: string, args: string[], cwd: string, silent= false, inherit = true) => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
@@ -43,7 +44,7 @@ export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): 
     return memo
   }, [])
 
-const isWindows = () => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
+export const isWindows = () => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
 export const getSymlinkType = (type?: string): FsSymlinkType =>
   type === 'junction' && isWindows()
@@ -53,11 +54,21 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = () => isWindows() ? 'yarn.cmd' : 'yarn'
 
+export const getClosestNpm = (cmd: string): string => {
+  const pkgRoot = pkgDir(__dirname) + ''
+
+  return findUp(dir => {
+    const ref = resolve(dir, 'node_modules', '.bin', cmd)
+
+    return fs.existsSync(ref) ? ref : undefined
+  }, {cwd: pkgRoot}) + ''
+}
+
 export const getNpm = (requireNpmBeta?: boolean, allowNpmBeta?: boolean, isWin = isWindows()) => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
 
   return requireNpmBeta && allowNpmBeta
-    ? resolve(pkgDir(__dirname) + '', 'node_modules/.bin', cmd)
+    ? getClosestNpm(cmd)
     : cmd
 }
 
