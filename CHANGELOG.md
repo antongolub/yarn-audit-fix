@@ -1,3 +1,20 @@
+# [3.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v2.3.0...v3.0.0) (2020-09-12)
+
+
+### Bug Fixes
+
+* fix npm resolving when launched through npx ([e1339e2](https://github.com/antongolub/yarn-audit-fix/commit/e1339e2eee157dbe3765fc5ad68b960316dc91a4)), closes [#32](https://github.com/antongolub/yarn-audit-fix/issues/32)
+
+
+### Features
+
+* print runtime digest ([631897e](https://github.com/antongolub/yarn-audit-fix/commit/631897e92fff8bca3dfece15a768d13e2648e1f4))
+
+
+### BREAKING CHANGES
+
+* --inherit-npm flag was replaced with --npm-v7
+
 # [2.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v2.2.4...v2.3.0) (2020-09-12)
 
 
