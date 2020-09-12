@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v2.2.4...v2.3.0) (2020-09-12)
+
+
+### Features
+
+* add debug point ([53b335b](https://github.com/antongolub/yarn-audit-fix/commit/53b335b8d9f97fc6a900d249daa290d4a35c07e8))
+
 ## [2.2.4](https://github.com/antongolub/yarn-audit-fix/compare/v2.2.3...v2.2.4) (2020-09-08)
 
 
