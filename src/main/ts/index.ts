@@ -15,7 +15,7 @@ type TStage = [string, ...TCallback[]]
 /**
  * Print runtime context digest.
  */
-const printRuntimeDigest: TCallback = ({temp, flags, manifest}) => {
+const printRuntimeDigest: TCallback = ({temp, cwd, flags, manifest}) => {
   if (flags.silent) {
     return
   }
@@ -32,6 +32,8 @@ const printRuntimeDigest: TCallback = ({temp, flags, manifest}) => {
     npmVersion,
     nodeVersion,
     yarnAuditFixVersion,
+    temp,
+    cwd,
   }, null, 2).replace(/[":,{}]/g, ''))
 }
 
@@ -175,10 +177,6 @@ export const run = async(flags: Record<string, any> = {}) => {
     temp: findCacheDir({name: 'yarn-audit-fix', create: true, cwd}) + '',
     flags,
     manifest,
-  }
-
-  if (flags.verbose) {
-    console.log('context=', ctx)
   }
 
   for (const [description, ...steps] of stages) {
