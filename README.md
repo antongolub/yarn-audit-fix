@@ -104,7 +104,6 @@ A bit annoying, but it's easy to handle in several ways.
 ### --force did not force the update
 The problem only concerns repositories with `workspaces` (monorepos). 
 `npm audit fix --force` throws 1 status code and suggests running `npm audit fix --force`. This quite ironic behaviour is exactly what **npm** (arborist) [does now](https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373). 
-So you may, as the message says, to manually change the dependency versions. **npm@7** is still in beta, perhaps this logic will be changed later. 
 ```
 $$ yarn-audit-fix --force          
  Preparing temp assets...
@@ -126,8 +125,6 @@ $$ yarn-audit-fix --force
  Severity: high
  Prototype Pollution - https://npmjs.com/advisories/782
  Prototype Pollution - https://npmjs.com/advisories/1065
- Prototype Pollution - https://npmjs.com/advisories/577
- Prototype Pollution - https://npmjs.com/advisories/1523
  fix available via `npm audit fix --force`
  Will install lodash@4.17.20, which is outside the stated dependency range
  packages/bar/node_modules/lodash
@@ -145,6 +142,11 @@ $$ yarn-audit-fix --force
    stdout: null,
    stderr: null
  }
+```
+So you need, as the message says, to manually change the dependency versions. **npm@7** is still in beta, perhaps this logic will be changed later.
+You can also try to combine calls with different npm versions. In some cases **npm@6** works better.
+```shell script
+npx yarn-audit-fix && npx yarn-audit-fix --npm-v7
 ```
 
 ## License
