@@ -79,6 +79,11 @@ const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
     `--prefix=${temp}`,
   ]
 
+  if (flags.verbose) {
+    console.log('process.argv=', process.argv)
+    invoke(npm, ['--version'], temp, flags.silent)
+  }
+
   invoke(npm, auditArgs, temp, flags.silent)
 }
 
