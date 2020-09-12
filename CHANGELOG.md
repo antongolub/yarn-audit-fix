@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v3.0.0...v3.0.1) (2020-09-12)
+
+
+### Bug Fixes
+
+* fix npm finder ([32b7778](https://github.com/antongolub/yarn-audit-fix/commit/32b77782237430c1d36a1d4c6fd552626690304e))
+
 # [3.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v2.3.0...v3.0.0) (2020-09-12)
 
 
