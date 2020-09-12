@@ -4,12 +4,36 @@ import {join} from 'path'
 import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
 import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn, getNpm, readJson} from './util'
+import {sync as pkgDir} from 'pkg-dir'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any>, manifest: Record<string, any>}
 
 type TCallback = (cxt: TContext) => void | Promise<void>
 
 type TStage = [string, ...TCallback[]]
+
+/**
+ * Print runtime context digest.
+ */
+const printRuntimeDigest: TCallback = ({temp, flags, manifest}) => {
+  if (flags.silent) {
+    return
+  }
+
+  const isMonorepo = !!manifest.workspaces
+  const npmPath = getNpm(isMonorepo, flags['npm-v7'])
+  const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
+  const nodeVersion = invoke('node', ['--version'], temp, true, false)
+  const yarnAuditFixVersion = readJson(join(pkgDir(__dirname) + '', 'package.json')).version
+
+  console.log(JSON.stringify({
+    isMonorepo,
+    npmPath,
+    npmVersion,
+    nodeVersion,
+    yarnAuditFixVersion,
+  }, null, 2).replace(/[":,{}]/g, ''))
+}
 
 /**
  * Prepare temp assets.
@@ -79,7 +103,6 @@ const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
     `--prefix=${temp}`,
   ]
 
-  invoke(npm, ['--version'], temp, flags.silent)
   invoke(npm, auditArgs, temp, flags.silent)
 }
 
@@ -112,6 +135,10 @@ const clear: TCallback = ({temp}) =>
   fs.emptyDirSync(temp)
 
 export const stages: TStage[] = [
+  [
+    'Runtime digest',
+    printRuntimeDigest,
+  ],
   [
     'Preparing temp assets...',
     clear,

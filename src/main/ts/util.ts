@@ -1,4 +1,4 @@
-import cp from 'child_process'
+import cp, {StdioOptions} from 'child_process'
 import chalk from 'chalk'
 import {FsSymlinkType, readFileSync} from 'fs-extra'
 import minimist from 'minimist'
@@ -6,14 +6,17 @@ import {resolve} from 'path'
 import glob, {Options as GlobOptions} from 'bash-glob'
 import {sync as pkgDir} from 'pkg-dir'
 
-export const invoke = (cmd: string, args: string[], cwd: string, silent= false) => {
+export const invoke = (cmd: string, args: string[], cwd: string, silent= false, inherit = true) => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
 
-  const result = cp.spawnSync(cmd, args, {cwd, stdio: ['inherit', 'inherit', 'inherit']})
+  const stdio: StdioOptions = inherit ? ['inherit', 'inherit', 'inherit'] : [null, null, null]
+  const result = cp.spawnSync(cmd, args, {cwd, stdio})
 
   if (result.error || result.status) {
     throw result
   }
+
+  return result.stdout?.toString().trim()
 }
 
 export const parseFlags = (argv: string[]) => minimist(argv, {'--': true})
