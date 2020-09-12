@@ -165,9 +165,9 @@ success Already up-to-date.
 							<td>low</td>
 						</tr>
 						<tr>
-							<td><code>--inherit-npm</code></td>
-							<td>Use <code>npm</code> version from the environment</td>
-							<td></td>
+							<td><code>--npm-v7</code></td>
+							<td>Use the latest <code>npm@7.x.x-beta.x</code> version. Applicable to monorepos only</td>
+							<td>false</td>
 						</tr>
 				</tbody></table>
 				<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
@@ -209,30 +209,27 @@ success Already up-to-date.
 					<h3>--force did not force the update</h3>
 				</a>
 				<p>The problem only concerns repositories with <code>workspaces</code> (monorepos).
-					<code>npm audit fix --force</code> throws 1 status code and suggests running <code>npm audit fix --force</code>. This quite ironic behaviour is exactly what <strong>npm</strong> (arborist) <a href="https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373">does now</a>.
-				So you need, as the message says, to manually change the dependency versions. <strong>npm@7</strong> is still in beta, perhaps this logic will be changed later. </p>
+				<code>npm audit fix --force</code> throws 1 status code and suggests running <code>npm audit fix --force</code>. This quite ironic behaviour is exactly what <strong>npm</strong> (arborist) <a href="https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373">does now</a>. </p>
 				<pre><code>$$ yarn-audit-fix --force
  Preparing temp assets...
- Generating package-lock.json from yarn.lock...
+ Generating <span class="hljs-keyword">package</span>-lock.json <span class="hljs-keyword">from</span> yarn.lock...
  Applying npm audit fix...
- invoke <span class="hljs-regexp">/home/</span>qwelias<span class="hljs-regexp">/.nvm/</span>versions<span class="hljs-regexp">/node/</span>v12.<span class="hljs-number">18.1</span><span class="hljs-regexp">/lib/</span>node_modules<span class="hljs-regexp">/yarn-audit-fix/</span>node_modules<span class="hljs-regexp">/.bin/</span>npm audit fix --package-lock-only --force --prefix=<span class="hljs-regexp">/home/</span>qwelias<span class="hljs-regexp">/prj/</span>stuff<span class="hljs-regexp">/test-yarn-audit-fix/</span>node_modules<span class="hljs-regexp">/.cache/y</span>arn-audit-fix
+ invoke <span class="hljs-regexp">/home/</span>qwelias<span class="hljs-regexp">/.nvm/</span>versions<span class="hljs-regexp">/node/</span>v12.<span class="hljs-number">18.1</span><span class="hljs-regexp">/lib/</span>node_modules<span class="hljs-regexp">/yarn-audit-fix/</span>node_modules<span class="hljs-regexp">/.bin/</span>npm audit fix --<span class="hljs-keyword">package</span>-lock-only --force --prefix=<span class="hljs-regexp">/home/</span>qwelias<span class="hljs-regexp">/prj/</span>stuff<span class="hljs-regexp">/test-yarn-audit-fix/</span>node_modules<span class="hljs-regexp">/.cache/y</span>arn-audit-fix
  npm WARN using --force Recommended protections disabled.
  npm WARN audit Updating lodash to <span class="hljs-number">4.17</span>.<span class="hljs-number">20</span>,which is outside your stated dependency range.
- npm WARN audit Manual fix required <span class="hljs-keyword">in</span> linked project at .<span class="hljs-regexp">/packages/</span>bar <span class="hljs-keyword">for</span> lodash@&lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>.
+ npm WARN audit Manual fix required in linked <span class="hljs-keyword">project</span> at .<span class="hljs-regexp">/packages/</span>bar <span class="hljs-keyword">for</span> lodash@&lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>.
  npm WARN audit <span class="hljs-string">&#x27;cd ./packages/bar&#x27;</span> and run <span class="hljs-string">&#x27;npm audit&#x27;</span> <span class="hljs-keyword">for</span> details.
- npm WARN audit Manual fix required <span class="hljs-keyword">in</span> linked project at .<span class="hljs-regexp">/packages/</span>foo <span class="hljs-keyword">for</span> lodash@&lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>.
+ npm WARN audit Manual fix required in linked <span class="hljs-keyword">project</span> at .<span class="hljs-regexp">/packages/</span>foo <span class="hljs-keyword">for</span> lodash@&lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>.
  npm WARN audit <span class="hljs-string">&#x27;cd ./packages/foo&#x27;</span> and run <span class="hljs-string">&#x27;npm audit&#x27;</span> <span class="hljs-keyword">for</span> details.
 
- up to date, audited <span class="hljs-number">7</span> packages <span class="hljs-keyword">in</span> <span class="hljs-number">2</span>s
+ up to date, audited <span class="hljs-number">7</span> packages in <span class="hljs-number">2</span>s
 
- <span class="hljs-comment"># npm audit report</span>
+ # npm audit report
 
  lodash  &lt;=<span class="hljs-number">4.17</span>.<span class="hljs-number">18</span>
  Severity: high
- Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">782</span>
- Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">1065</span>
- Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">577</span>
- Prototype Pollution - https:<span class="hljs-regexp">//</span>npmjs.com<span class="hljs-regexp">/advisories/</span><span class="hljs-number">1523</span>
+ Prototype Pollution - https:<span class="hljs-comment">//npmjs.com/advisories/782</span>
+ Prototype Pollution - https:<span class="hljs-comment">//npmjs.com/advisories/1065</span>
  fix available via `npm audit fix --force`
  Will install lodash@<span class="hljs-number">4.17</span>.<span class="hljs-number">20</span>, which is outside the stated dependency range
  packages<span class="hljs-regexp">/bar/</span>node_modules/lodash
@@ -244,12 +241,15 @@ success Already up-to-date.
    npm audit fix --force
  {
    status: <span class="hljs-number">1</span>,
-   signal: null,
-   output: [ null, null, null ],
+   signal: <span class="hljs-keyword">null</span>,
+   output: [ <span class="hljs-keyword">null</span>, <span class="hljs-keyword">null</span>, <span class="hljs-keyword">null</span> ],
    pid: <span class="hljs-number">176019</span>,
-   stdout: null,
-   stderr: null
+   stdout: <span class="hljs-keyword">null</span>,
+   stderr: <span class="hljs-keyword">null</span>
  }</code></pre>
+				<p>So you need, as the message says, to manually change the dependency versions. <strong>npm@7</strong> is still in beta, perhaps this logic will be changed later.
+				You can also try to combine calls with different npm versions. In some cases <strong>npm@6</strong> works better.</p>
+				<pre><code class="language-shell">npx yarn-audit-fix &amp;&amp; npx yarn-audit-fix --npm-v7</code></pre>
 				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
 					<h2>License</h2>
 				</a>
@@ -263,7 +263,7 @@ success Already up-to-date.
 						<a href="globals.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-module tsd-is-not-exported">
-						<a href="modules/reflection-38.html">&lt;em&gt;<wbr>Module&lt;/em&gt;</a>
+						<a href="modules/reflection-39.html">&lt;em&gt;<wbr>Module&lt;/em&gt;</a>
 					</li>
 				</ul>
 			</nav>
