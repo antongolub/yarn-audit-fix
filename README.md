@@ -70,7 +70,7 @@ success Already up-to-date.
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
 |`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
-|`--inherit-npm` | Use `npm` version from the environment |
+|`--npm-v7` | Use the latest `npm@7.x.x-beta.x` version. Applicable to monorepos only | false 
 
 ## Troubleshooting
 ### enoent: no such file or directory
@@ -104,7 +104,7 @@ A bit annoying, but it's easy to handle in several ways.
 ### --force did not force the update
 The problem only concerns repositories with `workspaces` (monorepos). 
 `npm audit fix --force` throws 1 status code and suggests running `npm audit fix --force`. This quite ironic behaviour is exactly what **npm** (arborist) [does now](https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373). 
-So you need, as the message says, to manually change the dependency versions. **npm@7** is still in beta, perhaps this logic will be changed later. 
+So you may, as the message says, to manually change the dependency versions. **npm@7** is still in beta, perhaps this logic will be changed later. 
 ```
 $$ yarn-audit-fix --force          
  Preparing temp assets...
