@@ -4,6 +4,7 @@ import {FsSymlinkType, readFileSync} from 'fs-extra'
 import minimist from 'minimist'
 import {resolve} from 'path'
 import glob, {Options as GlobOptions} from 'bash-glob'
+import {sync as pkgDir} from 'pkg-dir'
 
 export const invoke = (cmd: string, args: string[], cwd: string, silent= false) => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
@@ -49,11 +50,11 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = () => isWindows() ? 'yarn.cmd' : 'yarn'
 
-export const getNpm = (requireNpmBeta?: boolean, inheritNpm?: boolean, isWin = isWindows()) => {
+export const getNpm = (requireNpmBeta?: boolean, allowNpmBeta?: boolean, isWin = isWindows()) => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
 
-  return requireNpmBeta && !inheritNpm
-    ? resolve(require.resolve('npm'), '../../../.bin', cmd)
+  return requireNpmBeta && allowNpmBeta
+    ? resolve(pkgDir(__dirname) + '', 'node_modules/.bin', cmd)
     : cmd
 }
 

@@ -59,7 +59,7 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  */
 const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
   const requireNpmBeta = !!manifest.workspaces
-  const npm = getNpm(requireNpmBeta, flags['inherit-npm'])
+  const npm = getNpm(requireNpmBeta, flags['npm-v7'])
   const defaultFlags = {
     'package-lock-only': true,
   }
@@ -79,11 +79,7 @@ const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
     `--prefix=${temp}`,
   ]
 
-  if (flags.verbose) {
-    console.log('process.argv=', process.argv)
-    invoke(npm, ['--version'], temp, flags.silent)
-  }
-
+  invoke(npm, ['--version'], temp, flags.silent)
   invoke(npm, auditArgs, temp, flags.silent)
 }
 
@@ -149,9 +145,13 @@ export const run = async(flags: Record<string, any> = {}) => {
   const manifest = readJson(join(cwd, 'package.json'))
   const ctx = {
     cwd,
-    temp: findCacheDir({name: 'yarn-audit-fix', create: true}) + '',
+    temp: findCacheDir({name: 'yarn-audit-fix', create: true, cwd}) + '',
     flags,
     manifest,
+  }
+
+  if (flags.verbose) {
+    console.log('context=', ctx)
   }
 
   for (const [description, ...steps] of stages) {

@@ -60,7 +60,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "synp": "^1.8.2",
     "@types/bash-glob": "^2.0.0",
     "@types/find-cache-dir": "^3.2.0",
     "@types/fs-extra": "^9.0.1",
@@ -71,6 +70,8 @@
     "fs-extra": "^9.0.1",
     "minimist": "^1.2.5",
     "npm": "7.0.0-beta.10",
+    "pkg-dir": "^4.2.0",
+    "synp": "^1.8.2",
     "tslib": "^2.0.1"
   },
   "devDependencies": {
