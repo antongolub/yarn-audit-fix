@@ -12,27 +12,30 @@ env:
   - YARN_GPG=no
 
 before_script:
-  - if [ "$TRAVIS_OS_NAME" = "linux" && "$TRAVIS_NODE_VERSION" = "12"]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" && "$TRAVIS_NODE_VERSION" = "12" ]; then chmod +x ./cc-test-reporter ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" && "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter before-build ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux"] && ["$TRAVIS_NODE_VERSION" = "12"]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux"] && ["$TRAVIS_NODE_VERSION" = "12" ]; then chmod +x ./cc-test-reporter ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux"] && ["$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter before-build ; fi
 
 after_script:
-  - if [ "$TRAVIS_OS_NAME" = "linux" && "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" && "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux"] && ["$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux"] && ["$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
 
 install:
-  - yarn cache clean
   - yarn
 
 script:
   - yarn build
   - yarn test:report
 
-deploy:
-  provider: script
-  script:
-    - yarn release
-  skip_cleanup: true
-  on:
-    branch: master
-    condition: $TRAVIS_OS_NAME = linux && $TRAVIS_NODE_VERSION = 12
+jobs:
+  include:
+    - stage: release
+      script: skip
+      deploy:
+        if: branch = master
+        provider: script
+        script:
+          - yarn release
+        skip_cleanup: true
+        on:
+          branch: master
