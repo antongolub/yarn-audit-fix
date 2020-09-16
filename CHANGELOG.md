@@ -1,3 +1,10 @@
+## [3.0.2](https://github.com/antongolub/yarn-audit-fix/compare/v3.0.1...v3.0.2) (2020-09-16)
+
+
+### Bug Fixes
+
+* **deps:** update dependency npm to v7.0.0-beta.11 ([761b3f1](https://github.com/antongolub/yarn-audit-fix/commit/761b3f122be7897170842fd27b7224d6154b3d35))
+
 ## [3.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v3.0.0...v3.0.1) (2020-09-12)
 
 
