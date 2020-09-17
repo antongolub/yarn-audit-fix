@@ -3,33 +3,41 @@ language: node_js
 
 jobs:
   include:
-    - stage: build
+    - &build
+      os: linux
+      stage: build
       node_js: 14
       install: yarn
       script: yarn build
       # https://docs.travis-ci.com/user/using-workspaces/
       workspaces:
         create:
-          name: shared
+          name: linux-shared
           paths:
             - node_modules
             - target
             - flow-typed
             - typings
             - docs
+    - <<: *build
+      os: windows
+      # https://travis-ci.community/t/timeout-after-build-finished-and-succeeded/1336/2
+      env: YARN_GPG=no
+      workspaces:
+        create:
+          name: win-shared
+          paths:
+            - node_modules
+            - target
 
     - &test
       stage: test
       os: linux
       node_js: 12
-      # https://travis-ci.community/t/timeout-after-build-finished-and-succeeded/1336/2
-      env:
-        - YARN_GPG=no
-      workspaces:
-        use: shared
-
       install: skip
-      script: yarn test:report
+      script: yarn test
+      workspaces:
+        use: linux-shared
     - <<: *test
       os: linux
       node_js: 14
@@ -39,22 +47,25 @@ jobs:
         - ./cc-test-reporter before-build
       script:
         - yarn test:report
-
       after_script:
         - ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
     - <<: *test
       os: windows
-      install: yarn
+      env: YARN_GPG=no
+      workspaces:
+        use: win-shared
     - <<: *test
       os: windows
-      install: yarn
+      env: YARN_GPG=no
       node_js: 14
+      workspaces:
+        use: win-shared
 
     - stage: release
       node_js: 14
       workspaces:
-        use: shared
+        use: linux-shared
+      install: skip
       script:
         - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then yarn release ; fi
-      install: skip
