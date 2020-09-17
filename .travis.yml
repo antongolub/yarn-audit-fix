@@ -11,32 +11,39 @@ node_js:
 env:
   - YARN_GPG=no
 
+install:
+  - yarn
+
 before_script:
-  - if [ "$TRAVIS_OS_NAME" = "linux"] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux"] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then chmod +x ./cc-test-reporter ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux"] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter before-build ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then chmod +x ./cc-test-reporter ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter before-build ; fi
 
 script:
   - yarn build
   - yarn test:report
 
 after_script:
-  - if [ "$TRAVIS_OS_NAME" = "linux"] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux"] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info ; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
 
-install:
-  - yarn
+workspaces:
+  create:
+    name: $TRAVIS_OS_NAME$TRAVIS_NODE_VERSION
+    paths:
+      - node_modules
+      - target
 
 jobs:
   include:
     - stage: release
-      script: skip
       node_js: 12
-      deploy:
-        provider: script
-        script:
-          - yarn release
-        cleanup: false
-        skip_cleanup: true
-        on:
-          branch: master
+      on:
+        branch: master
+      workspaces:
+        use: $TRAVIS_OS_NAME$TRAVIS_NODE_VERSION
+      before_script: skip
+      script:
+        - yarn release
+      after_script: skip
+      install: skip
