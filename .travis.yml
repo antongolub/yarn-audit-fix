@@ -1,39 +1,12 @@
 language: node_js
 
-os:
-  - linux
-  - windows
-node_js:
-  - 12
-  - 14
-# https://travis-ci.community/t/timeout-after-build-finished-and-succeeded/1336/2
-env:
-  - YARN_GPG=no
-workspaces:
-  use: shared
-
-install: skip
-
-before_script:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then chmod +x ./cc-test-reporter ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter before-build ; fi
-
-script:
-  - yarn test:report
-
-after_script:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info ; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
 
 jobs:
   include:
     - stage: build
       node_js: 14
-      install:
-        - yarn
-      script:
-        - yarn build
+      install: yarn
+      script: yarn build
       # https://docs.travis-ci.com/user/using-workspaces/
       workspaces:
         create:
@@ -44,13 +17,44 @@ jobs:
             - flow-typed
             - typings
             - docs
-    - stage: test
+
+    - &test
+      stage: test
+      os: linux
+      node_js: 12
+      # https://travis-ci.community/t/timeout-after-build-finished-and-succeeded/1336/2
+      env:
+        - YARN_GPG=no
+      workspaces:
+        use: shared
+
+      install: skip
+      script: yarn test:report
+    - <<: *test
+      os: linux
+      node_js: 14
+      before_script:
+        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        - chmod +x ./cc-test-reporter
+        - ./cc-test-reporter before-build
+      script:
+        - yarn test:report
+
+      after_script:
+        - ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info
+        - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    - <<: *test
+      os: windows
+      install: yarn
+    - <<: *test
+      os: windows
+      install: yarn
+      node_js: 14
+
     - stage: release
       node_js: 14
       workspaces:
         use: shared
-      before_script: skip
       script:
         - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then yarn release ; fi
-      after_script: skip
       install: skip
