@@ -33,6 +33,9 @@ workspaces:
     paths:
       - node_modules
       - target
+      - flow-typed
+      - typings
+      - docs
 
 jobs:
   include:
