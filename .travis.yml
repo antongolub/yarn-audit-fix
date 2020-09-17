@@ -1,4 +1,5 @@
 language: node_js
+edge: true
 
 os:
   - linux
@@ -27,9 +28,10 @@ after_script:
   - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info ; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$TRAVIS_NODE_VERSION" = "12" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT ; fi
 
+# https://docs.travis-ci.com/user/using-workspaces/
 workspaces:
   create:
-    name: $TRAVIS_OS_NAME$TRAVIS_NODE_VERSION
+    name: node$TRAVIS_NODE_VERSION$TRAVIS_OS_NAME
     paths:
       - node_modules
       - target
@@ -42,10 +44,9 @@ jobs:
     - stage: release
       node_js: 14
       workspaces:
-        use: $TRAVIS_OS_NAME$TRAVIS_NODE_VERSION
+        use: node$TRAVIS_NODE_VERSION$TRAVIS_OS_NAME
       before_script: skip
       script:
-        - if [ "$TRAVIS_BRANCH" = "master" ] && [ "TRAVIS_PULL_REQUEST" = "false" ]; then yarn release ; fi
-        - yarn release
+        - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then yarn release ; fi
       after_script: skip
       install: skip
