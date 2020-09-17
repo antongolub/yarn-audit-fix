@@ -42,7 +42,7 @@ jobs:
         use: $TRAVIS_OS_NAME$TRAVIS_NODE_VERSION
       before_script: skip
       script:
-        - if [ "$TRAVIS_BRANCH" = "master" ]; then yarn release ; fi
+        - if [ "$TRAVIS_BRANCH" = "master" ] && [ "TRAVIS_PULL_REQUEST" = "false" ]; then yarn release ; fi
         - yarn release
       after_script: skip
       install: skip
