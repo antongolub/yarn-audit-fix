@@ -32,10 +32,9 @@ jobs:
     - stage: release
       script: skip
       deploy:
-        if: branch = master
         provider: script
         script:
           - yarn release
-        skip_cleanup: true
+        cleanup: false
         on:
           branch: master
