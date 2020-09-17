@@ -47,6 +47,7 @@ jobs:
         use: node$TRAVIS_NODE_VERSION$TRAVIS_OS_NAME
       before_script: skip
       script:
+        - du -sh ./node_modules ./docs ./target
         - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then yarn release ; fi
       after_script: skip
       install: skip
