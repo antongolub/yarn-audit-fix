@@ -12,7 +12,7 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": false,
-    "declaration": true,
+    "declaration": false,
     "esModuleInterop": true,
 
     "incremental": true,
