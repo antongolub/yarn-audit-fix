@@ -45,6 +45,8 @@ const printRuntimeDigest: TCallback = ({temp, cwd, flags, manifest}) => {
 const createTempAssets: TCallback = ({temp, flags}) => {
   fs.copyFileSync('yarn.lock', join(temp, 'yarn.lock'))
   fs.copyFileSync('package.json', join(temp, 'package.json'))
+  fs.existsSync('.npmrc') && fs.copyFileSync('.npmrc', join(temp, '.npmrc'))
+  fs.existsSync('.yarnrc') && fs.copyFileSync('.yarnrc', join(temp, '.yarnrc'))
 }
 
 /**
