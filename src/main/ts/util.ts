@@ -64,10 +64,14 @@ export const getClosestNpm = (cmd: string): string => {
   }, {cwd: pkgRoot}) + ''
 }
 
-export const getNpm = (requireNpmBeta?: boolean, allowNpmBeta?: boolean, isWin = isWindows()) => {
+export const getNpm = (requireNpmBeta?: boolean, allowNpmBeta?: boolean, silent = false, isWin = isWindows()) => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
 
-  return requireNpmBeta && allowNpmBeta
+  if (requireNpmBeta && !allowNpmBeta && !silent) {
+    console.warn('The project looks like monorepo, so it is recommended to use `--npm-v7` flag')
+  }
+
+  return allowNpmBeta
     ? getClosestNpm(cmd)
     : cmd
 }

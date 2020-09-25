@@ -85,7 +85,7 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  */
 const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
   const requireNpmBeta = !!manifest.workspaces
-  const npm = getNpm(requireNpmBeta, flags['npm-v7'])
+  const npm = getNpm(requireNpmBeta, flags['npm-v7'], flags.silent)
   const defaultFlags = {
     'package-lock-only': true,
   }
