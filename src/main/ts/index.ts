@@ -97,12 +97,13 @@ const npmAuditFix: TCallback = ({temp, flags, cwd, manifest}) => {
     'force',
     'audit-level',
     'silent',
+    'registry',
   )
   const auditArgs = [
     'audit',
     'fix',
     ...auditFlags,
-    `--prefix=${temp}`,
+    '--prefix', temp,
   ]
 
   invoke(npm, auditArgs, temp, flags.silent)
@@ -126,7 +127,7 @@ const yarnImport: TCallback = ({temp, flags}) => {
  * @return {void}
  */
 const yarnInstall: TCallback = ({cwd, flags}) => {
-  invoke(getYarn(), ['--update-checksums', ...formatFlags(flags, 'verbose', 'silent')], cwd, flags.silent)
+  invoke(getYarn(), ['--update-checksums', ...formatFlags(flags, 'verbose', 'silent', 'registry')], cwd, flags.silent)
 }
 /**
  * Clean up temporaries.
