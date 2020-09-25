@@ -59,18 +59,19 @@ describe('yarn-audit-fix', () => {
         'fix',
         skipPkgLockOnly ? null : '--package-lock-only',
         '--verbose',
-        `--prefix=${temp}`,
+        '--registry', 'https://example.com',
+        '--prefix', temp,
       ]).filter(v => v !== null), {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
-      expect(cp.spawnSync).toHaveBeenCalledWith(getYarn(), ['--update-checksums', '--verbose'], {cwd, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith(getYarn(), ['--update-checksums', '--verbose', '--registry', 'https://example.com'], {cwd, stdio})
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
     }
 
     describe('runner', () => {
       it('invokes cmd queue with proper args', async() => {
-        await run({verbose: true, foo: 'bar', ['package-lock-only']: true})
+        await run({verbose: true, foo: 'bar', ['package-lock-only']: true, registry: 'https://example.com'})
         checkFlow()
       })
 
@@ -97,7 +98,7 @@ describe('yarn-audit-fix', () => {
     describe('cli', () => {
       it('invokes cmd queue with proper args', () => {
         jest.isolateModules(() => {
-          process.argv.push('--verbose', '--package-lock-only=false')
+          process.argv.push('--verbose', '--package-lock-only=false', '--registry=https://example.com')
           require('../../main/ts/cli')
         })
         checkFlow(true)
