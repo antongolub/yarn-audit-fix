@@ -70,7 +70,7 @@ success Already up-to-date.
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
 |`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
-|`--npm-v7` | Use the latest `npm@7.x.x-beta.x` version. Applicable to monorepos only | false 
+|`--npm-v7` | Use the latest `npm@7.x.x-beta.x` version. Recommended for monorepos | false 
 
 ## Troubleshooting
 ### enoent: no such file or directory

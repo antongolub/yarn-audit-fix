@@ -57,14 +57,15 @@ describe('util', () => {
     it('properly resolves npm ref', () => {
       const cmd = isWindows() ? 'npm.cmd' : 'npm'
       const localNpm = resolve(__dirname, '../../../node_modules/.bin', cmd)
-      const cases: [boolean, boolean, string][] = [
-        [true, true, localNpm],
-        [true, false, cmd],
-        [false, true, cmd],
+      const cases: [boolean, boolean, boolean, string][] = [
+        [true, true, true, localNpm],
+        [false, true, true, localNpm],
+        [true, false, true, cmd],
+        [false, false, true, cmd],
       ]
 
-      cases.forEach(([requireNpm7, allowNpm7, result]) => {
-        expect(getNpm(requireNpm7, allowNpm7)).toBe(result)
+      cases.forEach(([requireNpm7, allowNpm7, silent, result]) => {
+        expect(getNpm(requireNpm7, allowNpm7, silent)).toBe(result)
       })
 
     })
