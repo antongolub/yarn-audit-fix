@@ -48,6 +48,8 @@ describe('yarn-audit-fix', () => {
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
       expect(fs.copyFileSync).toHaveBeenCalledWith('yarn.lock', join(temp, 'yarn.lock'))
       expect(fs.copyFileSync).toHaveBeenCalledWith('package.json', join(temp, 'package.json'))
+      expect(fs.copyFileSync).toHaveBeenCalledWith('.yarnrc', join(temp, '.yarnrc'))
+      expect(fs.copyFileSync).toHaveBeenCalledWith('.npmrc', join(temp, '.npmrc'))
       expect(fs.createSymlinkSync).toHaveBeenCalledWith(join(cwd, 'node_modules'), join(temp, 'node_modules'), 'dir')
 
       // Generating package-lock.json from yarn.lock...
