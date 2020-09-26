@@ -5,6 +5,7 @@ import {
   parseFlags,
   getNpm,
   isWindows,
+  getTemp,
 } from '../../main/ts/util'
 
 describe('util', () => {
@@ -66,6 +67,22 @@ describe('util', () => {
 
       cases.forEach(([requireNpm7, allowNpm7, silent, result]) => {
         expect(getNpm(requireNpm7, allowNpm7, silent)).toBe(result)
+      })
+
+    })
+  })
+
+  describe('#getTemp', () => {
+    it('properly resolves temp dir path', () => {
+      const cwd = process.cwd()
+      const temp = resolve(__dirname, '../temp')
+      const cases: [string, string | undefined, string][] = [
+        [cwd, undefined, resolve(cwd, 'node_modules/.cache/yarn-audit-fix')],
+        [cwd, temp, temp],
+      ]
+
+      cases.forEach(([cwd, temp, result]) => {
+        expect(getTemp(cwd, temp)).toBe(result)
       })
 
     })

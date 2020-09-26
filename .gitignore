@@ -64,3 +64,6 @@ buildcache
 .rts2_cache_umd/
 
 .DS_Store
+
+# Temporary assets
+temp

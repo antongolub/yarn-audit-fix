@@ -1,9 +1,8 @@
 import fs, {SymlinkType} from 'fs-extra'
 import synp from 'synp'
 import {join} from 'path'
-import findCacheDir from 'find-cache-dir'
 import chalk from 'chalk'
-import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn, getNpm, readJson} from './util'
+import {invoke, formatFlags, getSymlinkType, getWorkspaces, getYarn, getNpm, readJson, getTemp} from './util'
 import {sync as pkgDir} from 'pkg-dir'
 
 type TContext = { cwd: string, temp: string, flags: Record<string, any>, manifest: Record<string, any>}
@@ -175,9 +174,10 @@ export const stages: TStage[] = [
 export const run = async(flags: Record<string, any> = {}) => {
   const cwd = process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
+  const temp = getTemp(cwd, flags.temp)
   const ctx = {
     cwd,
-    temp: findCacheDir({name: 'yarn-audit-fix', create: true, cwd}) + '',
+    temp,
     flags,
     manifest,
   }

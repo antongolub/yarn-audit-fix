@@ -71,7 +71,8 @@ success Already up-to-date.
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
 |`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
 |`--npm-v7` | Use the latest `npm@7.x.x-beta.x` version. Recommended for monorepos | false 
-|`--registry` | Custom registry url |  
+|`--registry` | Custom registry url |
+|`--temp` | Dir for temp assets | `<cwd>/node_modules/.cache/yarn-audit-fix`
 
 ## Troubleshooting
 ### enoent: no such file or directory
