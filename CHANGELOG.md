@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.1.0...v3.2.0) (2020-09-26)
+
+
+### Features
+
+* provide temp dir customization ([d3eda24](https://github.com/antongolub/yarn-audit-fix/commit/d3eda242f457f2a9fff1cb9008dd53251e4fbf95)), closes [#42](https://github.com/antongolub/yarn-audit-fix/issues/42)
+
 # [3.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.0.4...v3.1.0) (2020-09-26)
 
 
