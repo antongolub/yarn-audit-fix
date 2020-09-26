@@ -1,3 +1,12 @@
+# [3.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.0.4...v3.1.0) (2020-09-26)
+
+
+### Features
+
+* handle .npmrc .yarnrc if exist ([55340c3](https://github.com/antongolub/yarn-audit-fix/commit/55340c381ee8a80c7c39938041d30b02c134c0a0)), closes [#34](https://github.com/antongolub/yarn-audit-fix/issues/34)
+* handle registry flag ([71d9ba1](https://github.com/antongolub/yarn-audit-fix/commit/71d9ba1c1f46c7a61dd7dad008614ac7e2238a64)), closes [#34](https://github.com/antongolub/yarn-audit-fix/issues/34)
+* let --npm-v7 flag be applied to regular repos ([2e648fd](https://github.com/antongolub/yarn-audit-fix/commit/2e648fd7005739286b718f1b3c97e1fd970f0f22))
+
 ## [3.0.4](https://github.com/antongolub/yarn-audit-fix/compare/v3.0.3...v3.0.4) (2020-09-22)
 
 
