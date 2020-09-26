@@ -1,4 +1,4 @@
-import fs, {FsSymlinkType, readFileSync} from 'fs-extra'
+import fs, {ensureDirSync, FsSymlinkType, readFileSync} from 'fs-extra'
 import cp, {StdioOptions} from 'child_process'
 import chalk from 'chalk'
 import minimist from 'minimist'
@@ -6,6 +6,7 @@ import {resolve} from 'path'
 import glob, {Options as GlobOptions} from 'bash-glob'
 import {sync as pkgDir} from 'pkg-dir'
 import {sync as findUp} from 'find-up'
+import findCacheDir from 'find-cache-dir'
 
 export const invoke = (cmd: string, args: string[], cwd: string, silent= false, inherit = true) => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
@@ -99,3 +100,14 @@ export const getWorkspaces = (cwd: string, manifest: Record<string, any>) => {
 
 export const readJson = (path: string): any =>
   JSON.parse(readFileSync(path).toString('utf-8').trim())
+
+export const getTemp = (cwd: string, temp?: string): string => {
+  if (temp) {
+    const _temp = resolve(temp)
+    ensureDirSync(_temp)
+
+    return _temp
+  }
+
+  return findCacheDir({name: 'yarn-audit-fix', create: true, cwd}) + ''
+}
