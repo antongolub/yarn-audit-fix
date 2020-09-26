@@ -76,7 +76,7 @@
     "tslib": "^2.0.1"
   },
   "devDependencies": {
-    "@qiwi/libdefkit": "^2.0.1",
+    "@qiwi/libdefkit": "^2.1.0",
     "@qiwi/license": "^1.1.3",
     "@qiwi/semantic-release-gh-pages-plugin": "^5.0.0",
     "@semantic-release/changelog": "^5.0.1",
