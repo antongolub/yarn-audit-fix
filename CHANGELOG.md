@@ -1,3 +1,10 @@
+## [3.2.1](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.0...v3.2.1) (2020-09-27)
+
+
+### Bug Fixes
+
+* up synp, fix consistency issues ([5cc1e15](https://github.com/antongolub/yarn-audit-fix/commit/5cc1e1581d23537b0348fdfa2a387f984ad64ae8))
+
 # [3.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.1.0...v3.2.0) (2020-09-26)
 
 
