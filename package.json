@@ -72,7 +72,7 @@
     "minimist": "^1.2.5",
     "npm": "7.0.0-beta.12",
     "pkg-dir": "^4.2.0",
-    "synp": "^1.8.2",
+    "synp": "^1.9.3",
     "tslib": "^2.0.1"
   },
   "devDependencies": {

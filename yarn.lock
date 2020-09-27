@@ -8117,10 +8117,10 @@ sync-rpc@^1.2.1:
   dependencies:
     get-port "^3.1.0"
 
-synp@^1.8.2:
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/synp/-/synp-1.8.2.tgz#ee191f7c935ebf81020c41ee019e61d409bd8b3d"
-  integrity sha512-BynZmRh5NDcTJtheXO4GKJqd3Ee4A+aKScx4R/oRcJQUU65kYgEgKgPY0VS6r612+cR99ZYY2jef9FaU6C+EQw==
+synp@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/synp/-/synp-1.9.3.tgz#14614ebb50cc2359330777f3c6a8304a098ee31f"
+  integrity sha512-ZmiFazwupo3lc1bTM4c/nvTtK4dA/zFh4icwT/FZbOVzYCC+ZqgjhLMNrUSJ46WvC7l6+R1g28ksUCXVoyYCDw==
   dependencies:
     "@yarnpkg/lockfile" "^1.1.0"
     bash-glob "^2.0.0"
@@ -8130,6 +8130,7 @@ synp@^1.8.2:
     lodash "4.17.20"
     nmtree "^1.0.6"
     request "^2.88.2"
+    semver "^7.3.2"
     sort-object-keys "^1.1.3"
 
 tar@^4.4.10, tar@^4.4.12, tar@^4.4.13:
