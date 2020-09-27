@@ -8117,7 +8117,7 @@ sync-rpc@^1.2.1:
   dependencies:
     get-port "^3.1.0"
 
-synp@^1.9.3:
+synp@^1.9.2:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/synp/-/synp-1.9.3.tgz#14614ebb50cc2359330777f3c6a8304a098ee31f"
   integrity sha512-ZmiFazwupo3lc1bTM4c/nvTtK4dA/zFh4icwT/FZbOVzYCC+ZqgjhLMNrUSJ46WvC7l6+R1g28ksUCXVoyYCDw==
