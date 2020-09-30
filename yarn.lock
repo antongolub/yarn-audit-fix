@@ -590,36 +590,7 @@
     "@nodelib/fs.scandir" "2.1.3"
     fastq "^1.6.0"
 
-"@npmcli/arborist@1 || 0":
-  version "0.0.27"
-  resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-0.0.27.tgz#fb2150c4b3238c8504b8b1d65a6f9c38e34af837"
-  integrity sha512-7+uXkEV7d+oY7A3gpQGNx6ufYoihC99R4I3BtWOeC1x3PzgGe1VMiKyirYLkiG2q2sYswa00NBmlG3R3LqVAAg==
-  dependencies:
-    "@npmcli/installed-package-contents" "^1.0.5"
-    "@npmcli/map-workspaces" "0.0.0-pre.1"
-    "@npmcli/metavuln-calculator" "^1.0.0"
-    "@npmcli/name-from-folder" "^1.0.1"
-    "@npmcli/run-script" "^1.3.1"
-    bin-links "^2.1.4"
-    cacache "^15.0.3"
-    common-ancestor-path "^1.0.1"
-    json-parse-even-better-errors "^2.3.1"
-    json-stringify-nice "^1.1.1"
-    mkdirp-infer-owner "^2.0.0"
-    npm-install-checks "^4.0.0"
-    npm-package-arg "^8.0.0"
-    npm-pick-manifest "^6.1.0"
-    pacote "^11.1.10"
-    parse-conflict-json "^1.1.1"
-    promise-all-reject-late "^1.0.0"
-    promise-call-limit "^1.0.1"
-    read-package-json-fast "^1.2.1"
-    readdir-scoped-modules "^1.1.0"
-    semver "^7.1.2"
-    treeverse "^1.0.4"
-    walk-up-path "^1.0.0"
-
-"@npmcli/arborist@^0.0.28":
+"@npmcli/arborist@1 || 0", "@npmcli/arborist@^0.0.28":
   version "0.0.28"
   resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-0.0.28.tgz#fd66f3bb2474d5ae268fd9582a9e2690164ef266"
   integrity sha512-E0yscLZ8yOPbbFnODRIRMsG+Lz7ffP/FWu4tq2mz0Omk3DQN+pllBbDHiOIjekrfJsLFBpmvGTltH71bKAMeCw==
@@ -1748,9 +1719,9 @@ bin-links@^1.1.2, bin-links@^1.1.8:
     write-file-atomic "^2.3.0"
 
 bin-links@^2.1.3, bin-links@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/bin-links/-/bin-links-2.1.4.tgz#f2fb5c9f232c1e3e301aabf5337f9d7eafa95d16"
-  integrity sha512-NIi7OWd1FelUfgNERBLpgSaRbbm6+wkMRfURuvfui31N0i9jmQYFXhPxL0d8rcnnbUB2Rw+DiCY4nU1Egdrugg==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/bin-links/-/bin-links-2.2.0.tgz#1d8478e51a51cc00c1ff342565c4d697aafaa442"
+  integrity "sha1-HYR45RpRzADB/zQlZcTWl6r6pEI= sha512-SmANP2yFm/fWCW/MSLXS2sFKjmQakc0gyQbUbgpf1jyr3qg+ep0FUgfJpcDeiXxTZ3R2eGAzcTf/mCsIes8+OA=="
   dependencies:
     cmd-shim "^4.0.1"
     mkdirp "^1.0.3"
@@ -7071,9 +7042,9 @@ query-string@^4.1.0:
     strict-uri-encode "^1.0.0"
 
 query-string@^6.8.2:
-  version "6.13.2"
-  resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.13.2.tgz#3585aa9412c957cbd358fd5eaca7466f05586dda"
-  integrity sha512-BMmDaUiLDFU1hlM38jTFcRt7HYiGP/zt1sRzrIWm5zpeEuO1rkbPS0ELI3uehoLuuhHDCS8u8lhFN3fEN4JzPQ==
+  version "6.13.4"
+  resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.13.4.tgz#b35a9a3bd4955bce55f94feb0e819b3d0be6f66f"
+  integrity sha512-E2NPIeJoBEJGQNy3ib1k/Z/OkDBUKIo8IV2ZVwbKfoa65IS9unqWWUlLcbfU70Da0qNoxUZZA8CfKUjKLE641Q==
   dependencies:
     decode-uri-component "^0.2.0"
     split-on-first "^1.0.0"
@@ -7763,7 +7734,7 @@ source-map-resolve@^0.5.0:
     source-map-url "^0.4.0"
     urix "^0.1.0"
 
-source-map-support@^0.5.6, source-map-support@~0.5.12:
+source-map-support@^0.5.6, source-map-support@~0.5.19:
   version "0.5.19"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.19.tgz#a98b62f86dcaf4f67399648c085291ab9e8fed61"
   integrity sha512-Wonm7zOCIJzBGQdB+thsPar0kYuCIzYvxZwlBa87yi/Mdjv7Tip2cyVbLj5o0cFPN4EVkuTwb3GDDyUx2DGnGw==
@@ -7786,7 +7757,7 @@ source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
-source-map@^0.7.3:
+source-map@^0.7.3, source-map@~0.7.2:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.3.tgz#5302f8169031735226544092e64981f751750383"
   integrity sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==
@@ -8217,14 +8188,14 @@ terminal-link@^2.0.0:
     ansi-escapes "^4.2.1"
     supports-hyperlinks "^2.0.0"
 
-terser@^5.3.2:
-  version "5.3.2"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.3.2.tgz#f4bea90eb92945b2a028ceef79181b9bb586e7af"
-  integrity sha512-H67sydwBz5jCUA32ZRL319ULu+Su1cAoZnnc+lXnenGRYWyLE3Scgkt8mNoAsMx0h5kdo758zdoS0LG9rYZXDQ==
+terser@^5.3.3:
+  version "5.3.3"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-5.3.3.tgz#2592a1cf079df55101fe2b2cb2330f951863860b"
+  integrity sha512-vRQDIlD+2Pg8YMwVK9kMM3yGylG95EIwzBai1Bw7Ot4OBfn3VP1TZn3EWx4ep2jERN/AmnVaTiGuelZSN7ds/A==
   dependencies:
     commander "^2.20.0"
-    source-map "~0.6.1"
-    source-map-support "~0.5.12"
+    source-map "~0.7.2"
+    source-map-support "~0.5.19"
 
 test-exclude@^6.0.0:
   version "6.0.0"
@@ -8391,10 +8362,10 @@ trim-repeated@^1.0.0:
   dependencies:
     escape-string-regexp "^1.0.2"
 
-ts-jest@^26.4.0:
-  version "26.4.0"
-  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-26.4.0.tgz#903c7827f3d3bc33efc2f91be294b164400c32e3"
-  integrity sha512-ofBzoCqf6Nv/PoWb/ByV3VNKy2KJSikamOBxvR3E6eVdIw10GwAXoyvMWXXjZJK2s6S27ZE8fI+JBTnGaovl6Q==
+ts-jest@^26.4.1:
+  version "26.4.1"
+  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-26.4.1.tgz#08ec0d3fc2c3a39e4a46eae5610b69fafa6babd0"
+  integrity sha512-F4aFq01aS6mnAAa0DljNmKr/Kk9y4HVZ1m6/rtJ0ED56cuxINGq3Q9eVAh+z5vcYKe5qnTMvv90vE8vUMFxomg==
   dependencies:
     "@types/jest" "26.x"
     bs-logger "0.x"
