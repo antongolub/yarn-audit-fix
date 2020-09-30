@@ -3,7 +3,8 @@ import cp, {StdioOptions} from 'child_process'
 import chalk from 'chalk'
 import minimist from 'minimist'
 import {resolve} from 'path'
-import glob, {Options as GlobOptions} from 'bash-glob'
+import {glob} from './glob'
+import {Options as GlobOptions} from 'bash-glob'
 import {sync as pkgDir} from 'pkg-dir'
 import {sync as findUp} from 'find-up'
 import findCacheDir from 'find-cache-dir'
@@ -88,7 +89,7 @@ export const getWorkspaces = (cwd: string, manifest: Record<string, any>) => {
   }
 
   // Turn workspaces into list of package.json files.
-  return glob.sync(
+  return glob(
     packages.map((p: string) => p.replace(/\/?$/, '/package.json')),
     {
       cwd,

@@ -87,4 +87,17 @@ describe('util', () => {
 
     })
   })
+
+  describe('#glob', () => {
+    it('checks `bash` to be installed', () => {
+      jest.isolateModules(() => {
+        jest.resetModules()
+        jest.mock('bash-path', () => undefined)
+
+        const {glob} = require('../../main/ts/glob')
+
+        expect(() => glob([])).toThrowError('`bash` must be installed')
+      })
+    })
+  })
 })
