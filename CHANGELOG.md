@@ -1,3 +1,10 @@
+## [3.2.3](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.2...v3.2.3) (2020-09-30)
+
+
+### Bug Fixes
+
+* check bash to be installed (required by bash-glob) ([#47](https://github.com/antongolub/yarn-audit-fix/issues/47)) ([278cef8](https://github.com/antongolub/yarn-audit-fix/commit/278cef808b5ebfc261df04440f28a55e7d720447))
+
 ## [3.2.2](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.1...v3.2.2) (2020-09-29)
 
 
