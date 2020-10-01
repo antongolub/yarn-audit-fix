@@ -17,7 +17,7 @@
     "jest": "jest -w 1 --config=jest.config.json",
     "lint:fix": "tslint -p tsconfig.json -c tslint.json --fix && tslint -c tslint.json src/test/js/*.js --fix",
     "test:unit": "yarn jest",
-    "test:integration": "node ./target/es5/cli.js --package-lock-only",
+    "test:integration": "node ./target/es5/cli.js --package-lock-only --audit-level=moderate",
     "test:integration-build": "yarn build:es5 && yarn test:integration",
     "test": "yarn lint && yarn test:unit && yarn test:integration",
     "clean": "rimraf target typings flow-typed buildcache",
@@ -71,7 +71,7 @@
     "find-cache-dir": "^3.3.1",
     "fs-extra": "^9.0.1",
     "minimist": "^1.2.5",
-    "npm": "7.0.0-beta.13",
+    "npm": "7.0.0-rc.0",
     "pkg-dir": "^4.2.0",
     "synp": "^1.9.4",
     "tslib": "^2.0.1"

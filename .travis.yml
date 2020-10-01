@@ -1,12 +1,12 @@
 language: node_js
 cache: npm
+node_js: 14
 
 jobs:
   include:
     - &build
       os: linux
       stage: build
-      node_js: 14
       install: yarn
       script: yarn build
       # https://docs.travis-ci.com/user/using-workspaces/
@@ -50,17 +50,11 @@ jobs:
     - <<: *test
       os: windows
       env: YARN_GPG=no
-      workspaces:
-        use: win-shared
-    - <<: *test
-      os: windows
-      env: YARN_GPG=no
       node_js: 14
       workspaces:
         use: win-shared
 
     - stage: release
-      node_js: 14
       if: branch = master AND type != pull_request
       workspaces:
         use: linux-shared
