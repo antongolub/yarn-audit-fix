@@ -38,6 +38,7 @@ jobs:
         use: linux-shared
     - <<: *test
       node_js: 14
+      install: yarn
       before_script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
@@ -61,8 +62,8 @@ jobs:
 
     - stage: release
       node_js: 14
+      if: branch = master AND type != pull_request
       workspaces:
         use: linux-shared
       install: skip
-      script:
-        - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then yarn release ; fi
+      script: yarn release
