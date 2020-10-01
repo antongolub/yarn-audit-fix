@@ -1,3 +1,11 @@
+## [3.2.4](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.3...v3.2.4) (2020-10-01)
+
+
+### Bug Fixes
+
+* **deps:** up npm ([c0123cd](https://github.com/antongolub/yarn-audit-fix/commit/c0123cdbf16a63bce421a36864320a08ab83167c))
+* **deps:** up synp to the latest ([6afdf87](https://github.com/antongolub/yarn-audit-fix/commit/6afdf87096e02ccdd49aa0a5c214c3cec7c3cb88))
+
 ## [3.2.3](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.2...v3.2.3) (2020-09-30)
 
 
