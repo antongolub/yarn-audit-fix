@@ -55,20 +55,19 @@ describe('util', () => {
   })
 
   describe('#getNpm', () => {
-    it('properly resolves npm ref', () => {
-      const cmd = isWindows() ? 'npm.cmd' : 'npm'
-      const localNpm = resolve(__dirname, '../../../node_modules/.bin', cmd)
-      const cases: [boolean, boolean, boolean, string][] = [
-        [true, true, true, localNpm],
-        [false, true, true, localNpm],
-        [true, false, true, cmd],
-        [false, false, true, cmd],
-      ]
-
-      cases.forEach(([requireNpm7, allowNpm7, silent, result]) => {
+    const isWin = isWindows()
+    const cmd = isWin ? 'npm.cmd' : 'npm'
+    const localNpm = resolve(__dirname, '../../../node_modules/.bin', cmd)
+    const cases: [boolean, boolean, boolean, string][] = [
+      [true, true, true, localNpm],
+      [false, true, true, localNpm],
+      [true, false, true, cmd],
+      [false, false, true, cmd],
+    ]
+    cases.forEach(([requireNpm7, allowNpm7, silent, result]) => {
+      it(`resolves npm ref: requireNpm7=${requireNpm7}, allowNpm7=${allowNpm7}, silent=${silent}, isWin=${isWin}`, () => {
         expect(getNpm(requireNpm7, allowNpm7, silent)).toBe(result)
       })
-
     })
   })
 
