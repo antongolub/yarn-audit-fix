@@ -1,4 +1,5 @@
 language: node_js
+cache: npm
 
 jobs:
   include:
@@ -13,7 +14,6 @@ jobs:
         create:
           name: linux-shared
           paths:
-            - node_modules
             - target
             - flow-typed
             - typings
@@ -26,7 +26,6 @@ jobs:
         create:
           name: win-shared
           paths:
-            - node_modules
             - target
 
     - &test
@@ -38,7 +37,6 @@ jobs:
       workspaces:
         use: linux-shared
     - <<: *test
-      os: linux
       node_js: 14
       before_script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
