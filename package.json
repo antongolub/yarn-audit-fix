@@ -34,7 +34,7 @@
     "postupdate": "yarn && yarn build && yarn test",
     "publish:beta": "npm publish --no-git-tag-version --tag beta",
     "publish:rc": "npm publish --no-git-tag-version --tag rc",
-    "rm-npm-bin": "rimraf node_modules/.bin/npm node_modules/.bin/npm.cmd",
+    "rm-npm-bin": "rimraf node_modules/.bin/npm node_modules/.bin/npm.cmd && echo 'rm-npm-bin: deleted node_modules/.bin/npm'",
     "release": "yarn rm-npm-bin && semantic-release"
   },
   "repository": {
