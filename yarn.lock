@@ -620,10 +620,10 @@
     treeverse "^1.0.4"
     walk-up-path "^1.0.0"
 
-"@npmcli/arborist@^0.0.31":
-  version "0.0.31"
-  resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-0.0.31.tgz#708d1808ffe52b85ef041bb8aa33b7eee9f19f06"
-  integrity sha512-BO5mCagGFv2szVhdAoZj2RcyjgOFxf1B+KpBTJvJYnYWwj/v4dDpzh5BixNrvDRcrCVZUq+kOOL/l53d5MHPjA==
+"@npmcli/arborist@^0.0.32":
+  version "0.0.32"
+  resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-0.0.32.tgz#502006820674e8f75084197d81acbf1e83746761"
+  integrity sha512-FZgrZVFaBqSPRsfr7DYAdrqFBT6ShxXpkMUBBIFZ6mm7Bgt3h5exM050s9ROD2DBOsxXJGOJj8BfdAuU0ZABXg==
   dependencies:
     "@npmcli/installed-package-contents" "^1.0.5"
     "@npmcli/map-workspaces" "^1.0.1"
@@ -6170,12 +6170,12 @@ npm-user-validate@~1.0.0:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.0.tgz#8ceca0f5cea04d4e93519ef72d0557a75122e951"
   integrity sha1-jOyg9c6gTU6TUZ73LQVXp1Ei6VE=
 
-npm@7.0.0-rc.2:
-  version "7.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-rc.2.tgz#34c2168fee6df82c9bc5c3b53c248c4355fef513"
-  integrity sha512-Fln3jftKZaQgrK7CsvwWUUJ9GN/aq0eSEWKzbg1iFwjWG2Ff9YaPu7RivWoMyggFyMs/EE7Jkh0MZvmkdxXjTQ==
+npm@7.0.0-rc.3:
+  version "7.0.0-rc.3"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-7.0.0-rc.3.tgz#50f3ae158798ef9e55762107ab6d3bf05dbb8cf1"
+  integrity sha512-SESEvmKSP99svYnwJyYkI5NFGVMeu7JcP/3nS5I6oxA1/x7sxb4loVHDkMpJdOrWBBtRAvh0cTKNE6Hp0rAV+A==
   dependencies:
-    "@npmcli/arborist" "^0.0.31"
+    "@npmcli/arborist" "^0.0.32"
     "@npmcli/ci-detect" "^1.2.0"
     "@npmcli/config" "^1.1.8"
     "@npmcli/run-script" "^1.7.0"
@@ -6236,7 +6236,7 @@ npm@7.0.0-rc.2:
     tar "^6.0.5"
     text-table "~0.2.0"
     tiny-relative-date "^1.3.0"
-    uuid "^8.3.0"
+    uuid "^8.3.1"
     validate-npm-package-name "~3.0.0"
     which "^2.0.2"
     write-file-atomic "^3.0.3"
@@ -8787,6 +8787,11 @@ uuid@^8.3.0:
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.0.tgz#ab738085ca22dc9a8c92725e459b1d507df5d6ea"
   integrity sha512-fX6Z5o4m6XsXBdli9g7DtWgAx+osMsRRZFKma1mIUsLCz6vRvv+pz5VNbyu9UEDzpMWulZfvpgb/cmDXVulYFQ==
+
+uuid@^8.3.1:
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.1.tgz#2ba2e6ca000da60fce5a196954ab241131e05a31"
+  integrity sha512-FOmRr+FmWEIG8uhZv6C2bTgEVXsHk08kE7mPlrBbEe+c3r9pjceVPgupIfNIhc4yx55H69OXANrUaSuu9eInKg==
 
 v8-to-istanbul@^5.0.1:
   version "5.0.1"
