@@ -1,3 +1,10 @@
+## [3.2.11](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.10...v3.2.11) (2020-10-17)
+
+
+### Bug Fixes
+
+* **package:** up deps ([7b9e6a6](https://github.com/antongolub/yarn-audit-fix/commit/7b9e6a6470b5d0362f95c95eefbcd28520b7264c))
+
 ## [3.2.10](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.9...v3.2.10) (2020-10-16)
 
 
