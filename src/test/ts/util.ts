@@ -91,7 +91,7 @@ describe('util', () => {
     it('checks `bash` to be installed', () => {
       jest.isolateModules(() => {
         jest.resetModules()
-        jest.mock('bash-path', () => undefined)
+        jest.mock('bash-path', () => () => null)
 
         const {glob} = require('../../main/ts/glob')
 

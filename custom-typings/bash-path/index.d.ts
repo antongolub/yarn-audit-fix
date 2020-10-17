@@ -1,4 +1,4 @@
 declare module 'bash-path' {
-  const bashPath: string
-  export = bashPath
+  function getBashPath(paths?: string[]): string | null
+  export = getBashPath
 }
