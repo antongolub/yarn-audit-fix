@@ -1,11 +1,12 @@
 import {resolve} from 'path'
+
 import {
   formatFlags,
-  getSymlinkType,
-  parseFlags,
   getNpm,
-  isWindows,
+  getSymlinkType,
   getTemp,
+  isWindows,
+  parseFlags,
 } from '../../main/ts/util'
 
 describe('util', () => {
@@ -91,9 +92,9 @@ describe('util', () => {
     it('checks `bash` to be installed', () => {
       jest.isolateModules(() => {
         jest.resetModules()
-        jest.mock('bash-path', () => () => null)
+        jest.mock('bash-path', () => () => null) // eslint-disable-line
 
-        const {glob} = require('../../main/ts/glob')
+        const {glob} = require('../../main/ts/glob') // eslint-disable-line
 
         expect(() => glob([])).toThrowError('`bash` must be installed')
       })

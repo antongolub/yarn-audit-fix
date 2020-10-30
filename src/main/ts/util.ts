@@ -1,18 +1,19 @@
-import fs, {ensureDirSync, FsSymlinkType, readFileSync} from 'fs-extra'
-import cp, {StdioOptions} from 'child_process'
+import {Options as GlobOptions} from 'bash-glob'
 import chalk from 'chalk'
+import cp, {StdioOptions} from 'child_process'
+import findCacheDir from 'find-cache-dir'
+import {sync as findUp} from 'find-up'
+import fs, {ensureDirSync, FsSymlinkType, readFileSync} from 'fs-extra'
 import minimist from 'minimist'
 import {resolve} from 'path'
-import {glob} from './glob'
-import {Options as GlobOptions} from 'bash-glob'
 import {sync as pkgDir} from 'pkg-dir'
-import {sync as findUp} from 'find-up'
-import findCacheDir from 'find-cache-dir'
 
-export const invoke = (cmd: string, args: string[], cwd: string, silent= false, inherit = true) => {
+import {glob} from './glob'
+
+export const invoke = (cmd: string, args: string[], cwd: string, silent= false, inherit = true): string | ReturnType<typeof cp.spawnSync> => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
 
-  const stdio: StdioOptions = inherit ? ['inherit', 'inherit', 'inherit'] : [null, null, null]
+  const stdio: StdioOptions = inherit ? ['inherit', 'inherit', 'inherit'] : [null, null, null] // eslint-disable-line
   const result = cp.spawnSync(cmd, args, {cwd, stdio})
 
   if (result.error || result.status) {
@@ -22,7 +23,7 @@ export const invoke = (cmd: string, args: string[], cwd: string, silent= false, 
   return result.stdout?.toString().trim()
 }
 
-export const parseFlags = (argv: string[]) => minimist(argv, {'--': true})
+export const parseFlags = (argv: string[]): ReturnType<typeof minimist> => minimist(argv, {'--': true})
 
 const checkValue = (key: string, value: any, omitlist: any[], picklist: any[]): boolean =>
   value !== 'false' && !omitlist.includes(key) && (!picklist.length || picklist.includes(key))
@@ -46,7 +47,7 @@ export const formatFlags = (flags: Record<string, any>, ...picklist: string[]): 
     return memo
   }, [])
 
-export const isWindows = () => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
+export const isWindows = (): boolean => process.platform === 'win32' || /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
 export const getSymlinkType = (type?: string): FsSymlinkType =>
   type === 'junction' && isWindows()
@@ -54,7 +55,7 @@ export const getSymlinkType = (type?: string): FsSymlinkType =>
     : 'dir'
 
 // https://github.com/facebook/jest/issues/2993
-export const getYarn = () => isWindows() ? 'yarn.cmd' : 'yarn'
+export const getYarn = (): string => isWindows() ? 'yarn.cmd' : 'yarn'
 
 export const getClosestNpm = (cmd: string): string => {
   const pkgRoot = pkgDir(__dirname) + ''
@@ -66,7 +67,7 @@ export const getClosestNpm = (cmd: string): string => {
   }, {cwd: pkgRoot}) + ''
 }
 
-export const getNpm = (requireNpmBeta?: boolean, allowNpmBeta?: boolean, silent = false, isWin = isWindows()) => {
+export const getNpm = (requireNpmBeta?: boolean, allowNpmBeta?: boolean, silent = false, isWin = isWindows()): string => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
 
   if (requireNpmBeta && !allowNpmBeta && !silent) {
@@ -78,13 +79,13 @@ export const getNpm = (requireNpmBeta?: boolean, allowNpmBeta?: boolean, silent 
     : cmd
 }
 
-export const getWorkspaces = (cwd: string, manifest: Record<string, any>) => {
+export const getWorkspaces = (cwd: string, manifest: Record<string, any>): string[] => {
   let packages = manifest.workspaces
   if (packages && packages.packages) {
     packages = packages.packages
   }
 
-  if (!packages || !packages.length) {
+  if (!packages || packages.length === 0) {
     return []
   }
 

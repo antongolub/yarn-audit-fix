@@ -13,9 +13,10 @@
     "definition": "typings/index.d.ts"
   },
   "scripts": {
-    "lint": "tslint -p tsconfig.json -c tslint.json && tslint -c tslint.json src/test/js/*.js",
+    "lint": "eslint 'src/**/*.+(js|ts)'",
+    "lint:fix": "yarn lint --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
     "jest": "jest -w 1 --config=jest.config.json",
-    "lint:fix": "tslint -p tsconfig.json -c tslint.json --fix && tslint -c tslint.json src/test/js/*.js --fix",
     "test:unit": "yarn jest",
     "test:integration": "node ./target/es5/cli.js --package-lock-only --audit-level=moderate",
     "test:integration-build": "yarn build:es5 && yarn test:integration",
@@ -89,10 +90,12 @@
     "mkdirp": "^1.0.4",
     "terser": "^5.3.8",
     "ts-jest": "^26.4.3",
-    "tslint": "6.1.3",
-    "tslint-config-qiwi": "^1.6.0",
+    "eslint": "^7.12.1",
+    "eslint-config-qiwi": "^1.10.0",
+    "eslint-config-prettier": "^6.15.0",
     "typedoc": "^0.19.2",
     "typedoc-plugin-external-module-name": "^4.0.3",
-    "typescript": "4.0.5"
+    "typescript": "4.0.5",
+    "prettier": "^2.1.2"
   }
 }

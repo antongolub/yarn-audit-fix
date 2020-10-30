@@ -1,16 +1,19 @@
 import cp from 'child_process'
-import {join} from 'path'
-import fs from 'fs-extra'
-import synp from 'synp'
 import findCacheDir from 'find-cache-dir'
+import fs from 'fs-extra'
 import {factory as iop} from 'inside-out-promise'
+import {join} from 'path'
+import synp from 'synp'
+
 import {run} from '../../main/ts'
-import {getYarn, getNpm} from '../../main/ts/util'
+import {getNpm,getYarn} from '../../main/ts/util'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
 jest.mock('npm')
 jest.mock('synp')
+
+const registryUrl = 'https://example.com'
 
 describe('yarn-audit-fix', () => {
   beforeEach(() => {
@@ -39,6 +42,7 @@ describe('yarn-audit-fix', () => {
   afterAll(jest.resetAllMocks)
 
   describe('flow', () => {
+    // eslint-disable-next-line
     const checkFlow = (skipPkgLockOnly?: boolean) => {
       const temp = findCacheDir({name: 'yarn-audit-fix', create: true}) + ''
       const cwd = process.cwd()
@@ -59,21 +63,21 @@ describe('yarn-audit-fix', () => {
       expect(cp.spawnSync).toHaveBeenCalledWith(getNpm(), ([
         'audit',
         'fix',
-        skipPkgLockOnly ? null : '--package-lock-only',
+        skipPkgLockOnly ? undefined : '--package-lock-only',
         '--verbose',
-        '--registry', 'https://example.com',
+        '--registry', registryUrl,
         '--prefix', temp,
-      ]).filter(v => v !== null), {cwd: temp, stdio})
+      ]).filter(v => v !== undefined), {cwd: temp, stdio})
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
-      expect(cp.spawnSync).toHaveBeenCalledWith(getYarn(), ['--update-checksums', '--verbose', '--registry', 'https://example.com'], {cwd, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith(getYarn(), ['--update-checksums', '--verbose', '--registry', registryUrl], {cwd, stdio})
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
     }
 
     describe('runner', () => {
       it('invokes cmd queue with proper args', async() => {
-        await run({verbose: true, foo: 'bar', ['package-lock-only']: true, registry: 'https://example.com'})
+        await run({verbose: true, foo: 'bar', 'package-lock-only': true, registry: registryUrl})
         checkFlow()
       })
 
@@ -100,13 +104,14 @@ describe('yarn-audit-fix', () => {
     describe('cli', () => {
       it('invokes cmd queue with proper args', () => {
         jest.isolateModules(() => {
-          process.argv.push('--verbose', '--package-lock-only=false', '--registry=https://example.com')
+          process.argv.push('--verbose', '--package-lock-only=false', `--registry=${registryUrl}`)
           require('../../main/ts/cli')
         })
         checkFlow(true)
       })
 
       describe('on error', () => {
+        // eslint-disable-next-line
         const checkExit = (reason: any, code: number): Promise<any> => {
           const {promise, resolve} = iop()
           // @ts-ignore
