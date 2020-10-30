@@ -1,12 +1,26 @@
 import chalk from 'chalk'
-import fs, {SymlinkType} from 'fs-extra'
-import {join} from 'path'
-import {sync as pkgDir} from 'pkg-dir'
+import fs, { SymlinkType } from 'fs-extra'
+import { join } from 'path'
+import { sync as pkgDir } from 'pkg-dir'
 import synp from 'synp'
 
-import {formatFlags, getNpm, getSymlinkType, getTemp,getWorkspaces, getYarn, invoke, readJson} from './util'
+import {
+  formatFlags,
+  getNpm,
+  getSymlinkType,
+  getTemp,
+  getWorkspaces,
+  getYarn,
+  invoke,
+  readJson,
+} from './util'
 
-type TContext = { cwd: string, temp: string, flags: Record<string, any>, manifest: Record<string, any>}
+type TContext = {
+  cwd: string
+  temp: string
+  flags: Record<string, any>
+  manifest: Record<string, any>
+}
 
 type TCallback = (cxt: TContext) => void | Promise<void>
 
@@ -15,7 +29,7 @@ type TStage = [string, ...TCallback[]]
 /**
  * Print runtime context digest.
  */
-const printRuntimeDigest: TCallback = ({temp, cwd, flags, manifest}) => {
+const printRuntimeDigest: TCallback = ({ temp, cwd, flags, manifest }) => {
   if (flags.silent) {
     return
   }
@@ -24,17 +38,25 @@ const printRuntimeDigest: TCallback = ({temp, cwd, flags, manifest}) => {
   const npmPath = getNpm(isMonorepo, flags['npm-v7'])
   const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
   const nodeVersion = invoke('node', ['--version'], temp, true, false)
-  const yarnAuditFixVersion = readJson(join(pkgDir(__dirname) + '', 'package.json')).version // eslint-disable-line
+  const yarnAuditFixVersion = readJson(
+    join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
+  ).version
 
-  console.log(JSON.stringify({
-    isMonorepo,
-    npmPath,
-    npmVersion,
-    nodeVersion,
-    yarnAuditFixVersion,
-    temp,
-    cwd,
-  }, undefined, 2).replace(/[",:{}]/g, ''))
+  console.log(
+    JSON.stringify(
+      {
+        isMonorepo,
+        npmPath,
+        npmVersion,
+        nodeVersion,
+        yarnAuditFixVersion,
+        temp,
+        cwd,
+      },
+      undefined,
+      2,
+    ).replace(/[",:{}]/g, ''),
+  )
 }
 
 /**
@@ -42,7 +64,7 @@ const printRuntimeDigest: TCallback = ({temp, cwd, flags, manifest}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const createTempAssets: TCallback = ({temp}) => {
+const createTempAssets: TCallback = ({ temp }) => {
   fs.copyFileSync('yarn.lock', join(temp, 'yarn.lock'))
   fs.copyFileSync('package.json', join(temp, 'package.json'))
   fs.existsSync('.npmrc') && fs.copyFileSync('.npmrc', join(temp, '.npmrc'))
@@ -54,7 +76,7 @@ const createTempAssets: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const createSymlinks: TCallback = ({temp, flags, cwd, manifest}) => {
+const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
   const symlinkType = getSymlinkType(flags.symlink) as SymlinkType // TODO fix fs-extra typings issue
   const workspaces = getWorkspaces(cwd, manifest)
   const links = [join(cwd, 'node_modules'), ...workspaces]
@@ -73,7 +95,7 @@ const createSymlinks: TCallback = ({temp, flags, cwd, manifest}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const yarnLockToPkgLock: TCallback = ({temp}) => {
+const yarnLockToPkgLock: TCallback = ({ temp }) => {
   const pgkLockJsonData = synp.yarnToNpm(temp, true)
 
   fs.writeFileSync(join(temp, 'package-lock.json'), pgkLockJsonData)
@@ -85,14 +107,15 @@ const yarnLockToPkgLock: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const npmAuditFix: TCallback = ({temp, flags, manifest}) => {
+const npmAuditFix: TCallback = ({ temp, flags, manifest }) => {
   const requireNpmBeta = !!manifest.workspaces
   const npm = getNpm(requireNpmBeta, flags['npm-v7'], flags.silent)
   const defaultFlags = {
     'package-lock-only': true,
   }
-  const auditFlags = formatFlags({...defaultFlags, ...flags},
-'package-lock-only',
+  const auditFlags = formatFlags(
+    { ...defaultFlags, ...flags },
+    'package-lock-only',
     'verbose',
     'loglevel',
     'only',
@@ -101,12 +124,7 @@ const npmAuditFix: TCallback = ({temp, flags, manifest}) => {
     'silent',
     'registry',
   )
-  const auditArgs = [
-    'audit',
-    'fix',
-    ...auditFlags,
-    '--prefix', temp,
-  ]
+  const auditArgs = ['audit', 'fix', ...auditFlags, '--prefix', temp]
 
   invoke(npm, auditArgs, temp, flags.silent)
 }
@@ -116,7 +134,7 @@ const npmAuditFix: TCallback = ({temp, flags, manifest}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const yarnImport: TCallback = ({temp}) => {
+const yarnImport: TCallback = ({ temp }) => {
   const yarnLockData = synp.npmToYarn(temp, true)
 
   fs.writeFileSync(join(temp, 'yarn.lock'), yarnLockData)
@@ -128,51 +146,42 @@ const yarnImport: TCallback = ({temp}) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const yarnInstall: TCallback = ({cwd, flags}) => {
-  invoke(getYarn(), ['--update-checksums', ...formatFlags(flags, 'verbose', 'silent', 'registry')], cwd, flags.silent)
+const yarnInstall: TCallback = ({ cwd, flags }) => {
+  invoke(
+    getYarn(),
+    [
+      '--update-checksums',
+      ...formatFlags(flags, 'verbose', 'silent', 'registry'),
+    ],
+    cwd,
+    flags.silent,
+  )
 }
 /**
  * Clean up temporaries.
  * @param {TContext} cxt
  * @return {void}
  */
-const clear: TCallback = ({temp}) =>
-  fs.emptyDirSync(temp)
+const clear: TCallback = ({ temp }) => fs.emptyDirSync(temp)
 
 export const stages: TStage[] = [
-  [
-    'Runtime digest',
-    printRuntimeDigest,
-  ],
-  [
-    'Preparing temp assets...',
-    clear,
-    createTempAssets,
-    createSymlinks,
-  ],
-  [
-    'Generating package-lock.json from yarn.lock...',
-    yarnLockToPkgLock,
-  ],
-  [
-    'Applying npm audit fix...',
-    npmAuditFix,
-  ],
+  ['Runtime digest', printRuntimeDigest],
+  ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
+  ['Generating package-lock.json from yarn.lock...', yarnLockToPkgLock],
+  ['Applying npm audit fix...', npmAuditFix],
   [
     'Updating yarn.lock from package-lock.json...',
     yarnImport,
     yarnInstall,
     clear,
   ],
-  [
-    'Done',
-  ],
+  ['Done'],
 ]
 
 /**
  * Public static void main.
  */
-export const run = async(flags: Record<string, any> = {}): Promise<void> => {
+export const run = async (flags: Record<string, any> = {}): Promise<void> => {
   const cwd = process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
