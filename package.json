@@ -35,7 +35,7 @@
     "publish:beta": "npm publish --no-git-tag-version --tag beta",
     "publish:rc": "npm publish --no-git-tag-version --tag rc",
     "rm-npm-bin": "rimraf node_modules/.bin/npm node_modules/.bin/npm.cmd && echo 'rm-npm-bin: deleted node_modules/.bin/npm'",
-    "release": "yarn rm-npm-bin && semantic-release"
+    "release": "yarn rm-npm-bin && npx -p @qiwi/semrel-toolkit semrel -e @qiwi/semrel-config"
   },
   "repository": {
     "type": "git",
@@ -78,47 +78,21 @@
     "tslib": "^2.0.3"
   },
   "devDependencies": {
-    "@qiwi/libdefkit": "^2.1.1",
-    "@qiwi/license": "^1.1.3",
-    "@qiwi/semantic-release-gh-pages-plugin": "^5.0.1",
-    "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/git": "^9.0.0",
-    "@semantic-release/github": "^7.1.1",
-    "@semantic-release/npm": "^7.0.6",
-    "@swissquote/crafty-preset-jest": "^1.13.5",
+    "@qiwi/libdefkit": "^2.1.4",
+    "@swissquote/crafty-preset-jest": "^1.13.7",
     "@types/jest": "^26.0.15",
-    "@types/node": "^14.14.3",
+    "@types/node": "^14.14.6",
     "coveralls": "^3.1.0",
     "cpy-cli": "^3.1.1",
-    "inside-out-promise": "^2.1.1",
+    "inside-out-promise": "^2.1.2",
     "jest": "^26.6.1",
     "mkdirp": "^1.0.4",
-    "semantic-release": "^17.2.1",
     "terser": "^5.3.8",
-    "ts-jest": "^26.4.2",
+    "ts-jest": "^26.4.3",
     "tslint": "6.1.3",
-    "tslint-config-qiwi": "^1.5.0",
+    "tslint-config-qiwi": "^1.6.0",
     "typedoc": "^0.19.2",
     "typedoc-plugin-external-module-name": "^4.0.3",
-    "typescript": "4.0.3"
-  },
-  "release": {
-    "branch": "master",
-    "verifyConditions": [
-      "@semantic-release/changelog",
-      "@semantic-release/npm",
-      "@semantic-release/git",
-      "@qiwi/semantic-release-gh-pages-plugin"
-    ],
-    "prepare": [
-      "@semantic-release/changelog",
-      "@semantic-release/npm",
-      "@semantic-release/git"
-    ],
-    "publish": [
-      "@semantic-release/npm",
-      "@semantic-release/github",
-      "@qiwi/semantic-release-gh-pages-plugin"
-    ]
+    "typescript": "4.0.5"
   }
 }
