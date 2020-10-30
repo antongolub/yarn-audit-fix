@@ -1,4 +1,4 @@
-import {resolve} from 'path'
+import { resolve } from 'path'
 
 import {
   formatFlags,
@@ -13,11 +13,15 @@ describe('util', () => {
   describe('#formatArgs', () => {
     it('return proper values', () => {
       const cases: [Record<string, any>, string[], string[]][] = [
-        [{_: [], '--': []}, [], []],
-        [{foo: 'bar'}, [], ['--foo', 'bar']],
-        [{f: true}, [], ['-f']],
-        [{verbose: true}, [], ['--verbose']],
-        [{f: true, foo: 'bar', b: true, baz: 'qux'}, ['f', 'baz'], ['-f', '--baz', 'qux']],
+        [{ _: [], '--': [] }, [], []],
+        [{ foo: 'bar' }, [], ['--foo', 'bar']],
+        [{ f: true }, [], ['-f']],
+        [{ verbose: true }, [], ['--verbose']],
+        [
+          { f: true, foo: 'bar', b: true, baz: 'qux' },
+          ['f', 'baz'],
+          ['-f', '--baz', 'qux'],
+        ],
         [
           parseFlags([
             '-w',
@@ -49,7 +53,9 @@ describe('util', () => {
       expect(getSymlinkType()).toBe('dir')
 
       process.env.OSTYPE = 'unknown'
-      expect(getSymlinkType('junction')).toBe(process.platform === 'win32' ? 'junction' : 'dir')
+      expect(getSymlinkType('junction')).toBe(
+        process.platform === 'win32' ? 'junction' : 'dir',
+      )
       expect(getSymlinkType('foo')).toBe('dir')
       expect(getSymlinkType()).toBe('dir')
     })
@@ -84,7 +90,6 @@ describe('util', () => {
       cases.forEach(([cwd, temp, result]) => {
         expect(getTemp(cwd, temp)).toBe(result)
       })
-
     })
   })
 
@@ -94,7 +99,7 @@ describe('util', () => {
         jest.resetModules()
         jest.mock('bash-path', () => () => null) // eslint-disable-line
 
-        const {glob} = require('../../main/ts/glob') // eslint-disable-line
+        const { glob } = require('../../main/ts/glob') // eslint-disable-line
 
         expect(() => glob([])).toThrowError('`bash` must be installed')
       })

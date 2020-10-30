@@ -1,12 +1,12 @@
 import cp from 'child_process'
 import findCacheDir from 'find-cache-dir'
 import fs from 'fs-extra'
-import {factory as iop} from 'inside-out-promise'
-import {join} from 'path'
+import { factory as iop } from 'inside-out-promise'
+import { join } from 'path'
 import synp from 'synp'
 
-import {run} from '../../main/ts'
-import {getNpm,getYarn} from '../../main/ts/util'
+import { run } from '../../main/ts'
+import { getNpm, getYarn } from '../../main/ts/util'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
@@ -18,25 +18,35 @@ const registryUrl = 'https://example.com'
 describe('yarn-audit-fix', () => {
   beforeEach(() => {
     // @ts-ignore
-    jest.spyOn(process, 'exit').mockImplementation(() => { /* noop */ })
+    jest.spyOn(process, 'exit').mockImplementation(() => {
+      /* noop */
+    })
     // @ts-ignore
-    fs.emptyDirSync.mockImplementation(() => { /* noop */ })
+    fs.emptyDirSync.mockImplementation(() => {
+      /* noop */
+    })
     // @ts-ignore
-    fs.copyFileSync.mockImplementation(() => { /* noop */ })
+    fs.copyFileSync.mockImplementation(() => {
+      /* noop */
+    })
     // @ts-ignore
     fs.readFileSync.mockImplementation(() => '{}')
     // @ts-ignore
-    fs.removeSync.mockImplementation(() => { /* noop */ })
+    fs.removeSync.mockImplementation(() => {
+      /* noop */
+    })
     // @ts-ignore
     fs.existsSync.mockImplementation(() => true)
     // @ts-ignore
-    fs.createSymlinkSync.mockImplementation(() => { /* noop */ })
+    fs.createSymlinkSync.mockImplementation(() => {
+      /* noop */
+    })
     // @ts-ignore
     synp.yarnToNpm.mockImplementation(() => '{}')
     // @ts-ignore
     synp.npmToYarn.mockImplementation(() => '{}')
     // @ts-ignore
-    cp.spawnSync.mockImplementation(() => ({status: 0, stdout: 'foobar'}))
+    cp.spawnSync.mockImplementation(() => ({ status: 0, stdout: 'foobar' }))
   })
   afterEach(jest.clearAllMocks)
   afterAll(jest.resetAllMocks)
@@ -44,53 +54,87 @@ describe('yarn-audit-fix', () => {
   describe('flow', () => {
     // eslint-disable-next-line
     const checkFlow = (skipPkgLockOnly?: boolean) => {
-      const temp = findCacheDir({name: 'yarn-audit-fix', create: true}) + ''
+      const temp = findCacheDir({ name: 'yarn-audit-fix', create: true }) + ''
       const cwd = process.cwd()
       const stdio = ['inherit', 'inherit', 'inherit']
 
       // Preparing...
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
-      expect(fs.copyFileSync).toHaveBeenCalledWith('yarn.lock', join(temp, 'yarn.lock'))
-      expect(fs.copyFileSync).toHaveBeenCalledWith('package.json', join(temp, 'package.json'))
-      expect(fs.copyFileSync).toHaveBeenCalledWith('.yarnrc', join(temp, '.yarnrc'))
-      expect(fs.copyFileSync).toHaveBeenCalledWith('.npmrc', join(temp, '.npmrc'))
-      expect(fs.createSymlinkSync).toHaveBeenCalledWith(join(cwd, 'node_modules'), join(temp, 'node_modules'), 'dir')
+      expect(fs.copyFileSync).toHaveBeenCalledWith(
+        'yarn.lock',
+        join(temp, 'yarn.lock'),
+      )
+      expect(fs.copyFileSync).toHaveBeenCalledWith(
+        'package.json',
+        join(temp, 'package.json'),
+      )
+      expect(fs.copyFileSync).toHaveBeenCalledWith(
+        '.yarnrc',
+        join(temp, '.yarnrc'),
+      )
+      expect(fs.copyFileSync).toHaveBeenCalledWith(
+        '.npmrc',
+        join(temp, '.npmrc'),
+      )
+      expect(fs.createSymlinkSync).toHaveBeenCalledWith(
+        join(cwd, 'node_modules'),
+        join(temp, 'node_modules'),
+        'dir',
+      )
 
       // Generating package-lock.json from yarn.lock...
       expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith(getNpm(), ([
-        'audit',
-        'fix',
-        skipPkgLockOnly ? undefined : '--package-lock-only',
-        '--verbose',
-        '--registry', registryUrl,
-        '--prefix', temp,
-      ]).filter(v => v !== undefined), {cwd: temp, stdio})
+      expect(cp.spawnSync).toHaveBeenCalledWith(
+        getNpm(),
+        [
+          'audit',
+          'fix',
+          skipPkgLockOnly ? undefined : '--package-lock-only',
+          '--verbose',
+          '--registry',
+          registryUrl,
+          '--prefix',
+          temp,
+        ].filter((v) => v !== undefined),
+        { cwd: temp, stdio },
+      )
 
       // Updating yarn.lock from package-lock.json...
-      expect(fs.copyFileSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'), 'yarn.lock')
-      expect(cp.spawnSync).toHaveBeenCalledWith(getYarn(), ['--update-checksums', '--verbose', '--registry', registryUrl], {cwd, stdio})
+      expect(fs.copyFileSync).toHaveBeenCalledWith(
+        join(temp, 'yarn.lock'),
+        'yarn.lock',
+      )
+      expect(cp.spawnSync).toHaveBeenCalledWith(
+        getYarn(),
+        ['--update-checksums', '--verbose', '--registry', registryUrl],
+        { cwd, stdio },
+      )
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
     }
 
     describe('runner', () => {
-      it('invokes cmd queue with proper args', async() => {
-        await run({verbose: true, foo: 'bar', 'package-lock-only': true, registry: registryUrl})
+      it('invokes cmd queue with proper args', async () => {
+        await run({
+          verbose: true,
+          foo: 'bar',
+          'package-lock-only': true,
+          registry: registryUrl,
+        })
         checkFlow()
       })
 
-      it('handles exceptions', async() => {
-        let reason = {error: new Error('foobar')} as any
+      it('handles exceptions', async () => {
+        let reason = { error: new Error('foobar') } as any
         // @ts-ignore
         cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({silent: true})).rejects.toBe(reason)
+        await expect(run({ silent: true })).rejects.toBe(reason)
 
-        reason = {status: 1}
+        reason = { status: 1 }
         // @ts-ignore
         cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({silent: true})).rejects.toBe(reason)
+        await expect(run({ silent: true })).rejects.toBe(reason)
 
         reason = new TypeError('foo')
         // @ts-ignore
@@ -104,7 +148,11 @@ describe('yarn-audit-fix', () => {
     describe('cli', () => {
       it('invokes cmd queue with proper args', () => {
         jest.isolateModules(() => {
-          process.argv.push('--verbose', '--package-lock-only=false', `--registry=${registryUrl}`)
+          process.argv.push(
+            '--verbose',
+            '--package-lock-only=false',
+            `--registry=${registryUrl}`,
+          )
           require('../../main/ts/cli')
         })
         checkFlow(true)
@@ -113,7 +161,7 @@ describe('yarn-audit-fix', () => {
       describe('on error', () => {
         // eslint-disable-next-line
         const checkExit = (reason: any, code: number): Promise<any> => {
-          const {promise, resolve} = iop()
+          const { promise, resolve } = iop()
           // @ts-ignore
           cp.spawnSync.mockImplementationOnce(() => {
             setImmediate(() => {
@@ -130,12 +178,12 @@ describe('yarn-audit-fix', () => {
           return promise
         }
 
-        it('returns exit code if passed', async() => {
-          await checkExit({status: 2}, 2)
+        it('returns exit code if passed', async () => {
+          await checkExit({ status: 2 }, 2)
         })
 
-        it('sets code to 1 otherwise', async() => {
-          await checkExit({error: new Error('foobar')}, 1)
+        it('sets code to 1 otherwise', async () => {
+          await checkExit({ error: new Error('foobar') }, 1)
         })
       })
     })
