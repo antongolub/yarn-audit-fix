@@ -13,7 +13,7 @@
 [![deps](https://img.shields.io/david/antongolub/yarn-audit-fix)](https://david-dm.org/antongolub/yarn-audit-fix)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability)](https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage)](https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage)
-[![CodeStyle](https://img.shields.io/badge/code%20style-tslint--config--qiwi-brightgreen.svg)](https://github.com/qiwi/tslint-config-qiwi)
+[![CodeStyle](https://img.shields.io/badge/code%20style-eslint--config--qiwi-brightgreen.svg)](https://github.com/qiwi/lint-config-qiwi)
 
 Apply `npm audit fix` logic to `yarn.lock`
 
