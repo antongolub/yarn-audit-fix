@@ -1,5 +1,5 @@
 language: node_js
-cache: npm
+cache: yarn
 node_js: 14
 
 jobs:
@@ -14,6 +14,7 @@ jobs:
         create:
           name: linux-shared
           paths:
+            - node_modules
             - target
             - flow-typed
             - typings
@@ -26,6 +27,7 @@ jobs:
         create:
           name: win-shared
           paths:
+            - node_modules
             - target
 
     - &test
@@ -33,7 +35,7 @@ jobs:
       os: linux
       node_js: 12
       install: skip
-      script: yarn test
+      script: yarn test:integration
       workspaces:
         use: linux-shared
     - <<: *test
