@@ -39,8 +39,6 @@ jobs:
       workspaces:
         use: linux-shared
     - <<: *test
-      node_js: 15
-    - <<: *test
       node_js: 14
       before_script:
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -51,6 +49,8 @@ jobs:
       after_script:
         - ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+    - <<: *test
+      node_js: 15
     - <<: *test
       os: windows
       env: YARN_GPG=no
