@@ -77,7 +77,7 @@ const createTempAssets: TCallback = ({ temp }) => {
  * @return {void}
  */
 const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
-  const symlinkType = getSymlinkType(flags.symlink) as SymlinkType // TODO fix fs-extra typings issue
+  const symlinkType = getSymlinkType(flags.symlink)
   const workspaces = getWorkspaces(cwd, manifest)
   const links = [join(cwd, 'node_modules'), ...workspaces]
 
@@ -86,7 +86,7 @@ const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
     const from = join(cwd, rel)
     const to = join(temp, rel)
 
-    fs.createSymlinkSync(from, to, symlinkType)
+    fs.createSymlinkSync(from, to, symlinkType as SymlinkType) // TODO fix fs-extra typings issue
   })
 }
 

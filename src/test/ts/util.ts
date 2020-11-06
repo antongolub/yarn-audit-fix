@@ -80,11 +80,11 @@ describe('util', () => {
 
   describe('#getTemp', () => {
     it('properly resolves temp dir path', () => {
-      const cwd = process.cwd()
-      const temp = resolve(__dirname, '../temp')
+      const pwd = process.cwd()
+      const tempdir = resolve(__dirname, '../temp')
       const cases: [string, string | undefined, string][] = [
-        [cwd, undefined, resolve(cwd, 'node_modules/.cache/yarn-audit-fix')],
-        [cwd, temp, temp],
+        [pwd, undefined, resolve(pwd, 'node_modules/.cache/yarn-audit-fix')],
+        [pwd, tempdir, tempdir],
       ]
 
       cases.forEach(([cwd, temp, result]) => {
