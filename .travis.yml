@@ -13,7 +13,7 @@ jobs:
       install: yarn
       script:
         - yarn build
-        - if [ $CI_TEST != "false" ]; then
+        - if [ "$CI_TEST" != "false" ]; then
             yarn test;
           fi
     - &build
@@ -59,19 +59,19 @@ jobs:
     - <<: *test
       if: branch = master AND type != pull_request AND env(CI_TEST) != false
       before_script:
-        - if [ $CC_TEST_REPORTER_ID != "" ]; then
+        - if [ "$CC_TEST_REPORTER_ID" != "" ]; then
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
             chmod +x ./cc-test-reporter;
             ./cc-test-reporter before-build;
           fi
       script:
-        - if [ $CC_TEST_REPORTER_ID != "" ]; then
+        - if [ "$CC_TEST_REPORTER_ID" != "" ]; then
             yarn test:report;
           else
             yarn test;
           fi
       after_script:
-        - if [ $CC_TEST_REPORTER_ID != "" ]; then
+        - if [ "$CC_TEST_REPORTER_ID" != "" ]; then
             ./cc-test-reporter format-coverage -t lcov ./coverage/lcov.info;
             ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT;
           fi
