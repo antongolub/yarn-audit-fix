@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import cp, { StdioOptions } from 'child_process'
 import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
-import fs, { ensureDirSync, FsSymlinkType, readFileSync } from 'fs-extra'
+import fs, { ensureDirSync, readFileSync,SymlinkType } from 'fs-extra'
 import minimist from 'minimist'
 import { resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
@@ -71,7 +71,7 @@ export const isWindows = (): boolean =>
   process.platform === 'win32' ||
   /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
-export const getSymlinkType = (type?: string): FsSymlinkType =>
+export const getSymlinkType = (type?: string): SymlinkType =>
   type === 'junction' && isWindows() ? type : 'dir'
 
 // https://github.com/facebook/jest/issues/2993
