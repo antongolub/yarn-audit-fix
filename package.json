@@ -21,7 +21,7 @@
     "test:integration": "node ./target/es5/cli.js --package-lock-only --audit-level=moderate",
     "test:integration-build": "yarn build:es5 && yarn test:integration",
     "test": "yarn lint && yarn test:unit && yarn test:integration",
-    "clean": "rimraf target typings flow-typed buildcache",
+    "clean": "rimraf target typings flow-typed buildcache docs coverage",
     "build": "yarn clean && yarn build:es5 && yarn build:es6 && yarn build:ts && yarn build:libdef && yarn docs",
     "build:es5": "mkdirp target/es5 && tsc -p tsconfig.es5.json",
     "build:es6": "mkdirp target/es6 && tsc -p tsconfig.es6.json",
@@ -30,7 +30,7 @@
     "test:report": "yarn test && yarn push:report",
     "push:report": "yarn coveralls:push",
     "coveralls:push": "cat ./coverage/lcov.info | coveralls || exit 0",
-    "docs": "typedoc --readme README.md --tsconfig tsconfig.json src/main --ignoreCompilerErrors || exit 0",
+    "docs": "typedoc --readme README.md --tsconfig tsconfig.json src/main",
     "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
     "postupdate": "yarn && yarn build && yarn test",
     "publish:beta": "npm publish --no-git-tag-version --tag beta",
@@ -65,7 +65,7 @@
   "dependencies": {
     "@types/bash-glob": "^2.0.0",
     "@types/find-cache-dir": "^3.2.0",
-    "@types/fs-extra": "^9.0.3",
+    "@types/fs-extra": "^9.0.4",
     "@types/npm": "^2.0.31",
     "bash-glob": "^2.0.0",
     "bash-path": "^2.0.1",
@@ -79,23 +79,23 @@
     "tslib": "^2.0.3"
   },
   "devDependencies": {
-    "@qiwi/libdefkit": "^2.1.4",
+    "@qiwi/libdefkit": "^2.1.5",
     "@swissquote/crafty-preset-jest": "^1.13.7",
-    "@types/jest": "^26.0.15",
-    "@types/node": "^14.14.6",
+    "@types/jest": "^26.0.17",
+    "@types/node": "^14.14.10",
     "coveralls": "^3.1.0",
     "cpy-cli": "^3.1.1",
     "inside-out-promise": "^2.1.2",
     "jest": "^26.6.3",
     "mkdirp": "^1.0.4",
-    "terser": "^5.3.8",
-    "ts-jest": "^26.4.3",
-    "eslint": "^7.12.1",
+    "terser": "^5.5.1",
+    "ts-jest": "^26.4.4",
+    "eslint": "^7.15.0",
     "eslint-config-qiwi": "^1.10.0",
     "eslint-config-prettier": "^7.0.0",
     "typedoc": "^0.19.2",
     "typedoc-plugin-external-module-name": "^4.0.3",
     "typescript": "4.1.2",
-    "prettier": "^2.1.2"
+    "prettier": "^2.2.1"
   }
 }
