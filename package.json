@@ -22,7 +22,7 @@
     "test:integration-build": "yarn build:es5 && yarn test:integration",
     "test:depcheck": "npx depcheck --ignores tslib,@swissquote/crafty-preset-jest,@types/jest,@types/node",
     "test:report": "yarn test && yarn push:report",
-    "test": "npm-run-all -p -l lint test:unit test:integration",
+    "test": "npm-run-all -p -l lint test:unit test:integration test:depcheck",
     "build": "yarn clean && npm-run-all -p -l build:es5 build:es6 build:ts build:libdef docs",
     "build:es5": "mkdirp target/es5 && tsc -p tsconfig.es5.json",
     "build:es6": "mkdirp target/es6 && tsc -p tsconfig.es6.json",
@@ -62,7 +62,6 @@
     "@types/bash-glob": "^2.0.0",
     "@types/find-cache-dir": "^3.2.0",
     "@types/fs-extra": "^9.0.6",
-    "@types/npm": "^2.0.31",
     "bash-glob": "^2.0.0",
     "bash-path": "^2.0.1",
     "chalk": "^4.1.0",
@@ -92,7 +91,8 @@
     "eslint-config-prettier": "^7.1.0",
     "typedoc": "^0.20.5",
     "typescript": "4.1.3",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "find-up": "^5.0.0"
   },
   "repository": {
     "type": "git",
