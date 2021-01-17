@@ -42,7 +42,7 @@ const checkValue = (
 ): boolean =>
   value !== 'false' &&
   !omitlist.includes(key) &&
-  (!picklist.length || picklist.includes(key))
+  (picklist.length === 0 || picklist.includes(key))
 
 const formatFlag = (key: string): string =>
   (key.length === 1 ? '-' : '--') + key
