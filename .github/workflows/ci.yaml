@@ -1,0 +1,118 @@
+# This is a Github Workflow that runs tests on any push or pull request.
+# If the tests pass and this is a push to the master branch it also runs Semantic Release.
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - run: yarn
+      - run: yarn build
+
+      - name: Save target
+        uses: actions/upload-artifact@v2
+        with:
+          name: target
+          retention-days: 1
+          path: |
+            docs
+            target
+            flow-typed
+            typings
+            buildstamp.json
+
+  test_fast:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore target
+        uses: actions/download-artifact@v2
+        with:
+          name: target
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - run: yarn
+      - name: Unit test only
+        run: yarn test:unit
+      - name: Push coverage
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v2
+        with:
+          name: target
+          retention-days: 1
+          path: coverage
+
+  test:
+    if: github.event_name == 'pull_request'
+    strategy:
+      matrix:
+        os: [ windows-2019, ubuntu-20.04 ]
+        node-version: [ 12, 14 ]
+    name: Test (Node v${{ matrix.node-version }}, OS ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore target
+        uses: actions/download-artifact@v2
+        with:
+          name: target
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn
+      - name: Intergarion test
+        if: matrix.node-version != '14' || matrix.os != 'ubuntu-20.04'
+        run: yarn test:integration
+      - name: Full test suite
+        if: matrix.node-version == '14' && matrix.os == 'ubuntu-20.04'
+        run: yarn test
+
+  release:
+    name: Release
+    # https://github.community/t/trigger-job-on-tag-push-only/18076
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-20.04
+    needs: test_fast
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore target
+        uses: actions/download-artifact@v2
+        with:
+          name: target
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Codeclimate
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageLocations: |
+            ${{github.workspace}}/coverage/*.lcov:lcov
+
+      - name: Coveralls
+        run: yarn push:report
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          extends: |
+            @qiwi/semrel-config
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_AUTHOR_EMAIL: 'mailbox@antongolub.ru'
+          GIT_COMMITTER_EMAIL: 'mailbox@antongolub.ru'
+          GIT_AUTHOR_NAME: '@antongolub'
+          GIT_COMMITTER_NAME: '@antongolub'
