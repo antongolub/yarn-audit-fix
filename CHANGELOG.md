@@ -1,3 +1,10 @@
+## [3.2.15](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.14...v3.2.15) (2021-02-10)
+
+
+### Performance Improvements
+
+* **package:** up npm ([d12ce69](https://github.com/antongolub/yarn-audit-fix/commit/d12ce69c06760da83a6099a2c243d90b2932e955))
+
 ## [3.2.14](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.13...v3.2.14) (2021-02-06)
 
 
