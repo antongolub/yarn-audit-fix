@@ -3,21 +3,47 @@
 name: CI
 on: [push, pull_request]
 jobs:
+  # Handle [skip ci] / [ci skip] directives in commit messages
+  init:
+    name: init
+    runs-on: ubuntu-20.04
+    outputs:
+      skip: ${{ steps.ci-skip-step.outputs.ci-skip }}
+      skip-not: ${{ steps.ci-skip-step.outputs.ci-skip-not }}
+    steps:
+      - name: Checkuout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - id: ci-skip-step
+        uses: mstachniuk/ci-skip@v1
+
   build:
     name: build
+    needs: init
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - name: Checkuout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: yarn
-      - run: yarn build
 
-      - name: Save target
+      - name: Yarn install
+        run: yarn
+
+      - name: Build
+        run: yarn build
+
+      - name: Save artifact
         uses: actions/upload-artifact@v2
         with:
-          name: target
+          name: artifact-{{ github.run_id }}
           retention-days: 1
           path: |
             docs
@@ -26,52 +52,77 @@ jobs:
             typings
             buildstamp.json
 
-  test_fast:
+  # Fast unit tests flow
+  test_push:
     needs: build
     if: github.event_name == 'push'
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Restore target
+      - name: Checkuout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Restore artifact
         uses: actions/download-artifact@v2
         with:
-          name: target
-      - uses: actions/setup-node@v2
+          name: artifact-{{ github.run_id }}
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
         with:
           node-version: 14
-      - run: yarn
+
+      - name: Yarn install
+        run: yarn
+
       - name: Unit test only
         run: yarn test:unit
-      - name: Push coverage
+
+      - name: Update coverage
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v2
         with:
-          name: target
+          name: artifact-{{ github.run_id }}
           retention-days: 1
           path: coverage
 
-  test:
+  # Full tests for PR
+  test_pr:
     if: github.event_name == 'pull_request'
     strategy:
       matrix:
         os: [ windows-2019, ubuntu-20.04 ]
         node-version: [ 12, 14 ]
+
     name: Test (Node v${{ matrix.node-version }}, OS ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     needs: build
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Restore target
+      - name: Checkuout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Restore artifact
         uses: actions/download-artifact@v2
         with:
-          name: target
-      - uses: actions/setup-node@v2
+          name: artifact-{{ github.run_id }}
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn
+
+      - name: Yarn install
+        run: yarn
+
       - name: Intergarion test
         if: matrix.node-version != '14' || matrix.os != 'ubuntu-20.04'
         run: yarn test:integration
+
+      # Run all tests for Ubuntu + NodeJS v14 only
       - name: Full test suite
         if: matrix.node-version == '14' && matrix.os == 'ubuntu-20.04'
         run: yarn test
@@ -81,14 +132,18 @@ jobs:
     # https://github.community/t/trigger-job-on-tag-push-only/18076
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-20.04
-    needs: test_fast
+    needs: test_push
     steps:
-      - uses: actions/checkout@v2
-      - name: Restore target
+      - name: Checkuout
+        uses: actions/checkout@v2
+
+      - name: Restore artifact
         uses: actions/download-artifact@v2
         with:
-          name: target
-      - uses: actions/setup-node@v2
+          name: artifact-{{ github.run_id }}
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
         with:
           node-version: 14
 
@@ -101,7 +156,9 @@ jobs:
             ${{github.workspace}}/coverage/*.lcov:lcov
 
       - name: Coveralls
-        run: yarn push:report
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
