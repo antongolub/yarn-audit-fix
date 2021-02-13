@@ -86,7 +86,8 @@ jobs:
           name: artifact-${{ github.run_id }}
           retention-days: 1
           path: |
-            coverage/
+            coverage
+            .nyc_output
 
   # Full tests for PR
   test_pr:
