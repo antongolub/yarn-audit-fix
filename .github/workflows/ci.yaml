@@ -43,7 +43,7 @@ jobs:
       - name: Save artifact
         uses: actions/upload-artifact@v2
         with:
-          name: artifact-{{ github.run_id }}
+          name: artifact-${{ github.run_id }}
           retention-days: 1
           path: |
             docs
@@ -66,7 +66,7 @@ jobs:
       - name: Restore artifact
         uses: actions/download-artifact@v2
         with:
-          name: artifact-{{ github.run_id }}
+          name: artifact-${{ github.run_id }}
 
       - name: Setup NodeJS
         uses: actions/setup-node@v2
@@ -83,7 +83,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v2
         with:
-          name: artifact-{{ github.run_id }}
+          name: artifact-${{ github.run_id }}
           retention-days: 1
           path: coverage
 
@@ -108,7 +108,7 @@ jobs:
       - name: Restore artifact
         uses: actions/download-artifact@v2
         with:
-          name: artifact-{{ github.run_id }}
+          name: artifact-${{ github.run_id }}
 
       - name: Setup NodeJS
         uses: actions/setup-node@v2
@@ -140,7 +140,7 @@ jobs:
       - name: Restore artifact
         uses: actions/download-artifact@v2
         with:
-          name: artifact-{{ github.run_id }}
+          name: artifact-${{ github.run_id }}
 
       - name: Setup NodeJS
         uses: actions/setup-node@v2
@@ -153,12 +153,13 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
           coverageLocations: |
-            ${{github.workspace}}/coverage/*.lcov:lcov
+            ${{ github.workspace }}/coverage/lcov.info:lcov
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ${{ github.workspace }}/coverage/lcov.info
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2
