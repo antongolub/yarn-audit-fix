@@ -1,12 +1,13 @@
-import { resolve } from 'path'
+import {join, resolve} from 'path'
 
 import {
   formatFlags,
   getNpm,
   getSymlinkType,
   getTemp,
+  getWorkspaces,
   isWindows,
-  parseFlags,
+  parseFlags, readJson,
 } from '../../main/ts/util'
 
 describe('util', () => {
@@ -93,16 +94,14 @@ describe('util', () => {
     })
   })
 
-  describe('#glob', () => {
-    it('checks `bash` to be installed', () => {
-      jest.isolateModules(() => {
-        jest.resetModules()
-        jest.mock('bash-path', () => () => null) // eslint-disable-line
+  describe('getWorkspaces', () => {
+    it('returns paths of found package.json files', () => {
+      const cwd = resolve(__dirname, '../fixtures/regular-monorepo')
+      const manifest = readJson(join(cwd, 'package.json'))
+      const files = getWorkspaces(cwd, manifest)
+      const expected = ['a', 'b'].map((p) => join(cwd, 'packages', p, 'package.json'))
 
-        const { glob } = require('../../main/ts/glob') // eslint-disable-line
-
-        expect(() => glob([])).toThrowError('`bash` must be installed')
-      })
+      expect(files).toEqual(expected)
     })
   })
 })

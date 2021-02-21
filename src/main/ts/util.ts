@@ -1,9 +1,9 @@
-import { Options as GlobOptions } from 'bash-glob'
 import chalk from 'chalk'
 import cp, { StdioOptions } from 'child_process'
 import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
 import fs, { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
+import { GlobbyOptions } from 'globby'
 import minimist from 'minimist'
 import { resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
@@ -127,9 +127,10 @@ export const getWorkspaces = (
     packages.map((p: string) => p.replace(/\/?$/, '/package.json')),
     {
       cwd,
-      realpath: true,
-      ignore: '**/node_modules/**',
-    } as GlobOptions,
+      onlyFiles: true,
+      absolute: true,
+      gitignore: true,
+    } as GlobbyOptions,
   )
 }
 
