@@ -2,10 +2,10 @@ import cp from 'child_process'
 import findCacheDir from 'find-cache-dir'
 import fs from 'fs-extra'
 import { factory as iop } from 'inside-out-promise'
-import { join } from 'path'
+import { join, resolve } from 'path'
 import synp from 'synp'
 
-import { run } from '../../main/ts'
+import { createSymlinks, run } from '../../main/ts'
 import { getNpm, getYarn } from '../../main/ts/util'
 
 jest.mock('child_process')
@@ -14,6 +14,8 @@ jest.mock('npm')
 jest.mock('synp')
 
 const registryUrl = 'https://example.com'
+const strMatching = (temp: string, ending: string) =>
+  expect.stringMatching(new RegExp(`${temp}.+${ending}`))
 
 describe('yarn-audit-fix', () => {
   beforeEach(() => {
@@ -51,6 +53,27 @@ describe('yarn-audit-fix', () => {
   afterEach(jest.clearAllMocks)
   afterAll(jest.resetAllMocks)
 
+  describe('createSymlinks', () => {
+    it('establishes proper links', () => {
+      const temp = 'foo/bar'
+      const cwd = resolve(__dirname, '../fixtures/regular-monorepo')
+      const manifest = {
+        workspaces: ['packages/*'],
+      }
+
+      createSymlinks({ temp, flags: {}, cwd, manifest })
+
+      const links = ['node_modules', 'packages/a', 'packages/b']
+      links.forEach((link) => {
+        expect(fs.createSymlinkSync).toHaveBeenCalledWith(
+          join(cwd, link),
+          strMatching(temp, link),
+          'dir',
+        )
+      })
+    })
+  })
+
   describe('flow', () => {
     // eslint-disable-next-line
     const checkFlow = (skipPkgLockOnly?: boolean) => {
@@ -59,31 +82,31 @@ describe('yarn-audit-fix', () => {
       const stdio = ['inherit', 'inherit', 'inherit']
 
       // Preparing...
-      expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
+      expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
       expect(fs.copyFileSync).toHaveBeenCalledWith(
         'yarn.lock',
-        join(temp, 'yarn.lock'),
+        strMatching(temp, 'yarn.lock'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
         'package.json',
-        join(temp, 'package.json'),
+        strMatching(temp, 'package.json'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
         '.yarnrc',
-        join(temp, '.yarnrc'),
+        strMatching(temp, '.yarnrc'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
         '.npmrc',
-        join(temp, '.npmrc'),
+        strMatching(temp, '.npmrc'),
       )
       expect(fs.createSymlinkSync).toHaveBeenCalledWith(
         join(cwd, 'node_modules'),
-        join(temp, 'node_modules'),
+        strMatching(temp, 'node_modules'),
         'dir',
       )
 
       // Generating package-lock.json from yarn.lock...
-      expect(fs.removeSync).toHaveBeenCalledWith(join(temp, 'yarn.lock'))
+      expect(fs.removeSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
       expect(cp.spawnSync).toHaveBeenCalledWith(
@@ -96,14 +119,14 @@ describe('yarn-audit-fix', () => {
           '--registry',
           registryUrl,
           '--prefix',
-          temp,
+          expect.stringMatching(temp),
         ].filter((v) => v !== undefined),
-        { cwd: temp, stdio },
+        { cwd: expect.stringMatching(temp), stdio },
       )
 
       // Updating yarn.lock from package-lock.json...
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        join(temp, 'yarn.lock'),
+        strMatching(temp, 'yarn.lock'),
         'yarn.lock',
       )
       expect(cp.spawnSync).toHaveBeenCalledWith(
@@ -111,7 +134,7 @@ describe('yarn-audit-fix', () => {
         ['--update-checksums', '--verbose', '--registry', registryUrl],
         { cwd, stdio },
       )
-      expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
+      expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
     }
 
     describe('runner', () => {

@@ -85,12 +85,12 @@ describe('util', () => {
       const pwd = process.cwd()
       const tempdir = resolve(__dirname, '../temp')
       const cases: [string, string | undefined, string][] = [
-        [pwd, undefined, resolve(pwd, 'node_modules/.cache/yarn-audit-fix')],
         [pwd, tempdir, tempdir],
+        [pwd, undefined, resolve(pwd, 'node_modules/.cache/yarn-audit-fix')],
       ]
 
       cases.forEach(([cwd, temp, result]) => {
-        expect(getTemp(cwd, temp)).toBe(result)
+        expect(getTemp(cwd, temp)).toMatch(result)
       })
     })
   })

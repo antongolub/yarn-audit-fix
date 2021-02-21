@@ -76,13 +76,16 @@ const createTempAssets: TCallback = ({ temp }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
+export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
   const symlinkType = getSymlinkType(flags.symlink)
   const workspaces = getWorkspaces(cwd, manifest)
-  const links = [join(cwd, 'node_modules'), ...workspaces]
+  const links = [
+    join(cwd, 'node_modules'),
+    ...workspaces.map((ws) => dirname(ws)),
+  ]
 
-  links.forEach((pkgPath: string) => {
-    const rel = dirname(relative(pkgPath, cwd))
+  links.forEach((link: string) => {
+    const rel = relative(cwd, link)
     const from = join(cwd, rel)
     const to = join(temp, rel)
 

@@ -1,11 +1,12 @@
 import chalk from 'chalk'
 import cp, { StdioOptions } from 'child_process'
+import crypto from 'crypto'
 import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
 import fs, { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
 import { GlobbyOptions } from 'globby'
 import minimist from 'minimist'
-import { resolve } from 'path'
+import { join, resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
 
 import { glob } from './glob'
@@ -137,13 +138,20 @@ export const getWorkspaces = (
 export const readJson = (path: string): any =>
   JSON.parse(readFileSync(path).toString('utf-8').trim())
 
+export const ensureDir = (dir: string): string => {
+  ensureDirSync(dir)
+
+  return dir
+}
+
 export const getTemp = (cwd: string, temp?: string): string => {
   if (temp) {
-    const _temp = resolve(temp)
-    ensureDirSync(_temp)
-
-    return _temp
+    return ensureDir(resolve(temp))
   }
 
-  return findCacheDir({ name: 'yarn-audit-fix', create: true, cwd }) + ''
+  const id = crypto.randomBytes(16).toString('hex')
+  const cacheDir = findCacheDir({ name: 'yarn-audit-fix', cwd }) + ''
+  const tempDir = join(cacheDir, id)
+
+  return ensureDir(tempDir)
 }
