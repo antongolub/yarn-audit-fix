@@ -28,7 +28,7 @@ export const invoke = (
     throw result
   }
 
-  return result.stdout?.toString().trim()
+  return '' + result.stdout?.toString().trim()
 }
 
 export const parseFlags = (argv: string[]): ReturnType<typeof minimist> =>
