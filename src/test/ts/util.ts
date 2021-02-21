@@ -1,4 +1,4 @@
-import {join, resolve} from 'path'
+import { join, resolve } from 'path'
 
 import {
   formatFlags,
@@ -7,7 +7,8 @@ import {
   getTemp,
   getWorkspaces,
   isWindows,
-  parseFlags, readJson,
+  parseFlags,
+  readJson,
 } from '../../main/ts/util'
 
 describe('util', () => {
@@ -99,7 +100,9 @@ describe('util', () => {
       const cwd = resolve(__dirname, '../fixtures/regular-monorepo')
       const manifest = readJson(join(cwd, 'package.json'))
       const files = getWorkspaces(cwd, manifest)
-      const expected = ['a', 'b'].map((p) => join(cwd, 'packages', p, 'package.json'))
+      const expected = ['a', 'b'].map((p) =>
+        join(cwd, 'packages', p, 'package.json'),
+      )
 
       expect(files).toEqual(expected)
     })
