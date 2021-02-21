@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import fs, { SymlinkType } from 'fs-extra'
-import { join } from 'path'
+import { dirname, join, relative } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
 import synp from 'synp'
 
@@ -82,7 +82,7 @@ const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
   const links = [join(cwd, 'node_modules'), ...workspaces]
 
   links.forEach((pkgPath: string) => {
-    const rel = pkgPath.replace(/\/package\.json$/, '').slice(cwd.length)
+    const rel = dirname(relative(pkgPath, cwd))
     const from = join(cwd, rel)
     const to = join(temp, rel)
 
