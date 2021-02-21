@@ -1,3 +1,11 @@
+# [3.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.16...v3.3.0) (2021-02-21)
+
+
+### Features
+
+* replace bash-glob with globby (do not require bash to be installed) ([c2999ee](https://github.com/antongolub/yarn-audit-fix/commit/c2999eece1795f1722ebf73a66bc39f5d50b603b))
+* use separate temp dir for each exec context ([7f24b51](https://github.com/antongolub/yarn-audit-fix/commit/7f24b51833d27e87b75b08f08fd23b99b210709b)), closes [#45](https://github.com/antongolub/yarn-audit-fix/issues/45)
+
 ## [3.2.16](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.15...v3.2.16) (2021-02-13)
 
 
