@@ -1,6 +1,7 @@
 {
   "name": "yarn-audit-fix",
   "out": "./docs",
+  "entryPoints": ["src/main/ts"],
   "exclude": ["src/test", "**/node_modules/**", "paralleljs"],
   "externalPattern": ["**/node_modules/**"],
   "excludePrivate": false,
