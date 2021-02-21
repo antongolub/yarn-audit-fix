@@ -591,7 +591,7 @@
 "@npmcli/arborist@^2.0.0", "@npmcli/arborist@^2.2.2":
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-2.2.3.tgz#fb5777be5bf143a466f2a62ceb13c85ce40b3bea"
-  integrity "sha1-+1d3vlvxQ6Rm8qYs6xPIXOQLO+o= sha512-K7yWh9uQZ87o8ktcsr+5ummcshP6Jsif05T4F7j1jA8WNCN6CP6I/1ePEsi1fTjCwKF/TAYn2gLX719LbW7gCA=="
+  integrity sha512-K7yWh9uQZ87o8ktcsr+5ummcshP6Jsif05T4F7j1jA8WNCN6CP6I/1ePEsi1fTjCwKF/TAYn2gLX719LbW7gCA==
   dependencies:
     "@npmcli/installed-package-contents" "^1.0.6"
     "@npmcli/map-workspaces" "^1.0.2"
@@ -680,7 +680,7 @@
 "@npmcli/metavuln-calculator@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@npmcli/metavuln-calculator/-/metavuln-calculator-1.1.0.tgz#61fbb8a70b618fee5a0ba818018b0476263e523e"
-  integrity "sha1-Yfu4pwthj+5aC6gYAYsEdiY+Uj4= sha512-fb51NyiWHjeqqFez9FXhvr+E2Dv4ZjPGVgnj8QC1xjHRSw4gMRIO8pNCzU11WYQ2wZxoHBhPMgovZGxP5lP74g=="
+  integrity sha512-fb51NyiWHjeqqFez9FXhvr+E2Dv4ZjPGVgnj8QC1xjHRSw4gMRIO8pNCzU11WYQ2wZxoHBhPMgovZGxP5lP74g==
   dependencies:
     cacache "^15.0.5"
     pacote "^11.1.11"
@@ -1503,11 +1503,6 @@ bash-path@^1.0.1:
   dependencies:
     arr-union "^3.1.0"
     is-windows "^1.0.1"
-
-bash-path@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/bash-path/-/bash-path-2.0.1.tgz#f1f2fa0f071aba04918ecbf21bdc4ab699e26091"
-  integrity sha512-cBJaWODBsbTsf8WylNtTptGP7Vd/JSN4Vc0ahBXUY3e/HNobG+LRPCoIYvOefOkrcYnotEbjd0J9URZPtGpjlw==
 
 bcrypt-pbkdf@^1.0.0:
   version "1.0.2"
@@ -3008,7 +3003,7 @@ globals@^12.1.0:
   dependencies:
     type-fest "^0.8.1"
 
-globby@^11.0.1:
+globby@^11.0.1, globby@^11.0.2:
   version "11.0.2"
   resolved "https://registry.yarnpkg.com/globby/-/globby-11.0.2.tgz#1af538b766a3b540ebfb58a32b2e2d5897321d83"
   integrity sha512-2ZThXDvvV8fYFRVIxnrMQBipZQDr7MxKAmQK1vujaj9/7eF0efG7BPUKJ7jP7G5SLF37xKDXvO4S/KKLj/Z0og==
@@ -4283,7 +4278,7 @@ libnpmorg@^2.0.1:
 libnpmpack@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/libnpmpack/-/libnpmpack-2.0.1.tgz#d3eac25cc8612f4e7cdeed4730eee339ba51c643"
-  integrity "sha1-0+rCXMhhL0583u1HMO7jObpRxkM= sha512-He4/jxOwlaQ7YG7sIC1+yNeXeUDQt8RLBvpI68R3RzPMZPa4/VpxhlDo8GtBOBDYoU8eq6v1wKL38sq58u4ibQ=="
+  integrity sha512-He4/jxOwlaQ7YG7sIC1+yNeXeUDQt8RLBvpI68R3RzPMZPa4/VpxhlDo8GtBOBDYoU8eq6v1wKL38sq58u4ibQ==
   dependencies:
     "@npmcli/run-script" "^1.8.3"
     npm-package-arg "^8.1.0"
@@ -4318,7 +4313,7 @@ libnpmteam@^2.0.2:
 libnpmversion@^1.0.10:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/libnpmversion/-/libnpmversion-1.0.11.tgz#589c9bc78c342b99929db890c41a1557d905e2ec"
-  integrity "sha1-WJybx4w0K5mSnbiQxBoVV9kF4uw= sha512-HKbfJ0wwx+W9Br4bvbHUMN/YIe7B8qmFtdaLZnXEUozaaTD6gGpIEf1aH1xRlGfNPocT6YBz3O6+RAgSndAgbA=="
+  integrity sha512-HKbfJ0wwx+W9Br4bvbHUMN/YIe7B8qmFtdaLZnXEUozaaTD6gGpIEf1aH1xRlGfNPocT6YBz3O6+RAgSndAgbA==
   dependencies:
     "@npmcli/git" "^2.0.6"
     "@npmcli/run-script" "^1.8.3"
@@ -4853,7 +4848,7 @@ npm-normalize-package-bin@^1.0.0, npm-normalize-package-bin@^1.0.1:
 npm-package-arg@^8.0.0, npm-package-arg@^8.0.1, npm-package-arg@^8.1.0:
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/npm-package-arg/-/npm-package-arg-8.1.1.tgz#00ebf16ac395c63318e67ce66780a06db6df1b04"
-  integrity "sha1-AOvxasOVxjMY5nzmZ4CgbbbfGwQ= sha512-CsP95FhWQDwNqiYS+Q0mZ7FAEDytDZAkNxQqea6IaAFJTAY9Lhhqyl0irU/6PMc7BGfUmnsbHcqxJD7XuVM/rg=="
+  integrity sha512-CsP95FhWQDwNqiYS+Q0mZ7FAEDytDZAkNxQqea6IaAFJTAY9Lhhqyl0irU/6PMc7BGfUmnsbHcqxJD7XuVM/rg==
   dependencies:
     hosted-git-info "^3.0.6"
     semver "^7.0.0"
@@ -5255,7 +5250,7 @@ p-try@^2.0.0:
 pacote@^11.1.11, pacote@^11.2.3, pacote@^11.2.6:
   version "11.2.7"
   resolved "https://registry.yarnpkg.com/pacote/-/pacote-11.2.7.tgz#a44a9d40d4feac524e9ce78d77e2b390181d8afc"
-  integrity "sha1-pEqdQNT+rFJOnOeNd+KzkBgdivw= sha512-ogxPor11v/rnU9ukwLlI2dPx22q9iob1+yZyqSwerKsOvBMhU9e+SJHtxY4y2N0MRH4/5jGsGiRLsZeJWyM4dQ=="
+  integrity sha512-ogxPor11v/rnU9ukwLlI2dPx22q9iob1+yZyqSwerKsOvBMhU9e+SJHtxY4y2N0MRH4/5jGsGiRLsZeJWyM4dQ==
   dependencies:
     "@npmcli/git" "^2.0.1"
     "@npmcli/installed-package-contents" "^1.0.6"
