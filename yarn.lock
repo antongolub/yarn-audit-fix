@@ -860,11 +860,6 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/bash-glob@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/bash-glob/-/bash-glob-2.0.0.tgz#bba8dcad40e615f33e400170fa551daa40ee3c6a"
-  integrity sha512-8jAlbKjXTGhbJoEwUOWfCME5favbf3y4+2FirPno2QzMKFiK6Jguvyu15Jz8ZqA7i+bha8ZZBjlLGG1edb2DDA==
-
 "@types/detect-indent@6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@types/detect-indent/-/detect-indent-6.0.0.tgz#5ff60617bfa71950694f53bcca86309414534f19"

@@ -58,7 +58,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "@types/bash-glob": "^2.0.0",
     "@types/find-cache-dir": "^3.2.0",
     "@types/fs-extra": "^9.0.7",
     "globby": "^11.0.2",
