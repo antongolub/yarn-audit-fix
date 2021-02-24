@@ -86,7 +86,7 @@
     "eslint-config-qiwi": "^1.10.7",
     "eslint-config-prettier": "^8.0.0",
     "typedoc": "^0.20.27",
-    "typescript": "4.1.5",
+    "typescript": "4.2.2",
     "prettier": "^2.2.1",
     "find-up": "^5.0.0"
   },
