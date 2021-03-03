@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>util | yarn-audit-fix</title>
+	<title>runner | yarn-audit-fix</title>
 	<meta name="description" content="Documentation for yarn-audit-fix">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">/*! normalize.css v1.1.3 | MIT License | git.io/normalize */
@@ -2682,41 +2682,11 @@ img {
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#ensuredir" class="tsd-kind-icon">ensure<wbr>Dir</a>
+		<li class=" tsd-kind-variable tsd-parent-kind-module">
+			<a href="runner.html#stages" class="tsd-kind-icon">stages</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#formatflags" class="tsd-kind-icon">format<wbr>Flags</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#getclosestnpm" class="tsd-kind-icon">get<wbr>Closest<wbr>Npm</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#getnpm" class="tsd-kind-icon">get<wbr>Npm</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#getsymlinktype" class="tsd-kind-icon">get<wbr>Symlink<wbr>Type</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#gettemp" class="tsd-kind-icon">get<wbr>Temp</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#getworkspaces" class="tsd-kind-icon">get<wbr>Workspaces</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#getyarn" class="tsd-kind-icon">get<wbr>Yarn</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#invoke" class="tsd-kind-icon">invoke</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#iswindows" class="tsd-kind-icon">is<wbr>Windows</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#parseflags" class="tsd-kind-icon">parse<wbr>Flags</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="util.html#readjson" class="tsd-kind-icon">read<wbr>Json</a>
+			<a href="runner.html#run" class="tsd-kind-icon">run</a>
 		</li>
 	</ul>
 </nav>
@@ -2727,318 +2697,60 @@ img {
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
+						<h3>Variables</h3>
+						<ul class="tsd-index-list">
+							<li class="tsd-kind-variable tsd-parent-kind-module"><a href="runner.html#stages" class="tsd-kind-icon">stages</a></li>
+						</ul>
+					</section>
+					<section class="tsd-index-section ">
 						<h3>Functions</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#ensuredir" class="tsd-kind-icon">ensure<wbr>Dir</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#formatflags" class="tsd-kind-icon">format<wbr>Flags</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#getclosestnpm" class="tsd-kind-icon">get<wbr>Closest<wbr>Npm</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#getnpm" class="tsd-kind-icon">get<wbr>Npm</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#getsymlinktype" class="tsd-kind-icon">get<wbr>Symlink<wbr>Type</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#gettemp" class="tsd-kind-icon">get<wbr>Temp</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#getworkspaces" class="tsd-kind-icon">get<wbr>Workspaces</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#getyarn" class="tsd-kind-icon">get<wbr>Yarn</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#invoke" class="tsd-kind-icon">invoke</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#iswindows" class="tsd-kind-icon">is<wbr>Windows</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#parseflags" class="tsd-kind-icon">parse<wbr>Flags</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="util.html#readjson" class="tsd-kind-icon">read<wbr>Json</a></li>
+							<li class="tsd-kind-function tsd-parent-kind-module"><a href="runner.html#run" class="tsd-kind-icon">run</a></li>
 						</ul>
 					</section>
 				</div>
 			</section>
 		</section>
 		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Variables</h2>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-module">
+				<a name="stages" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> stages</h3>
+				<div class="tsd-signature tsd-kind-icon">stages<span class="tsd-signature-symbol">:</span> <a href="ifaces.html#tstage" class="tsd-signature-type" data-tsd-kind="Type alias">TStage</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = ...</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/runner.ts#L17">runner.ts:17</a></li>
+					</ul>
+				</aside>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
 			<h2>Functions</h2>
 			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="ensuredir" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> ensure<wbr>Dir</h3>
+				<a name="run" class="tsd-anchor"></a>
+				<h3><span class="tsd-flag ts-flagConst">Const</span> run</h3>
 				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">ensure<wbr>Dir<span class="tsd-signature-symbol">(</span>dir<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span>flags<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L139">util.ts:139</a></li>
+								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/runner.ts#L34">runner.ts:34</a></li>
 							</ul>
 						</aside>
+						<div class="tsd-comment tsd-typography">
+							<div class="lead">
+								<p>Public static void main.</p>
+							</div>
+						</div>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>dir: <span class="tsd-signature-type">string</span></h5>
+								<h5>flags: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></h5>
 							</li>
 						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="formatflags" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> format<wbr>Flags</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">format<wbr>Flags<span class="tsd-signature-symbol">(</span>flags<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span>, <span class="tsd-signature-symbol">...</span>picklist<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L49">util.ts:49</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>flags: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
-							</li>
-							<li>
-								<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>picklist: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="getclosestnpm" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Closest<wbr>Npm</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Closest<wbr>Npm<span class="tsd-signature-symbol">(</span>cmd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L79">util.ts:79</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>cmd: <span class="tsd-signature-type">string</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="getnpm" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Npm</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Npm<span class="tsd-signature-symbol">(</span>requireNpmBeta<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, allowNpmBeta<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, silent<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, isWin<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L94">util.ts:94</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> requireNpmBeta: <span class="tsd-signature-type">boolean</span></h5>
-							</li>
-							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> allowNpmBeta: <span class="tsd-signature-type">boolean</span></h5>
-							</li>
-							<li>
-								<h5>silent: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
-							</li>
-							<li>
-								<h5>isWin: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = ...</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="getsymlinktype" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Symlink<wbr>Type</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Symlink<wbr>Type<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">SymlinkType</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L73">util.ts:73</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> type: <span class="tsd-signature-type">string</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">SymlinkType</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="gettemp" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Temp</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Temp<span class="tsd-signature-symbol">(</span>cwd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, temp<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L145">util.ts:145</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>cwd: <span class="tsd-signature-type">string</span></h5>
-							</li>
-							<li>
-								<h5><span class="tsd-flag ts-flagOptional">Optional</span> temp: <span class="tsd-signature-type">string</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="getworkspaces" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Workspaces</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Workspaces<span class="tsd-signature-symbol">(</span>cwd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, manifest<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L111">util.ts:111</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>cwd: <span class="tsd-signature-type">string</span></h5>
-							</li>
-							<li>
-								<h5>manifest: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="getyarn" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Yarn</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Yarn<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L77">util.ts:77</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="invoke" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> invoke</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">invoke<span class="tsd-signature-symbol">(</span>cmd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, cwd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, silent<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, inherit<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">SpawnSyncReturns</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L12">util.ts:12</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>cmd: <span class="tsd-signature-type">string</span></h5>
-							</li>
-							<li>
-								<h5>args: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
-							</li>
-							<li>
-								<h5>cwd: <span class="tsd-signature-type">string</span></h5>
-							</li>
-							<li>
-								<h5>silent: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
-							</li>
-							<li>
-								<h5>inherit: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">SpawnSyncReturns</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="iswindows" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> is<wbr>Windows</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">is<wbr>Windows<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L69">util.ts:69</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="parseflags" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> parse<wbr>Flags</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">parse<wbr>Flags<span class="tsd-signature-symbol">(</span>argv<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ParsedArgs</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L33">util.ts:33</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>argv: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ParsedArgs</span></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="readjson" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> read<wbr>Json</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">read<wbr>Json<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/717fa81/src/main/ts/util.ts#L136">util.ts:136</a></li>
-							</ul>
-						</aside>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>path: <span class="tsd-signature-type">string</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+						<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
