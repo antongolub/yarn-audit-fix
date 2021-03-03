@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://yarnpkg.com/">
-    <img alt="Yarn fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true?raw=true" width="546">
+    <img alt="Yarn audit fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true?raw=true" width="546">
   </a>
 </p>
 
@@ -9,7 +9,7 @@
 </h1>
 
 [![Build Status](https://travis-ci.com/antongolub/yarn-audit-fix.svg?branch=master)](https://travis-ci.com/antongolub/yarn-audit-fix)
-[![deps](https://img.shields.io/david/antongolub/yarn-audit-fix)](https://david-dm.org/antongolub/yarn-audit-fix)
+[![deps](https://img.shields.io/david/antongolub/yarn-audit-fix?label=deps)](https://david-dm.org/antongolub/yarn-audit-fix)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability)](https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage)](https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage)
 [![Sonar](https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status)](https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix)
