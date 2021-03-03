@@ -145,7 +145,7 @@ $$ yarn-audit-fix --force
    stderr: null
  }
 ```
-So you need, as the message says, to manually change the dependency versions. **npm@7** is still in beta, perhaps this logic will be changed later.
+So you need, as the message says, to manually change the dependency versions. **npm@7** ~~is still in beta~~, perhaps this logic will be changed later.
 You can also try to combine calls with different npm versions. In some cases **npm@6** works better.
 ```shell script
 npx yarn-audit-fix && npx yarn-audit-fix --npm-v7
