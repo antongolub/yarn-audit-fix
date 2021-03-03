@@ -18,8 +18,6 @@
 
     "incremental": true,
     "tsBuildInfoFile": "./buildcache/.tsbuildinfo",
-
-    "typeRoots": ["./node_modules/@types", "./custom-typings"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]
