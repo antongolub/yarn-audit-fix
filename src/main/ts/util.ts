@@ -4,12 +4,10 @@ import crypto from 'crypto'
 import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
 import fs, { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
-import { GlobbyOptions } from 'globby'
+import { GlobbyOptions, sync as glob } from 'globby'
 import minimist from 'minimist'
 import { join, resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
-
-import { glob } from './glob'
 
 export const invoke = (
   cmd: string,
