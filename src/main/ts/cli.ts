@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { run } from './index'
+import { run } from './runner'
 import { parseFlags } from './util'
 
 const flags = parseFlags(process.argv.slice(2))
