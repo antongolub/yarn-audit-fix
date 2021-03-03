@@ -1,3 +1,10 @@
+## [3.3.1](https://github.com/antongolub/yarn-audit-fix/compare/v3.3.0...v3.3.1) (2021-03-03)
+
+
+### Performance Improvements
+
+* **package:** up npm to v7.6.0 ([49e3851](https://github.com/antongolub/yarn-audit-fix/commit/49e38519a80fddbc34cb1f6616ef78241e645f1d))
+
 # [3.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.2.16...v3.3.0) (2021-02-21)
 
 
