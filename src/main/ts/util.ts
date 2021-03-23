@@ -8,6 +8,7 @@ import { GlobbyOptions, sync as glob } from 'globby'
 import minimist from 'minimist'
 import { join, resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
+import {TFlags} from "./ifaces";
 
 export const invoke = (
   cmd: string,
@@ -29,6 +30,18 @@ export const invoke = (
 
   return '' + result.stdout?.toString().trim()
 }
+
+export const parseEnv = (env: Record<string, string | undefined>): TFlags =>
+  Object.keys(env).reduce<TFlags>((m, key) => {
+    const flag = key.toLowerCase().replace(/_/g, '-')
+
+    if (flag.startsWith('yaf-')) {
+      m[flag.slice(4)] = env[key] ?? true
+    }
+
+    return m
+  }, {})
+
 
 export const parseFlags = (argv: string[]): ReturnType<typeof minimist> =>
   minimist(argv, { '--': true })

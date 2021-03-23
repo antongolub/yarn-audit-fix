@@ -1,7 +1,9 @@
+export type TFlags = Record<string, any>
+
 export type TContext = {
   cwd: string
   temp: string
-  flags: Record<string, any>
+  flags: TFlags
   manifest: Record<string, any>
 }
 
