@@ -82,6 +82,11 @@ success Already up-to-date.
 |`--registry` | Custom registry url |
 |`--skip-flags-check` | Disable CLI flags verification |
 
+### ENV
+All mentioned above CLI directives can be replaced with corresponding env variables with leading **YAF** prefix. For example:
+* `YAF_FORCE` equals `--force`
+* `YAF_ONLY=prod` — `--only=prod`
+
 ## Troubleshooting
 ### enoent: no such file or directory
 In some cases **npm audit fix** makes `node_modules` to become inconsistent. This is expected. **yarn** and **npm** organize the directory space slightly differently.

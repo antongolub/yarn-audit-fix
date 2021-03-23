@@ -13,8 +13,8 @@ describe('stages', () => {
       expect(() => checkFlags({ ...ctx, flags: { foo: 'bar'}} )).toThrowError('Unsupported flag: foo')
     })
 
-    it('suppresses error if `skip-cli-check` passed', () => {
-      expect(checkFlags({ ...ctx, flags: { foo: 'bar', 'skip-cli-check': true}} )).toBeUndefined()
+    it('suppresses error if `skip-flags-check` passed', () => {
+      expect(checkFlags({ ...ctx, flags: { foo: 'bar', 'skip-flags-check': true}} )).toBeUndefined()
     })
 
     it('returns undefined if flags are valid', () => {
