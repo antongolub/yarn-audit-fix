@@ -28,12 +28,19 @@ export const printRuntimeDigest: TCallback = ({
   }
 
   const isMonorepo = !!manifest.workspaces
-  const npmPath = getNpm(isMonorepo, flags['npm-v7'])
+  const npmPath = getNpm(flags['npm-path'])
   const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
   const nodeVersion = invoke('node', ['--version'], temp, true, false)
   const yarnAuditFixVersion = readJson(
     join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
   ).version
+
+  // NOTE npm > 7.0.0 provides monorepo support
+  if (isMonorepo && +(npmVersion + '').charAt(0) < 7) {
+    console.warn(
+      'The project looks like monorepo, so it\'s recommended to use `npm v7` at least to process workspaces',
+    )
+  }
 
   console.log(
     JSON.stringify(
@@ -104,8 +111,7 @@ export const yarnLockToPkgLock: TCallback = ({ temp }) => {
  * @return {void}
  */
 export const npmAuditFix: TCallback = ({ temp, flags, manifest }) => {
-  const requireNpmBeta = !!manifest.workspaces
-  const npm = getNpm(requireNpmBeta, flags['npm-v7'], flags.silent)
+  const npm = getNpm(flags['npm-path'])
   const defaultFlags = {
     'package-lock-only': true,
   }

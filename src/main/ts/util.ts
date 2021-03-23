@@ -92,20 +92,21 @@ export const getClosestNpm = (cmd: string): string => {
 }
 
 export const getNpm = (
-  requireNpmBeta?: boolean,
-  allowNpmBeta?: boolean,
-  silent = false,
+  npmPath = 'local',
   isWin = isWindows(),
 ): string => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
 
-  if (requireNpmBeta && !allowNpmBeta && !silent) {
-    console.warn(
-      'The project looks like monorepo, so it is recommended to use `--npm-v7` flag',
-    )
+  if (npmPath === 'system') {
+    return cmd
   }
 
-  return allowNpmBeta ? getClosestNpm(cmd) : cmd
+  if (npmPath === 'local') {
+    return getClosestNpm(cmd)
+  }
+
+  // TODO support custom path to npm bin
+  throw new Error(`Unsupported npm path value: ${npmPath}`)
 }
 
 export const getWorkspaces = (
