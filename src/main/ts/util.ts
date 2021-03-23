@@ -5,10 +5,10 @@ import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
 import fs, { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
 import { GlobbyOptions, sync as glob } from 'globby'
-import minimist from 'minimist'
+import { Command } from 'commander'
 import { join, resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
-import {TFlags} from "./ifaces";
+import {TFlags} from "./ifaces"
 
 export const invoke = (
   cmd: string,
@@ -43,9 +43,6 @@ export const parseEnv = (env: Record<string, string | undefined>): TFlags =>
   }, {})
 
 
-export const parseFlags = (argv: string[]): ReturnType<typeof minimist> =>
-  minimist(argv, { '--': true })
-
 const checkValue = (
   key: string,
   value: any,
@@ -57,7 +54,16 @@ const checkValue = (
   (picklist.length === 0 || picklist.includes(key))
 
 const formatFlag = (key: string): string =>
-  (key.length === 1 ? '-' : '--') + key
+  (key.length === 1 ? '-' : '--') + camelToKebab(key)
+
+// https://gist.github.com/nblackburn/875e6ff75bc8ce171c758bf75f304707
+const camelToKebab = (string: string): string => string.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
+
+export const normalizeFlags = (flags: TFlags): TFlags =>
+  Object.keys(flags).reduce<TFlags>((m, key) => {
+    m[camelToKebab(key)] = flags[key]
+    return m
+  }, {})
 
 export const formatFlags = (
   flags: Record<string, any>,
@@ -68,7 +74,7 @@ export const formatFlags = (
     const value = flags[key]
     const flag = formatFlag(key)
 
-    if (checkValue(key, value, omitlist, picklist)) {
+    if (checkValue(camelToKebab(key), value, omitlist, picklist)) {
       memo.push(flag)
 
       if (value !== true) {

@@ -1,4 +1,5 @@
 import { join, resolve } from 'path'
+import { Command } from 'commander'
 
 import {
   formatFlags,
@@ -6,8 +7,7 @@ import {
   getSymlinkType,
   getTemp,
   getWorkspaces,
-  isWindows,
-  parseFlags,
+  isWindows, parseEnv,
   readJson,
 } from '../../main/ts/util'
 
@@ -25,17 +25,24 @@ describe('util', () => {
           ['-f', '--baz', 'qux'],
         ],
         [
-          parseFlags([
-            '-w',
-            '1',
-            '--force',
-            '--audit-level=moderate',
-            '--only=dev',
-            '--',
-            '--bar',
-            '-b',
-            '2',
-          ]),
+          new Command()
+            .option('-w')
+            .option('--force')
+            .option('--audit-level <level>')
+            .option('--bar')
+            .option('--only <scope>')
+            .option('-b <b>')
+            .parse([
+              '-w',
+              '1',
+              '--force',
+              '--audit-level=moderate',
+              '--only=dev',
+              '--',
+              '--bar',
+              '-b',
+              '2',
+            ], {from: 'user'}).opts(),
           ['force', 'audit-level', 'only', 'bar', 'b'],
           ['--force', '--audit-level', 'moderate', '--only', 'dev'],
         ],
