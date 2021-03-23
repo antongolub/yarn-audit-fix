@@ -62,25 +62,23 @@ success Already up-to-date.
 </pre>
 
 ### Migration from v3 to v4
-* `--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system`.
-* Unknown CLI flag raises an exception. To suppress this behaviour use `--skip-flags-check` directive.
+`--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system`.
 
 ### CLI
 | Flag | Description | Default |
 |---|---|---|
-|`--verbose` | Switch log level to verbose/debug | false |
-|`--silent` | Disable log output | false |
-|`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix`
-|`--npm-path` | Switch to system default version of **npm** instead of package's own. `system / local` | `local`
-|`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | true |
-|`--loglevel` | Set custom [log level](https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties)
-|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
+|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
+|`--dry-run` | Get an idea of what audit fix will do | 
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
 |`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution | 
-|`--dry-run` | Get an idea of what audit fix will do | 
-|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
+|`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel)
+|`--npm-path` | Switch to system default version of **npm** instead of package's own. `system / local` | `local`
+|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
+|`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | true |
 |`--registry` | Custom registry url |
-|`--skip-flags-check` | Disable CLI flags verification |
+|`--silent` | Disable log output | false |
+|`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix`
+|`--verbose` | Switch log level to verbose/debug | false |
 
 ### ENV
 All mentioned above CLI directives can be replaced with corresponding env variables with leading **YAF** prefix. For example:
@@ -159,9 +157,9 @@ $$ yarn-audit-fix --npm.force
  }
 ```
 So you need, as the message says, to manually change the dependency versions. **npm@7** ~~is still in beta~~, perhaps this logic will be changed later.
-You can also try to combine calls with different npm versions. In some cases **npm@6** works better.
+In some cases **npm@6** works better, so if you have such a version installed on your system, you may try:
 ```shell script
-npx yarn-audit-fix && npx yarn-audit-fix --npm-v7
+npx yarn-audit-fix --npm-path=system
 ```
 
 ## License
