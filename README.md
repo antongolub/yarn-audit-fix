@@ -18,13 +18,14 @@
 Apply `npm audit fix` logic to `yarn.lock`
 
 ## Motivation
-`yarn audit` detects vulnerabilities, but cannot fix them.
+1. `yarn audit` detects vulnerabilities, but cannot fix them.
 Authors suggest using [Depedabot](https://dependabot.com/) or [Snyk](https://snyk.io/) for security patches. Well, it is very inconvenient in some situations, to say the least of it.
-The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075)
-
+The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).  
 Fortunately, there's a workaround: [stackoverflow/60878037](https://stackoverflow.com/a/60878037) (thanks to Gianfranco P.).
 `yarn-audit-fix` is just a composition of these steps into a single utility.
 More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
+   
+2. `yarn audit` does not support custom (internal) registries. Here are the [issue](https://github.com/yarnpkg/yarn/issues/7012) & [PR](https://github.com/yarnpkg/yarn/pull/6484) which have not yet received the green light.
 
 ## Install
 ```shell script
