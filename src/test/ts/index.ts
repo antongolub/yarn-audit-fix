@@ -18,6 +18,9 @@ const strMatching = (temp: string, ending: string) =>
   expect.stringMatching(new RegExp(`${temp}.+${ending}`))
 
 describe('yarn-audit-fix', () => {
+  beforeAll(() => {
+    process.env.YAF_SKIP_CLI_CHECK = 'true'
+  })
   beforeEach(() => {
     // @ts-ignore
     jest.spyOn(process, 'exit').mockImplementation(() => {
@@ -51,7 +54,10 @@ describe('yarn-audit-fix', () => {
     cp.spawnSync.mockImplementation(() => ({ status: 0, stdout: 'foobar' }))
   })
   afterEach(jest.clearAllMocks)
-  afterAll(jest.resetAllMocks)
+  afterAll(() => {
+    delete process.env.YAF_SKIP_CLI_CHECK
+    jest.resetAllMocks()
+  })
 
   describe('createSymlinks', () => {
     it('establishes proper links', () => {
@@ -144,6 +150,7 @@ describe('yarn-audit-fix', () => {
           foo: 'bar',
           'package-lock-only': true,
           registry: registryUrl,
+          'skip-cli-check': true,
         })
         checkFlow()
       })

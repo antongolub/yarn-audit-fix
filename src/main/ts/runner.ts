@@ -4,6 +4,7 @@ import { join } from 'path'
 import { TCallback, TStage } from './ifaces'
 import {
   clear,
+  checkFlags,
   createSymlinks,
   createTempAssets,
   npmAuditFix,
@@ -15,7 +16,7 @@ import {
 import { getTemp, readJson } from './util'
 
 export const stages: TStage[] = [
-  ['Runtime digest', printRuntimeDigest],
+  ['Runtime digest', checkFlags, printRuntimeDigest],
   ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
   ['Generating package-lock.json from yarn.lock...', yarnLockToPkgLock],
   ['Applying npm audit fix...', npmAuditFix],

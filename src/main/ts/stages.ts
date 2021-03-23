@@ -60,6 +60,24 @@ export const printRuntimeDigest: TCallback = ({
 }
 
 /**
+ * CLI flag checks.
+ * @param {TContext} cxt
+ * @return {void}
+ */
+export const checkFlags: TCallback = ({ flags }) => {
+  if (flags['skip-flags-check']) {
+    return
+  }
+
+  const allowedPattern = /^(_|audit-level|force|dry-run|loglevel|legacy-peer-deps|npm|npm-path|only|package-lock-only|registry|silent|skip-flags-check|temp|verbose|yarn)$/
+  const unsupportedFlag = Object.keys(flags).find((key: string) => !allowedPattern.test(key))
+
+  if (unsupportedFlag) {
+    throw new Error(`Unsupported flag: ${unsupportedFlag}`)
+  }
+}
+
+/**
  * Prepare temp assets.
  * @param {TContext} cxt
  * @return {void}
@@ -117,14 +135,16 @@ export const npmAuditFix: TCallback = ({ temp, flags, manifest }) => {
   }
   const auditFlags = formatFlags(
     { ...defaultFlags, ...flags },
-    'package-lock-only',
-    'verbose',
-    'loglevel',
-    'only',
-    'force',
     'audit-level',
-    'silent',
+    'dry-run',
+    'force',
+    'loglevel',
+    'legacy-peer-deps',
+    'only',
+    'package-lock-only',
     'registry',
+    'silent',
+    'verbose',
   )
   const auditArgs = ['audit', 'fix', ...auditFlags, '--prefix', temp]
 

@@ -63,8 +63,7 @@ success Already up-to-date.
 
 ### Migration from v3 to v4
 * `--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system`.
-* `package-lock-only`, `loglevel`, `force`, etc flags now require `npm.` prefix. For example: `--npm.force`, `--npm.audit-level=high`. This is needed to avoid CLI args remapping in order to use all available npm flags without restrictions.
-* Unknown CLI flag raises an exception. To suppress this behaviour use `--skip-cli-check` directive. NOTE `npm.*` are passed as is without limitations.
+* Unknown CLI flag raises an exception. To suppress this behaviour use `--skip-flags-check` directive.
 
 ### CLI
 | Flag | Description | Default |
@@ -72,14 +71,16 @@ success Already up-to-date.
 |`--verbose` | Switch log level to verbose/debug | false |
 |`--silent` | Disable log output | false |
 |`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix`
-|`--npm-path` | Switch to system default version of **npm** instead of package's own. `system / local` | `local` 
-| **`--npm.*`** | Pass additional flags for **npm** invocation | 
-|`--npm.package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | true |
-|`--npm.loglevel` | Set custom [log level](https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties)
-|`--npm.only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
-|`--npm.force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
-|`--npm.audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
-|`--npm.registry` | Custom registry url |
+|`--npm-path` | Switch to system default version of **npm** instead of package's own. `system / local` | `local`
+|`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | true |
+|`--loglevel` | Set custom [log level](https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties)
+|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
+|`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
+|`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution | 
+|`--dry-run` | Get an idea of what audit fix will do | 
+|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
+|`--registry` | Custom registry url |
+|`--skip-flags-check` | Disable CLI flags verification |
 
 ## Troubleshooting
 ### enoent: no such file or directory
