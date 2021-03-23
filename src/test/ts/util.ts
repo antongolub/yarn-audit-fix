@@ -67,15 +67,19 @@ describe('util', () => {
     const isWin = isWindows()
     const cmd = isWin ? 'npm.cmd' : 'npm'
     const localNpm = resolve(__dirname, '../../../node_modules/.bin', cmd)
-    const cases: [boolean, boolean, boolean, string][] = [
-      [true, true, true, localNpm],
-      [false, true, true, localNpm],
-      [true, false, true, cmd],
-      [false, false, true, cmd],
+    const cases: [any, string?, string?][] = [
+      ['local', localNpm],
+      ['system', cmd],
+      ['unknown', undefined, 'Unsupported npm path value: unknown'],
+      [NaN, undefined, 'Unsupported npm path value: NaN'],
     ]
-    cases.forEach(([requireNpm7, allowNpm7, silent, result]) => {
-      it(`resolves npm ref: requireNpm7=${requireNpm7}, allowNpm7=${allowNpm7}, silent=${silent}, isWin=${isWin}`, () => {
-        expect(getNpm(requireNpm7, allowNpm7, silent)).toBe(result)
+    cases.forEach(([npmPath, result, err]) => {
+      it(`resolves npm ref: npmPath=${npmPath},  isWin=${isWin}`, () => {
+        if (err) {
+          expect(() => getNpm(npmPath)).toThrowError()
+        } else {
+          expect(getNpm(npmPath)).toBe(result)
+        }
       })
     })
   })

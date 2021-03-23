@@ -74,7 +74,7 @@ success Already up-to-date.
 |`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix`
 |`--npm-path` | Switch to system default version of **npm** instead of package's own. `system / local` | `local` 
 | **`--npm.*`** | Pass additional flags for **npm** invocation | 
-|`--npm.package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | false |
+|`--npm.package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | true |
 |`--npm.loglevel` | Set custom [log level](https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties)
 |`--npm.only` | Set package [updating scope](https://docs.npmjs.com/cli/audit): `dev`/`prod`
 |`--npm.force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
