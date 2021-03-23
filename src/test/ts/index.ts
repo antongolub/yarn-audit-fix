@@ -19,7 +19,7 @@ const strMatching = (temp: string, ending: string) =>
 
 describe('yarn-audit-fix', () => {
   beforeAll(() => {
-    process.env.YAF_SKIP_CLI_CHECK = 'true'
+    process.env.YAF_SKIP_FLAGS_CHECK = 'true'
   })
   beforeEach(() => {
     // @ts-ignore
@@ -55,7 +55,7 @@ describe('yarn-audit-fix', () => {
   })
   afterEach(jest.clearAllMocks)
   afterAll(() => {
-    delete process.env.YAF_SKIP_CLI_CHECK
+    delete process.env.YAF_SKIP_FLAGS_CHECK
     jest.resetAllMocks()
   })
 
@@ -150,7 +150,7 @@ describe('yarn-audit-fix', () => {
           foo: 'bar',
           'package-lock-only': true,
           registry: registryUrl,
-          'skip-cli-check': true,
+          'skip-flags-check': true,
         })
         checkFlow()
       })
