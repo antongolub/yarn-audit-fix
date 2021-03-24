@@ -32,7 +32,7 @@ describe('yarn-audit-fix', () => {
       /* noop */
     })
     // @ts-ignore
-    fs.readFileSync.mockImplementation(() => '{}')
+    fs.readFileSync.mockImplementation(() => '{"version": "1.0.0"}')
     // @ts-ignore
     fs.removeSync.mockImplementation(() => {
       /* noop */
@@ -48,7 +48,7 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     synp.npmToYarn.mockImplementation(() => '{}')
     // @ts-ignore
-    cp.spawnSync.mockImplementation(() => ({ status: 0, stdout: 'foobar' }))
+    cp.spawnSync.mockImplementation(() => ({ status: 0, stdout: '1.0.1' }))
   })
   afterEach(jest.clearAllMocks)
   afterAll(jest.resetAllMocks)
