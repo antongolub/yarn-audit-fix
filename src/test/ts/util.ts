@@ -1,5 +1,5 @@
-import { join, resolve } from 'path'
 import { Command } from 'commander'
+import { join, resolve } from 'path'
 
 import {
   formatFlags,
@@ -7,7 +7,7 @@ import {
   getSymlinkType,
   getTemp,
   getWorkspaces,
-  isWindows, parseEnv,
+  isWindows,
   readJson,
 } from '../../main/ts/util'
 
@@ -32,17 +32,21 @@ describe('util', () => {
             .option('--bar')
             .option('--only <scope>')
             .option('-b <b>')
-            .parse([
-              '-w',
-              '1',
-              '--force',
-              '--audit-level=moderate',
-              '--only=dev',
-              '--',
-              '--bar',
-              '-b',
-              '2',
-            ], {from: 'user'}).opts(),
+            .parse(
+              [
+                '-w',
+                '1',
+                '--force',
+                '--audit-level=moderate',
+                '--only=dev',
+                '--',
+                '--bar',
+                '-b',
+                '2',
+              ],
+              { from: 'user' },
+            )
+            .opts(),
           ['force', 'audit-level', 'only', 'bar', 'b'],
           ['--force', '--audit-level', 'moderate', '--only', 'dev'],
         ],

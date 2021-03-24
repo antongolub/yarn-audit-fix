@@ -38,7 +38,7 @@ export const printRuntimeDigest: TCallback = ({
   // NOTE npm > 7.0.0 provides monorepo support
   if (isMonorepo && +(npmVersion + '').charAt(0) < 7) {
     console.warn(
-      'The project looks like monorepo, so it\'s recommended to use `npm v7` at least to process workspaces',
+      "The project looks like monorepo, so it's recommended to use `npm v7` at least to process workspaces",
     )
   }
 
@@ -110,7 +110,7 @@ export const yarnLockToPkgLock: TCallback = ({ temp }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const npmAuditFix: TCallback = ({ temp, flags, manifest }) => {
+export const npmAuditFix: TCallback = ({ temp, flags }) => {
   const npm = getNpm(flags['npm-path'])
   const defaultFlags = {
     'package-lock-only': true,
@@ -129,8 +129,8 @@ export const npmAuditFix: TCallback = ({ temp, flags, manifest }) => {
     'verbose',
   )
   const auditArgs = ['audit', 'fix', ...auditFlags, '--prefix', temp]
-console.log('auditArgs!!!!', auditArgs)
-console.log('flags!!!!', flags)
+  console.log('auditArgs!!!!', auditArgs)
+  console.log('flags!!!!', flags)
   invoke(npm, auditArgs, temp, flags.silent)
 }
 
