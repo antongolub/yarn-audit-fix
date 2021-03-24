@@ -7,7 +7,6 @@ import { normalizeFlags } from './util'
 
 const env = process.env
 const flags = new Command()
-  // low, moderate, high, critical | low
   .addOption(
     new Option(
       '--audit-level [level]',
@@ -15,11 +14,6 @@ const flags = new Command()
     )
       .choices(['low', 'moderate', 'high', 'critical'])
       .default(env.YAF_AUDIT_LEVEL),
-  )
-  .option(
-    '--audit-level [level]',
-    'Include a vulnerability with a level as defined or higher',
-    env.YAF_AUDIT_LEVEL,
   )
   .option(
     '--dry-run',
@@ -56,8 +50,8 @@ const flags = new Command()
     env.YAF_PACKAGE_LOCK_ONLY,
   )
   .option('--registry [registry]', 'Custom registry url', env.YAF_REGISTRY)
-  .option('--silent', ' Disable log output', env.YAF_SILENT)
-  .option('--temp [dir]', ' Directory for temporary assets')
+  .option('--silent', 'Disable log output', env.YAF_SILENT)
+  .option('--temp [dir]', 'Directory for temporary assets')
   .option('--verbose', 'Switch log level to verbose/debug', env.YAF_VERBOSE)
   .allowUnknownOption()
   .parse(process.argv)
