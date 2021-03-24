@@ -1,3 +1,24 @@
+# [4.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.3.3...v4.0.0) (2021-03-24)
+
+
+### Bug Fixes
+
+* **cli:** fix env options resolution ([2adb481](https://github.com/antongolub/yarn-audit-fix/commit/2adb48172bb0b9a4175ae65d5ad76e5a9d2e2394))
+* rm duplicated cli options ([481ce14](https://github.com/antongolub/yarn-audit-fix/commit/481ce1421d24a9a2f9f9827ba224af75cddc6562))
+
+
+### Features
+
+* add cli guard ([7eb3034](https://github.com/antongolub/yarn-audit-fix/commit/7eb303450e28ab1c0eb936c2c0aa88d1d54f302f))
+* provide env directives ([6a61668](https://github.com/antongolub/yarn-audit-fix/commit/6a6166817cc834e5adbec160e2db42c6adf02bce))
+* use npm v7 by default, introduce `npm-path` flag ([7b723d1](https://github.com/antongolub/yarn-audit-fix/commit/7b723d171d895805636ecfde4f58cdfd0e6d26a5))
+
+
+### BREAKING CHANGES
+
+* unsupported flag raises an error. See v3 to v4 migration guide in README.md
+* `--npm-v7` directive is no longer supported. Follow v3 to v4 migration guide in README.md
+
 ## [3.3.3](https://github.com/antongolub/yarn-audit-fix/compare/v3.3.2...v3.3.3) (2021-03-22)
 
 
