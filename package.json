@@ -60,6 +60,7 @@
   "dependencies": {
     "@types/find-cache-dir": "^3.2.0",
     "@types/fs-extra": "^9.0.8",
+    "@types/semver": "^7.3.4",
     "globby": "^11.0.3",
     "chalk": "^4.1.0",
     "find-cache-dir": "^3.3.1",
@@ -68,7 +69,8 @@
     "npm": "^7.7.0",
     "pkg-dir": "^5.0.0",
     "synp": "^1.9.7",
-    "tslib": "^2.1.0"
+    "tslib": "^2.1.0",
+    "semver": "^7.3.5"
   },
   "devDependencies": {
     "@qiwi/libdefkit": "^2.1.8",

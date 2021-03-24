@@ -52,7 +52,11 @@ const flags = new Command()
   .option('--registry [registry]', 'Custom registry url', env.YAF_REGISTRY)
   .option('--silent [bool]', 'Disable log output', env.YAF_SILENT)
   .option('--temp [dir]', 'Directory for temporary assets')
-  .option('--verbose [bool]', 'Switch log level to verbose/debug', env.YAF_VERBOSE)
+  .option(
+    '--verbose [bool]',
+    'Switch log level to verbose/debug',
+    env.YAF_VERBOSE,
+  )
   .allowUnknownOption()
   .parse(process.argv)
   .opts()

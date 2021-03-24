@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import { dirname, join, relative } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
+import semver from 'semver'
 import synp from 'synp'
 
 import { TCallback } from './ifaces'
@@ -36,9 +37,9 @@ export const printRuntimeDigest: TCallback = ({
   ).version
 
   // NOTE npm > 7.0.0 provides monorepo support
-  if (isMonorepo && +(npmVersion + '').charAt(0) < 7) {
+  if (isMonorepo && (semver.parse(npmVersion + '')?.major as number) < 7) {
     console.warn(
-      "The project looks like monorepo, so it's recommended to use `npm v7` at least to process workspaces",
+      "This project looks like monorepo, so it's recommended to use `npm v7` at least to process workspaces",
     )
   }
 
@@ -52,7 +53,7 @@ export const printRuntimeDigest: TCallback = ({
         yarnAuditFixVersion,
         temp,
         cwd,
-        flags
+        flags,
       },
       undefined,
       2,
