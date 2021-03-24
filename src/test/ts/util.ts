@@ -8,6 +8,7 @@ import {
   getTemp,
   getWorkspaces,
   isWindows,
+  normalizeFlags,
   readJson,
 } from '../../main/ts/util'
 
@@ -53,7 +54,7 @@ describe('util', () => {
       ]
 
       cases.forEach(([input, picklist, output]) => {
-        expect(formatFlags(input, ...picklist)).toEqual(output)
+        expect(formatFlags(normalizeFlags(input), ...picklist)).toEqual(output)
       })
     })
   })
