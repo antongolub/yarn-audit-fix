@@ -129,8 +129,7 @@ export const npmAuditFix: TCallback = ({ temp, flags }) => {
     'verbose',
   )
   const auditArgs = ['audit', 'fix', ...auditFlags, '--prefix', temp]
-  console.log('auditArgs!!!!', auditArgs)
-  console.log('flags!!!!', flags)
+
   invoke(npm, auditArgs, temp, flags.silent)
 }
 

@@ -3,7 +3,7 @@
 import { Command, Option } from 'commander'
 
 import { run } from './runner'
-import { formatFlags, normalizeFlags, parseEnv } from './util'
+import { normalizeFlags } from './util'
 
 const env = process.env
 const flags = new Command()
@@ -60,9 +60,7 @@ const flags = new Command()
   .option('--temp [dir]', ' Directory for temporary assets')
   .option('--verbose', 'Switch log level to verbose/debug', env.YAF_VERBOSE)
   .allowUnknownOption()
-  .parse([...formatFlags(parseEnv(process.env)), ...process.argv.slice(2)], {
-    from: 'user',
-  })
+  .parse(process.argv)
   .opts()
 
 run(normalizeFlags(flags)).catch((reason) => {
