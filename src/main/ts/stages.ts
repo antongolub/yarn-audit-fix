@@ -32,14 +32,21 @@ export const printRuntimeDigest: TCallback = ({
   const npmPath = getNpm(flags['npm-path'])
   const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
   const nodeVersion = invoke('node', ['--version'], temp, true, false)
-  const yarnAuditFixVersion = readJson(
+  const latestYafVersion = invoke(npmPath, ['view', 'yarn-audit-fix', 'version'], temp, true, false) as string
+  const yafVersion = readJson(
     join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
   ).version
 
   // NOTE npm > 7.0.0 provides monorepo support
-  if (isMonorepo && (semver.parse(npmVersion + '')?.major as number) < 7) {
+  if (isMonorepo && (semver.parse(npmVersion as string)?.major as number) < 7) {
     console.warn(
-      "This project looks like monorepo, so it's recommended to use `npm v7` at least to process workspaces",
+      'This project looks like monorepo, so it\'s recommended to use `npm v7` at least to process workspaces',
+    )
+  }
+
+  if (semver.gte(latestYafVersion, yafVersion)) {
+    console.warn(
+      `yarn-audit-fix version ${yafVersion} is out of date. Install the latest ${latestYafVersion} for better results`,
     )
   }
 
@@ -50,7 +57,7 @@ export const printRuntimeDigest: TCallback = ({
         npmPath,
         npmVersion,
         nodeVersion,
-        yarnAuditFixVersion,
+        yafVersion,
         temp,
         cwd,
         flags,
