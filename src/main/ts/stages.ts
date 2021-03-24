@@ -52,6 +52,7 @@ export const printRuntimeDigest: TCallback = ({
         yarnAuditFixVersion,
         temp,
         cwd,
+        flags
       },
       undefined,
       2,

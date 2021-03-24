@@ -16,18 +16,18 @@ const flags = new Command()
       .default(env.YAF_AUDIT_LEVEL),
   )
   .option(
-    '--dry-run',
+    '--dry-run [bool]',
     'Get an idea of what audit fix will do',
     env.YAF_DRY_RUN_FORCE,
   )
   .option(
-    '--force',
+    '--force [bool]',
     'Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones',
     env.YAF_FORCE,
   )
   .option('--loglevel [level]', 'Set custom log level', env.YAF_LOGLEVEL)
   .option(
-    '--legacy-peer-deps',
+    '--legacy-peer-deps [bool]',
     'Accept an incorrect (potentially broken) deps resolution',
     env.YAF_LEGACY_PEER_DEPS,
   )
@@ -50,9 +50,9 @@ const flags = new Command()
     env.YAF_PACKAGE_LOCK_ONLY,
   )
   .option('--registry [registry]', 'Custom registry url', env.YAF_REGISTRY)
-  .option('--silent', 'Disable log output', env.YAF_SILENT)
+  .option('--silent [bool]', 'Disable log output', env.YAF_SILENT)
   .option('--temp [dir]', 'Directory for temporary assets')
-  .option('--verbose', 'Switch log level to verbose/debug', env.YAF_VERBOSE)
+  .option('--verbose [bool]', 'Switch log level to verbose/debug', env.YAF_VERBOSE)
   .allowUnknownOption()
   .parse(process.argv)
   .opts()
