@@ -2711,6 +2711,9 @@ img {
 			<a href="ifaces.html#tcontext" class="tsd-kind-icon">TContext</a>
 		</li>
 		<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+			<a href="ifaces.html#tflags" class="tsd-kind-icon">TFlags</a>
+		</li>
+		<li class=" tsd-kind-type-alias tsd-parent-kind-module">
 			<a href="ifaces.html#tstage" class="tsd-kind-icon">TStage</a>
 		</li>
 	</ul>
@@ -2726,6 +2729,7 @@ img {
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="ifaces.html#tcallback" class="tsd-kind-icon">TCallback</a></li>
 							<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="ifaces.html#tcontext" class="tsd-kind-icon">TContext</a></li>
+							<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="ifaces.html#tflags" class="tsd-kind-icon">TFlags</a></li>
 							<li class="tsd-kind-type-alias tsd-parent-kind-module"><a href="ifaces.html#tstage" class="tsd-kind-icon">TStage</a></li>
 						</ul>
 					</section>
@@ -2740,7 +2744,7 @@ img {
 				<div class="tsd-signature tsd-kind-icon">TCallback<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>cxt<span class="tsd-signature-symbol">: </span><a href="ifaces.html#tcontext" class="tsd-signature-type" data-tsd-kind="Type alias">TContext</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/8fe3bbf/src/main/ts/ifaces.ts#L8">ifaces.ts:8</a></li>
+						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/d4dcb12/src/main/ts/ifaces.ts#L10">ifaces.ts:10</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -2768,10 +2772,10 @@ img {
 			<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module">
 				<a name="tcontext" class="tsd-anchor"></a>
 				<h3>TContext</h3>
-				<div class="tsd-signature tsd-kind-icon">TContext<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>cwd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>flags<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>manifest<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>temp<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
+				<div class="tsd-signature tsd-kind-icon">TContext<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>cwd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>flags<span class="tsd-signature-symbol">: </span><a href="ifaces.html#tflags" class="tsd-signature-type" data-tsd-kind="Type alias">TFlags</a><span class="tsd-signature-symbol">; </span>manifest<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>temp<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/8fe3bbf/src/main/ts/ifaces.ts#L1">ifaces.ts:1</a></li>
+						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/d4dcb12/src/main/ts/ifaces.ts#L3">ifaces.ts:3</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -2781,7 +2785,7 @@ img {
 							<h5>cwd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></h5>
 						</li>
 						<li class="tsd-parameter">
-							<h5>flags<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+							<h5>flags<span class="tsd-signature-symbol">: </span><a href="ifaces.html#tflags" class="tsd-signature-type" data-tsd-kind="Type alias">TFlags</a></h5>
 						</li>
 						<li class="tsd-parameter">
 							<h5>manifest<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
@@ -2793,12 +2797,22 @@ img {
 				</div>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module">
+				<a name="tflags" class="tsd-anchor"></a>
+				<h3>TFlags</h3>
+				<div class="tsd-signature tsd-kind-icon">TFlags<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/d4dcb12/src/main/ts/ifaces.ts#L1">ifaces.ts:1</a></li>
+					</ul>
+				</aside>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module">
 				<a name="tstage" class="tsd-anchor"></a>
 				<h3>TStage</h3>
 				<div class="tsd-signature tsd-kind-icon">TStage<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">...</span><a href="ifaces.html#tcallback" class="tsd-signature-type" data-tsd-kind="Type alias">TCallback</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/8fe3bbf/src/main/ts/ifaces.ts#L10">ifaces.ts:10</a></li>
+						<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/d4dcb12/src/main/ts/ifaces.ts#L12">ifaces.ts:12</a></li>
 					</ul>
 				</aside>
 			</section>

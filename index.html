@@ -2727,12 +2727,14 @@ img {
 			<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
 				<h2>Motivation</h2>
 			</a>
-			<p><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
-				Authors suggest using <a href="https://dependabot.com/">Depedabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
-			The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a></p>
-			<p>Fortunately, there&#39;s a workaround: <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a> (thanks to Gianfranco P.).
-				<code>yarn-audit-fix</code> is just a composition of these steps into a single utility.
-			More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></p>
+			<ol>
+				<li><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
+					Authors suggest using <a href="https://dependabot.com/">Depedabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
+					The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a>.<br>Fortunately, there&#39;s a workaround: <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a> (thanks to Gianfranco P.).
+					<code>yarn-audit-fix</code> is just a composition of these steps into a single utility.
+				More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></li>
+				<li><code>yarn audit</code> does not support custom (in-house, internal) registries. Here are the <a href="https://github.com/yarnpkg/yarn/issues/7012">issue</a> &amp; <a href="https://github.com/yarnpkg/yarn/pull/6484">PR</a> which have not yet received the green light.</li>
+			</ol>
 			<a href="#install" id="install" style="color: inherit; text-decoration: none;">
 				<h2>Install</h2>
 			</a>
@@ -2767,6 +2769,10 @@ success Saved lockfile.
 success Already up-to-date.
 <b>Done</b>
 </pre>
+			<a href="#migration-from-v3-to-v4" id="migration-from-v3-to-v4" style="color: inherit; text-decoration: none;">
+				<h3>Migration from v3 to v4</h3>
+			</a>
+			<p><code>--npm-v7</code> flag is redundant. From v4.0.0 package&#39;s own version of <strong>npm</strong> is used by default. But you&#39;re still able to invoke system default with <code>--npm-path=system</code>.</p>
 			<a href="#cli" id="cli" style="color: inherit; text-decoration: none;">
 				<h3>CLI</h3>
 			</a>
@@ -2779,28 +2785,13 @@ success Already up-to-date.
 					</tr>
 				</thead>
 				<tbody><tr>
-						<td><code>--verbose</code></td>
-						<td>Switch log level to verbose/debug</td>
-						<td>false</td>
+						<td><code>--audit-level</code></td>
+						<td>Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical</td>
+						<td>low</td>
 					</tr>
 					<tr>
-						<td><code>--package-lock-only</code></td>
-						<td>Run audit fix without modifying <code>node_modules</code>. Highly recommended to <strong>enable</strong>.</td>
-						<td>false</td>
-					</tr>
-					<tr>
-						<td><code>--silent</code></td>
-						<td>Disable log output</td>
-						<td>false</td>
-					</tr>
-					<tr>
-						<td><code>--loglevel</code></td>
-						<td>Set custom <a href="https://docs.npmjs.com/misc/config#shorthands-and-other-cli-niceties">log level</a></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--only</code></td>
-						<td>Set package <a href="https://docs.npmjs.com/cli/audit">updating scope</a>: <code>dev</code>/<code>prod</code></td>
+						<td><code>--dry-run</code></td>
+						<td>Get an idea of what audit fix will do</td>
 						<td></td>
 					</tr>
 					<tr>
@@ -2809,14 +2800,29 @@ success Already up-to-date.
 						<td>false</td>
 					</tr>
 					<tr>
-						<td><code>--audit-level</code></td>
-						<td>Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical</td>
-						<td>low</td>
+						<td><code>--legacy-peer-deps</code></td>
+						<td>Accept an incorrect (potentially broken) deps resolution</td>
+						<td></td>
 					</tr>
 					<tr>
-						<td><code>--npm-v7</code></td>
-						<td>Use the latest <code>npm@7.x.x-beta.x</code> version. Recommended for monorepos</td>
-						<td>false</td>
+						<td><code>--loglevel</code></td>
+						<td>Set custom <a href="https://docs.npmjs.com/cli/v7/using-npm/config#loglevel">log level</a></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><code>--npm-path</code></td>
+						<td>Switch to system default version of <strong>npm</strong> instead of package&#39;s own. <code>system / local</code></td>
+						<td><code>local</code></td>
+					</tr>
+					<tr>
+						<td><code>--only</code></td>
+						<td>Set package <a href="https://docs.npmjs.com/cli/v7/using-npm/config#only">updating scope</a>: <code>dev</code>/<code>prod</code></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><code>--package-lock-only</code></td>
+						<td>Run audit fix without modifying <code>node_modules</code>. Highly recommended to <strong>enable</strong>.</td>
+						<td>true</td>
 					</tr>
 					<tr>
 						<td><code>--registry</code></td>
@@ -2824,11 +2830,29 @@ success Already up-to-date.
 						<td></td>
 					</tr>
 					<tr>
+						<td><code>--silent</code></td>
+						<td>Disable log output</td>
+						<td>false</td>
+					</tr>
+					<tr>
 						<td><code>--temp</code></td>
-						<td>Dir for temp assets</td>
+						<td>Directory for temporary assets</td>
 						<td><code>&lt;cwd&gt;/node_modules/.cache/yarn-audit-fix</code></td>
 					</tr>
+					<tr>
+						<td><code>--verbose</code></td>
+						<td>Switch log level to verbose/debug</td>
+						<td>false</td>
+					</tr>
 			</tbody></table>
+			<a href="#env" id="env" style="color: inherit; text-decoration: none;">
+				<h3>ENV</h3>
+			</a>
+			<p>All mentioned above CLI directives can be replaced with corresponding env variables with leading <strong>YAF</strong> prefix. For example:</p>
+			<ul>
+				<li><code>YAF_FORCE</code> equals <code>--force</code></li>
+				<li><code>YAF_ONLY=prod</code> — <code>--only=prod</code></li>
+			</ul>
 			<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
 				<h2>Troubleshooting</h2>
 			</a>
@@ -2909,8 +2933,8 @@ success Already up-to-date.
 <span style="color: #000000"> }</span>
 </code></pre>
 			<p>So you need, as the message says, to manually change the dependency versions. <strong>npm@7</strong> <del>is still in beta</del>, perhaps this logic will be changed later.
-			You can also try to combine calls with different npm versions. In some cases <strong>npm@6</strong> works better.</p>
-			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix &amp;&amp; npx yarn-audit-fix --npm-v7</span>
+			In some cases <strong>npm@6</strong> works better, so if you have such a version installed on your system, you may try:</p>
+			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix --npm-path=system</span>
 </code></pre>
 			<a href="#license" id="license" style="color: inherit; text-decoration: none;">
 				<h2>License</h2>
