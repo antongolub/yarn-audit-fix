@@ -42,7 +42,7 @@ const checkValue = (
   (picklist.length === 0 || picklist.includes(key))
 
 const formatFlag = (key: string): string =>
-  (key.length === 1 ? '-' : '--') + camelToKebab(key)
+  (key.length === 1 ? '-' : '--') + key
 
 // https://gist.github.com/nblackburn/875e6ff75bc8ce171c758bf75f304707
 const camelToKebab = (string: string): string =>
@@ -63,7 +63,7 @@ export const formatFlags = (
     const value = flags[key]
     const flag = formatFlag(key)
 
-    if (checkValue(camelToKebab(key), value, omitlist, picklist)) {
+    if (checkValue(key, value, omitlist, picklist)) {
       memo.push(flag)
 
       if (value !== true) {
