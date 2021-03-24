@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v4.0.0...v4.1.0) (2021-03-24)
+
+
+### Features
+
+* warn if yaf is out of date ([6ac2bd1](https://github.com/antongolub/yarn-audit-fix/commit/6ac2bd16f7640aa6b13e1007a7478e03d576522e)), closes [#82](https://github.com/antongolub/yarn-audit-fix/issues/82)
+
 # [4.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v3.3.3...v4.0.0) (2021-03-24)
 
 
