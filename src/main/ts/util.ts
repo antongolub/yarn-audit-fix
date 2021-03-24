@@ -5,10 +5,10 @@ import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
 import fs, { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
 import { GlobbyOptions, sync as glob } from 'globby'
-import { Command } from 'commander'
 import { join, resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
-import {TFlags} from "./ifaces"
+
+import { TFlags } from './ifaces'
 
 export const invoke = (
   cmd: string,
@@ -31,18 +31,6 @@ export const invoke = (
   return '' + result.stdout?.toString().trim()
 }
 
-export const parseEnv = (env: Record<string, string | undefined>): TFlags =>
-  Object.keys(env).reduce<TFlags>((m, key) => {
-    const flag = key.toLowerCase().replace(/_/g, '-')
-
-    if (flag.startsWith('yaf-')) {
-      m[flag.slice(4)] = env[key] ?? true
-    }
-
-    return m
-  }, {})
-
-
 const checkValue = (
   key: string,
   value: any,
@@ -57,7 +45,8 @@ const formatFlag = (key: string): string =>
   (key.length === 1 ? '-' : '--') + camelToKebab(key)
 
 // https://gist.github.com/nblackburn/875e6ff75bc8ce171c758bf75f304707
-const camelToKebab = (string: string): string => string.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
+const camelToKebab = (string: string): string =>
+  string.replace(/([\da-z]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
 
 export const normalizeFlags = (flags: TFlags): TFlags =>
   Object.keys(flags).reduce<TFlags>((m, key) => {
@@ -110,10 +99,7 @@ export const getClosestNpm = (cmd: string): string => {
   )
 }
 
-export const getNpm = (
-  npmPath = 'local',
-  isWin = isWindows(),
-): string => {
+export const getNpm = (npmPath = 'local', isWin = isWindows()): string => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
 
   if (npmPath === 'system') {
