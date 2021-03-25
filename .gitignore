@@ -29,6 +29,7 @@ dist/
 target/
 typings/
 flow-typed/
+buildstamp.json
 
 # Docs
 docs
