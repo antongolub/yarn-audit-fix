@@ -1,3 +1,15 @@
+## [4.1.6](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.5...v4.1.6) (2021-04-01)
+
+
+### Bug Fixes
+
+* fix older version detection ([81bbce8](https://github.com/antongolub/yarn-audit-fix/commit/81bbce871e652b07df829b43cbb201bd72785d6a)), closes [#96](https://github.com/antongolub/yarn-audit-fix/issues/96)
+
+
+### Performance Improvements
+
+* **deps:** up npm to v7.7.6 ([05be662](https://github.com/antongolub/yarn-audit-fix/commit/05be6628d926e1f1c8e3314a35154b8edd790bfd)), closes [#94](https://github.com/antongolub/yarn-audit-fix/issues/94)
+
 ## [4.1.5](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.4...v4.1.5) (2021-03-30)
 
 
