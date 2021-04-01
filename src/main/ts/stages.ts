@@ -44,7 +44,7 @@ export const printRuntimeDigest: TCallback = ({
     )
   }
 
-  if (semver.gte(latestYafVersion, yafVersion)) {
+  if (semver.gt(latestYafVersion, yafVersion)) {
     console.warn(
       `yarn-audit-fix version ${yafVersion} is out of date. Install the latest ${latestYafVersion} for better results`,
     )
