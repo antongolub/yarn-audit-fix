@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { join } from 'path'
 
-import { TCallback, TStage } from './ifaces'
+import { TCallback, TContext, TStage } from './ifaces'
 import {
   clear,
   createSymlinks,
@@ -29,18 +29,26 @@ export const stages: TStage[] = [
 ]
 
 /**
- * Public static void main.
+ * Build running context.
  */
-export const run = async (flags: Record<string, any> = {}): Promise<void> => {
+export const getContext = (flags: Record<string, any> = {}): TContext => {
   const cwd = process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
-  const ctx = {
+
+  return {
     cwd,
     temp,
     flags,
     manifest,
   }
+}
+
+/**
+ * Public static void main.
+ */
+export const run = async (flags: Record<string, any> = {}): Promise<void> => {
+  const ctx = getContext(flags)
 
   for (const [description, ...steps] of stages) {
     !flags.silent && console.log(chalk.bold(description))

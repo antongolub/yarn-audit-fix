@@ -32,7 +32,13 @@ export const printRuntimeDigest: TCallback = ({
   const npmPath = getNpm(flags['npm-path'])
   const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
   const nodeVersion = invoke('node', ['--version'], temp, true, false)
-  const latestYafVersion = invoke(npmPath, ['view', 'yarn-audit-fix', 'version'], temp, true, false) as string
+  const latestYafVersion = invoke(
+    npmPath,
+    ['view', 'yarn-audit-fix', 'version'],
+    temp,
+    true,
+    false,
+  ) as string
   const yafVersion = readJson(
     join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
   ).version
@@ -40,7 +46,7 @@ export const printRuntimeDigest: TCallback = ({
   // NOTE npm > 7.0.0 provides monorepo support
   if (isMonorepo && (semver.parse(npmVersion as string)?.major as number) < 7) {
     console.warn(
-      'This project looks like monorepo, so it\'s recommended to use `npm v7` at least to process workspaces',
+      "This project looks like monorepo, so it's recommended to use `npm v7` at least to process workspaces",
     )
   }
 
