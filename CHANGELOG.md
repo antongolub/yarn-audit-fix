@@ -1,3 +1,5 @@
+## [4.1.8](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.7...v4.1.8) (2021-04-08)
+
 ## [4.1.7](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.6...v4.1.7) (2021-04-01)
 
 
