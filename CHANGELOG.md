@@ -1,3 +1,10 @@
+## [4.1.9](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.8...v4.1.9) (2021-04-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency npm to v7.9.0 ([509ca55](https://github.com/antongolub/yarn-audit-fix/commit/509ca55d5a80016f126814cab96d7618c7bb45b9))
+
 ## [4.1.8](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.7...v4.1.8) (2021-04-08)
 
 ## [4.1.7](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.6...v4.1.7) (2021-04-01)
