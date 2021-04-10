@@ -3,7 +3,6 @@
 import { Command, Option } from 'commander'
 
 import { run } from './runner'
-import { normalizeFlags } from './util'
 
 const env = process.env
 const flags = new Command()
@@ -61,7 +60,4 @@ const flags = new Command()
   .parse(process.argv)
   .opts()
 
-run(normalizeFlags(flags)).catch((reason) => {
-  !flags.silent && console.error(reason)
-  process.exit(reason.status | 0 || 1)
-})
+run(flags)

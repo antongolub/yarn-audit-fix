@@ -20,10 +20,6 @@ const strMatching = (temp: string, ending: string) =>
 describe('yarn-audit-fix', () => {
   beforeEach(() => {
     // @ts-ignore
-    jest.spyOn(process, 'exit').mockImplementation(() => {
-      /* noop */
-    })
-    // @ts-ignore
     fs.emptyDirSync.mockImplementation(() => {
       /* noop */
     })
@@ -183,15 +179,12 @@ describe('yarn-audit-fix', () => {
 
       describe('on error', () => {
         // eslint-disable-next-line
-        const checkExit = (reason: any, code: number): Promise<any> => {
+        const checkExit = (reason: any): Promise<any> => {
           const { promise, resolve } = iop()
+
           // @ts-ignore
           cp.spawnSync.mockImplementationOnce(() => {
-            setImmediate(() => {
-              expect(process.exit).toHaveBeenCalledWith(code)
-              // @ts-ignore
-              resolve()
-            })
+            setImmediate(resolve)
 
             return reason
           })
@@ -202,11 +195,13 @@ describe('yarn-audit-fix', () => {
         }
 
         it('returns exit code if passed', async () => {
-          await checkExit({ status: 2 }, 2)
+          await expect(checkExit({ status: 2 })).rejects
+          expect(process.exitCode).toBe(2)
         })
 
         it('sets code to 1 otherwise', async () => {
-          await checkExit({ error: new Error('foobar') }, 1)
+          await expect(checkExit({ error: new Error('foobar') })).rejects
+          expect(process.exitCode).toBe(1)
         })
       })
     })
