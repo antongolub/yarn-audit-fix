@@ -182,3 +182,13 @@ export const yarnInstall: TCallback = ({ cwd, flags }) => {
  * @return {void}
  */
 export const clear: TCallback = ({ temp }) => fs.emptyDirSync(temp)
+
+/**
+ * Exit on error.
+ * @param {TContext} cxt
+ * @return {void}
+ */
+export const exit: TCallback = ({ flags, err }) => {
+  !flags.silent && console.error(err)
+  process.exitCode = err?.status | 0 || 1
+}

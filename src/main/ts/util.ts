@@ -28,7 +28,7 @@ export const invoke = (
     throw result
   }
 
-  return '' + result.stdout?.toString().trim()
+  return String(result.stdout?.toString().trim())
 }
 
 const checkValue = (
@@ -87,7 +87,7 @@ export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
 export const getClosestNpm = (cmd: string): string => {
   const pkgRoot = pkgDir(__dirname) + ''
 
-  return (
+  return String(
     findUp(
       (dir) => {
         const ref = resolve(dir, 'node_modules', '.bin', cmd)
@@ -95,7 +95,7 @@ export const getClosestNpm = (cmd: string): string => {
         return fs.existsSync(ref) ? ref : undefined
       },
       { cwd: pkgRoot },
-    ) + ''
+    ),
   )
 }
 
