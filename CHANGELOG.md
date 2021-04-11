@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.9...v4.2.0) (2021-04-11)
+
+
+### Features
+
+* clear temp dir on error ([01e4f63](https://github.com/antongolub/yarn-audit-fix/commit/01e4f63d21699dfada667ace1ee18ce21d7bdb5e)), closes [#102](https://github.com/antongolub/yarn-audit-fix/issues/102)
+
 ## [4.1.9](https://github.com/antongolub/yarn-audit-fix/compare/v4.1.8...v4.1.9) (2021-04-08)
 
 
