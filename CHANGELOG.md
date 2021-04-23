@@ -1,3 +1,10 @@
+## [4.2.3](https://github.com/antongolub/yarn-audit-fix/compare/v4.2.2...v4.2.3) (2021-04-23)
+
+
+### Bug Fixes
+
+* rollback to npm 7.10.0 ([a8fbdf7](https://github.com/antongolub/yarn-audit-fix/commit/a8fbdf7fcb698f3a6ca6ace831828ab43701f22e)), closes [#111](https://github.com/antongolub/yarn-audit-fix/issues/111)
+
 ## [4.2.2](https://github.com/antongolub/yarn-audit-fix/compare/v4.2.1...v4.2.2) (2021-04-23)
 
 
