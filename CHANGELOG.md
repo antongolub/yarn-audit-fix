@@ -1,3 +1,15 @@
+# [4.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v4.2.4...v4.3.0) (2021-05-01)
+
+
+### Bug Fixes
+
+* **deps:** update dependency npm to v7.11.2 ([b794cb5](https://github.com/antongolub/yarn-audit-fix/commit/b794cb59d0c6e51fab5480e0949da0c3e869061b))
+
+
+### Features
+
+* provide configurable npmPath ([5e29c23](https://github.com/antongolub/yarn-audit-fix/commit/5e29c239d964ee8d652326e77d0f6ad24d517ff9)), closes [#107](https://github.com/antongolub/yarn-audit-fix/issues/107)
+
 ## [4.2.4](https://github.com/antongolub/yarn-audit-fix/compare/v4.2.3...v4.2.4) (2021-04-24)
 
 
