@@ -82,8 +82,8 @@ describe('util', () => {
     const cases: [any, string?, string?][] = [
       ['local', localNpm],
       ['system', cmd],
-      ['unknown', undefined, 'Unsupported npm path value: unknown'],
-      [NaN, undefined, 'Unsupported npm path value: NaN'],
+      [cmd, cmd],
+      [localNpm, localNpm],
     ]
     cases.forEach(([npmPath, result, err]) => {
       it(`resolves npm ref: npmPath=${npmPath},  isWin=${isWin}`, () => {

@@ -110,8 +110,7 @@ export const getNpm = (npmPath = 'local', isWin = isWindows()): string => {
     return getClosestNpm(cmd)
   }
 
-  // TODO support custom path to npm bin
-  throw new Error(`Unsupported npm path value: ${npmPath}`)
+  return npmPath
 }
 
 export const getWorkspaces = (
