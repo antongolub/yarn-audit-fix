@@ -1,3 +1,10 @@
+## [4.3.1](https://github.com/antongolub/yarn-audit-fix/compare/v4.3.0...v4.3.1) (2021-05-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency fs-extra to v10 ([96cb87a](https://github.com/antongolub/yarn-audit-fix/commit/96cb87af17b84842a42612ee6e5765b779f2ab0e))
+
 # [4.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v4.2.4...v4.3.0) (2021-05-01)
 
 
