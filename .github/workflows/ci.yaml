@@ -172,6 +172,7 @@ jobs:
           extends: |
             @qiwi/semrel-config
         env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GIT_AUTHOR_EMAIL: 'mailbox@antongolub.ru'
