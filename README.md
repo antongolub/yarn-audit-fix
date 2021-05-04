@@ -62,7 +62,7 @@ success Already up-to-date.
 </pre>
 
 ### Migration from v3 to v4
-`--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system`.
+`--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system` or define any custom `--npm-path=/another/npm/bin`.
 
 ### CLI
 | Flag | Description | Default |
@@ -72,7 +72,7 @@ success Already up-to-date.
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
 |`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution | 
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel)
-|`--npm-path` | Switch to system default version of **npm** instead of package's own. `system / local` | `local`
+|`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local`
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
 |`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | true |
 |`--registry` | Custom registry url |
