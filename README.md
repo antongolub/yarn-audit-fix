@@ -158,9 +158,35 @@ $$ yarn-audit-fix --force
 ```
 So you need, as the message says, to manually change the dependency versions. **npm@7** ~~is still in beta~~, perhaps this logic will be changed later.
 In some cases **npm@6** works better, so if you have such a version installed on your system, you may try:
-```shell script
+```shell
 npx yarn-audit-fix --npm-path=system
 ```
+You may also try to cast _the optimistic flags combo_
+```shell
+npx yarn-audit-fix --package-lock-only=false --force --legacy-peer-deps
+```
+Unfortunately, even this invocation may return something like:
+```shell
+# npm audit report
+
+hosted-git-info  <3.0.8
+Severity: moderate
+Regular Expression Deinal of Service - https://npmjs.com/advisories/1677
+No fix available
+node_modules/normalize-package-data/node_modules/hosted-git-info
+  normalize-package-data  2.0.0 - 2.5.0
+  Depends on vulnerable versions of hosted-git-info
+  node_modules/normalize-package-data
+    meow  3.4.0 - 9.0.0
+    Depends on vulnerable versions of normalize-package-data
+    Depends on vulnerable versions of read-pkg-up
+```
+**No fix available** just means that no fix available. If you still doubt the correctness of the output, you can check it.
+```shell
+npm i --package-lock-only
+npm audit fix --package-lock-only --force
+```
+Not everything can be fixed, alack.
 
 ## License
 [MIT](./LICENSE)
