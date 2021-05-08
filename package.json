@@ -82,7 +82,7 @@
     "cpy-cli": "^3.1.1",
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-config-qiwi": "^1.11.4",
+    "eslint-config-qiwi": "^1.11.3",
     "find-up": "^5.0.0",
     "inside-out-promise": "^2.1.2",
     "jest": "^26.6.3",
