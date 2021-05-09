@@ -78,6 +78,7 @@ success Already up-to-date.
 |`--registry` | Custom registry url |
 |`--silent` | Disable log output | false |
 |`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix`
+|`--symlink` | Symlink type for `node_modules` ref | `junction` for Windows, `dir` otherwise
 |`--verbose` | Switch log level to verbose/debug | false |
 
 ### ENV

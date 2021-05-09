@@ -12,6 +12,8 @@ import {
   readJson,
 } from '../../main/ts/util'
 
+const DEFAULT_OSTYPE = process.env.OSTYPE
+
 describe('util', () => {
   describe('#formatArgs', () => {
     it('return proper values', () => {
@@ -62,16 +64,16 @@ describe('util', () => {
   describe('#getSymlinkType', () => {
     it('resolves type by system profile and arg', () => {
       process.env.OSTYPE = 'msys'
-      expect(getSymlinkType('junction')).toBe('junction')
-      expect(getSymlinkType('foo')).toBe('dir')
-      expect(getSymlinkType()).toBe('dir')
+      expect(getSymlinkType()).toBe('junction')
+      expect(getSymlinkType('foo')).toBe('foo')
+      expect(getSymlinkType('dir')).toBe('dir')
 
       process.env.OSTYPE = 'unknown'
-      expect(getSymlinkType('junction')).toBe(
+      expect(getSymlinkType()).toBe(
         process.platform === 'win32' ? 'junction' : 'dir',
       )
-      expect(getSymlinkType('foo')).toBe('dir')
-      expect(getSymlinkType()).toBe('dir')
+
+      process.env.ostype = DEFAULT_OSTYPE
     })
   })
 
