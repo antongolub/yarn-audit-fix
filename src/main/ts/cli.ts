@@ -56,6 +56,13 @@ const flags = new Command()
     'Switch log level to verbose/debug',
     env.YAF_VERBOSE,
   )
+  .addOption(
+    new Option(
+      '--symlink',
+      'Define symlink type for `node_modules` assets',
+    )
+      .choices(['junction', 'dir'])
+  )
   .allowUnknownOption()
   .parse(process.argv)
   .opts()

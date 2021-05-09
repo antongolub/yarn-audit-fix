@@ -79,7 +79,7 @@ export const isWindows = (): boolean =>
   /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
 export const getSymlinkType = (type?: string): SymlinkType =>
-  type === 'junction' && isWindows() ? type : 'dir'
+  type as SymlinkType || (isWindows() ? 'junction' : 'dir')
 
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
