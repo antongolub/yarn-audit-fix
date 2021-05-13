@@ -95,7 +95,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2019, ubuntu-20.04 ]
-        node-version: [ 12, 14, 15 ]
+        node-version: [ 12, 14, 16 ]
 
     name: Test (Node v${{ matrix.node-version }}, OS ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
