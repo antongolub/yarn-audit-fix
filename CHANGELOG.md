@@ -1,3 +1,10 @@
+## [4.3.6](https://github.com/antongolub/yarn-audit-fix/compare/v4.3.5...v4.3.6) (2021-05-14)
+
+
+### Bug Fixes
+
+* handle symlink CLI option ([ef225ca](https://github.com/antongolub/yarn-audit-fix/commit/ef225ca8221e325103e38e8805dd9242daa7ed2e))
+
 ## [4.3.5](https://github.com/antongolub/yarn-audit-fix/compare/v4.3.4...v4.3.5) (2021-05-13)
 
 
