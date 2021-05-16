@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v4.3.6...v5.0.0) (2021-05-16)
+
+
+### chore
+
+* catch breaking change ([#121](https://github.com/antongolub/yarn-audit-fix/issues/121)) ([f6d683c](https://github.com/antongolub/yarn-audit-fix/commit/f6d683c00805370d45f65ef6a51127d580f89d9d))
+
+
+### BREAKING CHANGES
+
+* 'junction' is default symlink type for Windows, use `--symlink` flag to override
+
 ## [4.3.6](https://github.com/antongolub/yarn-audit-fix/compare/v4.3.5...v4.3.6) (2021-05-14)
 
 
