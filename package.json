@@ -78,7 +78,7 @@
     "@qiwi/npm-run-all": "^4.1.7",
     "@swissquote/crafty-preset-jest": "^1.14.0",
     "@types/jest": "^26.0.23",
-    "@types/node": "^15.0.3",
+    "@types/node": "^15.3.0",
     "cpy-cli": "^3.1.1",
     "eslint": "^7.26.0",
     "eslint-config-prettier": "^8.3.0",
