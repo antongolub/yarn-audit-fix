@@ -1,3 +1,10 @@
+## [5.0.2](https://github.com/antongolub/yarn-audit-fix/compare/v5.0.1...v5.0.2) (2021-05-25)
+
+
+### Performance Improvements
+
+* **pkg:** up deps ([6a3316e](https://github.com/antongolub/yarn-audit-fix/commit/6a3316e57626b28170ef17ea81273f14448ae6b9))
+
 ## [5.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v5.0.0...v5.0.1) (2021-05-20)
 
 
