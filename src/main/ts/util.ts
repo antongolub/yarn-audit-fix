@@ -84,20 +84,19 @@ export const getSymlinkType = (type?: string): SymlinkType =>
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
 
-export const getClosestNpm = (cmd: string): string => {
-  const pkgRoot = pkgDir(__dirname) + ''
-
-  return String(
+export const getClosestNpm = (cmd: string): string =>
+  String(
     findUp(
       (dir) => {
         const ref = resolve(dir, 'node_modules', '.bin', cmd)
 
         return fs.existsSync(ref) ? ref : undefined
       },
-      { cwd: pkgRoot },
+      {
+        cwd: String(pkgDir(__dirname))
+      },
     ),
   )
-}
 
 export const getNpm = (npmPath = 'local', isWin = isWindows()): string => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
