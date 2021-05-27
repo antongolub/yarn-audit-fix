@@ -1583,10 +1583,33 @@ byte-size@^7.0.1:
   resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-7.0.1.tgz#b1daf3386de7ab9d706b941a748dbfc71130dee3"
   integrity sha512-crQdqyCwhokxwV1UyDzLZanhkugAgft7vt0qbbdt60C6Zf3CAiGmtUCylbtYwrU6loOUw3euGrNtW1J651ot1A==
 
-cacache@^15.0.3, cacache@^15.0.5, cacache@^15.1.0:
+cacache@^15.0.3, cacache@^15.0.5:
   version "15.1.0"
   resolved "https://registry.yarnpkg.com/cacache/-/cacache-15.1.0.tgz#164c2f857ee606e4cc793c63018fefd0ea5eba7b"
   integrity sha512-mfx0C+mCfWjD1PnwQ9yaOrwG1ou9FkKnx0SvzUHWdFt7r7GaRtzT+9M8HAvLu62zIHtnpQ/1m93nWNDCckJGXQ==
+  dependencies:
+    "@npmcli/move-file" "^1.0.1"
+    chownr "^2.0.0"
+    fs-minipass "^2.0.0"
+    glob "^7.1.4"
+    infer-owner "^1.0.4"
+    lru-cache "^6.0.0"
+    minipass "^3.1.1"
+    minipass-collect "^1.0.2"
+    minipass-flush "^1.0.5"
+    minipass-pipeline "^1.2.2"
+    mkdirp "^1.0.3"
+    p-map "^4.0.0"
+    promise-inflight "^1.0.1"
+    rimraf "^3.0.2"
+    ssri "^8.0.1"
+    tar "^6.0.2"
+    unique-filename "^1.1.1"
+
+cacache@^15.2.0:
+  version "15.2.0"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-15.2.0.tgz#73af75f77c58e72d8c630a7a2858cb18ef523389"
+  integrity sha512-uKoJSHmnrqXgthDFx/IU6ED/5xd+NNGe+Bb+kLZy7Ku4P+BaiWEUflAKPZ7eAzsYGcsAGASJZsybXp+quEcHTw==
   dependencies:
     "@npmcli/move-file" "^1.0.1"
     chownr "^2.0.0"
@@ -4884,10 +4907,10 @@ normalize-path@^3.0.0:
   resolved "https://registry.npmjs.org/normalize-path/-/normalize-path-3.0.0.tgz"
   integrity sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==
 
-npm-audit-report@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/npm-audit-report/-/npm-audit-report-2.1.4.tgz#b14c4625131fb7bcacc4b1c83842af1f58c92c98"
-  integrity sha512-Tz7rnfskSdZ0msTzt2mENC/B+H2QI8u0jN0ck7o3zDsQYIQrek/l3MjEc+CARer+64LsVTU6ZIqNuh0X55QPhw==
+npm-audit-report@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/npm-audit-report/-/npm-audit-report-2.1.5.tgz#a5b8850abe2e8452fce976c8960dd432981737b5"
+  integrity sha512-YB8qOoEmBhUH1UJgh1xFAv7Jg1d+xoNhsDYiFQlEFThEBui0W1vIz2ZK6FVg4WZjwEdl7uBQlm1jy3MUfyHeEw==
   dependencies:
     chalk "^4.0.0"
 
@@ -4978,10 +5001,10 @@ npm-user-validate@^1.0.1:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.1.tgz#31428fc5475fe8416023f178c0ab47935ad8c561"
   integrity sha512-uQwcd/tY+h1jnEaze6cdX/LrhWhoBxfSknxentoqmIuStxUExxjWd3ULMLFPiFUrZKbOVMowH6Jq2FRWfmhcEw==
 
-npm@7.14.0:
-  version "7.14.0"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-7.14.0.tgz#b2df90a98879c181cd866ce5176f5a123730fbf5"
-  integrity sha512-GSG9/rSau8vGfkOmrmseRVYXoEjo3NPNsoM4nwvI1uWlKdzmlZ8UCw7FqCUrlQ5u0C5dRR7MG9EJUCV8LZegLA==
+npm@7.15.0:
+  version "7.15.0"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-7.15.0.tgz#85f0ff4ff222c01a2cc0164cf5d81c5a24994894"
+  integrity sha512-GIXNqy3obii54oPF0gbcBNq4aYuB/Ovuu/uYp1eS4nij2PEDMnoOh6RoSv2MDvAaB4a+JbpX/tjDxLO7JAADgQ==
   dependencies:
     "@npmcli/arborist" "^2.6.0"
     "@npmcli/ci-detect" "^1.2.0"
@@ -4992,7 +5015,7 @@ npm@7.14.0:
     ansistyles "~0.1.3"
     archy "~1.0.0"
     byte-size "^7.0.1"
-    cacache "^15.1.0"
+    cacache "^15.2.0"
     chalk "^4.1.0"
     chownr "^2.0.0"
     cli-columns "^3.1.2"
@@ -5025,7 +5048,7 @@ npm@7.14.0:
     ms "^2.1.2"
     node-gyp "^7.1.2"
     nopt "^5.0.0"
-    npm-audit-report "^2.1.4"
+    npm-audit-report "^2.1.5"
     npm-package-arg "^8.1.2"
     npm-pick-manifest "^6.1.1"
     npm-profile "^5.0.3"
