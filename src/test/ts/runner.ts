@@ -266,6 +266,7 @@ describe('yarn-audit-fix', () => {
           foo: 'bar',
           'package-lock-only': true,
           registry: registryUrl,
+          flow: 'convert'
         })
         checkConvertFlow()
       })
@@ -297,6 +298,7 @@ describe('yarn-audit-fix', () => {
             '--verbose',
             '--package-lock-only=false',
             `--registry=${registryUrl}`,
+            '--flow=convert',
           )
           require('../../main/ts/cli')
         })
