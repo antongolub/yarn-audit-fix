@@ -17,7 +17,7 @@ const flags = new Command()
   .option(
     '--dry-run [bool]',
     'Get an idea of what audit fix will do',
-    env.YAF_DRY_RUN_FORCE,
+    env.YAF_DRY_RUN,
   )
   .option(
     '--force [bool]',
@@ -50,18 +50,18 @@ const flags = new Command()
   )
   .option('--registry [registry]', 'Custom registry url', env.YAF_REGISTRY)
   .option('--silent [bool]', 'Disable log output', env.YAF_SILENT)
-  .option('--temp [dir]', 'Directory for temporary assets')
-  .option(
-    '--verbose [bool]',
-    'Switch log level to verbose/debug',
-    env.YAF_VERBOSE,
-  )
   .addOption(
     new Option(
       '--symlink',
       'Define symlink type for `node_modules` assets',
     )
       .choices(['junction', 'dir'])
+  )
+  .option('--temp [dir]', 'Directory for temporary assets')
+  .option(
+    '--verbose [bool]',
+    'Switch log level to verbose/debug',
+    env.YAF_VERBOSE,
   )
   .allowUnknownOption()
   .parse(process.argv)
