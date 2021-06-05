@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import { join, resolve } from 'path'
 
+import { TFlags, TFlagsMapping } from '../../main/ts'
 import {
   formatFlags,
   getNpm,
@@ -8,6 +9,7 @@ import {
   getTemp,
   getWorkspaces,
   isWindows,
+  mapFlags,
   normalizeFlags,
   readJson,
 } from '../../main/ts/util'
@@ -15,6 +17,37 @@ import {
 const DEFAULT_OSTYPE = process.env.OSTYPE
 
 describe('util', () => {
+  describe('#mapFlags', () => {
+    it('provides cross-util flags conversion', () => {
+      const cases: [[TFlags, TFlagsMapping, TFlags]] = [
+        [
+          {
+            only: 'prod',
+            'audit-level': 'low',
+          },
+          {
+            'audit-level': 'level',
+            only: {
+              key: 'groups',
+              values: {
+                prod: 'dependencies',
+                dev: 'devDependencies',
+              },
+            },
+          },
+          {
+            groups: 'dependencies',
+            level: 'low',
+          },
+        ],
+      ]
+
+      cases.forEach(([flags, mapping, result]) => {
+        expect(mapFlags(flags, mapping)).toEqual(result)
+      })
+    })
+  })
+
   describe('#formatArgs', () => {
     it('return proper values', () => {
       const cases: [Record<string, any>, string[], string[]][] = [

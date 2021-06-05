@@ -5,10 +5,11 @@ import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
 import fs, { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
 import { GlobbyOptions, sync as glob } from 'globby'
+import { reduce } from 'lodash'
 import { join, resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
 
-import { TFlags } from './ifaces'
+import { TFlags, TFlagsMapping } from './ifaces'
 
 export const invoke = (
   cmd: string,
@@ -55,10 +56,7 @@ export const normalizeFlags = (flags: TFlags): TFlags =>
     return m
   }, {})
 
-export const formatFlags = (
-  flags: Record<string, any>,
-  ...picklist: string[]
-): string[] =>
+export const formatFlags = (flags: TFlags, ...picklist: string[]): string[] =>
   Object.keys(flags).reduce<string[]>((memo, key: string) => {
     const omitlist = ['_', '--']
     const value = flags[key]
@@ -74,6 +72,30 @@ export const formatFlags = (
 
     return memo
   }, [])
+
+export const mapFlags = (flags: TFlags, mapping: TFlagsMapping): TFlags =>
+  reduce(
+    flags,
+    (memo: TFlags, value: any, key: string) => {
+      const repl = mapping[key]
+      let k = key;
+        let v = value
+
+      if (repl) {
+        if (typeof repl === 'string') {
+          k = repl
+        } else {
+          k = repl?.key ?? k
+          v = repl?.value ?? repl?.values?.[value] ?? v
+        }
+      }
+
+      memo[k] = v
+
+      return memo
+    },
+    {},
+  )
 
 export const isWindows = (): boolean =>
   process.platform === 'win32' ||

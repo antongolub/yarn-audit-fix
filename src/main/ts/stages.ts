@@ -119,7 +119,7 @@ export const yarnLockToPkgLock: TCallback = ({ temp, flags }) => {
 
   fs.writeFileSync(join(temp, 'package-lock.json'), pgkLockJsonData)
 
-  if (flags.flow === 'convert') {
+  if (flags.flow !== 'patch') {
     fs.removeSync(join(temp, 'yarn.lock'))
   }
 }

@@ -1,5 +1,11 @@
 export type TFlags = Record<string, any>
 
+export type TFlagsMapping = {
+  [flag: string]:
+    | string
+    | { key?: string; value?: string; values?: { [val: string]: string } }
+}
+
 export type TContext = {
   ctx: TContext
   cwd: string
