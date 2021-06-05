@@ -1,35 +1,9 @@
 import chalk from 'chalk'
 import { join } from 'path'
 
-import { TCallback, TContext, TFlags, TStage } from './ifaces'
-import {
-  clear,
-  createSymlinks,
-  createTempAssets,
-  exit,
-  npmAuditFix,
-  printRuntimeDigest,
-  yarnImport,
-  yarnInstall,
-  yarnLockToPkgLock,
-} from './stages'
+import {TCallback, TContext, TFlags, TFlow, TStage} from './ifaces'
+import { convert } from './flow'
 import { getTemp, normalizeFlags, readJson } from './util'
-
-export const main: TStage[] = [
-  ['Runtime digest', printRuntimeDigest],
-  ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
-  ['Generating package-lock.json from yarn.lock...', yarnLockToPkgLock],
-  ['Applying npm audit fix...', npmAuditFix],
-  [
-    'Updating yarn.lock from package-lock.json...',
-    yarnImport,
-    yarnInstall,
-    clear,
-  ],
-  ['Done'],
-]
-
-export const fallback: TStage[] = [['Failure!', clear, exit]]
 
 /**
  * Build running context.
@@ -45,6 +19,18 @@ export const getContext = (flags: Record<string, any> = {}): TContext => {
     flags,
     manifest,
   }
+}
+
+/**
+ * Select `yarn.lock` modification strategy.
+ * @param flags
+ */
+export const getFlow = ({ flow = 'convert' }: Record<string, any> = {}): TFlow => {
+  if (flow === 'convert') {
+    return convert
+  }
+
+  throw new Error(`Unsupported flow: ${flow}`)
 }
 
 /**
@@ -66,13 +52,14 @@ export const exec = (stages: TStage[], ctx: TContext): void => {
 export const run = async (_flags: TFlags = {}): Promise<void> => {
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
+  const flow = getFlow(flags)
 
   try {
-    exec(main, ctx)
+    exec(flow.main, ctx)
   } catch (err) {
     ctx.err = err
 
-    exec(fallback, ctx)
+    exec(flow.fallback, ctx)
 
     throw err
   }

@@ -13,3 +13,8 @@ export type TCallback = (cxt: TContext) => void | Promise<void>
 export type TStage = [string, ...TCallback[]]
 
 export type ICallable<A extends any[] = any[], R = any> = (...args: A) => R
+
+export type TFlow = {
+  main: TStage[]
+  fallback: TStage[]
+}

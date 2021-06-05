@@ -19,6 +19,14 @@ const flags = new Command()
     'Get an idea of what audit fix will do',
     env.YAF_DRY_RUN,
   )
+  .addOption(
+    new Option(
+      '--flow [flow]',
+      'Define how `yarn.lock` is modified',
+    )
+      .choices(['convert', 'patch'])
+      .default(env.YAF_FLOW || 'convert'),
+  )
   .option(
     '--force [bool]',
     'Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones',
@@ -33,7 +41,7 @@ const flags = new Command()
   .addOption(
     new Option(
       '--npm-path [path]',
-      "Switch to system default version of npm instead of package's own.",
+      'Switch to system default version of npm instead of package\'s own.',
     )
       .choices(['system', 'local'])
       .default(env.YAF_NPM_PATH || 'local'),
