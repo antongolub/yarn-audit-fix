@@ -96,10 +96,3 @@ export const audit = ({ flags, temp }: TContext): TAuditReport => {
     (item) => item.module_name,
   )
 }
-
-export default {
-  audit,
-  patch,
-  read,
-  write,
-}

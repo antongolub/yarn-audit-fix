@@ -5,7 +5,7 @@ import semver from 'semver'
 import synp from 'synp'
 
 import { TCallback } from './ifaces'
-import lf from './lockfile'
+import * as lf from './lockfile'
 import {
   formatFlags,
   getNpm,
