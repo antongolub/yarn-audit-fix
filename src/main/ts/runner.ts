@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import { join } from 'path'
 
-import { convert, patch } from './flow'
+import { convert, patch } from './flows'
 import { TCallback, TContext, TFlags, TFlow, TStage } from './ifaces'
 import { getTemp, normalizeFlags, readJson } from './util'
 
