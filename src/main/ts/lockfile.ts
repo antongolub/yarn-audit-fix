@@ -1,4 +1,5 @@
 import * as lf from '@yarnpkg/lockfile'
+import { SpawnSyncReturns } from 'child_process'
 import fs from 'fs-extra'
 import { keyBy } from 'lodash'
 import sv from 'semver'
@@ -77,12 +78,18 @@ export const audit = ({ flags, temp }: TContext): TAuditReport => {
     ['audit', '--json'],
     temp,
     !!flags.silent,
-    true,
+    false,
     true,
   )
 
-  return keyBy(
-    report
+  return parseAuditJsonReport(report)
+}
+
+export const parseAuditJsonReport = (
+  data: string | SpawnSyncReturns<Buffer>,
+): TAuditReport =>
+  keyBy(
+    data
       .toString()
       .split('\n')
       .map((item) => attempt(() => JSON.parse(item)) as TAuditEntry)
@@ -95,4 +102,3 @@ export const audit = ({ flags, temp }: TContext): TAuditReport => {
       })),
     (item) => item.module_name,
   )
-}
