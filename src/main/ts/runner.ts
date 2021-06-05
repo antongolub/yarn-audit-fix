@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { join } from 'path'
 
 import {TCallback, TContext, TFlags, TFlow, TStage} from './ifaces'
-import { convert } from './flow'
+import { convert, patch } from './flow'
 import { getTemp, normalizeFlags, readJson } from './util'
 
 /**
@@ -12,13 +12,15 @@ export const getContext = (flags: Record<string, any> = {}): TContext => {
   const cwd = process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
-
-  return {
+  const ctx = {
     cwd,
     temp,
     flags,
     manifest,
-  }
+  } as TContext
+  ctx.ctx = ctx
+
+  return ctx
 }
 
 /**
@@ -28,6 +30,10 @@ export const getContext = (flags: Record<string, any> = {}): TContext => {
 export const getFlow = ({ flow = 'convert' }: Record<string, any> = {}): TFlow => {
   if (flow === 'convert') {
     return convert
+  }
+
+  if (flow === 'patch') {
+    return patch
   }
 
   throw new Error(`Unsupported flow: ${flow}`)

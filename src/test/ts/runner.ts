@@ -5,40 +5,43 @@ import { factory as iop } from 'inside-out-promise'
 import { join, resolve } from 'path'
 import synp from 'synp'
 
-import { createSymlinks, run } from '../../main/ts'
+import {createSymlinks, run, TContext} from '../../main/ts'
 import { getNpm, getYarn } from '../../main/ts/util'
+import lf from '../../main/ts/lockfile'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
 jest.mock('npm')
 jest.mock('synp')
+jest.mock('../../main/ts/lockfile')
 
+const noop = () => { /* noop */ }
 const registryUrl = 'https://example.com'
-const strMatching = (temp: string, ending: string) =>
-  expect.stringMatching(new RegExp(`${temp}.+${ending}`))
+const strMatching = (start: string = '', end: string = '') =>
+  expect.stringMatching(new RegExp(`^${start}.+${end}$`))
 
 describe('yarn-audit-fix', () => {
   beforeEach(() => {
     // @ts-ignore
-    fs.emptyDirSync.mockImplementation(() => {
-      /* noop */
-    })
+    lf.audit.mockImplementation(noop)
     // @ts-ignore
-    fs.copyFileSync.mockImplementation(() => {
-      /* noop */
-    })
+    lf.parch.mockImplementation(noop)
+    // @ts-ignore
+    lf.read.mockImplementation(noop)
+    // @ts-ignore
+    lf.write.mockImplementation(noop)
+    // @ts-ignore
+    fs.emptyDirSync.mockImplementation(noop)
+    // @ts-ignore
+    fs.copyFileSync.mockImplementation(noop)
     // @ts-ignore
     fs.readFileSync.mockImplementation(() => '{"version": "1.0.0"}')
     // @ts-ignore
-    fs.removeSync.mockImplementation(() => {
-      /* noop */
-    })
+    fs.removeSync.mockImplementation(noop)
     // @ts-ignore
     fs.existsSync.mockImplementation(() => true)
     // @ts-ignore
-    fs.createSymlinkSync.mockImplementation(() => {
-      /* noop */
-    })
+    fs.createSymlinkSync.mockImplementation(noop)
     // @ts-ignore
     synp.yarnToNpm.mockImplementation(() => '{}')
     // @ts-ignore
@@ -57,7 +60,7 @@ describe('yarn-audit-fix', () => {
         workspaces: ['packages/*'],
       }
 
-      createSymlinks({ temp, flags: {}, cwd, manifest })
+      createSymlinks({ temp, flags: {}, cwd, manifest } as unknown as TContext)
 
       const links = ['node_modules', 'packages/a', 'packages/b']
       links.forEach((link) => {
@@ -70,9 +73,13 @@ describe('yarn-audit-fix', () => {
     })
   })
 
-  describe('flow', () => {
+  describe('runner', () => {
+    it('throws error on unsupported flow', async () =>
+      expect(run({flow: 'unknown'})).rejects.toEqual(new Error('Unsupported flow: unknown'))
+    )
+
     // eslint-disable-next-line
-    const checkFlow = (skipPkgLockOnly?: boolean) => {
+    const checkConvertFlow = (skipPkgLockOnly?: boolean) => {
       const temp = findCacheDir({ name: 'yarn-audit-fix', create: true }) + ''
       const cwd = process.cwd()
       const stdio = ['inherit', 'inherit', 'inherit']
@@ -102,6 +109,7 @@ describe('yarn-audit-fix', () => {
       )
 
       // Generating package-lock.json from yarn.lock...
+      expect(synp.yarnToNpm).toHaveBeenCalledWith(strMatching(temp), true)
       expect(fs.removeSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
@@ -133,11 +141,47 @@ describe('yarn-audit-fix', () => {
       expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
     }
 
-    describe('runner', () => {
-      it('checks target `flow` existence', async () =>
-        expect(run({flow: 'unknown'})).rejects.toEqual(new Error('Unsupported flow: unknown'))
-      )
+    describe('`patch` flow', () => {
+      fit('invokes cmd queue with proper args', async () => {
+        await run({
+          flow: 'patch',
+        })
 
+        const temp = findCacheDir({ name: 'yarn-audit-fix', create: true }) + ''
+        const cwd = process.cwd()
+        const stdio = ['inherit', 'inherit', 'inherit']
+
+        // Preparing...
+        expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
+        expect(fs.copyFileSync).toHaveBeenCalledWith(
+          'yarn.lock',
+          strMatching(temp, 'yarn.lock'),
+        )
+        expect(fs.copyFileSync).toHaveBeenCalledWith(
+          'package.json',
+          strMatching(temp, 'package.json'),
+        )
+        expect(fs.copyFileSync).toHaveBeenCalledWith(
+          '.yarnrc',
+          strMatching(temp, '.yarnrc'),
+        )
+        expect(fs.copyFileSync).toHaveBeenCalledWith(
+          '.npmrc',
+          strMatching(temp, '.npmrc'),
+        )
+        expect(fs.createSymlinkSync).toHaveBeenCalledWith(
+          join(cwd, 'node_modules'),
+          strMatching(temp, 'node_modules'),
+          'dir',
+        )
+
+        // Generating package-lock.json from yarn.lock...
+        expect(synp.yarnToNpm).toHaveBeenCalledWith(strMatching(temp), true)
+        expect(fs.removeSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
+      })
+    })
+
+    describe('`convert` flow', () => {
       it('invokes cmd queue with proper args', async () => {
         await run({
           verbose: true,
@@ -145,7 +189,7 @@ describe('yarn-audit-fix', () => {
           'package-lock-only': true,
           registry: registryUrl,
         })
-        checkFlow()
+        checkConvertFlow()
       })
 
       it('handles exceptions', async () => {
@@ -178,7 +222,7 @@ describe('yarn-audit-fix', () => {
           )
           require('../../main/ts/cli')
         })
-        checkFlow(true)
+        checkConvertFlow(true)
       })
 
       describe('on error', () => {
