@@ -1,11 +1,14 @@
-import {TFlow} from "./ifaces";
+import {TFlow} from './ifaces'
 import {
   clear,
   createSymlinks,
-  createTempAssets, exit,
+  createTempAssets,
+  exit,
   npmAuditFix,
+  patchLockfile,
   printRuntimeDigest,
-  yarnImport, yarnInstall,
+  yarnImport,
+  yarnInstall,
   yarnLockToPkgLock
 } from "./stages";
 
@@ -32,7 +35,11 @@ export const convert: TFlow = {
 // Inject `yarn audit --json` data to lockfile.
 export const patch: TFlow = {
   main: [
-    ['Runtime digest', printRuntimeDigest]
+    ['Runtime digest', printRuntimeDigest],
+    ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
+    ['Generating package-lock.json from yarn.lock...', yarnLockToPkgLock],
+    ['Patching yarn.lock with audit data...', patchLockfile, yarnInstall, clear],
+    ['Done'],
   ],
   fallback: [
     ['Failure!', clear, exit]

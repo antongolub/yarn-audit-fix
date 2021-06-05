@@ -157,3 +157,11 @@ export const getTemp = (cwd: string, temp?: string): string => {
 
   return ensureDir(tempDir)
 }
+
+export const attempt = <T>(f: () => T): T | null => {
+  try {
+    return f();
+  } catch {
+    return null;
+  }
+}
