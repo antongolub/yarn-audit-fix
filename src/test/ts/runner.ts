@@ -200,6 +200,8 @@ describe('yarn-audit-fix', () => {
         const temp = findCacheDir({ name: 'yarn-audit-fix', create: true }) + ''
         const cwd = process.cwd()
         const stdio = ['inherit', 'inherit', 'inherit']
+        const stdionull = [null, null, null]
+
 
         // Preparing...
         expect(fs.emptyDirSync).toHaveBeenCalledWith(
@@ -236,7 +238,7 @@ describe('yarn-audit-fix', () => {
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
           ['audit', '--json'],
-          { cwd: strMatching(temp), stdio },
+          { cwd: strMatching(temp), stdio: stdionull },
         )
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfWrite).toHaveBeenCalledTimes(1)

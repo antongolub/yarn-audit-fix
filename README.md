@@ -73,7 +73,7 @@ success Already up-to-date.
 `--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system` or define any custom `--npm-path=/another/npm/bin`.
 
 ### Migration to v6+
-Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=npm` option to CLI.
+Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=convert` option to CLI.
 
 ### CLI
 | Option | Description | Default | `convert` | `patch` | 
@@ -88,9 +88,8 @@ Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit
 |`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local` | ✔ | ✔
 |`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod` | | ✔ | ✔
 |`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | `true` | ✔ |
-|`--registry` | Custom registry url | | ✔ | ✔* |
+|`--registry` | Custom registry url | | ✔ |  |
 |`--silent` | Disable log output | `false` | ✔ | ✔
-|`--source`| Set audit json provider: `yarn` or `npm` (supports custom registries) | `yarn` |  | ✔
 |`--symlink` | Symlink type for `node_modules` ref | `junction` for Windows, `dir` otherwise | ✔
 |`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix` | ✔ | ✔
 |`--verbose` | Switch log level to verbose/debug | `false` | ✔ | ✔ |

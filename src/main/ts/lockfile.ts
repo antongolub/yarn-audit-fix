@@ -5,7 +5,7 @@ import { keyBy } from 'lodash'
 import sv from 'semver'
 
 import { TAuditEntry, TAuditReport, TContext, TLockfileObject } from './ifaces'
-import { attempt, getNpm, getYarn, invoke } from './util'
+import { attempt, formatFlags, getNpm, getYarn, invoke, mapFlags } from './util'
 
 export const read = (name: string): TLockfileObject => {
   const data = lf.parse(fs.readFileSync(name, 'utf-8'))
@@ -79,10 +79,25 @@ export const patch = (
 
 export const audit = ({ flags, temp }: TContext): TAuditReport => {
   const cmd = flags.reporter === 'npm' ? getNpm(flags['npm-path']) : getYarn()
-
+  const mapping = {
+    'audit-level': 'level',
+    only: {
+      key: 'groups',
+      values: {
+        prod: 'dependencies',
+        dev: 'devDependencies',
+      },
+    },
+  }
+  const _flags = formatFlags(
+    mapFlags(flags, mapping),
+    'groups',
+    'verbose',
+    'level',
+  )
   const report = invoke(
     cmd,
-    ['audit', '--json'],
+    ['audit', '--json', ..._flags],
     temp,
     !!flags.silent,
     false,
