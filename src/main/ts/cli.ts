@@ -20,10 +20,7 @@ const flags = new Command()
     env.YAF_DRY_RUN,
   )
   .addOption(
-    new Option(
-      '--flow [flow]',
-      'Define how `yarn.lock` is modified',
-    )
+    new Option('--flow [flow]', 'Define how `yarn.lock` is modified')
       .choices(['convert', 'patch'])
       .default(env.YAF_FLOW || 'convert'),
   )
@@ -41,7 +38,7 @@ const flags = new Command()
   .addOption(
     new Option(
       '--npm-path [path]',
-      'Switch to system default version of npm instead of package\'s own.',
+      "Switch to system default version of npm instead of package's own.",
     )
       .choices(['system', 'local'])
       .default(env.YAF_NPM_PATH || 'local'),
@@ -62,8 +59,7 @@ const flags = new Command()
     new Option(
       '--symlink',
       'Define symlink type for `node_modules` assets',
-    )
-      .choices(['junction', 'dir'])
+    ).choices(['junction', 'dir']),
   )
   .option('--temp [dir]', 'Directory for temporary assets')
   .option(

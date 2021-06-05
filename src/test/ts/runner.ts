@@ -2,12 +2,12 @@ import cp from 'child_process'
 import findCacheDir from 'find-cache-dir'
 import fs from 'fs-extra'
 import { factory as iop } from 'inside-out-promise'
-import { join, resolve, basename } from 'path'
+import { basename, join, resolve } from 'path'
 import synp from 'synp'
 
-import {createSymlinks, run, TContext} from '../../main/ts'
+import { createSymlinks, run, TContext } from '../../main/ts'
+import lf from '../../main/ts/lockfile'
 import { getNpm, getYarn } from '../../main/ts/util'
-import lf, {audit as lfAudit} from '../../main/ts/lockfile'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
@@ -15,26 +15,44 @@ jest.mock('npm')
 jest.mock('synp')
 
 const fixtures = resolve(__dirname, '../fixtures')
-const noop = () => { /* noop */ }
+const noop = () => {
+  /* noop */
+}
 const registryUrl = 'https://example.com'
-const strMatching = (start: string = '', end: string = '') =>
+const strMatching = (start = '', end = '') =>
   expect.stringMatching(new RegExp(`^${start}.+${end}$`))
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#using_the_reviver_parameter
-const revive = <T = any>(data: string): T => JSON.parse(data, (k, v) => {
-  if (
-    v !== null            &&
-    typeof v === 'object' &&
-    'type' in v           &&
-    v.type === 'Buffer'   &&
-    'data' in v           &&
-    Array.isArray(v.data)) {
-    return new Buffer(v.data)
-  }
-  return v
-})
-const audit = revive(jest.requireActual('fs').readFileSync(resolve(fixtures, 'lockfile/yarn-audit-report.json'), {encoding: 'utf-8'}))
-const yarnLockBefore = jest.requireActual('fs').readFileSync(resolve(fixtures, 'lockfile/yarn.lock.before'), {encoding: 'utf-8'})
-const yarnLockAfter = jest.requireActual('fs').readFileSync(resolve(fixtures, 'lockfile/yarn.lock.after'), {encoding: 'utf-8'})
+const revive = <T = any>(data: string): T =>
+  JSON.parse(data, (k, v) => {
+    if (
+      v !== null &&
+      typeof v === 'object' &&
+      'type' in v &&
+      v.type === 'Buffer' &&
+      'data' in v &&
+      Array.isArray(v.data)
+    ) {
+      return Buffer.from(v.data)
+    }
+    return v
+  })
+const audit = revive(
+  jest
+    .requireActual('fs')
+    .readFileSync(resolve(fixtures, 'lockfile/yarn-audit-report.json'), {
+      encoding: 'utf-8',
+    }),
+)
+const yarnLockBefore = jest
+  .requireActual('fs')
+  .readFileSync(resolve(fixtures, 'lockfile/yarn.lock.before'), {
+    encoding: 'utf-8',
+  })
+const yarnLockAfter = jest
+  .requireActual('fs')
+  .readFileSync(resolve(fixtures, 'lockfile/yarn.lock.after'), {
+    encoding: 'utf-8',
+  })
 
 describe('yarn-audit-fix', () => {
   const lfAudit = jest.spyOn(lf, 'audit')
@@ -72,7 +90,7 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     synp.npmToYarn.mockImplementation(() => '{}')
     // @ts-ignore
-    cp.spawnSync.mockImplementation((cmd, [$0, $1], opts) => {
+    cp.spawnSync.mockImplementation((cmd, [$0, $1]) => {
       if ($0 === 'audit' && $1 === '--json') {
         return audit
       }
@@ -106,8 +124,9 @@ describe('yarn-audit-fix', () => {
 
   describe('runner', () => {
     it('throws error on unsupported flow', async () =>
-      expect(run({flow: 'unknown'})).rejects.toEqual(new Error('Unsupported flow: unknown'))
-    )
+      expect(run({ flow: 'unknown' })).rejects.toEqual(
+        new Error('Unsupported flow: unknown'),
+      ))
 
     // eslint-disable-next-line
     const checkConvertFlow = (skipPkgLockOnly?: boolean) => {
@@ -173,7 +192,7 @@ describe('yarn-audit-fix', () => {
     }
 
     describe('`patch` flow', () => {
-      fit('invokes cmd queue with proper args', async () => {
+      it('invokes cmd queue with proper args', async () => {
         await run({
           flow: 'patch',
         })
@@ -183,7 +202,9 @@ describe('yarn-audit-fix', () => {
         const stdio = ['inherit', 'inherit', 'inherit']
 
         // Preparing...
-        expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
+        expect(fs.emptyDirSync).toHaveBeenCalledWith(
+          expect.stringMatching(temp),
+        )
         expect(fs.copyFileSync).toHaveBeenCalledWith(
           'yarn.lock',
           strMatching(temp, 'yarn.lock'),
@@ -208,7 +229,9 @@ describe('yarn-audit-fix', () => {
 
         // Generating package-lock.json from yarn.lock...
         expect(synp.yarnToNpm).toHaveBeenCalledWith(strMatching(temp), true)
-        expect(fs.removeSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
+        expect(fs.removeSync).toHaveBeenCalledWith(
+          strMatching(temp, 'yarn.lock'),
+        )
 
         // Patching `yarn.lock`
         expect(lfRead).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
@@ -216,11 +239,14 @@ describe('yarn-audit-fix', () => {
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
           ['audit', '--json'],
-          { cwd: strMatching(temp), stdio }
+          { cwd: strMatching(temp), stdio },
         )
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfWrite).toHaveBeenCalledTimes(1)
-        expect(fs.writeFileSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'), yarnLockAfter)
+        expect(fs.writeFileSync).toHaveBeenCalledWith(
+          strMatching(temp, 'yarn.lock'),
+          yarnLockAfter,
+        )
 
         // Replaces original file, triggers `yarn --update-checksums`, resets temp directory
         expect(fs.copyFileSync).toHaveBeenCalledWith(
