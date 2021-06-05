@@ -78,8 +78,8 @@ export const mapFlags = (flags: TFlags, mapping: TFlagsMapping): TFlags =>
     flags,
     (memo: TFlags, value: any, key: string) => {
       const repl = mapping[key]
-      let k = key;
-        let v = value
+      let k = key
+      let v = value
 
       if (repl) {
         if (typeof repl === 'string') {

@@ -200,7 +200,7 @@ node_modules/normalize-package-data/node_modules/hosted-git-info
 npm i --package-lock-only
 npm audit fix --package-lock-only --force
 ```
-Not everything can be fixed, alack.
+Not everything can be repaired, alack.
 
 ## License
 [MIT](./LICENSE)
