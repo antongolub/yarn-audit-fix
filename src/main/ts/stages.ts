@@ -158,6 +158,9 @@ export const yarnImport: TCallback = ({ temp }) => {
   const yarnLockData = synp.npmToYarn(temp, true)
 
   fs.writeFileSync(join(temp, 'yarn.lock'), yarnLockData)
+}
+
+export const syncLockfile: TCallback = ({ temp }) => {
   fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
 }
 

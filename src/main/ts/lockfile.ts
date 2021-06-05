@@ -1,5 +1,5 @@
-import fs from 'fs'
-import lf from '@yarnpkg/lockfile'
+import fs from 'fs-extra'
+import * as lf from '@yarnpkg/lockfile'
 import { keyBy } from 'lodash'
 import sv from 'semver'
 
@@ -69,7 +69,8 @@ export const audit = ({ flags, temp }: TContext): TAuditReport => {
   const cmd = flags.reporter === 'npm'
     ? getNpm(flags['npm-path'])
     : getYarn()
-  const report = invoke(cmd, ['audit', '--json'], temp, !!flags.silent, true)
+
+  const report = invoke(cmd, ['audit', '--json'], temp, !!flags.silent, true, true)
   
   return keyBy(
     report
