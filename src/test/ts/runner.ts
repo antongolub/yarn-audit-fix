@@ -229,9 +229,6 @@ describe('yarn-audit-fix', () => {
 
         // Generating package-lock.json from yarn.lock...
         expect(synp.yarnToNpm).toHaveBeenCalledWith(strMatching(temp), true)
-        expect(fs.removeSync).toHaveBeenCalledWith(
-          strMatching(temp, 'yarn.lock'),
-        )
 
         // Patching `yarn.lock`
         expect(lfRead).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))

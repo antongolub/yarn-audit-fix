@@ -114,11 +114,14 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const yarnLockToPkgLock: TCallback = ({ temp }) => {
+export const yarnLockToPkgLock: TCallback = ({ temp, flags }) => {
   const pgkLockJsonData = synp.yarnToNpm(temp, true)
 
   fs.writeFileSync(join(temp, 'package-lock.json'), pgkLockJsonData)
-  fs.removeSync(join(temp, 'yarn.lock'))
+
+  if (flags.flow === 'convert') {
+    fs.removeSync(join(temp, 'yarn.lock'))
+  }
 }
 
 /**
