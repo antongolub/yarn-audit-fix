@@ -200,8 +200,7 @@ describe('yarn-audit-fix', () => {
         const temp = findCacheDir({ name: 'yarn-audit-fix', create: true }) + ''
         const cwd = process.cwd()
         const stdio = ['inherit', 'inherit', 'inherit']
-        const stdionull = [null, null, null]
-
+        const stdionull = [null, null, null] // eslint-disable-line
 
         // Preparing...
         expect(fs.emptyDirSync).toHaveBeenCalledWith(
