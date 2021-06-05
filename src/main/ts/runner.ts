@@ -1,8 +1,8 @@
 import chalk from 'chalk'
 import { join } from 'path'
 
-import {TCallback, TContext, TFlags, TFlow, TStage} from './ifaces'
 import { convert, patch } from './flow'
+import { TCallback, TContext, TFlags, TFlow, TStage } from './ifaces'
 import { getTemp, normalizeFlags, readJson } from './util'
 
 /**
@@ -27,7 +27,9 @@ export const getContext = (flags: Record<string, any> = {}): TContext => {
  * Select `yarn.lock` modification strategy.
  * @param flags
  */
-export const getFlow = ({ flow = 'convert' }: Record<string, any> = {}): TFlow => {
+export const getFlow = ({
+  flow = 'convert',
+}: Record<string, any> = {}): TFlow => {
   if (flow === 'convert') {
     return convert
   }

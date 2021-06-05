@@ -4,8 +4,8 @@ import { sync as pkgDir } from 'pkg-dir'
 import semver from 'semver'
 import synp from 'synp'
 
+import { TCallback } from './ifaces'
 import lf from './lockfile'
-import {TCallback} from './ifaces'
 import {
   formatFlags,
   getNpm,
@@ -197,7 +197,7 @@ export const exit: TCallback = ({ flags, err }) => {
   process.exitCode = err?.status | 0 || 1
 }
 
-export const patchLockfile: TCallback = ({ flags , temp, ctx}) => {
+export const patchLockfile: TCallback = ({ temp, ctx }) => {
   const lockfilePath = join(temp, 'yarn.lock')
   const lockfile = lf.read(lockfilePath)
   const report = lf.audit(ctx)

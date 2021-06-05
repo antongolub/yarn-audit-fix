@@ -7,7 +7,6 @@ export type TContext = {
   flags: TFlags
   manifest: Record<string, any>
   err?: any
-  report?: TAuditReport
 }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>
@@ -21,22 +20,20 @@ export type TFlow = {
   fallback: TStage[]
 }
 
+export type TAuditAdvisory = {
+  module_name: string // eslint-disable-line camelcase
+  vulnerable_versions: string // eslint-disable-line camelcase
+  patched_versions: string // eslint-disable-line camelcase
+}
+
 export type TAuditEntry = {
   data: {
-    advisory: {
-      module_name: string
-      vulnerable_versions: string
-      patched_versions: string
-    }
+    advisory: TAuditAdvisory
   }
 }
 
 export type TAuditReport = {
-  [versionInfo: string]: {
-    module_name: string
-    vulnerable_versions: string
-    patched_versions: string
-  }
+  [versionInfo: string]: TAuditAdvisory
 }
 
 export type TLockfileObject = {
@@ -45,5 +42,5 @@ export type TLockfileObject = {
     resolved: string
     integrity: string
     dependencies: string[]
-  };
-};
+  }
+}

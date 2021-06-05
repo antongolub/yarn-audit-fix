@@ -16,7 +16,7 @@ export const invoke = (
   cwd: string,
   silent = false,
   inherit = true,
-  skipError = false
+  skipError = false,
 ): string | ReturnType<typeof cp.spawnSync> => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
 
@@ -80,7 +80,7 @@ export const isWindows = (): boolean =>
   /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
 export const getSymlinkType = (type?: string): SymlinkType =>
-  type as SymlinkType || (isWindows() ? 'junction' : 'dir')
+  (type as SymlinkType) || (isWindows() ? 'junction' : 'dir')
 
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
@@ -94,7 +94,7 @@ export const getClosestNpm = (cmd: string): string =>
         return fs.existsSync(ref) ? ref : undefined
       },
       {
-        cwd: String(pkgDir(__dirname))
+        cwd: String(pkgDir(__dirname)),
       },
     ),
   )
@@ -161,8 +161,8 @@ export const getTemp = (cwd: string, temp?: string): string => {
 
 export const attempt = <T>(f: () => T): T | null => {
   try {
-    return f();
+    return f()
   } catch {
-    return null;
+    return null // eslint-disable-line
   }
 }
