@@ -22,7 +22,7 @@ const flags = new Command()
   .addOption(
     new Option('--flow [flow]', 'Define how `yarn.lock` is modified')
       .choices(['convert', 'patch'])
-      .default(env.YAF_FLOW || 'convert'),
+      .default(env.YAF_FLOW || 'patch'),
   )
   .option(
     '--force [bool]',
