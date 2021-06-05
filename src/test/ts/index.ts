@@ -134,6 +134,10 @@ describe('yarn-audit-fix', () => {
     }
 
     describe('runner', () => {
+      it('checks target `flow` existence', async () =>
+        expect(run({flow: 'unknown'})).rejects.toEqual(new Error('Unsupported flow: unknown'))
+      )
+
       it('invokes cmd queue with proper args', async () => {
         await run({
           verbose: true,
