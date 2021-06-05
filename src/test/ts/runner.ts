@@ -6,7 +6,7 @@ import { basename, join, resolve } from 'path'
 import synp from 'synp'
 
 import { createSymlinks, run, TContext } from '../../main/ts'
-import lf from '../../main/ts/lockfile'
+import * as lf from '../../main/ts/lockfile'
 import { getNpm, getYarn } from '../../main/ts/util'
 
 jest.mock('child_process')
