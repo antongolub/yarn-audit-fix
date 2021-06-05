@@ -1,4 +1,4 @@
 export * from './stages'
 export * from './ifaces'
 export * from './runner'
-export * from './flow'
+export * from './flows'

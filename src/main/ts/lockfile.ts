@@ -21,6 +21,9 @@ export const write = (name: string, lockfile: TLockfileObject): void => {
   fs.writeFileSync(name, lf.stringify(lockfile))
 }
 
+/**
+ * Pulled up from https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts
+ */
 export const patch = (
   lockfile: TLockfileObject,
   report: TAuditReport,
@@ -50,7 +53,7 @@ export const patch = (
       }
       if (!sv.satisfies(fix, desiredRange)) {
         console.error(
-          'Cant find patched version that satisfies',
+          "Can't find patched version that satisfies",
           depSpec,
           'in',
           pkgAudit.patched_versions,
@@ -65,7 +68,11 @@ export const patch = (
     }
   }
 
-  !flags.silent && console.log('Upgraded deps:', upgraded.join(', '))
+  !flags.silent &&
+    console.log(
+      'Upgraded deps:',
+      upgraded.length > 0 ? upgraded.join(', ') : '<none>',
+    )
 
   return lockfile
 }
