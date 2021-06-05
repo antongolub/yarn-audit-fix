@@ -17,15 +17,23 @@
 
 Apply `npm audit fix` logic to `yarn.lock`
 
-## Motivation
+## Problem
 1. `yarn audit` detects vulnerabilities, but cannot fix them.
 Authors suggest using [Depedabot](https://dependabot.com/) or [Snyk](https://snyk.io/) for security patches. Well, it is very inconvenient in some situations, to say the least of it.
-The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).  
-Fortunately, there's a workaround: [stackoverflow/60878037](https://stackoverflow.com/a/60878037) (thanks to Gianfranco P.).
-`yarn-audit-fix` is just a composition of these steps into a single utility.
-More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
-   
+The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).
 2. `yarn audit` does not support custom (in-house, internal) registries. Here are the [issue](https://github.com/yarnpkg/yarn/issues/7012) & [PR](https://github.com/yarnpkg/yarn/pull/6484) which have not yet received the green light.
+
+## Solution
+Fortunately, there are several workarounds:
+1. Compose `npm audit fix` with lockfile converter. [stackoverflow/60878037](https://stackoverflow.com/a/60878037) (thanks to [Gianfranco P.](https://github.com/gianpaj)).
+   `yarn-audit-fix --flow=convert` is just a composition of these steps into a single utility. More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
+2. Fetch `yarn/npm audit --json` and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts))
+
+## Key features
+* `convert` and `patch` flows for `yarn.lock` at your choice
+* Mac / Linux / Windows support
+* CLI / JS API
+* TS and flow typings
 
 ## Install
 ```shell script
@@ -38,7 +46,7 @@ npx yarn-audit-fix
 
 ## Usage
 <pre>
-$ yarn-audit-fix
+$ yarn-audit-fix [--opts]
 
 <b>Preparing temp assets...</b>
 <b>Generating package-lock.json from yarn.lock...</b>
@@ -61,28 +69,34 @@ success Already up-to-date.
 <b>Done</b>
 </pre>
 
-### Migration from v3 to v4
+### Migration to v4+
 `--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system` or define any custom `--npm-path=/another/npm/bin`.
 
+### Migration to v6+
+Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=npm` option to CLI.
+
 ### CLI
-| Flag | Description | Default |
-|---|---|---|
-|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | low
-|`--dry-run` | Get an idea of what audit fix will do | 
-|`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | false
-|`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution | 
-|`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel)
-|`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local`
-|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
-|`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | true |
-|`--registry` | Custom registry url |
-|`--silent` | Disable log output | false |
-|`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix`
-|`--symlink` | Symlink type for `node_modules` ref | `junction` for Windows, `dir` otherwise
-|`--verbose` | Switch log level to verbose/debug | false |
+| Option | Description | Default | `convert` | `patch` | 
+|---|---|---|---|---|
+|`--flow` | Define how `yarn.lock` is modified. `convert` — to compose `npm audit fix` with two-way lockfile conversion (legacy flow). `patch` — to directly inject audit json data | `patch`
+|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | `low` | ✔ | ✔
+|`--dry-run` | Get an idea of what audit fix will do | | ✔ |
+|`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | `false` | ✔
+|`--help/-h`| Print help message |
+|`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution |  | ✔
+|`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel) | | ✔
+|`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local` | ✔ | ✔
+|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod` | | ✔ | ✔
+|`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | `true` | ✔ |
+|`--registry` | Custom registry url | | ✔ | ✔* |
+|`--silent` | Disable log output | `false` | ✔ | ✔
+|`--source`| Set audit json provider: `yarn` or `npm` (supports custom registries) | `yarn` |  | ✔
+|`--symlink` | Symlink type for `node_modules` ref | `junction` for Windows, `dir` otherwise | ✔
+|`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix` | ✔ | ✔
+|`--verbose` | Switch log level to verbose/debug | `false` | ✔ | ✔ |
 
 ### ENV
-All mentioned above CLI directives can be replaced with corresponding env variables with leading **YAF** prefix. For example:
+All mentioned above CLI options can be replaced with corresponding env variables with leading **YAF** prefix. For example:
 * `YAF_FORCE` equals `--force`
 * `YAF_ONLY=prod` — `--only=prod`
 
