@@ -2,40 +2,65 @@ import cp from 'child_process'
 import findCacheDir from 'find-cache-dir'
 import fs from 'fs-extra'
 import { factory as iop } from 'inside-out-promise'
-import { join, resolve } from 'path'
+import { join, resolve, basename } from 'path'
 import synp from 'synp'
 
 import {createSymlinks, run, TContext} from '../../main/ts'
 import { getNpm, getYarn } from '../../main/ts/util'
-import lf from '../../main/ts/lockfile'
+import lf, {audit as lfAudit} from '../../main/ts/lockfile'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
 jest.mock('npm')
 jest.mock('synp')
-jest.mock('../../main/ts/lockfile')
 
+const fixtures = resolve(__dirname, '../fixtures')
 const noop = () => { /* noop */ }
 const registryUrl = 'https://example.com'
 const strMatching = (start: string = '', end: string = '') =>
   expect.stringMatching(new RegExp(`^${start}.+${end}$`))
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#using_the_reviver_parameter
+const revive = <T = any>(data: string): T => JSON.parse(data, (k, v) => {
+  if (
+    v !== null            &&
+    typeof v === 'object' &&
+    'type' in v           &&
+    v.type === 'Buffer'   &&
+    'data' in v           &&
+    Array.isArray(v.data)) {
+    return new Buffer(v.data)
+  }
+  return v
+})
+const audit = revive(jest.requireActual('fs').readFileSync(resolve(fixtures, 'lockfile/yarn-audit-report.json'), {encoding: 'utf-8'}))
+const yarnLockBefore = jest.requireActual('fs').readFileSync(resolve(fixtures, 'lockfile/yarn.lock.before'), {encoding: 'utf-8'})
+const yarnLockAfter = jest.requireActual('fs').readFileSync(resolve(fixtures, 'lockfile/yarn.lock.after'), {encoding: 'utf-8'})
 
 describe('yarn-audit-fix', () => {
+  const lfAudit = jest.spyOn(lf, 'audit')
+  const lfRead = jest.spyOn(lf, 'read')
+  const lfPatch = jest.spyOn(lf, 'patch')
+  const lfWrite = jest.spyOn(lf, 'write')
+
   beforeEach(() => {
-    // @ts-ignore
-    lf.audit.mockImplementation(noop)
-    // @ts-ignore
-    lf.parch.mockImplementation(noop)
-    // @ts-ignore
-    lf.read.mockImplementation(noop)
-    // @ts-ignore
-    lf.write.mockImplementation(noop)
     // @ts-ignore
     fs.emptyDirSync.mockImplementation(noop)
     // @ts-ignore
     fs.copyFileSync.mockImplementation(noop)
     // @ts-ignore
-    fs.readFileSync.mockImplementation(() => '{"version": "1.0.0"}')
+    fs.readFileSync.mockImplementation((name) => {
+      const _name = basename(name)
+
+      if (_name === 'yarn.lock') {
+        return yarnLockBefore
+      }
+
+      if (_name === 'package.json') {
+        return '{"version": "1.0.0"}'
+      }
+
+      return ''
+    })
     // @ts-ignore
     fs.removeSync.mockImplementation(noop)
     // @ts-ignore
@@ -47,7 +72,13 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     synp.npmToYarn.mockImplementation(() => '{}')
     // @ts-ignore
-    cp.spawnSync.mockImplementation(() => ({ status: 0, stdout: '1.0.1' }))
+    cp.spawnSync.mockImplementation((cmd, [$0, $1], opts) => {
+      if ($0 === 'audit' && $1 === '--json') {
+        return audit
+      }
+
+      return { status: 0, stdout: '1.0.1' }
+    })
   })
   afterEach(jest.clearAllMocks)
   afterAll(jest.resetAllMocks)
@@ -55,7 +86,7 @@ describe('yarn-audit-fix', () => {
   describe('createSymlinks', () => {
     it('establishes proper links', () => {
       const temp = 'foo/bar'
-      const cwd = resolve(__dirname, '../fixtures/regular-monorepo')
+      const cwd = join(fixtures, 'regular-monorepo')
       const manifest = {
         workspaces: ['packages/*'],
       }
@@ -178,6 +209,29 @@ describe('yarn-audit-fix', () => {
         // Generating package-lock.json from yarn.lock...
         expect(synp.yarnToNpm).toHaveBeenCalledWith(strMatching(temp), true)
         expect(fs.removeSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
+
+        // Patching `yarn.lock`
+        expect(lfRead).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
+        expect(lfAudit).toHaveBeenCalledTimes(1)
+        expect(cp.spawnSync).toHaveBeenCalledWith(
+          getYarn(),
+          ['audit', '--json'],
+          { cwd: strMatching(temp), stdio }
+        )
+        expect(lfPatch).toHaveBeenCalledTimes(1)
+        expect(lfWrite).toHaveBeenCalledTimes(1)
+        expect(fs.writeFileSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'), yarnLockAfter)
+
+        // Replaces original file, triggers `yarn --update-checksums`, resets temp directory
+        expect(fs.copyFileSync).toHaveBeenCalledWith(
+          strMatching(temp, 'yarn.lock'),
+          'yarn.lock',
+        )
+        expect(cp.spawnSync).toHaveBeenCalledWith(
+          getYarn(),
+          ['--update-checksums'],
+          { cwd, stdio },
+        )
       })
     })
 

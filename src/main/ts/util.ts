@@ -16,6 +16,7 @@ export const invoke = (
   cwd: string,
   silent = false,
   inherit = true,
+  skipError = false
 ): string | ReturnType<typeof cp.spawnSync> => {
   !silent && console.log(chalk.bold('invoke'), cmd, ...args)
 
@@ -24,7 +25,7 @@ export const invoke = (
     : [null, null, null] // eslint-disable-line
   const result = cp.spawnSync(cmd, args, { cwd, stdio })
 
-  if (result.error || result.status) {
+  if (!skipError && (result.error || result.status)) {
     throw result
   }
 
