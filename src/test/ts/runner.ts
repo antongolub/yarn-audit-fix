@@ -5,7 +5,7 @@ import { factory as iop } from 'inside-out-promise'
 import { basename, join, resolve } from 'path'
 import synp from 'synp'
 
-import {createSymlinks, run, TContext, TFlow} from '../../main/ts'
+import { createSymlinks, run, TContext, TFlow } from '../../main/ts'
 import * as lf from '../../main/ts/lockfile'
 import { getNpm, getYarn } from '../../main/ts/util'
 
@@ -185,7 +185,7 @@ describe('yarn-audit-fix', () => {
       const handler = jest.fn(noop)
       const flow: TFlow = {
         main: [['Test', handler]],
-        fallback: []
+        fallback: [],
       }
       await run({}, flow)
 
