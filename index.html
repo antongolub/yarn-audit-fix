@@ -2746,7 +2746,7 @@ img {
 				<h2>Key features</h2>
 			</a>
 			<ul>
-				<li><code>convert</code> and <code>patch</code> flows for <code>yarn.lock</code> at your choice</li>
+				<li>A couple of strategies to fix security issues</li>
 				<li>Mac / Linux / Windows support</li>
 				<li>CLI / JS API</li>
 				<li>TS and flow typings</li>
@@ -2802,8 +2802,7 @@ success Already up-to-date.
 						<th>Option</th>
 						<th>Description</th>
 						<th>Default</th>
-						<th><code>convert</code></th>
-						<th><code>patch</code></th>
+						<th>with <code>--flow=convert</code> only</th>
 					</tr>
 				</thead>
 				<tbody><tr>
@@ -2811,33 +2810,28 @@ success Already up-to-date.
 						<td>Define how <code>yarn.lock</code> is modified. <code>convert</code> — to compose <code>npm audit fix</code> with two-way lockfile conversion (legacy flow). <code>patch</code> — to directly inject audit json data</td>
 						<td><code>patch</code></td>
 						<td></td>
-						<td></td>
 					</tr>
 					<tr>
 						<td><code>--audit-level</code></td>
 						<td>Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical</td>
 						<td><code>low</code></td>
-						<td>✔</td>
-						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--dry-run</code></td>
 						<td>Get an idea of what audit fix will do</td>
 						<td></td>
 						<td>✔</td>
-						<td></td>
 					</tr>
 					<tr>
 						<td><code>--force</code></td>
 						<td>Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones</td>
 						<td><code>false</code></td>
-						<td>✔</td>
 						<td></td>
 					</tr>
 					<tr>
 						<td><code>--help/-h</code></td>
 						<td>Print help message</td>
-						<td></td>
 						<td></td>
 						<td></td>
 					</tr>
@@ -2846,70 +2840,60 @@ success Already up-to-date.
 						<td>Accept an incorrect (potentially broken) deps resolution</td>
 						<td></td>
 						<td>✔</td>
-						<td></td>
 					</tr>
 					<tr>
 						<td><code>--loglevel</code></td>
 						<td>Set custom <a href="https://docs.npmjs.com/cli/v7/using-npm/config#loglevel">log level</a></td>
 						<td></td>
 						<td>✔</td>
-						<td></td>
 					</tr>
 					<tr>
 						<td><code>--npm-path</code></td>
 						<td>Declare npm path: switch to system default version of <strong>npm</strong> instead of package&#39;s own. <code>system / local / &lt;custom path&gt;</code></td>
 						<td><code>local</code></td>
-						<td>✔</td>
-						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--only</code></td>
 						<td>Set package <a href="https://docs.npmjs.com/cli/v7/using-npm/config#only">updating scope</a>: <code>dev</code>/<code>prod</code></td>
 						<td></td>
-						<td>✔</td>
-						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--package-lock-only</code></td>
 						<td>Run audit fix without modifying <code>node_modules</code>. Highly recommended to <strong>enable</strong>.</td>
 						<td><code>true</code></td>
 						<td>✔</td>
-						<td></td>
 					</tr>
 					<tr>
 						<td><code>--registry</code></td>
 						<td>Custom registry url</td>
 						<td></td>
 						<td>✔</td>
-						<td></td>
 					</tr>
 					<tr>
 						<td><code>--silent</code></td>
 						<td>Disable log output</td>
 						<td><code>false</code></td>
-						<td>✔</td>
-						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--symlink</code></td>
 						<td>Symlink type for <code>node_modules</code> ref</td>
 						<td><code>junction</code> for Windows, <code>dir</code> otherwise</td>
-						<td>✔</td>
 						<td></td>
 					</tr>
 					<tr>
 						<td><code>--temp</code></td>
 						<td>Directory for temporary assets</td>
 						<td><code>&lt;cwd&gt;/node_modules/.cache/yarn-audit-fix</code></td>
-						<td>✔</td>
-						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--verbose</code></td>
 						<td>Switch log level to verbose/debug</td>
 						<td><code>false</code></td>
-						<td>✔</td>
-						<td>✔</td>
+						<td></td>
 					</tr>
 			</tbody></table>
 			<a href="#env" id="env" style="color: inherit; text-decoration: none;">
@@ -2931,6 +2915,29 @@ success Already up-to-date.
 <span style="color: #000000">   </span><span style="color: #001080">flow:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;patch&#039;</span><span style="color: #000000">,</span>
 <span style="color: #000000">   </span><span style="color: #001080">verbose:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span>
 <span style="color: #000000">})</span>
+</code></pre>
+			<p>Build and run custom flows.</p>
+			<pre><code class="language-ts"><span style="color: #AF00DB">import</span><span style="color: #000000"> {</span>
+<span style="color: #000000">   </span><span style="color: #001080">clear</span><span style="color: #000000">,</span>
+<span style="color: #000000">   </span><span style="color: #001080">exit</span><span style="color: #000000">,</span>
+<span style="color: #000000">   </span><span style="color: #001080">patchLockfile</span><span style="color: #000000">,</span>
+<span style="color: #000000">   </span><span style="color: #001080">yarnInstall</span>
+<span style="color: #000000">} </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;yarn-audit-fix&#039;</span>
+
+<span style="color: #AF00DB">export</span><span style="color: #000000"> </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">flow</span><span style="color: #000000">: </span><span style="color: #267F99">TFlow</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">  </span><span style="color: #001080">main:</span><span style="color: #000000"> [</span>
+<span style="color: #000000">    [</span>
+<span style="color: #000000">      </span><span style="color: #A31515">&#039;Patching yarn.lock with audit data...&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">      </span><span style="color: #001080">patchLockfile</span><span style="color: #000000">,</span>
+<span style="color: #000000">      (...</span><span style="color: #001080">args</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Smth interesting:&#039;</span><span style="color: #000000">, ...</span><span style="color: #001080">args</span><span style="color: #000000">)},</span>
+<span style="color: #000000">      </span><span style="color: #001080">yarnInstall</span><span style="color: #000000">,</span>
+<span style="color: #000000">    ],</span>
+<span style="color: #000000">    [</span><span style="color: #A31515">&#039;Done&#039;</span><span style="color: #000000">],</span>
+<span style="color: #000000">  ],</span>
+<span style="color: #000000">  </span><span style="color: #001080">fallback:</span><span style="color: #000000"> [[</span><span style="color: #A31515">&#039;Failure!&#039;</span><span style="color: #000000">, </span><span style="color: #001080">exit</span><span style="color: #000000">]],</span>
+<span style="color: #000000">}</span>
+
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">({}, </span><span style="color: #001080">flow</span><span style="color: #000000">)</span>
 </code></pre>
 			<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
 				<h2>Troubleshooting</h2>
@@ -3025,10 +3032,10 @@ success Already up-to-date.
 </code></pre>
 			<p>So you need, as the message says, to manually change the dependency versions. <strong>npm@7</strong> <del>is still in beta</del>, perhaps this logic will be changed later.
 			In some cases <strong>npm@6</strong> works better, so if you have such a version installed on your system, you may try:</p>
-			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix --npm-path=system</span>
+			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix --npm-path=system --flow=convert</span>
 </code></pre>
 			<p>You may also try to cast <em>the optimistic flags combo</em></p>
-			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix --package-lock-only=false --force --legacy-peer-deps</span>
+			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix --package-lock-only=false --force --legacy-peer-deps --flow=convert</span>
 </code></pre>
 			<p>Unfortunately, even this invocation may return something like:</p>
 			<pre><code class="language-shell"><span style="color: #008000"># npm audit report</span>
@@ -3045,9 +3052,21 @@ success Already up-to-date.
 <span style="color: #000000">    Depends on vulnerable versions of normalize-package-data</span>
 <span style="color: #000000">    Depends on vulnerable versions of read-pkg-up</span>
 </code></pre>
-			<p><strong>No fix available</strong> just means that no fix available. If you still doubt the correctness of the output, you can check it.</p>
+			<p><strong>No fix available</strong> just means that no fix available. If you still doubt the correctness of the output, you can check it by hand.</p>
 			<pre><code class="language-shell"><span style="color: #000000">npm i --package-lock-only</span>
 <span style="color: #000000">npm audit fix --package-lock-only --force</span>
+</code></pre>
+			<p>Same response for alternative patching flow:</p>
+			<pre><code class="language-shell"><span style="color: #000000">npm_config_yes=true npx yarn-audit-fix --audit-level=moderate --flow=patch</span>
+</code></pre>
+			<pre><code class="language-shell"><span style="color: #000000">Patching yarn.lock with audit data...</span>
+<span style="color: #000000">invoke yarn audit --json --level moderate</span>
+<span style="color: #000000">Can</span><span style="color: #A31515">&#039;t find patched version that satisfies postcss@^7.0.0 in &gt;=8.2.10</span>
+<span style="color: #A31515">Can&#039;</span><span style="color: #000000">t find patched version that satisfies postcss@^7.0.1 </span><span style="color: #AF00DB">in</span><span style="color: #000000"> &gt;=8.2.10</span>
+<span style="color: #000000">Can</span><span style="color: #A31515">&#039;t find patched version that satisfies postcss@^7.0.27 in &gt;=8.2.10</span>
+<span style="color: #A31515">Can&#039;</span><span style="color: #000000">t find patched version that satisfies ws@^7.2.3 </span><span style="color: #AF00DB">in</span><span style="color: #000000"> &gt;=6.2.2 &lt;7.0.0 || &gt;=7.4.6</span>
+<span style="color: #000000">Upgraded deps: &lt;none&gt;</span>
+<span style="color: #000000">invoke yarn --update-checksums</span>
 </code></pre>
 			<p>Not everything can be repaired, alack.</p>
 			<a href="#license" id="license" style="color: inherit; text-decoration: none;">
