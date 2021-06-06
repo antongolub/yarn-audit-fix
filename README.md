@@ -81,7 +81,7 @@ Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit
 |`--flow` | Define how `yarn.lock` is modified. `convert` — to compose `npm audit fix` with two-way lockfile conversion (legacy flow). `patch` — to directly inject audit json data | `patch`
 |`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | `low` | ✔ | ✔
 |`--dry-run` | Get an idea of what audit fix will do | | ✔ |
-|`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | `false` | ✔
+|`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | `false` | ✔ | ✔
 |`--help/-h`| Print help message |
 |`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution |  | ✔
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel) | | ✔

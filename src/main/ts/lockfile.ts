@@ -51,7 +51,7 @@ export const patch = (
         )
         continue
       }
-      if (!sv.satisfies(fix, desiredRange)) {
+      if (!sv.satisfies(fix, desiredRange) && !flags.force) {
         console.error(
           "Can't find patched version that satisfies",
           depSpec,
