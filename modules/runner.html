@@ -2711,9 +2711,6 @@ img {
 			<a href="runner.html#getcontext" class="tsd-kind-icon">get<wbr>Context</a>
 		</li>
 		<li class=" tsd-kind-function tsd-parent-kind-module">
-			<a href="runner.html#getflow" class="tsd-kind-icon">get<wbr>Flow</a>
-		</li>
-		<li class=" tsd-kind-function tsd-parent-kind-module">
 			<a href="runner.html#run" class="tsd-kind-icon">run</a>
 		</li>
 	</ul>
@@ -2729,7 +2726,6 @@ img {
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-function tsd-parent-kind-module"><a href="runner.html#exec" class="tsd-kind-icon">exec</a></li>
 							<li class="tsd-kind-function tsd-parent-kind-module"><a href="runner.html#getcontext" class="tsd-kind-icon">get<wbr>Context</a></li>
-							<li class="tsd-kind-function tsd-parent-kind-module"><a href="runner.html#getflow" class="tsd-kind-icon">get<wbr>Flow</a></li>
 							<li class="tsd-kind-function tsd-parent-kind-module"><a href="runner.html#run" class="tsd-kind-icon">run</a></li>
 						</ul>
 					</section>
@@ -2748,7 +2744,7 @@ img {
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/f16002d/src/main/ts/runner.ts#L49">runner.ts:49</a></li>
+								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/4794e2d/src/main/ts/runner.ts#L31">runner.ts:31</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -2775,13 +2771,13 @@ img {
 				<a name="getcontext" class="tsd-anchor"></a>
 				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Context</h3>
 				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Context<span class="tsd-signature-symbol">(</span>flags<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ifaces.html#tcontext" class="tsd-signature-type" data-tsd-kind="Type alias">TContext</a></li>
+					<li class="tsd-signature tsd-kind-icon">get<wbr>Context<span class="tsd-signature-symbol">(</span>flags<span class="tsd-signature-symbol">?: </span><a href="ifaces.html#tflags" class="tsd-signature-type" data-tsd-kind="Type alias">TFlags</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ifaces.html#tcontext" class="tsd-signature-type" data-tsd-kind="Type alias">TContext</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/f16002d/src/main/ts/runner.ts#L11">runner.ts:11</a></li>
+								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/4794e2d/src/main/ts/runner.ts#L11">runner.ts:11</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
@@ -2792,38 +2788,10 @@ img {
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
-								<h5>flags: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = {}</span></h5>
+								<h5>flags: <a href="ifaces.html#tflags" class="tsd-signature-type" data-tsd-kind="Type alias">TFlags</a><span class="tsd-signature-symbol"> = {}</span></h5>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <a href="ifaces.html#tcontext" class="tsd-signature-type" data-tsd-kind="Type alias">TContext</a></h4>
-					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-				<a name="getflow" class="tsd-anchor"></a>
-				<h3><span class="tsd-flag ts-flagConst">Const</span> get<wbr>Flow</h3>
-				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-					<li class="tsd-signature tsd-kind-icon">get<wbr>Flow<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ifaces.html#tflow" class="tsd-signature-type" data-tsd-kind="Type alias">TFlow</a></li>
-				</ul>
-				<ul class="tsd-descriptions">
-					<li class="tsd-description">
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/f16002d/src/main/ts/runner.ts#L30">runner.ts:30</a></li>
-							</ul>
-						</aside>
-						<div class="tsd-comment tsd-typography">
-							<div class="lead">
-								<p>Select <code>yarn.lock</code> modification strategy.</p>
-							</div>
-						</div>
-						<h4 class="tsd-parameters-title">Parameters</h4>
-						<ul class="tsd-parameters">
-							<li>
-								<h5>__namedParameters: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = {}</span></h5>
-							</li>
-						</ul>
-						<h4 class="tsd-returns-title">Returns <a href="ifaces.html#tflow" class="tsd-signature-type" data-tsd-kind="Type alias">TFlow</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -2837,7 +2805,7 @@ img {
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/f16002d/src/main/ts/runner.ts#L60">runner.ts:60</a></li>
+								<li>Defined in <a href="https://github.com/antongolub/yarn-audit-fix/blob/4794e2d/src/main/ts/runner.ts#L42">runner.ts:42</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">

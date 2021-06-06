@@ -2738,9 +2738,9 @@ img {
 			</a>
 			<p>Fortunately, there are several workarounds:</p>
 			<ol>
-				<li>Compose <code>npm audit fix</code> with lockfile converter. <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a> (thanks to <a href="https://github.com/gianpaj">Gianfranco P.</a>).
-				<code>yarn-audit-fix --flow=convert</code> is just a composition of these steps into a single utility. More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></li>
-				<li>Fetch <code>yarn/npm audit --json</code> and patch lockfile inners (kudos to <a href="https://github.com/spion">G. Kosev</a>, <a href="https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts">code reference</a>)</li>
+				<li>Compose <code>npm audit fix</code> with lockfile converter (thanks to <a href="https://github.com/gianpaj">Gianfranco P.</a>, <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a>).
+				<code>yarn-audit-fix --flow=convert</code> just reproduces these steps with minimal changes. More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></li>
+				<li>Fetch <code>yarn/npm audit --json</code> and patch lockfile inners (kudos to <a href="https://github.com/spion">G. Kosev</a>, <a href="https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts">code reference</a>). <code>yarn-audit-fix --flow=patch</code></li>
 			</ol>
 			<a href="#key-features" id="key-features" style="color: inherit; text-decoration: none;">
 				<h2>Key features</h2>
@@ -2757,7 +2757,7 @@ img {
 			<pre><code class="language-shell"><span style="color: #000000">$ yarn add yarn-audit-fix -D</span>
 </code></pre>
 			<p>or even better</p>
-			<pre><code><span style="color: #001080">npx</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span>
+			<pre><code><span style="color: #001080">npm_config_yes</span><span style="color: #000000">=</span><span style="color: #0000FF">true</span><span style="color: #000000"> </span><span style="color: #001080">npx</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span>
 </code></pre>
 			<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 				<h2>Usage</h2>
@@ -2920,9 +2920,42 @@ success Already up-to-date.
 				<li><code>YAF_FORCE</code> equals <code>--force</code></li>
 				<li><code>YAF_ONLY=prod</code> — <code>--only=prod</code></li>
 			</ul>
+			<a href="#js-api" id="js-api" style="color: inherit; text-decoration: none;">
+				<h3>JS API</h3>
+			</a>
+			<p><strong>yarn-audit-fix</strong> is a naive and optimistic workaround, so it exposes all of its inners to give anybody a chance to tweak up and find a better steps combination.
+			Typedoc: <a href="https://antongolub.github.io/yarn-audit-fix/modules/">https://antongolub.github.io/yarn-audit-fix/modules/</a></p>
+			<pre><code class="language-ts"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">run</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;yarn-audit-fix&#039;</span>
+
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">({</span>
+<span style="color: #000000">   </span><span style="color: #001080">flow:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;patch&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">   </span><span style="color: #001080">verbose:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span>
+<span style="color: #000000">})</span>
+</code></pre>
 			<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
 				<h2>Troubleshooting</h2>
 			</a>
+			<a href="#yarn-audit-fix-version-xxx-is-out-of-date" id="yarn-audit-fix-version-xxx-is-out-of-date" style="color: inherit; text-decoration: none;">
+				<h3>yarn-audit-fix version x.x.x is out of date</h3>
+			</a>
+			<pre><code><span style="color: #001080">npm_config_yes</span><span style="color: #000000">=</span><span style="color: #0000FF">true</span><span style="color: #000000"> </span><span style="color: #001080">npx</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000"> --</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">level</span><span style="color: #000000">=</span><span style="color: #001080">moderate</span>
+<span style="color: #001080">Runtime</span><span style="color: #000000"> </span><span style="color: #001080">digest</span>
+<span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000"> </span><span style="color: #001080">version</span><span style="color: #000000"> </span><span style="color: #098658">4.3</span><span style="color: #000000">.</span><span style="color: #098658">6</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">out</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">date</span><span style="color: #000000">. </span><span style="color: #001080">Install</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">latest</span><span style="color: #000000"> </span><span style="color: #098658">6.0</span><span style="color: #000000">.</span><span style="color: #098658">0</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">better</span><span style="color: #000000"> </span><span style="color: #001080">results</span>
+</code></pre>
+			<p><strong>npx</strong> caches previously loaded packages, so you need one of:</p>
+			<ol>
+				<li>Define version to load: <code>npm yarn-audit-fix@6.0.0</code></li>
+				<li>Reset npx cache. For Mac/Linux: <code>rm -rf ~/.npm/_npx</code></li>
+			</ol>
+			<a href="#yarn-audit-fix-command-not-found" id="yarn-audit-fix-command-not-found" style="color: inherit; text-decoration: none;">
+				<h3>yarn-audit-fix command not found</h3>
+			</a>
+			<p>After installation, the package may not be found. This is probably an issue with $PATH finding <code>node_modules/.bin</code> contents or smth like that (<a href="https://github.com/npm/npm/issues/957">npm/issues/957</a>).
+			A bit annoying, but it&#39;s easy to handle in several ways.</p>
+			<ul>
+				<li>You&#39;re able to run the cmd through <strong>yarn</strong>: <code>yarn yarn-audit-fix</code>.</li>
+				<li>Simply invoke <code>node_modules/.bin/yarn-audit-fix</code> script.</li>
+			</ul>
 			<a href="#enoent-no-such-file-or-directory" id="enoent-no-such-file-or-directory" style="color: inherit; text-decoration: none;">
 				<h3>enoent: no such file or directory</h3>
 			</a>
@@ -2947,15 +2980,6 @@ success Already up-to-date.
 				<li>Restore the original <code>node_modules</code> state. <code>yarn --force</code> or <code>rm-rf node_modules &amp;&amp; yarn</code>.</li>
 				<li>Apply <code>npx yarn-audit-fix --package-lock-only</code>. The last param should instruct <strong>npm</strong> not to modify <code>node_modules</code> contents.</li>
 			</ol>
-			<a href="#yarn-audit-fix-command-not-found" id="yarn-audit-fix-command-not-found" style="color: inherit; text-decoration: none;">
-				<h3>yarn-audit-fix command not found</h3>
-			</a>
-			<p>After installation the package may not be found. This is probably an issue with $PATH finding <code>node_modules/.bin</code> contents or smth like that (<a href="https://github.com/npm/npm/issues/957">npm/issues/957</a>).
-			A bit annoying, but it&#39;s easy to handle in several ways. </p>
-			<ul>
-				<li>You&#39;re able to run the cmd through <strong>yarn</strong>: <code>yarn yarn-audit-fix</code>. </li>
-				<li>Simply invoke <code>node_modules/.bin/yarn-audit-fix</code> script.</li>
-			</ul>
 			<a href="#--force-did-not-force-the-update" id="--force-did-not-force-the-update" style="color: inherit; text-decoration: none;">
 				<h3>--force did not force the update</h3>
 			</a>
