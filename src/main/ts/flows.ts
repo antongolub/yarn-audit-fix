@@ -49,3 +49,16 @@ export const patch: TFlow = {
   ],
   fallback: [['Failure!', clear, exit]],
 }
+
+// Select `yarn.lock` modification strategy.
+export const getFlow = (flow = 'patch'): TFlow => {
+  if (flow === 'convert') {
+    return convert
+  }
+
+  if (flow === 'patch') {
+    return patch
+  }
+
+  throw new Error(`Unsupported flow: ${flow}`)
+}
