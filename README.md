@@ -30,7 +30,7 @@ Fortunately, there are several workarounds:
 2. Fetch `yarn/npm audit --json` and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)). `yarn-audit-fix --flow=patch`
 
 ## Key features
-* `convert` and `patch` flows for `yarn.lock` at your choice
+* A couple of strategies to fix security issues
 * Mac / Linux / Windows support
 * CLI / JS API
 * TS and flow typings
@@ -110,6 +110,31 @@ await run({
    flow: 'patch',
    verbose: true
 })
+```
+
+Build and run custom flows.
+```ts
+import {
+   clear,
+   exit,
+   patchLockfile,
+   yarnInstall
+} from 'yarn-audit-fix'
+
+export const flow: TFlow = {
+  main: [
+    [
+      'Patching yarn.lock with audit data...',
+      patchLockfile,
+      (...args) => {console.log('Smth interesting:', ...args)},
+      yarnInstall,
+    ],
+    ['Done'],
+  ],
+  fallback: [['Failure!', exit]],
+}
+
+await run({}, flow)
 ```
 
 ## Troubleshooting
