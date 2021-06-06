@@ -1,14 +1,14 @@
 import chalk from 'chalk'
 import { join } from 'path'
 
-import { convert, patch } from './flows'
+import { getFlow } from './flows'
 import { TCallback, TContext, TFlags, TFlow, TStage } from './ifaces'
 import { getTemp, normalizeFlags, readJson } from './util'
 
 /**
  * Build running context.
  */
-export const getContext = (flags: Record<string, any> = {}): TContext => {
+export const getContext = (flags: TFlags = {}): TContext => {
   const cwd = process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
@@ -21,24 +21,6 @@ export const getContext = (flags: Record<string, any> = {}): TContext => {
   ctx.ctx = ctx
 
   return ctx
-}
-
-/**
- * Select `yarn.lock` modification strategy.
- * @param flags
- */
-export const getFlow = ({
-  flow = 'patch',
-}: Record<string, any> = {}): TFlow => {
-  if (flow === 'convert') {
-    return convert
-  }
-
-  if (flow === 'patch') {
-    return patch
-  }
-
-  throw new Error(`Unsupported flow: ${flow}`)
 }
 
 /**
@@ -60,7 +42,7 @@ export const exec = (stages: TStage[], ctx: TContext): void => {
 export const run = async (_flags: TFlags = {}): Promise<void> => {
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
-  const flow = getFlow(flags)
+  const flow = getFlow(flags.flow)
 
   try {
     exec(flow.main, ctx)
