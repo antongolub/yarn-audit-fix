@@ -1,3 +1,11 @@
+# [6.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.1.0...v6.2.0) (2021-06-06)
+
+
+### Features
+
+* `force` option for patch flow ([0bfc6bc](https://github.com/antongolub/yarn-audit-fix/commit/0bfc6bc3726a0f17df095a990b1863d2d509b201))
+* **runner:** provide custom flows execution ([bf8be9c](https://github.com/antongolub/yarn-audit-fix/commit/bf8be9c97a33942569339c051975cceb2da14aa3))
+
 # [6.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.0.0...v6.1.0) (2021-06-06)
 
 
