@@ -2724,17 +2724,33 @@ img {
 				<a href="https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix"><img src="https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status" alt="Sonar"></a>
 			<a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/v/yarn-audit-fix" alt="npm (tag)"></a></p>
 			<p>Apply <code>npm audit fix</code> logic to <code>yarn.lock</code></p>
-			<a href="#motivation" id="motivation" style="color: inherit; text-decoration: none;">
-				<h2>Motivation</h2>
+			<a href="#problem" id="problem" style="color: inherit; text-decoration: none;">
+				<h2>Problem</h2>
 			</a>
 			<ol>
 				<li><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
 					Authors suggest using <a href="https://dependabot.com/">Depedabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
-					The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a>.<br>Fortunately, there&#39;s a workaround: <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a> (thanks to Gianfranco P.).
-					<code>yarn-audit-fix</code> is just a composition of these steps into a single utility.
-				More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></li>
+				The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a>.</li>
 				<li><code>yarn audit</code> does not support custom (in-house, internal) registries. Here are the <a href="https://github.com/yarnpkg/yarn/issues/7012">issue</a> &amp; <a href="https://github.com/yarnpkg/yarn/pull/6484">PR</a> which have not yet received the green light.</li>
 			</ol>
+			<a href="#solution" id="solution" style="color: inherit; text-decoration: none;">
+				<h2>Solution</h2>
+			</a>
+			<p>Fortunately, there are several workarounds:</p>
+			<ol>
+				<li>Compose <code>npm audit fix</code> with lockfile converter. <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a> (thanks to <a href="https://github.com/gianpaj">Gianfranco P.</a>).
+				<code>yarn-audit-fix --flow=convert</code> is just a composition of these steps into a single utility. More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></li>
+				<li>Fetch <code>yarn/npm audit --json</code> and patch lockfile inners (kudos to <a href="https://github.com/spion">G. Kosev</a>, <a href="https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts">code reference</a>)</li>
+			</ol>
+			<a href="#key-features" id="key-features" style="color: inherit; text-decoration: none;">
+				<h2>Key features</h2>
+			</a>
+			<ul>
+				<li><code>convert</code> and <code>patch</code> flows for <code>yarn.lock</code> at your choice</li>
+				<li>Mac / Linux / Windows support</li>
+				<li>CLI / JS API</li>
+				<li>TS and flow typings</li>
+			</ul>
 			<a href="#install" id="install" style="color: inherit; text-decoration: none;">
 				<h2>Install</h2>
 			</a>
@@ -2747,7 +2763,7 @@ img {
 				<h2>Usage</h2>
 			</a>
 			<pre>
-$ yarn-audit-fix
+$ yarn-audit-fix [--opts]
 
 <b>Preparing temp assets...</b>
 <b>Generating package-lock.json from yarn.lock...</b>
@@ -2769,91 +2785,137 @@ success Saved lockfile.
 success Already up-to-date.
 <b>Done</b>
 </pre>
-			<a href="#migration-from-v3-to-v4" id="migration-from-v3-to-v4" style="color: inherit; text-decoration: none;">
-				<h3>Migration from v3 to v4</h3>
+			<a href="#migration-to-v4" id="migration-to-v4" style="color: inherit; text-decoration: none;">
+				<h3>Migration to v4+</h3>
 			</a>
 			<p><code>--npm-v7</code> flag is redundant. From v4.0.0 package&#39;s own version of <strong>npm</strong> is used by default. But you&#39;re still able to invoke system default with <code>--npm-path=system</code> or define any custom <code>--npm-path=/another/npm/bin</code>.</p>
+			<a href="#migration-to-v6" id="migration-to-v6" style="color: inherit; text-decoration: none;">
+				<h3>Migration to v6+</h3>
+			</a>
+			<p>Default fix strategy <a href="https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0">has been changed</a> to direct lockfile patching with <code>yarn audit --json</code> data. To use the previous <em>legacy</em> flow, pass <code>--flow=convert</code> option to CLI.</p>
 			<a href="#cli" id="cli" style="color: inherit; text-decoration: none;">
 				<h3>CLI</h3>
 			</a>
 			<table>
 				<thead>
 					<tr>
-						<th>Flag</th>
+						<th>Option</th>
 						<th>Description</th>
 						<th>Default</th>
+						<th><code>convert</code></th>
+						<th><code>patch</code></th>
 					</tr>
 				</thead>
 				<tbody><tr>
+						<td><code>--flow</code></td>
+						<td>Define how <code>yarn.lock</code> is modified. <code>convert</code> — to compose <code>npm audit fix</code> with two-way lockfile conversion (legacy flow). <code>patch</code> — to directly inject audit json data</td>
+						<td><code>patch</code></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
 						<td><code>--audit-level</code></td>
 						<td>Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical</td>
-						<td>low</td>
+						<td><code>low</code></td>
+						<td>✔</td>
+						<td>✔</td>
 					</tr>
 					<tr>
 						<td><code>--dry-run</code></td>
 						<td>Get an idea of what audit fix will do</td>
 						<td></td>
+						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--force</code></td>
 						<td>Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones</td>
-						<td>false</td>
+						<td><code>false</code></td>
+						<td>✔</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><code>--help/-h</code></td>
+						<td>Print help message</td>
+						<td></td>
+						<td></td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--legacy-peer-deps</code></td>
 						<td>Accept an incorrect (potentially broken) deps resolution</td>
+						<td></td>
+						<td>✔</td>
 						<td></td>
 					</tr>
 					<tr>
 						<td><code>--loglevel</code></td>
 						<td>Set custom <a href="https://docs.npmjs.com/cli/v7/using-npm/config#loglevel">log level</a></td>
 						<td></td>
+						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--npm-path</code></td>
 						<td>Declare npm path: switch to system default version of <strong>npm</strong> instead of package&#39;s own. <code>system / local / &lt;custom path&gt;</code></td>
 						<td><code>local</code></td>
+						<td>✔</td>
+						<td>✔</td>
 					</tr>
 					<tr>
 						<td><code>--only</code></td>
 						<td>Set package <a href="https://docs.npmjs.com/cli/v7/using-npm/config#only">updating scope</a>: <code>dev</code>/<code>prod</code></td>
 						<td></td>
+						<td>✔</td>
+						<td>✔</td>
 					</tr>
 					<tr>
 						<td><code>--package-lock-only</code></td>
 						<td>Run audit fix without modifying <code>node_modules</code>. Highly recommended to <strong>enable</strong>.</td>
-						<td>true</td>
+						<td><code>true</code></td>
+						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--registry</code></td>
 						<td>Custom registry url</td>
 						<td></td>
+						<td>✔</td>
+						<td></td>
 					</tr>
 					<tr>
 						<td><code>--silent</code></td>
 						<td>Disable log output</td>
-						<td>false</td>
-					</tr>
-					<tr>
-						<td><code>--temp</code></td>
-						<td>Directory for temporary assets</td>
-						<td><code>&lt;cwd&gt;/node_modules/.cache/yarn-audit-fix</code></td>
+						<td><code>false</code></td>
+						<td>✔</td>
+						<td>✔</td>
 					</tr>
 					<tr>
 						<td><code>--symlink</code></td>
 						<td>Symlink type for <code>node_modules</code> ref</td>
 						<td><code>junction</code> for Windows, <code>dir</code> otherwise</td>
+						<td>✔</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><code>--temp</code></td>
+						<td>Directory for temporary assets</td>
+						<td><code>&lt;cwd&gt;/node_modules/.cache/yarn-audit-fix</code></td>
+						<td>✔</td>
+						<td>✔</td>
 					</tr>
 					<tr>
 						<td><code>--verbose</code></td>
 						<td>Switch log level to verbose/debug</td>
-						<td>false</td>
+						<td><code>false</code></td>
+						<td>✔</td>
+						<td>✔</td>
 					</tr>
 			</tbody></table>
 			<a href="#env" id="env" style="color: inherit; text-decoration: none;">
 				<h3>ENV</h3>
 			</a>
-			<p>All mentioned above CLI directives can be replaced with corresponding env variables with leading <strong>YAF</strong> prefix. For example:</p>
+			<p>All mentioned above CLI options can be replaced with corresponding env variables with leading <strong>YAF</strong> prefix. For example:</p>
 			<ul>
 				<li><code>YAF_FORCE</code> equals <code>--force</code></li>
 				<li><code>YAF_ONLY=prod</code> — <code>--only=prod</code></li>
@@ -2963,7 +3025,7 @@ success Already up-to-date.
 			<pre><code class="language-shell"><span style="color: #000000">npm i --package-lock-only</span>
 <span style="color: #000000">npm audit fix --package-lock-only --force</span>
 </code></pre>
-			<p>Not everything can be fixed, alack.</p>
+			<p>Not everything can be repaired, alack.</p>
 			<a href="#license" id="license" style="color: inherit; text-decoration: none;">
 				<h2>License</h2>
 			</a>
@@ -2978,8 +3040,10 @@ success Already up-to-date.
 						<h3>Modules</h3>
 						<ul class="tsd-index-list">
 							<li class="tsd-kind-module"><a href="modules/cli.html" class="tsd-kind-icon">cli</a></li>
+							<li class="tsd-kind-module"><a href="modules/flows.html" class="tsd-kind-icon">flows</a></li>
 							<li class="tsd-kind-module"><a href="modules/ifaces.html" class="tsd-kind-icon">ifaces</a></li>
 							<li class="tsd-kind-module"><a href="modules/index.html" class="tsd-kind-icon">index</a></li>
+							<li class="tsd-kind-module"><a href="modules/lockfile.html" class="tsd-kind-icon">lockfile</a></li>
 							<li class="tsd-kind-module"><a href="modules/runner.html" class="tsd-kind-icon">runner</a></li>
 							<li class="tsd-kind-module"><a href="modules/stages.html" class="tsd-kind-icon">stages</a></li>
 							<li class="tsd-kind-module"><a href="modules/util.html" class="tsd-kind-icon">util</a></li>
@@ -2995,6 +3059,7 @@ success Already up-to-date.
 					<ul class="tsd-legend">
 						<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
 						<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+						<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 						<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
 						<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 					</ul>
