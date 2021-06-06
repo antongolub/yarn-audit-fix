@@ -3,7 +3,7 @@ import cp, { StdioOptions } from 'child_process'
 import crypto from 'crypto'
 import findCacheDir from 'find-cache-dir'
 import { sync as findUp } from 'find-up'
-import fs, { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
+import { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
 import { GlobbyOptions, sync as glob } from 'globby'
 import { reduce } from 'lodash'
 import { join, resolve } from 'path'
@@ -107,13 +107,13 @@ export const getSymlinkType = (type?: string): SymlinkType =>
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
 
-export const getClosestNpm = (cmd: string): string =>
+export const getClosestBin = (cmd: string): string =>
   String(
     findUp(
       (dir) => {
         const ref = resolve(dir, 'node_modules', '.bin', cmd)
 
-        return fs.existsSync(ref) ? ref : undefined
+        return findUp.exists(ref) ? ref : undefined
       },
       {
         cwd: String(pkgDir(__dirname)),
@@ -129,7 +129,7 @@ export const getNpm = (npmPath = 'local', isWin = isWindows()): string => {
   }
 
   if (npmPath === 'local') {
-    return getClosestNpm(cmd)
+    return getClosestBin(cmd)
   }
 
   return npmPath
