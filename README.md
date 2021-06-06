@@ -221,11 +221,11 @@ $$ yarn-audit-fix --force
 So you need, as the message says, to manually change the dependency versions. **npm@7** ~~is still in beta~~, perhaps this logic will be changed later.
 In some cases **npm@6** works better, so if you have such a version installed on your system, you may try:
 ```shell
-npx yarn-audit-fix --npm-path=system
+npx yarn-audit-fix --npm-path=system --flow=convert
 ```
 You may also try to cast _the optimistic flags combo_
 ```shell
-npx yarn-audit-fix --package-lock-only=false --force --legacy-peer-deps
+npx yarn-audit-fix --package-lock-only=false --force --legacy-peer-deps --flow=convert
 ```
 Unfortunately, even this invocation may return something like:
 ```shell
@@ -243,10 +243,25 @@ node_modules/normalize-package-data/node_modules/hosted-git-info
     Depends on vulnerable versions of normalize-package-data
     Depends on vulnerable versions of read-pkg-up
 ```
-**No fix available** just means that no fix available. If you still doubt the correctness of the output, you can check it.
+**No fix available** just means that no fix available. If you still doubt the correctness of the output, you can check it by hand.
 ```shell
 npm i --package-lock-only
 npm audit fix --package-lock-only --force
+```
+
+Same response for alternative patching flow:
+```shell
+npm_config_yes=true npx yarn-audit-fix --audit-level=moderate --flow=patch
+```
+```shell
+Patching yarn.lock with audit data...
+invoke yarn audit --json --level moderate
+Can't find patched version that satisfies postcss@^7.0.0 in >=8.2.10
+Can't find patched version that satisfies postcss@^7.0.1 in >=8.2.10
+Can't find patched version that satisfies postcss@^7.0.27 in >=8.2.10
+Can't find patched version that satisfies ws@^7.2.3 in >=6.2.2 <7.0.0 || >=7.4.6
+Upgraded deps: <none>
+invoke yarn --update-checksums
 ```
 Not everything can be repaired, alack.
 
