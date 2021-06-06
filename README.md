@@ -76,23 +76,23 @@ success Already up-to-date.
 Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=convert` option to CLI.
 
 ### CLI
-| Option | Description | Default | `convert` | `patch` | 
-|---|---|---|---|---|
+| Option | Description | Default | with `--flow=convert` only | 
+|---|---|---|---|
 |`--flow` | Define how `yarn.lock` is modified. `convert` — to compose `npm audit fix` with two-way lockfile conversion (legacy flow). `patch` — to directly inject audit json data | `patch`
-|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | `low` | ✔ | ✔
+|`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | `low`
 |`--dry-run` | Get an idea of what audit fix will do | | ✔ |
-|`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | `false` | ✔ | ✔
+|`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | `false`
 |`--help/-h`| Print help message |
 |`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution |  | ✔
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel) | | ✔
-|`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local` | ✔ | ✔
-|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod` | | ✔ | ✔
+|`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local`
+|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
 |`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | `true` | ✔ |
-|`--registry` | Custom registry url | | ✔ |  |
-|`--silent` | Disable log output | `false` | ✔ | ✔
-|`--symlink` | Symlink type for `node_modules` ref | `junction` for Windows, `dir` otherwise | ✔
-|`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix` | ✔ | ✔
-|`--verbose` | Switch log level to verbose/debug | `false` | ✔ | ✔ |
+|`--registry` | Custom registry url | | ✔ |
+|`--silent` | Disable log output | `false` |
+|`--symlink` | Symlink type for `node_modules` ref | `junction` for Windows, `dir` otherwise
+|`--temp` | Directory for temporary assets | `<cwd>/node_modules/.cache/yarn-audit-fix` 
+|`--verbose` | Switch log level to verbose/debug | `false` 
 
 ### ENV
 All mentioned above CLI options can be replaced with corresponding env variables with leading **YAF** prefix. For example:
