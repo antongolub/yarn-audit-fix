@@ -5,7 +5,7 @@ import { factory as iop } from 'inside-out-promise'
 import { basename, join, resolve } from 'path'
 import synp from 'synp'
 
-import { createSymlinks, run, TContext } from '../../main/ts'
+import {createSymlinks, run, TContext, TFlow} from '../../main/ts'
 import * as lf from '../../main/ts/lockfile'
 import { getNpm, getYarn } from '../../main/ts/util'
 
@@ -180,6 +180,17 @@ describe('yarn-audit-fix', () => {
       )
       expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
     }
+
+    it('executes custom flows', async () => {
+      const handler = jest.fn(noop)
+      const flow: TFlow = {
+        main: [['Test', handler]],
+        fallback: []
+      }
+      await run({}, flow)
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
 
     it('throws error on unsupported flow', async () =>
       expect(run({ flow: 'unknown' })).rejects.toEqual(
