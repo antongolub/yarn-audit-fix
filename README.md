@@ -100,7 +100,17 @@ All mentioned above CLI options can be replaced with corresponding env variables
 * `YAF_ONLY=prod` — `--only=prod`
 
 ### JS API
+**yarn-audit-fix** is a naive and optimistic workaround, so it exposes all of its inners to give anybody a chance to tweak up and find a better steps combination.
+Typedoc: [https://antongolub.github.io/yarn-audit-fix/modules/](https://antongolub.github.io/yarn-audit-fix/modules/)
 
+```ts
+import { run } from 'yarn-audit-fix'
+
+await run({
+   flow: 'patch',
+   verbose: true
+})
+```
 
 ## Troubleshooting
 ### yarn-audit-fix version x.x.x is out of date

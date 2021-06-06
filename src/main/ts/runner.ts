@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { join } from 'path'
 
 import { getFlow } from './flows'
-import { TCallback, TContext, TFlags, TFlow, TStage } from './ifaces'
+import { TCallback, TContext, TFlags, TStage } from './ifaces'
 import { getTemp, normalizeFlags, readJson } from './util'
 
 /**

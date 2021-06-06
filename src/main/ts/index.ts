@@ -1,4 +1,6 @@
-export * from './stages'
+export { getFlow } from './flows'
 export * from './ifaces'
+export * from './lockfile'
 export * from './runner'
-export * from './flows'
+export * from './stages'
+export * from './util'
