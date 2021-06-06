@@ -25,9 +25,9 @@ The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).
 
 ## Solution
 Fortunately, there are several workarounds:
-1. Compose `npm audit fix` with lockfile converter. [stackoverflow/60878037](https://stackoverflow.com/a/60878037) (thanks to [Gianfranco P.](https://github.com/gianpaj)).
-   `yarn-audit-fix --flow=convert` is just a composition of these steps into a single utility. More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
-2. Fetch `yarn/npm audit --json` and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts))
+1. Compose `npm audit fix` with lockfile converter (thanks to [Gianfranco P.](https://github.com/gianpaj), [stackoverflow/60878037](https://stackoverflow.com/a/60878037)).
+   `yarn-audit-fix --flow=convert` just reproduces these steps with minimal changes. More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
+2. Fetch `yarn/npm audit --json` and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)). `yarn-audit-fix --flow=patch`
 
 ## Key features
 * `convert` and `patch` flows for `yarn.lock` at your choice
@@ -41,7 +41,7 @@ $ yarn add yarn-audit-fix -D
 ```
 or even better
 ```
-npx yarn-audit-fix
+npm_config_yes=true npx yarn-audit-fix
 ```
 
 ## Usage
@@ -99,7 +99,26 @@ All mentioned above CLI options can be replaced with corresponding env variables
 * `YAF_FORCE` equals `--force`
 * `YAF_ONLY=prod` — `--only=prod`
 
+### JS API
+
+
 ## Troubleshooting
+### yarn-audit-fix version x.x.x is out of date
+```
+npm_config_yes=true npx yarn-audit-fix --audit-level=moderate
+Runtime digest
+yarn-audit-fix version 4.3.6 is out of date. Install the latest 6.0.0 for better results
+```
+**npx** caches previously loaded packages, so you need one of:
+1. Define version to load: `npm yarn-audit-fix@6.0.0`
+2. Reset npx cache. For Mac/Linux: `rm -rf ~/.npm/_npx`
+
+### yarn-audit-fix command not found
+After installation, the package may not be found. This is probably an issue with $PATH finding `node_modules/.bin` contents or smth like that ([npm/issues/957](https://github.com/npm/npm/issues/957)).
+A bit annoying, but it's easy to handle in several ways.
+* You're able to run the cmd through **yarn**: `yarn yarn-audit-fix`.
+* Simply invoke `node_modules/.bin/yarn-audit-fix` script.
+
 ### enoent: no such file or directory
 In some cases **npm audit fix** makes `node_modules` to become inconsistent. This is expected. **yarn** and **npm** organize the directory space slightly differently.
 ```
@@ -121,12 +140,6 @@ npm ERR!     /Users/antongolub/.npm/_logs/2020-08-23T07_09_26_924Z-debug.log
 Let's try this workaround:
 1. Restore the original `node_modules` state. `yarn --force` or `rm-rf node_modules && yarn`.
 2. Apply `npx yarn-audit-fix --package-lock-only`. The last param should instruct **npm** not to modify `node_modules` contents.
-
-### yarn-audit-fix command not found
-After installation the package may not be found. This is probably an issue with $PATH finding `node_modules/.bin` contents or smth like that ([npm/issues/957](https://github.com/npm/npm/issues/957)).
-A bit annoying, but it's easy to handle in several ways. 
-* You're able to run the cmd through **yarn**: `yarn yarn-audit-fix`. 
-* Simply invoke `node_modules/.bin/yarn-audit-fix` script.
 
 ### --force did not force the update
 The problem only concerns repositories with `workspaces` (monorepos). 
