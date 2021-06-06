@@ -28,7 +28,7 @@ export const getContext = (flags: Record<string, any> = {}): TContext => {
  * @param flags
  */
 export const getFlow = ({
-  flow = 'convert',
+  flow = 'patch',
 }: Record<string, any> = {}): TFlow => {
   if (flow === 'convert') {
     return convert
