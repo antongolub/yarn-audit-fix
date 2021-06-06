@@ -175,7 +175,7 @@ describe('yarn-audit-fix', () => {
       )
       expect(cp.spawnSync).toHaveBeenCalledWith(
         getYarn(),
-        ['--update-checksums', '--verbose', '--registry', registryUrl],
+        ['install', '--update-checksums', '--verbose', '--registry', registryUrl],
         { cwd, stdio },
       )
       expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
@@ -230,7 +230,7 @@ describe('yarn-audit-fix', () => {
         )
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
-          ['--update-checksums'],
+          ['install', '--update-checksums'],
           { cwd, stdio },
         )
       })

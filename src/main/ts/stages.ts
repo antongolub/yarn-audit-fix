@@ -176,6 +176,7 @@ export const yarnInstall: TCallback = ({ cwd, flags }) => {
   invoke(
     getYarn(),
     [
+      'install',
       '--update-checksums',
       ...formatFlags(flags, 'verbose', 'silent', 'registry'),
     ],
