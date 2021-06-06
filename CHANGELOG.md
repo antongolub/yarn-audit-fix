@@ -1,3 +1,22 @@
+# [6.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v5.0.5...v6.0.0) (2021-06-06)
+
+
+### Bug Fixes
+
+* fix dry-run env flag ([4d79a4b](https://github.com/antongolub/yarn-audit-fix/commit/4d79a4b0cc774d1751cd36cb4c4270369a19175f))
+
+
+### Features
+
+* add lockfile patching flow ([b01dd0d](https://github.com/antongolub/yarn-audit-fix/commit/b01dd0d30dc7534cc56e420b3dc9843dfd2f1893))
+* add npm-yarn flag mapping ([a6f942b](https://github.com/antongolub/yarn-audit-fix/commit/a6f942b935b44d349b89a89d8432f95906806179))
+* set `patch` flow as default ([ed22952](https://github.com/antongolub/yarn-audit-fix/commit/ed22952b445856099725e592c443965a6d7f4edd))
+
+
+### BREAKING CHANGES
+
+* yaf uses `yarn audit json` data by default, see `--flow` option notes for details
+
 ## [5.0.5](https://github.com/antongolub/yarn-audit-fix/compare/v5.0.4...v5.0.5) (2021-06-03)
 
 
