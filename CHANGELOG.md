@@ -1,3 +1,15 @@
+# [6.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.0.0...v6.1.0) (2021-06-06)
+
+
+### Bug Fixes
+
+* set `patch` flow as default for getFlow helper ([517b71b](https://github.com/antongolub/yarn-audit-fix/commit/517b71b167a05c22cb2bc12a264ee98d0b155fe1))
+
+
+### Features
+
+* export all inners ([4794e2d](https://github.com/antongolub/yarn-audit-fix/commit/4794e2d165b9569427537864ff0af3d4ebdbf89d))
+
 # [6.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v5.0.5...v6.0.0) (2021-06-06)
 
 
