@@ -1,3 +1,10 @@
+## [6.2.1](https://github.com/antongolub/yarn-audit-fix/compare/v6.2.0...v6.2.1) (2021-06-06)
+
+
+### Bug Fixes
+
+* yarn install cmd ([2328203](https://github.com/antongolub/yarn-audit-fix/commit/23282038d0ace9db559b5ffe8a2aa163937918e6))
+
 # [6.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.1.0...v6.2.0) (2021-06-06)
 
 
