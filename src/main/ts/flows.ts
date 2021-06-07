@@ -23,10 +23,10 @@ export const convert: TFlow = {
     [
       'Updating yarn.lock from package-lock.json...',
       yarnImport,
-      yarnInstall,
       syncLockfile,
       clear,
     ],
+    ['Installing deps update...', yarnInstall],
     ['Done'],
   ],
   fallback: [['Failure!', clear, exit]],
@@ -41,10 +41,10 @@ export const patch: TFlow = {
     [
       'Patching yarn.lock with audit data...',
       patchLockfile,
-      yarnInstall,
       syncLockfile,
       clear,
     ],
+    ['Installing deps update...', yarnInstall],
     ['Done'],
   ],
   fallback: [['Failure!', clear, exit]],
