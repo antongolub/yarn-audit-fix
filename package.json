@@ -20,7 +20,7 @@
     "test:unit": "yarn jest --config=jest.config.json --runInBand",
     "test:integration": "node ./target/es5/cli.js --package-lock-only --audit-level=moderate",
     "test:integration-build": "yarn build:es5 && yarn test:integration",
-    "test:depcheck": "npm_config_yes=true npx depcheck --ignores=tslib,@swissquote/crafty-preset-jest,@types/jest,@types/node",
+    "test:depcheck": "npm_config_yes=true npx depcheck --ignores=tslib,@types/jest,@types/node",
     "test:report": "yarn test && yarn push:report",
     "test": "npm-run-all -p -l lint test:unit test:integration test:depcheck",
     "build": "yarn clean && npm-run-all -p -l build:es5 build:es6 build:ts build:libdef build:buildstamp docs",
@@ -80,7 +80,6 @@
   "devDependencies": {
     "@qiwi/libdefkit": "^2.1.8",
     "@qiwi/npm-run-all": "^4.1.7",
-    "@swissquote/crafty-preset-jest": "^1.14.0",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.1",
     "cpy-cli": "^3.1.1",
