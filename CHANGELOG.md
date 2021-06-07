@@ -1,3 +1,10 @@
+## [6.2.2](https://github.com/antongolub/yarn-audit-fix/compare/v6.2.1...v6.2.2) (2021-06-07)
+
+
+### Bug Fixes
+
+* apply yarn install step to cwd not tmp ([61bd639](https://github.com/antongolub/yarn-audit-fix/commit/61bd6391c8268d92a2bc1418effeac4ddd49f9e1))
+
 ## [6.2.1](https://github.com/antongolub/yarn-audit-fix/compare/v6.2.0...v6.2.1) (2021-06-06)
 
 
