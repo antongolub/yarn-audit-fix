@@ -118,7 +118,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Yarn install
-        run: yarn
+        run: yarn --ignore-engines # libdefkit requires Node.js >= 14
 
       - name: Intergarion test
         if: matrix.node-version != '14' || matrix.os != 'ubuntu-20.04'
