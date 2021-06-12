@@ -86,7 +86,7 @@ Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit
 |`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution |  | ✔
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel) | | ✔
 |`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local`
-|`--only` | Set package [updating scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
+|`--only` | Set package [update scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
 |`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | `true` | ✔ |
 |`--registry` | Custom registry url | | ✔ |
 |`--silent` | Disable log output | `false` |
@@ -106,6 +106,7 @@ Typedoc: [https://antongolub.github.io/yarn-audit-fix/modules/](https://antongol
 ```ts
 import { run } from 'yarn-audit-fix'
 
+// NOTE actually it's promisified run.sync
 await run({
    flow: 'patch',
    verbose: true
