@@ -1,3 +1,5 @@
+## [6.3.1](https://github.com/antongolub/yarn-audit-fix/compare/v6.3.0...v6.3.1) (2021-06-12)
+
 # [6.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.2.3...v6.3.0) (2021-06-12)
 
 
