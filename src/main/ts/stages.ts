@@ -163,7 +163,11 @@ export const yarnImport: TCallback = ({ temp }) => {
   fs.writeFileSync(join(temp, 'yarn.lock'), yarnLockData)
 }
 
-export const syncLockfile: TCallback = ({ temp }) => {
+export const syncLockfile: TCallback = ({ temp, flags }) => {
+  if (flags.dryRun) {
+    return
+  }
+
   fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
 }
 
@@ -173,6 +177,10 @@ export const syncLockfile: TCallback = ({ temp }) => {
  * @return {void}
  */
 export const yarnInstall: TCallback = ({ cwd, flags }) => {
+  if (flags.dryRun) {
+    return
+  }
+
   invoke(
     getYarn(),
     [

@@ -37,7 +37,6 @@ export const patch: TFlow = {
   main: [
     ['Runtime digest', printRuntimeDigest],
     ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
-    ['Generating package-lock.json from yarn.lock...', yarnLockToPkgLock],
     [
       'Patching yarn.lock with audit data...',
       patchLockfile,
