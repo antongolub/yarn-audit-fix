@@ -71,4 +71,4 @@ const flags = new Command()
   .parse(process.argv)
   .opts()
 
-run(flags)
+run.sync(flags)

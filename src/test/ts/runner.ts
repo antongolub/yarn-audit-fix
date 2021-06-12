@@ -1,7 +1,6 @@
 import cp from 'child_process'
 import findCacheDir from 'find-cache-dir'
 import fs from 'fs-extra'
-import { factory as iop } from 'inside-out-promise'
 import { basename, join, resolve } from 'path'
 import synp from 'synp'
 
@@ -287,28 +286,23 @@ describe('yarn-audit-fix', () => {
 
       describe('on error', () => {
         // eslint-disable-next-line
-        const checkExit = (reason: any): Promise<any> => {
-          const { promise, resolve } = iop()
-
+        const checkExit = (reason: any): void => {
           // @ts-ignore
-          cp.spawnSync.mockImplementationOnce(() => {
-            setImmediate(resolve)
-
-            return reason
+          cp.spawnSync.mockImplementationOnce(() => reason)
+          jest.isolateModules(() => {
+            try {
+              require('../../main/ts/cli')
+            } catch {}
           })
-
-          jest.isolateModules(() => require('../../main/ts/cli'))
-
-          return promise
         }
 
-        it('returns exit code if passed', async () => {
-          await expect(checkExit({ status: 2 })).rejects
+        it('returns exit code if passed', () => {
+          checkExit({ status: 2 })
           expect(process.exitCode).toBe(2)
         })
 
         it('sets code to 1 otherwise', async () => {
-          await expect(checkExit({ error: new Error('foobar') })).rejects
+          checkExit({ error: new Error('foobar') })
           expect(process.exitCode).toBe(1)
         })
       })

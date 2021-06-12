@@ -846,36 +846,6 @@
     shell-quote "^1.7.2"
     string.prototype.padend "^3.1.2"
 
-"@qiwi/substrate-abstract@1.20.2":
-  version "1.20.2"
-  resolved "https://registry.npmjs.org/@qiwi/substrate-abstract/-/substrate-abstract-1.20.2.tgz"
-  integrity sha512-nHUjol52vnnbatJ+WMQnqd7+tQMSBpdDzOdvm6irM1KdpFe5uyODDEh3kJgDi3TktaW1OEYhvFtLErUeOB6H4w==
-  dependencies:
-    "@qiwi/substrate-types" "1.51.0"
-
-"@qiwi/substrate-std@1.3.2":
-  version "1.3.2"
-  resolved "https://registry.npmjs.org/@qiwi/substrate-std/-/substrate-std-1.3.2.tgz"
-  integrity sha512-PJdk+pGT1ae8bjz3j8G/xPeQnLeypN8O3d44BuZc1B3JmZMON/RY9nRqwHwb5eKnumMUgaAYTAAsCqoCLjnZ5g==
-  dependencies:
-    "@qiwi/substrate-types" "1.51.0"
-    tslib "^2.2.0"
-
-"@qiwi/substrate-types@1.51.0":
-  version "1.51.0"
-  resolved "https://registry.npmjs.org/@qiwi/substrate-types/-/substrate-types-1.51.0.tgz"
-  integrity sha512-TDSZn2deqw9ismvfJ3pG5xm5JwrCzzS5D4YVaTFxzyAW+ofPfSG7Yp/yP46Yh1RNwfygxGOWjZx3D1fb0H63UQ==
-
-"@qiwi/substrate@^1.20.7":
-  version "1.20.7"
-  resolved "https://registry.yarnpkg.com/@qiwi/substrate/-/substrate-1.20.7.tgz#e2855d5cb406668e522a6e236431624d430dffd5"
-  integrity sha512-sKnfOLi0MpP2OHXRTWqfvc9YCoPuFkyCoOh9WsGbgksaW5zk5/5LLDrSY5TQQUYi+mahuJuoM1jzUTGjnKVPJQ==
-  dependencies:
-    "@qiwi/substrate-abstract" "1.20.2"
-    "@qiwi/substrate-std" "1.3.2"
-    "@qiwi/substrate-types" "1.51.0"
-    tslib "^2.2.0"
-
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"
   resolved "https://registry.npmjs.org/@sinonjs/commons/-/commons-1.8.3.tgz"
@@ -1433,11 +1403,6 @@ asynckit@^0.4.0:
   resolved "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-at-least-node@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/at-least-node/-/at-least-node-1.0.0.tgz"
-  integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
-
 atob@^2.1.2:
   version "2.1.2"
   resolved "https://registry.npmjs.org/atob/-/atob-2.1.2.tgz"
@@ -1576,11 +1541,6 @@ binary-extensions@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.2.0.tgz#75f502eeaf9ffde42fc98829645be4ea76bd9e2d"
   integrity sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==
-
-bind-decorator@^1.0.11:
-  version "1.0.11"
-  resolved "https://registry.npmjs.org/bind-decorator/-/bind-decorator-1.0.11.tgz#e41bc06a1f65dd9cec476c91c5daf3978488252f"
-  integrity sha1-5BvAah9l3ZzsR2yRxdrzl4SIJS8=
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -2951,16 +2911,6 @@ fs-extra@^10.0.0:
     jsonfile "^6.0.1"
     universalify "^2.0.0"
 
-fs-extra@^9.1.0:
-  version "9.1.0"
-  resolved "https://registry.npmjs.org/fs-extra/-/fs-extra-9.1.0.tgz"
-  integrity sha512-hcg3ZmepS30/7BSFqRvoo3DOMQu7IjqxO5nCDt+zM9XWjb33Wg7ziNT+Qvqbuc3+gWpzO02JubVyk2G4Zvo1OQ==
-  dependencies:
-    at-least-node "^1.0.0"
-    graceful-fs "^4.2.0"
-    jsonfile "^6.0.1"
-    universalify "^2.0.0"
-
 fs-minipass@^2.0.0, fs-minipass@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-2.1.0.tgz#7f5036fdbf12c63c169190cbe4199c852271f9fb"
@@ -3395,15 +3345,6 @@ init-package-json@^2.0.3:
     semver "^7.3.5"
     validate-npm-package-license "^3.0.4"
     validate-npm-package-name "^3.0.0"
-
-inside-out-promise@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/inside-out-promise/-/inside-out-promise-2.1.3.tgz#9f7a4d0c5302823fa9fa7098c1b0d6d045ea8e0e"
-  integrity sha512-dVZo+qlxBPWlMnHSzelcBwOvTg26QvYHiDiHgGcr8ElIZbhKSI9TOKcRYE22wDnlTD5p0ku2hjjoS7HW+prLHQ==
-  dependencies:
-    "@qiwi/substrate" "^1.20.7"
-    bind-decorator "^1.0.11"
-    tslib "^2.2.0"
 
 internal-slot@^1.0.3:
   version "1.0.3"
@@ -4646,10 +4587,10 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-marked@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.npmjs.org/marked/-/marked-2.0.3.tgz"
-  integrity sha512-5otztIIcJfPc2qGTN8cVtOJEjNJZ0jwa46INMagrYfk0EvqtRuEHLsEe0LrFS0/q+ZRKT0+kXK7P2T1AN5lWRA==
+marked@^2.0.7:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-2.0.7.tgz#bc5b857a09071b48ce82a1f7304913a993d4b7d1"
+  integrity sha512-BJXxkuIfJchcXOJWTT2DOL+yFWifFv2yGYOUzvXg8Qz610QKw+sHCvTMYwA+qWGhlA2uivBezChZ/pBy1tWdkQ==
 
 memorystream@^0.3.1:
   version "0.3.1"
@@ -6835,20 +6776,18 @@ typedoc-default-themes@^0.12.10:
   resolved "https://registry.npmjs.org/typedoc-default-themes/-/typedoc-default-themes-0.12.10.tgz"
   integrity sha512-fIS001cAYHkyQPidWXmHuhs8usjP5XVJjWB8oZGqkTowZaz3v7g3KDZeeqE82FBrmkAnIBOY3jgy7lnPnqATbA==
 
-typedoc@^0.20.36:
-  version "0.20.36"
-  resolved "https://registry.npmjs.org/typedoc/-/typedoc-0.20.36.tgz"
-  integrity sha512-qFU+DWMV/hifQ9ZAlTjdFO9wbUIHuUBpNXzv68ZyURAP9pInjZiO4+jCPeAzHVcaBCHER9WL/+YzzTt6ZlN/Nw==
+typedoc@^0.21.0-beta.2:
+  version "0.21.0-beta.2"
+  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.21.0-beta.2.tgz#e26927bf9c55c691f5401cd1608d99e4e7852ada"
+  integrity sha512-oCjdueR4glcSHT6ynR2q5HTpBkBM1ihf3/Wfpl0qriDJutrSg4idZovN+1jx66s+p9QmJE7yzDCXPrZ2GW/Xbw==
   dependencies:
-    colors "^1.4.0"
-    fs-extra "^9.1.0"
+    glob "^7.1.6"
     handlebars "^4.7.7"
     lodash "^4.17.21"
     lunr "^2.3.9"
-    marked "^2.0.3"
+    marked "^2.0.7"
     minimatch "^3.0.0"
     progress "^2.0.3"
-    shelljs "^0.8.4"
     shiki "^0.9.3"
     typedoc-default-themes "^0.12.10"
 
