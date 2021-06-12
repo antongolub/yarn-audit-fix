@@ -211,9 +211,6 @@ describe('yarn-audit-fix', () => {
 
         checkTempAssets()
 
-        // Generating package-lock.json from yarn.lock...
-        expect(synp.yarnToNpm).toHaveBeenCalledWith(strMatching(temp), true)
-
         // Patching `yarn.lock`
         expect(lfRead).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
         expect(lfAudit).toHaveBeenCalledTimes(1)

@@ -75,7 +75,7 @@
     "pkg-dir": "^5.0.0",
     "semver": "^7.3.5",
     "synp": "^1.9.7",
-    "tslib": "^2.2.0"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@qiwi/libdefkit": "^3.0.0",
