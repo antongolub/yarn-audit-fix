@@ -2855,7 +2855,7 @@ success Already up-to-date.
 					</tr>
 					<tr>
 						<td><code>--only</code></td>
-						<td>Set package <a href="https://docs.npmjs.com/cli/v7/using-npm/config#only">updating scope</a>: <code>dev</code>/<code>prod</code></td>
+						<td>Set package <a href="https://docs.npmjs.com/cli/v7/using-npm/config#only">update scope</a>: <code>dev</code>/<code>prod</code></td>
 						<td></td>
 						<td></td>
 					</tr>
@@ -2911,6 +2911,7 @@ success Already up-to-date.
 			Typedoc: <a href="https://antongolub.github.io/yarn-audit-fix/modules/">https://antongolub.github.io/yarn-audit-fix/modules/</a></p>
 			<pre><code class="language-ts"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">run</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;yarn-audit-fix&#039;</span>
 
+<span style="color: #008000">// NOTE actually it&#039;s promisified run.sync</span>
 <span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">({</span>
 <span style="color: #000000">   </span><span style="color: #001080">flow:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;patch&#039;</span><span style="color: #000000">,</span>
 <span style="color: #000000">   </span><span style="color: #001080">verbose:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span>
