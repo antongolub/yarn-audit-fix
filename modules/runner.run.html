@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>yarn-audit-fix | yarn-audit-fix</title>
+	<title>run | yarn-audit-fix</title>
 	<meta name="description" content="Documentation for yarn-audit-fix">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style type="text/css">:root {
@@ -2674,7 +2674,7 @@ img {
 		<div class="container">
 			<div class="table-wrap">
 				<div class="table-cell">
-					<strong><a href="index.html">yarn-audit-fix</a></strong>
+					<strong><a href="../index.html">yarn-audit-fix</a></strong>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -2704,394 +2704,62 @@ img {
 </header>
 <nav class="tsd-navigation secondary">
 	<ul>
+		<li class=" tsd-kind-variable tsd-parent-kind-namespace">
+			<a href="runner.run.html#sync" class="tsd-kind-icon">sync</a>
+		</li>
 	</ul>
 </nav>
 <div class="container container-main">
 	<div class="content-wrap">
-		<div class="tsd-panel tsd-typography">
-			<p align="center">
-				<a href="https://yarnpkg.com/">
-					<img alt="Yarn audit fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true?raw=true" width="546">
-				</a>
-			</p>
-			<h1 align="center">
-				yarn-audit-fix
-			</h1>
-			<p><a href="https://travis-ci.com/antongolub/yarn-audit-fix"><img src="https://travis-ci.com/antongolub/yarn-audit-fix.svg?branch=master" alt="Build Status"></a>
-				<a href="https://david-dm.org/antongolub/yarn-audit-fix"><img src="https://img.shields.io/david/antongolub/yarn-audit-fix?label=deps" alt="deps"></a>
-				<a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability" alt="Maintainability"></a>
-				<a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage" alt="Test Coverage"></a>
-				<a href="https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix"><img src="https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status" alt="Sonar"></a>
-			<a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/v/yarn-audit-fix" alt="npm (tag)"></a></p>
-			<p>Apply <code>npm audit fix</code> logic to <code>yarn.lock</code></p>
-			<a href="#problem" id="problem" style="color: inherit; text-decoration: none;">
-				<h2>Problem</h2>
-			</a>
-			<ol>
-				<li><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
-					Authors suggest using <a href="https://dependabot.com/">Depedabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
-				The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a>.</li>
-				<li><code>yarn audit</code> does not support custom (in-house, internal) registries. Here are the <a href="https://github.com/yarnpkg/yarn/issues/7012">issue</a> &amp; <a href="https://github.com/yarnpkg/yarn/pull/6484">PR</a> which have not yet received the green light.</li>
-			</ol>
-			<a href="#solution" id="solution" style="color: inherit; text-decoration: none;">
-				<h2>Solution</h2>
-			</a>
-			<p>Fortunately, there are several workarounds:</p>
-			<ol>
-				<li>Compose <code>npm audit fix</code> with lockfile converter (thanks to <a href="https://github.com/gianpaj">Gianfranco P.</a>, <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a>).
-				<code>yarn-audit-fix --flow=convert</code> just reproduces these steps with minimal changes. More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></li>
-				<li>Fetch <code>yarn/npm audit --json</code> and patch lockfile inners (kudos to <a href="https://github.com/spion">G. Kosev</a>, <a href="https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts">code reference</a>). <code>yarn-audit-fix --flow=patch</code></li>
-			</ol>
-			<a href="#key-features" id="key-features" style="color: inherit; text-decoration: none;">
-				<h2>Key features</h2>
-			</a>
-			<ul>
-				<li>A couple of strategies to fix security issues</li>
-				<li>Mac / Linux / Windows support</li>
-				<li>CLI / JS API</li>
-				<li>TS and flow typings</li>
-			</ul>
-			<a href="#install" id="install" style="color: inherit; text-decoration: none;">
-				<h2>Install</h2>
-			</a>
-			<pre><code class="language-shell"><span style="color: #000000">$ yarn add yarn-audit-fix -D</span>
-</code></pre>
-			<p>or even better</p>
-			<pre><code><span style="color: #001080">npm_config_yes</span><span style="color: #000000">=</span><span style="color: #0000FF">true</span><span style="color: #000000"> </span><span style="color: #001080">npx</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span>
-</code></pre>
-			<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
-				<h2>Usage</h2>
-			</a>
-			<pre>
-$ yarn-audit-fix [--opts]
-
-<b>Preparing temp assets...</b>
-<b>Generating package-lock.json from yarn.lock...</b>
-<b>Applying npm audit fix...</b>
-<b>invoke</b> npm audit fix --package-lock-only
-added 14 packages, removed 195 packages and updated 1245 packages in 4.795s
-fixed 3 of 26 vulnerabilities in 1370 scanned packages
-  23 vulnerabilities required manual review and could not be updated
-<b>Updating yarn.lock from package-lock.json...</b>
-<b>invoke</b> yarn import
-info found npm package-lock.json, converting to yarn.lock
-warning synp > request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
-warning tslint-config-qiwi > tslint-react@5.0.0: tslint-react is deprecated along with TSLint
-warning @qiwi/libdefkit > @types/read-pkg@5.1.0: This is a stub types definition. read-pkg provides its own type definitions, so you do not need this installed.
-...
-success Saved lockfile.
-<b>invoke</b> yarn
-[1/4] 🔍  Resolving packages...
-success Already up-to-date.
-<b>Done</b>
-</pre>
-			<a href="#migration-to-v4" id="migration-to-v4" style="color: inherit; text-decoration: none;">
-				<h3>Migration to v4+</h3>
-			</a>
-			<p><code>--npm-v7</code> flag is redundant. From v4.0.0 package&#39;s own version of <strong>npm</strong> is used by default. But you&#39;re still able to invoke system default with <code>--npm-path=system</code> or define any custom <code>--npm-path=/another/npm/bin</code>.</p>
-			<a href="#migration-to-v6" id="migration-to-v6" style="color: inherit; text-decoration: none;">
-				<h3>Migration to v6+</h3>
-			</a>
-			<p>Default fix strategy <a href="https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0">has been changed</a> to direct lockfile patching with <code>yarn audit --json</code> data. To use the previous <em>legacy</em> flow, pass <code>--flow=convert</code> option to CLI.</p>
-			<a href="#cli" id="cli" style="color: inherit; text-decoration: none;">
-				<h3>CLI</h3>
-			</a>
-			<table>
-				<thead>
-					<tr>
-						<th>Option</th>
-						<th>Description</th>
-						<th>Default</th>
-						<th>with <code>--flow=convert</code> only</th>
-					</tr>
-				</thead>
-				<tbody><tr>
-						<td><code>--flow</code></td>
-						<td>Define how <code>yarn.lock</code> is modified. <code>convert</code> — to compose <code>npm audit fix</code> with two-way lockfile conversion (legacy flow). <code>patch</code> — to directly inject audit json data</td>
-						<td><code>patch</code></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--audit-level</code></td>
-						<td>Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical</td>
-						<td><code>low</code></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--dry-run</code></td>
-						<td>Get an idea of what audit fix will do</td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--force</code></td>
-						<td>Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones</td>
-						<td><code>false</code></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--help/-h</code></td>
-						<td>Print help message</td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--legacy-peer-deps</code></td>
-						<td>Accept an incorrect (potentially broken) deps resolution</td>
-						<td></td>
-						<td>✔</td>
-					</tr>
-					<tr>
-						<td><code>--loglevel</code></td>
-						<td>Set custom <a href="https://docs.npmjs.com/cli/v7/using-npm/config#loglevel">log level</a></td>
-						<td></td>
-						<td>✔</td>
-					</tr>
-					<tr>
-						<td><code>--npm-path</code></td>
-						<td>Declare npm path: switch to system default version of <strong>npm</strong> instead of package&#39;s own. <code>system / local / &lt;custom path&gt;</code></td>
-						<td><code>local</code></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--only</code></td>
-						<td>Set package <a href="https://docs.npmjs.com/cli/v7/using-npm/config#only">updating scope</a>: <code>dev</code>/<code>prod</code></td>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--package-lock-only</code></td>
-						<td>Run audit fix without modifying <code>node_modules</code>. Highly recommended to <strong>enable</strong>.</td>
-						<td><code>true</code></td>
-						<td>✔</td>
-					</tr>
-					<tr>
-						<td><code>--registry</code></td>
-						<td>Custom registry url</td>
-						<td></td>
-						<td>✔</td>
-					</tr>
-					<tr>
-						<td><code>--silent</code></td>
-						<td>Disable log output</td>
-						<td><code>false</code></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--symlink</code></td>
-						<td>Symlink type for <code>node_modules</code> ref</td>
-						<td><code>junction</code> for Windows, <code>dir</code> otherwise</td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--temp</code></td>
-						<td>Directory for temporary assets</td>
-						<td><code>&lt;cwd&gt;/node_modules/.cache/yarn-audit-fix</code></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td><code>--verbose</code></td>
-						<td>Switch log level to verbose/debug</td>
-						<td><code>false</code></td>
-						<td></td>
-					</tr>
-			</tbody></table>
-			<a href="#env" id="env" style="color: inherit; text-decoration: none;">
-				<h3>ENV</h3>
-			</a>
-			<p>All mentioned above CLI options can be replaced with corresponding env variables with leading <strong>YAF</strong> prefix. For example:</p>
-			<ul>
-				<li><code>YAF_FORCE</code> equals <code>--force</code></li>
-				<li><code>YAF_ONLY=prod</code> — <code>--only=prod</code></li>
-			</ul>
-			<a href="#js-api" id="js-api" style="color: inherit; text-decoration: none;">
-				<h3>JS API</h3>
-			</a>
-			<p><strong>yarn-audit-fix</strong> is a naive and optimistic workaround, so it exposes all of its inners to give anybody a chance to tweak up and find a better steps combination.
-			Typedoc: <a href="https://antongolub.github.io/yarn-audit-fix/modules/">https://antongolub.github.io/yarn-audit-fix/modules/</a></p>
-			<pre><code class="language-ts"><span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">run</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;yarn-audit-fix&#039;</span>
-
-<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">({</span>
-<span style="color: #000000">   </span><span style="color: #001080">flow:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;patch&#039;</span><span style="color: #000000">,</span>
-<span style="color: #000000">   </span><span style="color: #001080">verbose:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span>
-<span style="color: #000000">})</span>
-</code></pre>
-			<p>Build and run custom flows.</p>
-			<pre><code class="language-ts"><span style="color: #AF00DB">import</span><span style="color: #000000"> {</span>
-<span style="color: #000000">   </span><span style="color: #001080">clear</span><span style="color: #000000">,</span>
-<span style="color: #000000">   </span><span style="color: #001080">exit</span><span style="color: #000000">,</span>
-<span style="color: #000000">   </span><span style="color: #001080">patchLockfile</span><span style="color: #000000">,</span>
-<span style="color: #000000">   </span><span style="color: #001080">yarnInstall</span>
-<span style="color: #000000">} </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;yarn-audit-fix&#039;</span>
-
-<span style="color: #AF00DB">export</span><span style="color: #000000"> </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">flow</span><span style="color: #000000">: </span><span style="color: #267F99">TFlow</span><span style="color: #000000"> = {</span>
-<span style="color: #000000">  </span><span style="color: #001080">main:</span><span style="color: #000000"> [</span>
-<span style="color: #000000">    [</span>
-<span style="color: #000000">      </span><span style="color: #A31515">&#039;Patching yarn.lock with audit data...&#039;</span><span style="color: #000000">,</span>
-<span style="color: #000000">      </span><span style="color: #001080">patchLockfile</span><span style="color: #000000">,</span>
-<span style="color: #000000">      (...</span><span style="color: #001080">args</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Smth interesting:&#039;</span><span style="color: #000000">, ...</span><span style="color: #001080">args</span><span style="color: #000000">)},</span>
-<span style="color: #000000">      </span><span style="color: #001080">yarnInstall</span><span style="color: #000000">,</span>
-<span style="color: #000000">    ],</span>
-<span style="color: #000000">    [</span><span style="color: #A31515">&#039;Done&#039;</span><span style="color: #000000">],</span>
-<span style="color: #000000">  ],</span>
-<span style="color: #000000">  </span><span style="color: #001080">fallback:</span><span style="color: #000000"> [[</span><span style="color: #A31515">&#039;Failure!&#039;</span><span style="color: #000000">, </span><span style="color: #001080">exit</span><span style="color: #000000">]],</span>
-<span style="color: #000000">}</span>
-
-<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">({}, </span><span style="color: #001080">flow</span><span style="color: #000000">)</span>
-</code></pre>
-			<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
-				<h2>Troubleshooting</h2>
-			</a>
-			<a href="#yarn-audit-fix-version-xxx-is-out-of-date" id="yarn-audit-fix-version-xxx-is-out-of-date" style="color: inherit; text-decoration: none;">
-				<h3>yarn-audit-fix version x.x.x is out of date</h3>
-			</a>
-			<pre><code><span style="color: #001080">npm_config_yes</span><span style="color: #000000">=</span><span style="color: #0000FF">true</span><span style="color: #000000"> </span><span style="color: #001080">npx</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000"> --</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">level</span><span style="color: #000000">=</span><span style="color: #001080">moderate</span>
-<span style="color: #001080">Runtime</span><span style="color: #000000"> </span><span style="color: #001080">digest</span>
-<span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000"> </span><span style="color: #001080">version</span><span style="color: #000000"> </span><span style="color: #098658">4.3</span><span style="color: #000000">.</span><span style="color: #098658">6</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">out</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">date</span><span style="color: #000000">. </span><span style="color: #001080">Install</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">latest</span><span style="color: #000000"> </span><span style="color: #098658">6.0</span><span style="color: #000000">.</span><span style="color: #098658">0</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">better</span><span style="color: #000000"> </span><span style="color: #001080">results</span>
-</code></pre>
-			<p><strong>npx</strong> caches previously loaded packages, so you need one of:</p>
-			<ol>
-				<li>Define version to load: <code>npm yarn-audit-fix@6.0.0</code></li>
-				<li>Reset npx cache. For Mac/Linux: <code>rm -rf ~/.npm/_npx</code></li>
-			</ol>
-			<a href="#yarn-audit-fix-command-not-found" id="yarn-audit-fix-command-not-found" style="color: inherit; text-decoration: none;">
-				<h3>yarn-audit-fix command not found</h3>
-			</a>
-			<p>After installation, the package may not be found. This is probably an issue with $PATH finding <code>node_modules/.bin</code> contents or smth like that (<a href="https://github.com/npm/npm/issues/957">npm/issues/957</a>).
-			A bit annoying, but it&#39;s easy to handle in several ways.</p>
-			<ul>
-				<li>You&#39;re able to run the cmd through <strong>yarn</strong>: <code>yarn yarn-audit-fix</code>.</li>
-				<li>Simply invoke <code>node_modules/.bin/yarn-audit-fix</code> script.</li>
-			</ul>
-			<a href="#enoent-no-such-file-or-directory" id="enoent-no-such-file-or-directory" style="color: inherit; text-decoration: none;">
-				<h3>enoent: no such file or directory</h3>
-			</a>
-			<p>In some cases <strong>npm audit fix</strong> makes <code>node_modules</code> to become inconsistent. This is expected. <strong>yarn</strong> and <strong>npm</strong> organize the directory space slightly differently.</p>
-			<pre><code><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">rm</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">removing</span><span style="color: #000000"> /</span><span style="color: #001080">Users</span><span style="color: #000000">/</span><span style="color: #001080">antongolub</span><span style="color: #000000">/</span><span style="color: #001080">projects</span><span style="color: #000000">/</span><span style="color: #001080">queuefy</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/.</span><span style="color: #001080">cache</span><span style="color: #000000">/</span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/</span><span style="color: #001080">npm</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/.</span><span style="color: #001080">bin</span><span style="color: #000000">/</span><span style="color: #001080">node</span><span style="color: #000000">-</span><span style="color: #001080">gyp</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #267F99">it</span><span style="color: #000000"> </span><span style="color: #267F99">wasn</span><span style="color: #A31515">&#039;t installed by /Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/npm/node_modules/node-gy</span><span style="color: #CD3131">p</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">rm</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">removing</span><span style="color: #000000"> /</span><span style="color: #001080">Users</span><span style="color: #000000">/</span><span style="color: #001080">antongolub</span><span style="color: #000000">/</span><span style="color: #001080">projects</span><span style="color: #000000">/</span><span style="color: #001080">queuefy</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/.</span><span style="color: #001080">cache</span><span style="color: #000000">/</span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/</span><span style="color: #001080">npm</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/.</span><span style="color: #001080">bin</span><span style="color: #000000">/</span><span style="color: #001080">uuid</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #267F99">it</span><span style="color: #000000"> </span><span style="color: #267F99">wasn</span><span style="color: #A31515">&#039;t installed by /Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/npm/node_modules/uui</span><span style="color: #CD3131">d</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">! </span><span style="color: #001080">code</span><span style="color: #000000"> </span><span style="color: #0070C1">ENOENT</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">! </span><span style="color: #001080">syscall</span><span style="color: #000000"> </span><span style="color: #001080">chmod</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">! </span><span style="color: #001080">path</span><span style="color: #000000"> /</span><span style="color: #001080">Users</span><span style="color: #000000">/</span><span style="color: #001080">antongolub</span><span style="color: #000000">/</span><span style="color: #001080">projects</span><span style="color: #000000">/</span><span style="color: #001080">queuefy</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/.</span><span style="color: #001080">cache</span><span style="color: #000000">/</span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/@</span><span style="color: #001080">qiwi</span><span style="color: #000000">/</span><span style="color: #001080">libdefkit</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/</span><span style="color: #001080">flowgen</span><span style="color: #000000">/</span><span style="color: #001080">lib</span><span style="color: #000000">/</span><span style="color: #001080">cli</span><span style="color: #000000">/</span><span style="color: #001080">index</span><span style="color: #000000">.</span><span style="color: #001080">js</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">! </span><span style="color: #001080">errno</span><span style="color: #000000"> -</span><span style="color: #098658">2</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">! </span><span style="color: #001080">enoent</span><span style="color: #000000"> ENOENT: </span><span style="color: #001080">no</span><span style="color: #000000"> </span><span style="color: #001080">such</span><span style="color: #000000"> </span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #001080">or</span><span style="color: #000000"> </span><span style="color: #001080">directory</span><span style="color: #000000">, </span><span style="color: #001080">chmod</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;/Users/antongolub/projects/queuefy/node_modules/.cache/yarn-audit-fix/node_modules/@qiwi/libdefkit/node_modules/flowgen/lib/cli/index.js&#039;</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">! </span><span style="color: #001080">enoent</span><span style="color: #000000"> </span><span style="color: #001080">This</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">related</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">being</span><span style="color: #000000"> </span><span style="color: #001080">able</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">find</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">file</span><span style="color: #000000">.</span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">! </span><span style="color: #001080">enoent</span><span style="color: #000000"> </span>
-<span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">ERR</span><span style="color: #000000">!     /</span><span style="color: #001080">Users</span><span style="color: #000000">/</span><span style="color: #001080">antongolub</span><span style="color: #000000">/.</span><span style="color: #001080">npm</span><span style="color: #000000">/</span><span style="color: #001080">_logs</span><span style="color: #000000">/</span><span style="color: #098658">2020</span><span style="color: #000000">-</span><span style="color: #098658">08</span><span style="color: #000000">-23</span><span style="color: #0070C1">T07_09_26_924Z</span><span style="color: #000000">-</span><span style="color: #001080">debug</span><span style="color: #000000">.</span><span style="color: #001080">log</span>
-<span style="color: #000000">{</span>
-<span style="color: #000000">  status: </span><span style="color: #098658">254</span><span style="color: #000000">,</span>
-<span style="color: #000000">  signal: </span><span style="color: #0000FF">null</span><span style="color: #000000">,</span>
-<span style="color: #000000">  output: [ </span><span style="color: #0000FF">null</span><span style="color: #000000">, </span><span style="color: #0000FF">null</span><span style="color: #000000">, </span><span style="color: #0000FF">null</span><span style="color: #000000"> ]</span>
-</code></pre>
-			<p>Let&#39;s try this workaround:</p>
-			<ol>
-				<li>Restore the original <code>node_modules</code> state. <code>yarn --force</code> or <code>rm-rf node_modules &amp;&amp; yarn</code>.</li>
-				<li>Apply <code>npx yarn-audit-fix --package-lock-only</code>. The last param should instruct <strong>npm</strong> not to modify <code>node_modules</code> contents.</li>
-			</ol>
-			<a href="#--force-did-not-force-the-update" id="--force-did-not-force-the-update" style="color: inherit; text-decoration: none;">
-				<h3>--force did not force the update</h3>
-			</a>
-			<p>The problem only concerns repositories with <code>workspaces</code> (monorepos).
-			<code>npm audit fix --force</code> throws 1 status code and suggests running <code>npm audit fix --force</code>. This quite ironic behaviour is exactly what <strong>npm</strong> (arborist) <a href="https://github.com/npm/arborist/blob/5b550501f50d6489d7e5f7598a97a5cf4cc5cc8a/lib/arborist/build-ideal-tree.js#L373">does now</a>. </p>
-			<pre><code><span style="color: #001080">$$</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000"> --</span><span style="color: #001080">force</span><span style="color: #000000">          </span>
-<span style="color: #000000"> </span><span style="color: #001080">Preparing</span><span style="color: #000000"> </span><span style="color: #001080">temp</span><span style="color: #000000"> </span><span style="color: #001080">assets</span><span style="color: #000000">...</span>
-<span style="color: #000000"> </span><span style="color: #001080">Generating</span><span style="color: #000000"> </span><span style="color: #AF00DB">package</span><span style="color: #000000">-</span><span style="color: #001080">lock</span><span style="color: #000000">.</span><span style="color: #001080">json</span><span style="color: #000000"> </span><span style="color: #001080">from</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">.</span><span style="color: #001080">lock</span><span style="color: #000000">...</span>
-<span style="color: #000000"> </span><span style="color: #001080">Applying</span><span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #001080">fix</span><span style="color: #000000">...</span>
-<span style="color: #000000"> </span><span style="color: #001080">invoke</span><span style="color: #000000"> /</span><span style="color: #001080">home</span><span style="color: #000000">/</span><span style="color: #001080">qwelias</span><span style="color: #000000">/.</span><span style="color: #001080">nvm</span><span style="color: #000000">/</span><span style="color: #001080">versions</span><span style="color: #000000">/</span><span style="color: #001080">node</span><span style="color: #000000">/</span><span style="color: #001080">v12</span><span style="color: #000000">.</span><span style="color: #098658">18.1</span><span style="color: #000000">/</span><span style="color: #001080">lib</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/</span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/.</span><span style="color: #001080">bin</span><span style="color: #000000">/</span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #001080">fix</span><span style="color: #000000"> --</span><span style="color: #AF00DB">package</span><span style="color: #000000">-</span><span style="color: #001080">lock</span><span style="color: #000000">-</span><span style="color: #001080">only</span><span style="color: #000000"> --</span><span style="color: #001080">force</span><span style="color: #000000"> --</span><span style="color: #001080">prefix</span><span style="color: #000000">=/</span><span style="color: #001080">home</span><span style="color: #000000">/</span><span style="color: #001080">qwelias</span><span style="color: #000000">/</span><span style="color: #001080">prj</span><span style="color: #000000">/</span><span style="color: #001080">stuff</span><span style="color: #000000">/</span><span style="color: #001080">test</span><span style="color: #000000">-</span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/.</span><span style="color: #001080">cache</span><span style="color: #000000">/</span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span>
-<span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">using</span><span style="color: #000000"> --</span><span style="color: #001080">force</span><span style="color: #000000"> </span><span style="color: #001080">Recommended</span><span style="color: #000000"> </span><span style="color: #001080">protections</span><span style="color: #000000"> </span><span style="color: #001080">disabled</span><span style="color: #000000">.</span>
-<span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #001080">Updating</span><span style="color: #000000"> </span><span style="color: #001080">lodash</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #098658">4.17</span><span style="color: #000000">.</span><span style="color: #098658">20</span><span style="color: #000000">,</span><span style="color: #001080">which</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">outside</span><span style="color: #000000"> </span><span style="color: #001080">your</span><span style="color: #000000"> </span><span style="color: #001080">stated</span><span style="color: #000000"> </span><span style="color: #001080">dependency</span><span style="color: #000000"> </span><span style="color: #001080">range</span><span style="color: #000000">.</span>
-<span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #001080">Manual</span><span style="color: #000000"> </span><span style="color: #001080">fix</span><span style="color: #000000"> </span><span style="color: #001080">required</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">linked</span><span style="color: #000000"> </span><span style="color: #001080">project</span><span style="color: #000000"> </span><span style="color: #001080">at</span><span style="color: #000000"> ./</span><span style="color: #001080">packages</span><span style="color: #000000">/</span><span style="color: #001080">bar</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">lodash</span><span style="color: #000000">@&lt;=</span><span style="color: #098658">4.17</span><span style="color: #000000">.</span><span style="color: #098658">18.</span>
-<span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;cd ./packages/bar&#039;</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">run</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;npm audit&#039;</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">details</span><span style="color: #000000">.</span>
-<span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #001080">Manual</span><span style="color: #000000"> </span><span style="color: #001080">fix</span><span style="color: #000000"> </span><span style="color: #001080">required</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">linked</span><span style="color: #000000"> </span><span style="color: #001080">project</span><span style="color: #000000"> </span><span style="color: #001080">at</span><span style="color: #000000"> ./</span><span style="color: #001080">packages</span><span style="color: #000000">/</span><span style="color: #001080">foo</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">lodash</span><span style="color: #000000">@&lt;=</span><span style="color: #098658">4.17</span><span style="color: #000000">.</span><span style="color: #098658">18.</span>
-<span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #0070C1">WARN</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;cd ./packages/foo&#039;</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">run</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;npm audit&#039;</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">details</span><span style="color: #000000">.</span>
-<span style="color: #000000"> </span>
-<span style="color: #000000"> </span><span style="color: #001080">up</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">date</span><span style="color: #000000">, </span><span style="color: #001080">audited</span><span style="color: #000000"> </span><span style="color: #098658">7</span><span style="color: #000000"> </span><span style="color: #001080">packages</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> 2</span><span style="color: #001080">s</span>
-<span style="color: #000000"> </span>
-<span style="color: #000000"> # </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #001080">report</span>
-<span style="color: #000000"> </span>
-<span style="color: #000000"> </span><span style="color: #001080">lodash</span><span style="color: #000000">  &lt;=</span><span style="color: #098658">4.17</span><span style="color: #000000">.</span><span style="color: #098658">18</span>
-<span style="color: #000000"> Severity: </span><span style="color: #001080">high</span>
-<span style="color: #000000"> </span><span style="color: #001080">Prototype</span><span style="color: #000000"> </span><span style="color: #001080">Pollution</span><span style="color: #000000"> - https:</span><span style="color: #008000">//npmjs.com/advisories/782</span>
-<span style="color: #000000"> </span><span style="color: #001080">Prototype</span><span style="color: #000000"> </span><span style="color: #001080">Pollution</span><span style="color: #000000"> - https:</span><span style="color: #008000">//npmjs.com/advisories/1065</span>
-<span style="color: #000000"> </span><span style="color: #001080">fix</span><span style="color: #000000"> </span><span style="color: #001080">available</span><span style="color: #000000"> </span><span style="color: #001080">via</span><span style="color: #000000"> </span><span style="color: #A31515">`npm audit fix --force`</span>
-<span style="color: #000000"> </span><span style="color: #001080">Will</span><span style="color: #000000"> </span><span style="color: #001080">install</span><span style="color: #000000"> </span><span style="color: #001080">lodash</span><span style="color: #000000">@</span><span style="color: #098658">4.17</span><span style="color: #000000">.</span><span style="color: #098658">20</span><span style="color: #000000">, </span><span style="color: #001080">which</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">outside</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">stated</span><span style="color: #000000"> </span><span style="color: #001080">dependency</span><span style="color: #000000"> </span><span style="color: #001080">range</span>
-<span style="color: #000000"> </span><span style="color: #001080">packages</span><span style="color: #000000">/</span><span style="color: #001080">bar</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/</span><span style="color: #001080">lodash</span>
-<span style="color: #000000"> </span><span style="color: #001080">packages</span><span style="color: #000000">/</span><span style="color: #001080">foo</span><span style="color: #000000">/</span><span style="color: #001080">node_modules</span><span style="color: #000000">/</span><span style="color: #001080">lodash</span>
-<span style="color: #000000"> </span>
-<span style="color: #000000"> </span><span style="color: #098658">1</span><span style="color: #000000"> </span><span style="color: #001080">high</span><span style="color: #000000"> </span><span style="color: #001080">severity</span><span style="color: #000000"> </span><span style="color: #001080">vulnerability</span>
-<span style="color: #000000"> </span>
-<span style="color: #000000"> </span><span style="color: #001080">To</span><span style="color: #000000"> </span><span style="color: #001080">address</span><span style="color: #000000"> </span><span style="color: #001080">all</span><span style="color: #000000"> </span><span style="color: #001080">issues</span><span style="color: #000000">, run:</span>
-<span style="color: #000000">   </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">audit</span><span style="color: #000000"> </span><span style="color: #001080">fix</span><span style="color: #000000"> --</span><span style="color: #001080">force</span>
-<span style="color: #000000"> {</span>
-<span style="color: #000000">   status: </span><span style="color: #098658">1</span><span style="color: #000000">,</span>
-<span style="color: #000000">   signal: </span><span style="color: #0000FF">null</span><span style="color: #000000">,</span>
-<span style="color: #000000">   output: [ </span><span style="color: #0000FF">null</span><span style="color: #000000">, </span><span style="color: #0000FF">null</span><span style="color: #000000">, </span><span style="color: #0000FF">null</span><span style="color: #000000"> ],</span>
-<span style="color: #000000">   pid: </span><span style="color: #098658">176019</span><span style="color: #000000">,</span>
-<span style="color: #000000">   stdout: </span><span style="color: #0000FF">null</span><span style="color: #000000">,</span>
-<span style="color: #000000">   stderr: </span><span style="color: #0000FF">null</span>
-<span style="color: #000000"> }</span>
-</code></pre>
-			<p>So you need, as the message says, to manually change the dependency versions. <strong>npm@7</strong> <del>is still in beta</del>, perhaps this logic will be changed later.
-			In some cases <strong>npm@6</strong> works better, so if you have such a version installed on your system, you may try:</p>
-			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix --npm-path=system --flow=convert</span>
-</code></pre>
-			<p>You may also try to cast <em>the optimistic flags combo</em></p>
-			<pre><code class="language-shell"><span style="color: #000000">npx yarn-audit-fix --package-lock-only=false --force --legacy-peer-deps --flow=convert</span>
-</code></pre>
-			<p>Unfortunately, even this invocation may return something like:</p>
-			<pre><code class="language-shell"><span style="color: #008000"># npm audit report</span>
-
-<span style="color: #000000">hosted-git-info  &lt;3.0.8</span>
-<span style="color: #000000">Severity: moderate</span>
-<span style="color: #000000">Regular Expression Deinal of Service - https://npmjs.com/advisories/1677</span>
-<span style="color: #000000">No fix available</span>
-<span style="color: #000000">node_modules/normalize-package-data/node_modules/hosted-git-info</span>
-<span style="color: #000000">  normalize-package-data  2.0.0 - 2.5.0</span>
-<span style="color: #000000">  Depends on vulnerable versions of hosted-git-info</span>
-<span style="color: #000000">  node_modules/normalize-package-data</span>
-<span style="color: #000000">    meow  3.4.0 - 9.0.0</span>
-<span style="color: #000000">    Depends on vulnerable versions of normalize-package-data</span>
-<span style="color: #000000">    Depends on vulnerable versions of read-pkg-up</span>
-</code></pre>
-			<p><strong>No fix available</strong> just means that no fix available. If you still doubt the correctness of the output, you can check it by hand.</p>
-			<pre><code class="language-shell"><span style="color: #000000">npm i --package-lock-only</span>
-<span style="color: #000000">npm audit fix --package-lock-only --force</span>
-</code></pre>
-			<p>Same response for alternative patching flow:</p>
-			<pre><code class="language-shell"><span style="color: #000000">npm_config_yes=true npx yarn-audit-fix --audit-level=moderate --flow=patch</span>
-</code></pre>
-			<pre><code class="language-shell"><span style="color: #000000">Patching yarn.lock with audit data...</span>
-<span style="color: #000000">invoke yarn audit --json --level moderate</span>
-<span style="color: #000000">Can</span><span style="color: #A31515">&#039;t find patched version that satisfies postcss@^7.0.0 in &gt;=8.2.10</span>
-<span style="color: #A31515">Can&#039;</span><span style="color: #000000">t find patched version that satisfies postcss@^7.0.1 </span><span style="color: #AF00DB">in</span><span style="color: #000000"> &gt;=8.2.10</span>
-<span style="color: #000000">Can</span><span style="color: #A31515">&#039;t find patched version that satisfies postcss@^7.0.27 in &gt;=8.2.10</span>
-<span style="color: #A31515">Can&#039;</span><span style="color: #000000">t find patched version that satisfies ws@^7.2.3 </span><span style="color: #AF00DB">in</span><span style="color: #000000"> &gt;=6.2.2 &lt;7.0.0 || &gt;=7.4.6</span>
-<span style="color: #000000">Upgraded deps: &lt;none&gt;</span>
-<span style="color: #000000">invoke yarn --update-checksums</span>
-</code></pre>
-			<p>Not everything can be repaired, alack.</p>
-			<a href="#license" id="license" style="color: inherit; text-decoration: none;">
-				<h2>License</h2>
-			</a>
-			<p><a href="./LICENSE">MIT</a></p>
-		</div>
-		<div style="position:relative;"><a name="typedoc-main-index" class="tsd-anchor"></a></div>
 		<section class="tsd-panel-group tsd-index-group">
 			<h2>Index</h2>
 			<section class="tsd-panel tsd-index-panel">
 				<div class="tsd-index-content">
 					<section class="tsd-index-section ">
-						<h3>Modules</h3>
+						<h3>Variables</h3>
 						<ul class="tsd-index-list">
-							<li class="tsd-kind-module"><a href="modules/cli.html" class="tsd-kind-icon">cli</a></li>
-							<li class="tsd-kind-module"><a href="modules/flows.html" class="tsd-kind-icon">flows</a></li>
-							<li class="tsd-kind-module"><a href="modules/ifaces.html" class="tsd-kind-icon">ifaces</a></li>
-							<li class="tsd-kind-module"><a href="modules/index.html" class="tsd-kind-icon">index</a></li>
-							<li class="tsd-kind-module"><a href="modules/lockfile.html" class="tsd-kind-icon">lockfile</a></li>
-							<li class="tsd-kind-module"><a href="modules/runner.html" class="tsd-kind-icon">runner</a></li>
-							<li class="tsd-kind-module"><a href="modules/stages.html" class="tsd-kind-icon">stages</a></li>
-							<li class="tsd-kind-module"><a href="modules/util.html" class="tsd-kind-icon">util</a></li>
+							<li class="tsd-kind-variable tsd-parent-kind-namespace"><a href="runner.run.html#sync" class="tsd-kind-icon">sync</a></li>
 						</ul>
 					</section>
+				</div>
+			</section>
+		</section>
+		<section class="tsd-panel-group tsd-member-group ">
+			<h2>Variables</h2>
+			<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-namespace">
+				<a name="sync" class="tsd-anchor"></a>
+				<h3>sync</h3>
+				<div class="tsd-signature tsd-kind-icon">sync<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>_flags<span class="tsd-signature-symbol">?: </span><a href="ifaces.html#tflags" class="tsd-signature-type" data-tsd-kind="Type alias">TFlags</a>, _flow<span class="tsd-signature-symbol">?: </span><a href="ifaces.html#tflow" class="tsd-signature-type" data-tsd-kind="Type alias">TFlow</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
+				<aside class="tsd-sources">
+				</aside>
+				<div class="tsd-type-declaration">
+					<h4>Type declaration</h4>
+					<ul class="tsd-parameters">
+						<li class="tsd-parameter-signature">
+							<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-namespace">
+								<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>_flags<span class="tsd-signature-symbol">?: </span><a href="ifaces.html#tflags" class="tsd-signature-type" data-tsd-kind="Type alias">TFlags</a>, _flow<span class="tsd-signature-symbol">?: </span><a href="ifaces.html#tflow" class="tsd-signature-type" data-tsd-kind="Type alias">TFlow</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+							</ul>
+							<ul class="tsd-descriptions">
+								<li class="tsd-description">
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>Public static void main.</p>
+										</div>
+									</div>
+									<h4 class="tsd-parameters-title">Parameters</h4>
+									<ul class="tsd-parameters">
+										<li>
+											<h5>_flags: <a href="ifaces.html#tflags" class="tsd-signature-type" data-tsd-kind="Type alias">TFlags</a><span class="tsd-signature-symbol"> = {}</span></h5>
+										</li>
+										<li>
+											<h5><span class="tsd-flag ts-flagOptional">Optional</span> _flow: <a href="ifaces.html#tflow" class="tsd-signature-type" data-tsd-kind="Type alias">TFlow</a></h5>
+										</li>
+									</ul>
+									<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+								</li>
+							</ul>
+						</li>
+					</ul>
 				</div>
 			</section>
 		</section>
