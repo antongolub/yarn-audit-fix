@@ -39,10 +39,7 @@ export const exec = (stages: TStage[], ctx: TContext): void => {
 /**
  * Public static void main.
  */
-export const run = async (
-  _flags: TFlags = {},
-  _flow?: TFlow,
-): Promise<void> => {
+export const runSync = (_flags: TFlags = {}, _flow?: TFlow): void => {
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
   const flow = _flow || getFlow(flags.flow)
@@ -57,3 +54,16 @@ export const run = async (
     throw err
   }
 }
+
+// Legacy async implementation
+export const run = (_flags: TFlags = {}, _flow?: TFlow): Promise<void> =>
+  new Promise((resolve, reject) => {
+    try {
+      runSync(_flags, _flow)
+      resolve()
+    } catch (e) {
+      reject(e)
+    }
+  })
+
+run.sync = runSync
