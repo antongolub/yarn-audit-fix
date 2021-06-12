@@ -1,3 +1,15 @@
+# [6.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.2.3...v6.3.0) (2021-06-12)
+
+
+### Bug Fixes
+
+* avoid ERR_UNHANDLED_REJECTION for CLI ([a397a7a](https://github.com/antongolub/yarn-audit-fix/commit/a397a7a85ee5cb0803a2c9ed5722ca146eba649e))
+
+
+### Features
+
+* handle --dry-run option in --flow=patch mode ([8fc5db6](https://github.com/antongolub/yarn-audit-fix/commit/8fc5db6e7a9ae36e12cc6fdef78985761ee10831))
+
 ## [6.2.3](https://github.com/antongolub/yarn-audit-fix/compare/v6.2.2...v6.2.3) (2021-06-10)
 
 
