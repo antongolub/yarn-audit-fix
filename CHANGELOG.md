@@ -1,3 +1,10 @@
+## [6.3.4](https://github.com/antongolub/yarn-audit-fix/compare/v6.3.3...v6.3.4) (2021-06-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency commander to v8 ([9089a71](https://github.com/antongolub/yarn-audit-fix/commit/9089a7122e240ad531d3eeaf8c55992eac09e718))
+
 ## [6.3.3](https://github.com/antongolub/yarn-audit-fix/compare/v6.3.2...v6.3.3) (2021-06-24)
 
 
