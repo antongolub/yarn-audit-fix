@@ -58,6 +58,9 @@
   "workspaces0": [
     "packages/*"
   ],
+  "resolutions": {
+    "**/globby/fast-glob": "^3.2.7"
+  },
   "dependencies": {
     "@types/find-cache-dir": "^3.2.1",
     "@types/fs-extra": "^9.0.12",
