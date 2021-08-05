@@ -2983,10 +2983,10 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.3, 
   resolved "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.6.tgz"
   integrity sha512-nTnJ528pbqxYanhpDYsi4Rd8MAeaBA67+RZ10CM1m3bTAVFEDcd5AuA4a6W5YkGZ1iNXHzZz8T6TBKLeBuNriQ==
 
-graceful-fs@^4.2.7:
-  version "4.2.7"
-  resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.7.tgz#ed65e76e7c700c3e2c889ca65677ec0d210db1b3"
-  integrity sha512-b1suB8r7mlSJQIBs6typf13fz55WYPeE7/KYlQUvqB7E3hUkXhz4D8FVHkENHTqG8+mD2yyT9HgT5bNkGNiqeQ==
+graceful-fs@^4.2.8:
+  version "4.2.8"
+  resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.8.tgz#e412b8d33f5e006593cbd3cee6df9f2cebbe802a"
+  integrity sha512-qkIilPUYcNhJpd33n0GBXTB1MMPp14TxEsEs0pTrsSVucApsYzW5V+Q8Qxhik6KU3evy+qkAAowTByymK0avdg==
 
 handlebars@^4.7.7:
   version "4.7.7"
@@ -4818,10 +4818,10 @@ npm-user-validate@^1.0.1:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.1.tgz#31428fc5475fe8416023f178c0ab47935ad8c561"
   integrity sha512-uQwcd/tY+h1jnEaze6cdX/LrhWhoBxfSknxentoqmIuStxUExxjWd3ULMLFPiFUrZKbOVMowH6Jq2FRWfmhcEw==
 
-npm@7.20.4:
-  version "7.20.4"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-7.20.4.tgz#2fab278d954d480e95da4dd4be7e1fcbe58c1736"
-  integrity sha512-OA/s7qkmew6O7klSVrPkN35BwmlWY7WdvWjLv5IzWSYRJyU37TWx6xFeyF0F44QNcpOC3ffj2l+gpl9+LQGWWA==
+npm@7.20.5:
+  version "7.20.5"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-7.20.5.tgz#287bcf427edad888f379eb63d3566b888b8c3680"
+  integrity sha512-vRyu1V79n5BzKn4vkanag1xEjEMLIZ48Ry1V7IyAvHQHi8syOEiYWvUMxNpeDk+e8JKAKCNG3lIYJDm3pM8VMQ==
   dependencies:
     "@npmcli/arborist" "^2.8.0"
     "@npmcli/ci-detect" "^1.2.0"
@@ -4840,7 +4840,7 @@ npm@7.20.4:
     cli-table3 "^0.6.0"
     columnify "~1.5.4"
     glob "^7.1.7"
-    graceful-fs "^4.2.7"
+    graceful-fs "^4.2.8"
     hosted-git-info "^4.0.2"
     ini "^2.0.0"
     init-package-json "^2.0.3"
