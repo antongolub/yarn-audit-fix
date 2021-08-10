@@ -83,7 +83,7 @@
   "devDependencies": {
     "@qiwi/libdefkit": "^3.0.0",
     "@qiwi/npm-run-all": "^4.1.7",
-    "@types/jest": "^26.0.24",
+    "@types/jest": "^27.0.0",
     "@types/node": "^16.3.2",
     "cpy-cli": "^3.1.1",
     "eslint": "^7.30.0",
