@@ -65,7 +65,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
 
       - name: Yarn install
         run: yarn
@@ -89,7 +89,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-2019, ubuntu-20.04 ]
-        node-version: [ 12, 14, 16 ]
+        node-version: [ 16, 14, 12 ]
 
     name: Test (Node v${{ matrix.node-version }}, OS ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -113,12 +113,12 @@ jobs:
         run: yarn --ignore-engines # libdefkit requires Node.js >= 14
 
       - name: Intergarion test
-        if: matrix.node-version != '14' || matrix.os != 'ubuntu-20.04'
+        if: matrix.node-version != '12' && matrix.os == 'windows-2019' || matrix.node-version == '14' && matrix.os == 'ubuntu-20.04'
         run: yarn test:integration
 
-      # Run all tests for Ubuntu + NodeJS v14 only
+      # Run all tests for Ubuntu + NodeJS v16 only
       - name: Full test suite
-        if: matrix.node-version == '14' && matrix.os == 'ubuntu-20.04'
+        if: matrix.node-version == '16' && matrix.os == 'ubuntu-20.04'
         run: yarn test
 
   release:
@@ -144,7 +144,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
 
       - name: Codeclimate
         uses: paambaati/codeclimate-action@v2.7.5
