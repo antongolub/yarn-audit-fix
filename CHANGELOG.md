@@ -1,3 +1,10 @@
+# [6.4.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.3.11...v6.4.0) (2021-08-11)
+
+
+### Features
+
+* add --ignore-engines flag ([3476e8d](https://github.com/antongolub/yarn-audit-fix/commit/3476e8d971846dc1016d788bb99e63c47fede441)), closes [#166](https://github.com/antongolub/yarn-audit-fix/issues/166)
+
 ## [6.3.11](https://github.com/antongolub/yarn-audit-fix/compare/v6.3.10...v6.3.11) (2021-08-05)
 
 
