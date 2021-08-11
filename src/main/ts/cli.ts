@@ -29,6 +29,11 @@ const flags = new Command()
     'Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones',
     env.YAF_FORCE,
   )
+  .option(
+    '--ignore-engines [bool]',
+    'Ignore engines check',
+    env.YAF_IGNORE_ENGINES,
+  )
   .option('--loglevel [level]', 'Set custom log level', env.YAF_LOGLEVEL)
   .option(
     '--legacy-peer-deps [bool]',

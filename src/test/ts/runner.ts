@@ -180,6 +180,7 @@ describe('yarn-audit-fix', () => {
           '--verbose',
           '--registry',
           registryUrl,
+          '--ignore-engines',
         ],
         { cwd, stdio },
       )
@@ -246,6 +247,7 @@ describe('yarn-audit-fix', () => {
           'package-lock-only': true,
           registry: registryUrl,
           flow: 'convert',
+          ignoreEngines: true,
         })
         checkConvertFlow()
       })
@@ -278,6 +280,7 @@ describe('yarn-audit-fix', () => {
             '--package-lock-only=false',
             `--registry=${registryUrl}`,
             '--flow=convert',
+            '--ignore-engines'
           )
           require('../../main/ts/cli')
         })
