@@ -1,6 +1,6 @@
 {
   "name": "yarn-audit-fix",
-  "version": "6.4.2",
+  "version": "6.4.3",
   "private": false,
   "description": "Apply `npm audit fix` logic to `yarn.lock`",
   "bin": {
