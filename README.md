@@ -17,25 +17,48 @@
 
 Apply `npm audit fix` logic to `yarn.lock`
 
-## Problem
+## Table of Contents
+- [Digest](#digest)
+   - [Problem](#problem)
+   - [Solution](#solution)
+   - [Key features](#key-features)
+- [Getting started](#getting-started)
+   - [Requirements](#requirements)
+   - [Install](#install)
+   - [CLI](#cli)
+   - [ENV](#env)
+   - [JS API](#js-api)
+- [Migration notes](#migration-notes)
+   - [^6.0.0](#^6.0.0)
+   - [^4.0.0](#^4.0.0)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Digest
+### Problem
 1. `yarn audit` detects vulnerabilities, but cannot fix them.
 Authors suggest using [Depedabot](https://dependabot.com/) or [Snyk](https://snyk.io/) for security patches. Well, it is very inconvenient in some situations, to say the least of it.
 The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).
 2. `yarn audit` does not support custom (in-house, internal) registries. Here are the [issue](https://github.com/yarnpkg/yarn/issues/7012) & [PR](https://github.com/yarnpkg/yarn/pull/6484) which have not yet received the green light.
 
-## Solution
+### Solution
 Fortunately, there are several workarounds:
 1. Compose `npm audit fix` with lockfile converter (thanks to [Gianfranco P.](https://github.com/gianpaj), [stackoverflow/60878037](https://stackoverflow.com/a/60878037)).
    `yarn-audit-fix --flow=convert` just reproduces these steps with minimal changes. More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
 2. Fetch `yarn/npm audit --json` and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)). `yarn-audit-fix --flow=patch`
 
-## Key features
+### Key features
 * A couple of strategies to fix security issues
 * Mac / Linux / Windows support
 * CLI / JS API
 * TS and flow typings
 
-## Install
+## Getting started
+### Requirements
+Node.js: `^12.20.0 || ^14.13.1 || >=16.0.0`
+
+### Install
 ```shell script
 $ yarn add yarn-audit-fix -D
 ```
@@ -44,7 +67,7 @@ or even better
 npm_config_yes=true npx yarn-audit-fix
 ```
 
-## Usage
+### CLI
 <pre>
 $ yarn-audit-fix [--opts]
 
@@ -68,14 +91,6 @@ success Saved lockfile.
 success Already up-to-date.
 <b>Done</b>
 </pre>
-
-### Migration to v4+
-`--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system` or define any custom `--npm-path=/another/npm/bin`.
-
-### Migration to v6+
-Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=convert` option to CLI.
-
-### CLI
 | Option | Description | Default | with `--flow=convert` only | 
 |---|---|---|---|
 |`--flow` | Define how `yarn.lock` is modified. `convert` — to compose `npm audit fix` with two-way lockfile conversion (legacy flow). `patch` — to directly inject audit json data | `patch`
@@ -95,7 +110,7 @@ Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit
 |`--verbose` | Switch log level to verbose/debug | `false` 
 
 ### ENV
-All mentioned above CLI options can be replaced with corresponding env variables with leading **YAF** prefix. For example:
+All mentioned above CLI options can be replaced with the corresponding env variables with leading **YAF** prefix. For example:
 * `YAF_FORCE` equals `--force`
 * `YAF_ONLY=prod` — `--only=prod`
 
@@ -137,6 +152,13 @@ export const flow: TFlow = {
 
 await run({}, flow)
 ```
+
+## Migration notes
+### ^6.0.0
+Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=convert` option to CLI.
+
+### ^4.0.0
+`--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system` or define any custom `--npm-path=/another/npm/bin`.
 
 ## Troubleshooting
 ### yarn-audit-fix version x.x.x is out of date
@@ -265,6 +287,11 @@ Upgraded deps: <none>
 invoke yarn --update-checksums
 ```
 Not everything can be repaired, alack.
+
+## Contributing
+Feel free to open any issues: for bugs, feature requests or questions.
+You're always welcome to suggest a PR. Just fork this repo, write some code, add some tests and push your changes.
+Any feedback is appreciated.
 
 ## License
 [MIT](./LICENSE)
