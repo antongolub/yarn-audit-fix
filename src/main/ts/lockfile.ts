@@ -1,7 +1,7 @@
-import * as lf from '@yarnpkg/lockfile'
+import lf from '@yarnpkg/lockfile'
 import { SpawnSyncReturns } from 'child_process'
 import fs from 'fs-extra'
-import { keyBy } from 'lodash'
+import { keyBy } from 'lodash-es'
 import sv from 'semver'
 
 import { TAuditEntry, TAuditReport, TContext, TLockfileObject } from './ifaces'
