@@ -2,15 +2,19 @@
   "name": "yarn-audit-fix",
   "version": "6.4.4",
   "private": false,
+  "type": "module",
   "description": "Apply `npm audit fix` logic to `yarn.lock`",
   "bin": {
-    "yarn-audit-fix": "target/es5/cli.js"
+    "yarn-audit-fix": "target/es6/cli.js"
   },
   "source": "src/main/ts/index.ts",
-  "main": "target/es5/index.js",
+  "main": "target/es6/index.js",
   "types": "typings/index.d.ts",
   "typescript": {
     "definition": "typings/index.d.ts"
+  },
+  "engines": {
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
   },
   "scripts": {
     "clean": "rimraf target typings flow-typed buildcache docs coverage",
@@ -18,17 +22,18 @@
     "lint:fix": "yarn lint --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "test:unit": "yarn jest --config=jest.config.json --runInBand",
-    "test:integration": "node ./target/es5/cli.js --package-lock-only --audit-level=moderate --ignore-engines",
+    "test:integration": "node ./target/es6/cli.js --package-lock-only --audit-level=moderate --ignore-engines",
     "test:integration-build": "yarn build:es5 && yarn test:integration",
     "test:depcheck": "npm_config_yes=true npx depcheck --ignores=tslib,@types/jest,@types/node",
     "test:report": "yarn test && yarn push:report",
     "test": "npm-run-all -p -l lint test:unit test:integration test:depcheck",
-    "build": "yarn clean && npm-run-all -p -l build:es5 build:es6 build:ts build:libdef build:buildstamp docs",
-    "build:es5": "mkdirp target/es5 && tsc -p tsconfig.es5.json",
+    "build": "yarn clean && npm-run-all -p -l build:esnext build:es6 build:ts build:libdef build:buildstamp docs && yarn build:esmfix",
+    "build:esnext": "mkdirp target/esnext && tsc -p tsconfig.esnext.json",
     "build:es6": "mkdirp target/es6 && tsc -p tsconfig.es6.json",
     "build:ts": "cpy src/main/ts/ target/ts/",
     "build:buildstamp": "npm_config_yes=true npx buildstamp --git --out.path=buildstamp.json",
-    "build:libdef": "libdefkit --tsconfig=tsconfig.es5.json --tsconfig=tsconfig.es6.json",
+    "build:libdef": "libdefkit --tsconfig=tsconfig.esnext.json --tsconfig=tsconfig.es6.json",
+    "build:esmfix": "tsc-esm-fix --target=target/es6 --target=target/esnext",
     "push:report": "yarn coveralls:push",
     "docs": "typedoc",
     "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
@@ -95,6 +100,7 @@
     "prettier": "^2.3.2",
     "terser": "^5.7.1",
     "ts-jest": "^27.0.4",
+    "tsc-esm-fix": "^2.7.1",
     "typedoc": "^0.21.5",
     "typescript": "4.4.2"
   },
