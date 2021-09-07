@@ -2,14 +2,16 @@ import chalk from 'chalk'
 import cp, { StdioOptions } from 'child_process'
 import crypto from 'crypto'
 import findCacheDir from 'find-cache-dir'
-import { sync as findUp } from 'find-up'
-import { ensureDirSync, readFileSync, SymlinkType } from 'fs-extra'
-import { GlobbyOptions, sync as glob } from 'globby'
-import { reduce } from 'lodash'
+import { findUpSync, pathExistsSync } from 'find-up'
+import fse, {SymlinkType} from 'fs-extra'
+import { Options as GlobbyOptions, globbySync as glob } from 'globby'
+import { reduce } from 'lodash-es'
 import { join, resolve } from 'path'
 import { sync as pkgDir } from 'pkg-dir'
 
 import { TFlags, TFlagsMapping } from './ifaces'
+
+const { ensureDirSync, readFileSync } = fse
 
 export const invoke = (
   cmd: string,
@@ -109,11 +111,11 @@ export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
 
 export const getClosestBin = (cmd: string): string =>
   String(
-    findUp(
+    findUpSync(
       (dir) => {
         const ref = resolve(dir, 'node_modules', '.bin', cmd)
 
-        return findUp.exists(ref) ? ref : undefined
+        return pathExistsSync(ref) ? ref : undefined
       },
       {
         cwd: String(pkgDir(__dirname)),
