@@ -155,7 +155,11 @@ await run({}, flow)
 
 ## Migration notes
 ### ^7.0.0
-Converted to 
+Following the deps, converted to ESM. So legacy `require` API is not supported now. Use new shiny `import` instead or try your luck with [esm-hook](https://www.npmjs.com/package/@qiwi/esm). CLI works as before.
+```js
+// const {run} = require('yarn-audit-fix') turns into
+import {run} from 'yarn-audit-fix'
+```
 
 ### ^6.0.0
 Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=convert` option to CLI.
