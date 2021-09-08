@@ -1,3 +1,15 @@
+# [7.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v6.4.4...v7.0.0) (2021-09-08)
+
+
+### Features
+
+* move to esm ([16a3e65](https://github.com/antongolub/yarn-audit-fix/commit/16a3e65f83715fc01994c0c06e3985fd4cd9632b))
+
+
+### BREAKING CHANGES
+
+* require Node.js ^12.20.0 || ^14.13.1 || >=16.0.0
+
 ## [6.4.4](https://github.com/antongolub/yarn-audit-fix/compare/v6.4.3...v6.4.4) (2021-09-02)
 
 
