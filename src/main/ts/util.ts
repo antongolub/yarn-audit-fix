@@ -1,17 +1,22 @@
 import chalk from 'chalk'
-import cp, { StdioOptions } from 'child_process'
 import crypto from 'crypto'
 import findCacheDir from 'find-cache-dir'
 import { findUpSync, pathExistsSync } from 'find-up'
-import fse, {SymlinkType} from 'fs-extra'
-import { Options as GlobbyOptions, globbySync as glob } from 'globby'
+import fse, { SymlinkType } from 'fs-extra'
+import { globbySync as glob, Options as GlobbyOptions } from 'globby'
 import { reduce } from 'lodash-es'
-import { join, resolve } from 'path'
+import type { StdioOptions } from 'node:child_process'
+import { createRequire } from 'node:module'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { sync as pkgDir } from 'pkg-dir'
 
 import { TFlags, TFlagsMapping } from './ifaces'
 
+// FIXME Jest workaround: cannot properly mock `child_process` with import API
+const cp = createRequire(import.meta.url)('child_process')
 const { ensureDirSync, readFileSync } = fse
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export const invoke = (
   cmd: string,

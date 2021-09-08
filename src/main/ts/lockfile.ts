@@ -7,7 +7,7 @@ import sv from 'semver'
 import { TAuditEntry, TAuditReport, TContext, TLockfileObject } from './ifaces'
 import { attempt, formatFlags, getNpm, getYarn, invoke, mapFlags } from './util'
 
-export const read = (name: string): TLockfileObject => {
+export const _read = (name: string): TLockfileObject => {
   const data = lf.parse(fs.readFileSync(name, 'utf-8'))
 
   if (data.type !== 'success') {
@@ -17,14 +17,14 @@ export const read = (name: string): TLockfileObject => {
   return data.object
 }
 
-export const write = (name: string, lockfile: TLockfileObject): void => {
+export const _write = (name: string, lockfile: TLockfileObject): void => {
   fs.writeFileSync(name, lf.stringify(lockfile))
 }
 
 /**
  * Pulled up from https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts
  */
-export const patch = (
+export const _patch = (
   lockfile: TLockfileObject,
   report: TAuditReport,
   { flags }: TContext,
@@ -77,7 +77,7 @@ export const patch = (
   return lockfile
 }
 
-export const audit = ({ flags, temp }: TContext): TAuditReport => {
+export const _audit = ({ flags, temp }: TContext): TAuditReport => {
   const cmd = flags.reporter === 'npm' ? getNpm(flags['npm-path']) : getYarn()
   const mapping = {
     'audit-level': 'level',
@@ -104,10 +104,10 @@ export const audit = ({ flags, temp }: TContext): TAuditReport => {
     true,
   )
 
-  return parseAuditJsonReport(report)
+  return _parseAuditJsonReport(report)
 }
 
-export const parseAuditJsonReport = (
+export const _parseAuditJsonReport = (
   data: string | SpawnSyncReturns<Buffer>,
 ): TAuditReport =>
   keyBy(
@@ -124,3 +124,20 @@ export const parseAuditJsonReport = (
       })),
     (item) => item.module_name,
   )
+
+// FIXME Jest cannot mock esm yet
+// https://github.com/facebook/jest/commit/90d6908492d164392ce8429923e7f0fa17946d2d
+export const _internal = {
+  _read,
+  _audit,
+  _patch,
+  _parseAuditJsonReport,
+  _write,
+}
+
+export const read: typeof _read = (...args) => _internal._read(...args)
+export const audit: typeof _audit = (...args) => _internal._audit(...args)
+export const patch: typeof _patch = (...args) => _internal._patch(...args)
+export const write: typeof _write = (...args) => _internal._write(...args)
+export const parseAuditJsonReport: typeof _parseAuditJsonReport = (...args) =>
+  _internal._parseAuditJsonReport(...args)

@@ -154,6 +154,9 @@ await run({}, flow)
 ```
 
 ## Migration notes
+### ^7.0.0
+Converted to 
+
 ### ^6.0.0
 Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. To use the previous _legacy_ flow, pass `--flow=convert` option to CLI.
 
