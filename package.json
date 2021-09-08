@@ -86,6 +86,7 @@
     "tslib": "^2.3.1"
   },
   "devDependencies": {
+    "@jest/globals": "^27.1.1",
     "@qiwi/libdefkit": "^3.1.1",
     "@qiwi/npm-run-all": "^4.1.7",
     "@types/jest": "^27.0.1",
