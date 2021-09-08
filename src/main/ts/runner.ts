@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import { join } from 'path'
+import { join } from 'node:path'
 
 import { getFlow } from './flows'
 import { TCallback, TContext, TFlags, TFlow, TStage } from './ifaces'

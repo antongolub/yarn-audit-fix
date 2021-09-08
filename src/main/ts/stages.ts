@@ -1,5 +1,6 @@
 import fs from 'fs-extra'
-import { dirname, join, relative } from 'path'
+import { dirname, join, relative } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { sync as pkgDir } from 'pkg-dir'
 import semver from 'semver'
 import synp from 'synp'
@@ -15,6 +16,8 @@ import {
   invoke,
   readJson,
 } from './util'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /**
  * Print runtime context digest.

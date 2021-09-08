@@ -1,7 +1,8 @@
 import { Command } from 'commander'
-import { join, resolve } from 'path'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'url'
 
-import { TFlags, TFlagsMapping } from '../../main/ts'
+import type { TFlags, TFlagsMapping } from '../../main/ts'
 import {
   formatFlags,
   getNpm,
@@ -14,6 +15,7 @@ import {
   readJson,
 } from '../../main/ts/util'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const DEFAULT_OSTYPE = process.env.OSTYPE
 
 describe('util', () => {

@@ -1,18 +1,25 @@
-import cp from 'child_process'
-import findCacheDir from 'find-cache-dir'
-import fs from 'fs-extra'
-import { basename, join, resolve } from 'path'
-import synp from 'synp'
+import { jest } from '@jest/globals'
+import { createRequire } from 'node:module'
+import { basename, dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-import { createSymlinks, run, TContext, TFlow } from '../../main/ts'
-import * as lf from '../../main/ts/lockfile'
-import { getNpm, getYarn } from '../../main/ts/util'
+import type { TContext, TFlow } from '../../main/ts/ifaces'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
 jest.mock('npm')
 jest.mock('synp')
 
+const cp = createRequire(import.meta.url)('child_process')
+const findCacheDir = (await import('find-cache-dir')).default
+const fs = (await import('fs-extra')).default
+const synp = (await import('synp')).default
+
+const lf = (await import('../../main/ts/lockfile'))._internal
+const { createSymlinks, run } = await import('../../main/ts')
+const { getNpm, getYarn } = await import('../../main/ts/util')
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const noop = () => {
   /* noop */
 }
@@ -21,9 +28,12 @@ const registryUrl = 'https://example.com'
 const strMatching = (start = '', end = '') =>
   expect.stringMatching(new RegExp(`^${start}.+${end}$`))
 const readFixture = (name: string): string =>
-  jest.requireActual('fs').readFileSync(resolve(fixtures, name), {
-    encoding: 'utf-8',
-  })
+  (jest.requireActual('fs') as typeof fs).readFileSync(
+    resolve(fixtures, name),
+    {
+      encoding: 'utf-8',
+    },
+  )
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#using_the_reviver_parameter
 const revive = <T = any>(data: string): T =>
   JSON.parse(data, (k, v) => {
@@ -48,13 +58,19 @@ const cwd = process.cwd()
 const stdio = ['inherit', 'inherit', 'inherit']
 const stdionull = [null, null, null] // eslint-disable-line
 
-const lfAudit = jest.spyOn(lf, 'audit')
-const lfRead = jest.spyOn(lf, 'read')
-const lfPatch = jest.spyOn(lf, 'patch')
-const lfWrite = jest.spyOn(lf, 'write')
+const lfAudit = jest.spyOn(lf, '_audit')
+const lfRead = jest.spyOn(lf, '_read')
+const lfPatch = jest.spyOn(lf, '_patch')
+const lfWrite = jest.spyOn(lf, '_write')
+
+// https://ar.al/2021/02/22/cache-busting-in-node.js-dynamic-esm-imports/
+const reimport = async (modulePath: string) => {
+  const cacheBustingModulePath = `${modulePath}?update=${Date.now()}`
+  return (await import(cacheBustingModulePath)).default
+}
 
 describe('yarn-audit-fix', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     // @ts-ignore
     fs.emptyDirSync.mockImplementation(noop)
     // @ts-ignore
@@ -273,40 +289,44 @@ describe('yarn-audit-fix', () => {
     })
 
     describe('cli', () => {
-      it('invokes cmd queue with proper args', () => {
-        jest.isolateModules(() => {
-          process.argv.push(
-            '--verbose',
-            '--package-lock-only=false',
-            `--registry=${registryUrl}`,
-            '--flow=convert',
-            '--ignore-engines'
-          )
-          require('../../main/ts/cli')
-        })
-        checkConvertFlow(true)
+      it('invokes cmd queue with proper args', async () => {
+        process.argv.push(
+          '--verbose',
+          '--package-lock-only=false',
+          `--registry=${registryUrl}`,
+          '--flow=convert',
+          '--ignore-engines',
+        )
+        await reimport('../../main/ts/cli')
+          .then(() => checkConvertFlow(true))
+          .catch(noop)
       })
 
       describe('on error', () => {
         // eslint-disable-next-line
-        const checkExit = (reason: any): void => {
-          // @ts-ignore
-          cp.spawnSync.mockImplementationOnce(() => reason)
-          jest.isolateModules(() => {
-            try {
-              require('../../main/ts/cli')
-            } catch {}
+        const checkExit = async (reason: any): Promise<any> => {
+          let _resolve: any
+          const promise = new Promise((resolve) => {
+            _resolve = resolve
           })
+
+          jest.isolateModules(() => {
+            // @ts-ignore
+            cp.spawnSync.mockImplementationOnce(() => reason)
+            reimport('../../main/ts/cli').catch(_resolve)
+          })
+
+          return promise
         }
 
-        it('returns exit code if passed', () => {
-          checkExit({ status: 2 })
-          expect(process.exitCode).toBe(2)
+        it('sets code to 1 otherwise', async () => {
+          await checkExit({ error: new Error('foobar') })
+          expect(process.exitCode).toBe(1)
         })
 
-        it('sets code to 1 otherwise', async () => {
-          checkExit({ error: new Error('foobar') })
-          expect(process.exitCode).toBe(1)
+        it('returns exit code if passed', async () => {
+          await checkExit({ status: 2 })
+          expect(process.exitCode).toBe(2)
         })
       })
     })
