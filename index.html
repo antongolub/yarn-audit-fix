@@ -2724,8 +2724,38 @@ img {
 				<a href="https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix"><img src="https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status" alt="Sonar"></a>
 			<a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/v/yarn-audit-fix" alt="npm (tag)"></a></p>
 			<p>Apply <code>npm audit fix</code> logic to <code>yarn.lock</code></p>
+			<a href="#table-of-contents" id="table-of-contents" style="color: inherit; text-decoration: none;">
+				<h2>Table of Contents</h2>
+			</a>
+			<ul>
+				<li><a href="#digest">Digest</a><ul>
+						<li><a href="#problem">Problem</a></li>
+						<li><a href="#solution">Solution</a></li>
+						<li><a href="#key-features">Key features</a></li>
+					</ul>
+				</li>
+				<li><a href="#getting-started">Getting started</a><ul>
+						<li><a href="#requirements">Requirements</a></li>
+						<li><a href="#install">Install</a></li>
+						<li><a href="#cli">CLI</a></li>
+						<li><a href="#env">ENV</a></li>
+						<li><a href="#js-api">JS API</a></li>
+					</ul>
+				</li>
+				<li><a href="#migration-notes">Migration notes</a><ul>
+						<li><a href="#%5E6.0.0">^6.0.0</a></li>
+						<li><a href="#%5E4.0.0">^4.0.0</a></li>
+					</ul>
+				</li>
+				<li><a href="#troubleshooting">Troubleshooting</a></li>
+				<li><a href="#contributing">Contributing</a></li>
+				<li><a href="#license">License</a></li>
+			</ul>
+			<a href="#digest" id="digest" style="color: inherit; text-decoration: none;">
+				<h2>Digest</h2>
+			</a>
 			<a href="#problem" id="problem" style="color: inherit; text-decoration: none;">
-				<h2>Problem</h2>
+				<h3>Problem</h3>
 			</a>
 			<ol>
 				<li><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
@@ -2734,7 +2764,7 @@ img {
 				<li><code>yarn audit</code> does not support custom (in-house, internal) registries. Here are the <a href="https://github.com/yarnpkg/yarn/issues/7012">issue</a> &amp; <a href="https://github.com/yarnpkg/yarn/pull/6484">PR</a> which have not yet received the green light.</li>
 			</ol>
 			<a href="#solution" id="solution" style="color: inherit; text-decoration: none;">
-				<h2>Solution</h2>
+				<h3>Solution</h3>
 			</a>
 			<p>Fortunately, there are several workarounds:</p>
 			<ol>
@@ -2743,7 +2773,7 @@ img {
 				<li>Fetch <code>yarn/npm audit --json</code> and patch lockfile inners (kudos to <a href="https://github.com/spion">G. Kosev</a>, <a href="https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts">code reference</a>). <code>yarn-audit-fix --flow=patch</code></li>
 			</ol>
 			<a href="#key-features" id="key-features" style="color: inherit; text-decoration: none;">
-				<h2>Key features</h2>
+				<h3>Key features</h3>
 			</a>
 			<ul>
 				<li>A couple of strategies to fix security issues</li>
@@ -2751,16 +2781,23 @@ img {
 				<li>CLI / JS API</li>
 				<li>TS and flow typings</li>
 			</ul>
+			<a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
+				<h2>Getting started</h2>
+			</a>
+			<a href="#requirements" id="requirements" style="color: inherit; text-decoration: none;">
+				<h3>Requirements</h3>
+			</a>
+			<p>Node.js: <code>^12.20.0 || ^14.13.1 || &gt;=16.0.0</code></p>
 			<a href="#install" id="install" style="color: inherit; text-decoration: none;">
-				<h2>Install</h2>
+				<h3>Install</h3>
 			</a>
 			<pre><code class="language-shell"><span style="color: #000000">$ yarn add yarn-audit-fix -D</span>
 </code></pre>
 			<p>or even better</p>
 			<pre><code><span style="color: #001080">npm_config_yes</span><span style="color: #000000">=</span><span style="color: #0000FF">true</span><span style="color: #000000"> </span><span style="color: #001080">npx</span><span style="color: #000000"> </span><span style="color: #001080">yarn</span><span style="color: #000000">-</span><span style="color: #001080">audit</span><span style="color: #000000">-</span><span style="color: #001080">fix</span>
 </code></pre>
-			<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
-				<h2>Usage</h2>
+			<a href="#cli" id="cli" style="color: inherit; text-decoration: none;">
+				<h3>CLI</h3>
 			</a>
 			<pre>
 $ yarn-audit-fix [--opts]
@@ -2785,17 +2822,6 @@ success Saved lockfile.
 success Already up-to-date.
 <b>Done</b>
 </pre>
-			<a href="#migration-to-v4" id="migration-to-v4" style="color: inherit; text-decoration: none;">
-				<h3>Migration to v4+</h3>
-			</a>
-			<p><code>--npm-v7</code> flag is redundant. From v4.0.0 package&#39;s own version of <strong>npm</strong> is used by default. But you&#39;re still able to invoke system default with <code>--npm-path=system</code> or define any custom <code>--npm-path=/another/npm/bin</code>.</p>
-			<a href="#migration-to-v6" id="migration-to-v6" style="color: inherit; text-decoration: none;">
-				<h3>Migration to v6+</h3>
-			</a>
-			<p>Default fix strategy <a href="https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0">has been changed</a> to direct lockfile patching with <code>yarn audit --json</code> data. To use the previous <em>legacy</em> flow, pass <code>--flow=convert</code> option to CLI.</p>
-			<a href="#cli" id="cli" style="color: inherit; text-decoration: none;">
-				<h3>CLI</h3>
-			</a>
 			<table>
 				<thead>
 					<tr>
@@ -2899,7 +2925,7 @@ success Already up-to-date.
 			<a href="#env" id="env" style="color: inherit; text-decoration: none;">
 				<h3>ENV</h3>
 			</a>
-			<p>All mentioned above CLI options can be replaced with corresponding env variables with leading <strong>YAF</strong> prefix. For example:</p>
+			<p>All mentioned above CLI options can be replaced with the corresponding env variables with leading <strong>YAF</strong> prefix. For example:</p>
 			<ul>
 				<li><code>YAF_FORCE</code> equals <code>--force</code></li>
 				<li><code>YAF_ONLY=prod</code> — <code>--only=prod</code></li>
@@ -2940,6 +2966,24 @@ success Already up-to-date.
 
 <span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">({}, </span><span style="color: #001080">flow</span><span style="color: #000000">)</span>
 </code></pre>
+			<a href="#migration-notes" id="migration-notes" style="color: inherit; text-decoration: none;">
+				<h2>Migration notes</h2>
+			</a>
+			<a href="#700" id="700" style="color: inherit; text-decoration: none;">
+				<h3>^7.0.0</h3>
+			</a>
+			<p>Following the deps, converted to ESM. So legacy <code>require</code> API is not supported now. Use new shiny <code>import</code> instead or try your luck with <a href="https://www.npmjs.com/package/@qiwi/esm">esm-hook</a>. CLI works as before.</p>
+			<pre><code class="language-js"><span style="color: #008000">// const {run} = require(&#039;yarn-audit-fix&#039;) turns into</span>
+<span style="color: #AF00DB">import</span><span style="color: #000000"> {</span><span style="color: #001080">run</span><span style="color: #000000">} </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;yarn-audit-fix&#039;</span>
+</code></pre>
+			<a href="#600" id="600" style="color: inherit; text-decoration: none;">
+				<h3>^6.0.0</h3>
+			</a>
+			<p>Default fix strategy <a href="https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0">has been changed</a> to direct lockfile patching with <code>yarn audit --json</code> data. To use the previous <em>legacy</em> flow, pass <code>--flow=convert</code> option to CLI.</p>
+			<a href="#400" id="400" style="color: inherit; text-decoration: none;">
+				<h3>^4.0.0</h3>
+			</a>
+			<p><code>--npm-v7</code> flag is redundant. From v4.0.0 package&#39;s own version of <strong>npm</strong> is used by default. But you&#39;re still able to invoke system default with <code>--npm-path=system</code> or define any custom <code>--npm-path=/another/npm/bin</code>.</p>
 			<a href="#troubleshooting" id="troubleshooting" style="color: inherit; text-decoration: none;">
 				<h2>Troubleshooting</h2>
 			</a>
@@ -3070,6 +3114,12 @@ success Already up-to-date.
 <span style="color: #000000">invoke yarn --update-checksums</span>
 </code></pre>
 			<p>Not everything can be repaired, alack.</p>
+			<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
+				<h2>Contributing</h2>
+			</a>
+			<p>Feel free to open any issues: for bugs, feature requests or questions.
+				You&#39;re always welcome to suggest a PR. Just fork this repo, write some code, add some tests and push your changes.
+			Any feedback is appreciated.</p>
 			<a href="#license" id="license" style="color: inherit; text-decoration: none;">
 				<h2>License</h2>
 			</a>
