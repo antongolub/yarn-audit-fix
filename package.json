@@ -89,7 +89,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-qiwi": "^1.13.4",
-    "find-up": "^5.0.0",
+    "find-up": "^6.0.0",
     "jest": "^27.0.6",
     "mkdirp": "^1.0.4",
     "prettier": "^2.3.2",
