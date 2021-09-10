@@ -1,3 +1,10 @@
+## [7.0.2](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.1...v7.0.2) (2021-09-10)
+
+
+### Bug Fixes
+
+* **package:** add missed prod dep `find-up` ([6fa6d8f](https://github.com/antongolub/yarn-audit-fix/commit/6fa6d8fa7d971d4335bce814969e014727b7b621)), closes [#179](https://github.com/antongolub/yarn-audit-fix/issues/179)
+
 ## [7.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.0...v7.0.1) (2021-09-09)
 
 
