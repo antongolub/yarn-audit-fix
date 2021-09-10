@@ -33,7 +33,7 @@
     "build:ts": "cpy src/main/ts/ target/ts/",
     "build:buildstamp": "npm_config_yes=true npx buildstamp --git --out.path=buildstamp.json",
     "build:libdef": "libdefkit --tsconfig=tsconfig.esnext.json --tsconfig=tsconfig.es6.json",
-    "build:esmfix": "tsc-esm-fix --target=target/es6 --target=target/esnext --dirnameVar=false",
+    "build:esmfix": "yarn tsc-esm-fix --target=target/es6 --target=target/esnext --dirnameVar=false",
     "push:report": "yarn coveralls:push",
     "docs": "typedoc",
     "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
