@@ -1,3 +1,10 @@
+## [7.0.5](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.4...v7.0.5) (2021-09-28)
+
+
+### Bug Fixes
+
+* **deps:** update dependency npm to v7.24.1 ([28cd8c0](https://github.com/antongolub/yarn-audit-fix/commit/28cd8c07fe82e6c1154ba99afadd69e6099d21ab))
+
 ## [7.0.4](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.3...v7.0.4) (2021-09-17)
 
 
