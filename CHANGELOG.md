@@ -1,3 +1,10 @@
+## [7.0.6](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.5...v7.0.6) (2021-10-02)
+
+
+### Performance Improvements
+
+* update pkg-dir to v6.0.0 ([3b54abb](https://github.com/antongolub/yarn-audit-fix/commit/3b54abb3854916060e24c89355f10b367b3ff08f))
+
 ## [7.0.5](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.4...v7.0.5) (2021-09-28)
 
 
