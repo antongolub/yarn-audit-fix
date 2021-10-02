@@ -9,7 +9,7 @@ import type { StdioOptions } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sync as pkgDir } from 'pkg-dir'
+import { packageDirectorySync } from 'pkg-dir'
 
 import { TFlags, TFlagsMapping } from './ifaces'
 
@@ -17,6 +17,8 @@ import { TFlags, TFlagsMapping } from './ifaces'
 const cp = createRequire(import.meta.url)('child_process')
 const { ensureDirSync, readFileSync } = fse
 const __dirname = dirname(fileURLToPath(import.meta.url))
+
+export const pkgDir = (cwd: string): string => packageDirectorySync({cwd})
 
 export const invoke = (
   cmd: string,
