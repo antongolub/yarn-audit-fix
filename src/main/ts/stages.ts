@@ -1,7 +1,6 @@
 import fs from 'fs-extra'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sync as pkgDir } from 'pkg-dir'
 import semver from 'semver'
 import synp from 'synp'
 
@@ -14,6 +13,7 @@ import {
   getWorkspaces,
   getYarn,
   invoke,
+  pkgDir,
   readJson,
 } from './util'
 
