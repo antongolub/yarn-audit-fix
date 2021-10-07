@@ -4630,10 +4630,10 @@ npm-user-validate@*:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.1.tgz#31428fc5475fe8416023f178c0ab47935ad8c561"
   integrity sha512-uQwcd/tY+h1jnEaze6cdX/LrhWhoBxfSknxentoqmIuStxUExxjWd3ULMLFPiFUrZKbOVMowH6Jq2FRWfmhcEw==
 
-npm@7.24.2:
-  version "7.24.2"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-7.24.2.tgz#861117af8241bea592289f22407230e5300e59ca"
-  integrity sha512-120p116CE8VMMZ+hk8IAb1inCPk4Dj3VZw29/n2g6UI77urJKVYb7FZUDW8hY+EBnfsjI/2yrobBgFyzo7YpVQ==
+npm@8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-8.0.0.tgz#28955335bb3142217b0ae80fc1ca6eb652da2534"
+  integrity sha512-bhZ8L73aloy8CEEhRjkyJp55icQzpsOqdWWA95xZyyLwL52ASgVOm8CsXKcZgIlrh4/cQTeJMuIK6krBju43HA==
   dependencies:
     "@isaacs/string-locale-compare" "*"
     "@npmcli/arborist" "*"
