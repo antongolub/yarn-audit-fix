@@ -119,12 +119,18 @@ All mentioned above CLI options can be replaced with the corresponding env varia
 Typedoc: [https://antongolub.github.io/yarn-audit-fix/modules/](https://antongolub.github.io/yarn-audit-fix/modules/)
 
 ```ts
-import { run } from 'yarn-audit-fix'
+import { run, runSync } from 'yarn-audit-fix'
 
 // NOTE actually it's promisified run.sync
 await run({
    flow: 'patch',
    verbose: true
+})
+
+// `runSync` is an alias for `run.sync`
+await runSync({
+  flow: 'patch',
+  verbose: true
 })
 ```
 
