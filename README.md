@@ -95,6 +95,7 @@ success Already up-to-date.
 |---|---|---|---|
 |`--flow` | Define how `yarn.lock` is modified. `convert` — to compose `npm audit fix` with two-way lockfile conversion (legacy flow). `patch` — to directly inject audit json data | `patch`
 |`--audit-level` | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical | `low`
+|`--cwd` | Current working dir | `process.cwd()`
 |`--dry-run` | Get an idea of what audit fix will do
 |`--force` | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones | `false`
 |`--help/-h`| Print help message |
@@ -121,7 +122,7 @@ Typedoc: [https://antongolub.github.io/yarn-audit-fix/modules/](https://antongol
 ```ts
 import { run, runSync } from 'yarn-audit-fix'
 
-// NOTE actually it's promisified run.sync
+// NOTE actually it's promisified `run.sync`
 await run({
    flow: 'patch',
    verbose: true

@@ -15,7 +15,7 @@ const fs = (await import('fs-extra')).default
 const synp = (await import('synp')).default
 
 const lf = (await import('../../main/ts/lockfile'))._internal
-const { createSymlinks, run } = await import('../../main/ts')
+const { createSymlinks, getContext, run, runSync } = await import('../../main/ts')
 const { getNpm, getYarn } = await import('../../main/ts/util')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -328,6 +328,29 @@ describe('yarn-audit-fix', () => {
           expect(process.exitCode).toBe(2)
         })
       })
+    })
+  })
+
+  describe('#getContext', () => {
+    it('parses flags, returns ctx entry', () => {
+      const cwd = '/foo/bar'
+      const bar = 'baz'
+      const ctx = getContext({
+        cwd,
+        bar
+      })
+
+      expect(ctx).toEqual(expect.objectContaining({
+        cwd,
+        flags: { cwd, bar },
+        manifest: { version: '1.0.0' }
+      }))
+    })
+  })
+
+  describe('aliases', () => {
+    it('runSync eq run.sync', () => {
+      expect(run.sync).toBe(runSync)
     })
   })
 })
