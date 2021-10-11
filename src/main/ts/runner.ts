@@ -9,7 +9,7 @@ import { getTemp, normalizeFlags, readJson } from './util'
  * Build running context.
  */
 export const getContext = (flags: TFlags = {}): TContext => {
-  const cwd = process.cwd()
+  const cwd = flags.cwd || process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
   const ctx = {

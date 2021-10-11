@@ -15,6 +15,11 @@ const flags = new Command()
       .default(env.YAF_AUDIT_LEVEL),
   )
   .option(
+    '--cwd [path]',
+    'CWD. Defaults to `process.cwd()`',
+    env.YAF_CWD,
+  )
+  .option(
     '--dry-run [bool]',
     'Get an idea of what audit fix will do',
     env.YAF_DRY_RUN,
