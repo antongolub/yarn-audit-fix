@@ -7,7 +7,6 @@ import type { TContext, TFlow } from '../../main/ts/ifaces'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
-jest.mock('npm')
 jest.mock('synp')
 
 const cp = createRequire(import.meta.url)('child_process')
