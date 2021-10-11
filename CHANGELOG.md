@@ -1,3 +1,16 @@
+# [7.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.8...v7.1.0) (2021-10-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency npm to v8 ([6a07aa2](https://github.com/antongolub/yarn-audit-fix/commit/6a07aa2e5d0de987a9568b1f226e2ea015a4d095))
+* **deps:** update npm to v8.0.0 ([b54cc7a](https://github.com/antongolub/yarn-audit-fix/commit/b54cc7aba6021f5fed19e4649897bca0360e559a))
+
+
+### Features
+
+* add cwd option ([4ff467b](https://github.com/antongolub/yarn-audit-fix/commit/4ff467b0aa3798684f63ff31fc3aee68d821bda7)), closes [#135](https://github.com/antongolub/yarn-audit-fix/issues/135)
+
 ## [7.0.8](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.7...v7.0.8) (2021-10-04)
 
 
