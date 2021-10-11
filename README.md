@@ -101,7 +101,7 @@ success Already up-to-date.
 |`--help/-h`| Print help message |
 |`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution |  | ✔
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel) | | ✔
-|`--npm-path` | Declare npm path: switch to system default version of **npm** instead of package's own. `system / local / <custom path>` | `local`
+|`--npm-path` | Define npm path: switch to system **npm** version instead of default package's own. Or provide a custom path. `system / local / <custom path>` | `local`
 |`--only` | Set package [update scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
 |`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | `true` | ✔ |
 |`--registry` | Custom registry url | | ✔ |
