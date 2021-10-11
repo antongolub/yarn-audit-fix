@@ -17,7 +17,6 @@
 
 Apply `npm audit fix` logic to `yarn.lock`
 
-## Table of Contents
 - [Digest](#digest)
    - [Problem](#problem)
    - [Solution](#solution)
@@ -297,7 +296,7 @@ invoke yarn --update-checksums
 Not everything can be repaired, alack.
 
 ## Contributing
-Feel free to open any issues: for bugs, feature requests or questions.
+Feel free to open any issues: bugs, feature requests or other questions.
 You're always welcome to suggest a PR. Just fork this repo, write some code, add some tests and push your changes.
 Any feedback is appreciated.
 
