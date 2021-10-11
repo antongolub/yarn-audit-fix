@@ -15,10 +15,6 @@
 <a href="https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix"><img src="https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status" alt="Sonar"></a>
 <a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/v/yarn-audit-fix" alt="npm (tag)"></a></p>
 <p>Apply <code>npm audit fix</code> logic to <code>yarn.lock</code></p>
-
-<a href="#table-of-contents" id="table-of-contents" style="color: inherit; text-decoration: none;">
-  <h2>Table of Contents</h2>
-</a>
 <ul>
 <li><a href="#digest">Digest</a><ul>
 <li><a href="#problem">Problem</a></li>
@@ -145,6 +141,12 @@ success Already up-to-date.
 <td></td>
 </tr>
 <tr>
+<td><code>--cwd</code></td>
+<td>Current working dir</td>
+<td><code>process.cwd()</code></td>
+<td></td>
+</tr>
+<tr>
 <td><code>--dry-run</code></td>
 <td>Get an idea of what audit fix will do</td>
 <td></td>
@@ -176,7 +178,7 @@ success Already up-to-date.
 </tr>
 <tr>
 <td><code>--npm-path</code></td>
-<td>Declare npm path: switch to system default version of <strong>npm</strong> instead of package&#39;s own. <code>system / local / &lt;custom path&gt;</code></td>
+<td>Define npm path: switch to system <strong>npm</strong> version instead of default package&#39;s own. Or provide a custom path. <code>system / local / &lt;custom path&gt;</code></td>
 <td><code>local</code></td>
 <td></td>
 </tr>
@@ -238,7 +240,7 @@ success Already up-to-date.
 </a>
 <p><strong>yarn-audit-fix</strong> is a naive and optimistic workaround, so it exposes all of its inners to give anybody a chance to tweak up and find a better steps combination.
 Typedoc: <a href="https://antongolub.github.io/yarn-audit-fix/modules/">https://antongolub.github.io/yarn-audit-fix/modules/</a></p>
-<pre><code class="language-ts"><span class="hl-3">import</span><span class="hl-0"> { </span><span class="hl-1">run</span><span class="hl-0"> } </span><span class="hl-3">from</span><span class="hl-0"> </span><span class="hl-4">&#39;yarn-audit-fix&#39;</span><br/><br/><span class="hl-5">// NOTE actually it&#39;s promisified run.sync</span><br/><span class="hl-3">await</span><span class="hl-0"> </span><span class="hl-6">run</span><span class="hl-0">({</span><br/><span class="hl-0">   </span><span class="hl-1">flow:</span><span class="hl-0"> </span><span class="hl-4">&#39;patch&#39;</span><span class="hl-0">,</span><br/><span class="hl-0">   </span><span class="hl-1">verbose:</span><span class="hl-0"> </span><span class="hl-2">true</span><br/><span class="hl-0">})</span>
+<pre><code class="language-ts"><span class="hl-3">import</span><span class="hl-0"> { </span><span class="hl-1">run</span><span class="hl-0">, </span><span class="hl-1">runSync</span><span class="hl-0"> } </span><span class="hl-3">from</span><span class="hl-0"> </span><span class="hl-4">&#39;yarn-audit-fix&#39;</span><br/><br/><span class="hl-5">// NOTE actually it&#39;s promisified `run.sync`</span><br/><span class="hl-3">await</span><span class="hl-0"> </span><span class="hl-6">run</span><span class="hl-0">({</span><br/><span class="hl-0">   </span><span class="hl-1">flow:</span><span class="hl-0"> </span><span class="hl-4">&#39;patch&#39;</span><span class="hl-0">,</span><br/><span class="hl-0">   </span><span class="hl-1">verbose:</span><span class="hl-0"> </span><span class="hl-2">true</span><br/><span class="hl-0">})</span><br/><br/><span class="hl-5">// `runSync` is an alias for `run.sync`</span><br/><span class="hl-3">await</span><span class="hl-0"> </span><span class="hl-6">runSync</span><span class="hl-0">({</span><br/><span class="hl-0">  </span><span class="hl-1">flow:</span><span class="hl-0"> </span><span class="hl-4">&#39;patch&#39;</span><span class="hl-0">,</span><br/><span class="hl-0">  </span><span class="hl-1">verbose:</span><span class="hl-0"> </span><span class="hl-2">true</span><br/><span class="hl-0">})</span>
 </code></pre>
 <p>Build and run custom flows.</p>
 <pre><code class="language-ts"><span class="hl-3">import</span><span class="hl-0"> {</span><br/><span class="hl-0">   </span><span class="hl-1">clear</span><span class="hl-0">,</span><br/><span class="hl-0">   </span><span class="hl-1">exit</span><span class="hl-0">,</span><br/><span class="hl-0">   </span><span class="hl-1">patchLockfile</span><span class="hl-0">,</span><br/><span class="hl-0">   </span><span class="hl-1">yarnInstall</span><br/><span class="hl-0">} </span><span class="hl-3">from</span><span class="hl-0"> </span><span class="hl-4">&#39;yarn-audit-fix&#39;</span><br/><br/><span class="hl-3">export</span><span class="hl-0"> </span><span class="hl-2">const</span><span class="hl-0"> </span><span class="hl-7">flow</span><span class="hl-0">: </span><span class="hl-8">TFlow</span><span class="hl-0"> = {</span><br/><span class="hl-0">  </span><span class="hl-1">main:</span><span class="hl-0"> [</span><br/><span class="hl-0">    [</span><br/><span class="hl-0">      </span><span class="hl-4">&#39;Patching yarn.lock with audit data...&#39;</span><span class="hl-0">,</span><br/><span class="hl-0">      </span><span class="hl-1">patchLockfile</span><span class="hl-0">,</span><br/><span class="hl-0">      (...</span><span class="hl-1">args</span><span class="hl-0">) </span><span class="hl-2">=&gt;</span><span class="hl-0"> {</span><span class="hl-1">console</span><span class="hl-0">.</span><span class="hl-6">log</span><span class="hl-0">(</span><span class="hl-4">&#39;Smth interesting:&#39;</span><span class="hl-0">, ...</span><span class="hl-1">args</span><span class="hl-0">)},</span><br/><span class="hl-0">      </span><span class="hl-1">yarnInstall</span><span class="hl-0">,</span><br/><span class="hl-0">    ],</span><br/><span class="hl-0">    [</span><span class="hl-4">&#39;Done&#39;</span><span class="hl-0">],</span><br/><span class="hl-0">  ],</span><br/><span class="hl-0">  </span><span class="hl-1">fallback:</span><span class="hl-0"> [[</span><span class="hl-4">&#39;Failure!&#39;</span><span class="hl-0">, </span><span class="hl-1">exit</span><span class="hl-0">]],</span><br/><span class="hl-0">}</span><br/><br/><span class="hl-3">await</span><span class="hl-0"> </span><span class="hl-6">run</span><span class="hl-0">({}, </span><span class="hl-1">flow</span><span class="hl-0">)</span>
@@ -332,7 +334,7 @@ In some cases <strong>npm@6</strong> works better, so if you have such a version
 <a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
   <h2>Contributing</h2>
 </a>
-<p>Feel free to open any issues: for bugs, feature requests or questions.
+<p>Feel free to open any issues: bugs, feature requests or other questions.
 You&#39;re always welcome to suggest a PR. Just fork this repo, write some code, add some tests and push your changes.
 Any feedback is appreciated.</p>
 
