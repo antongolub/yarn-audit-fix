@@ -1,3 +1,10 @@
+## [7.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v7.1.0...v7.1.1) (2021-10-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to v4.4.4 ([#195](https://github.com/antongolub/yarn-audit-fix/issues/195)) ([3a4d217](https://github.com/antongolub/yarn-audit-fix/commit/3a4d2171db9f8daa3e5ab6f3267bcc66bb3ba0b7))
+
 # [7.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v7.0.8...v7.1.0) (2021-10-11)
 
 
