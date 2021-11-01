@@ -1,3 +1,11 @@
+## [7.1.5](https://github.com/antongolub/yarn-audit-fix/compare/v7.1.4...v7.1.5) (2021-11-01)
+
+
+### Bug Fixes
+
+* **lockfile:** override internal strip-ansi/ansi-regex to v5.0.1 ([2b62278](https://github.com/antongolub/yarn-audit-fix/commit/2b622785b4a114c551e98aecf811c063242eb6a1)), closes [#199](https://github.com/antongolub/yarn-audit-fix/issues/199)
+* update synp to v1.9.8 ([fe13f4c](https://github.com/antongolub/yarn-audit-fix/commit/fe13f4cdcbd37097d56456aa9bd0cd1224d3cb00))
+
 ## [7.1.4](https://github.com/antongolub/yarn-audit-fix/compare/v7.1.3...v7.1.4) (2021-10-28)
 
 
