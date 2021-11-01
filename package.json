@@ -64,6 +64,7 @@
     "packages/*"
   ],
   "resolutions": {
+    "**/strip-ansi/ansi-regex": "^5.0.1",
     "**/globby/fast-glob": "^3.2.7"
   },
   "dependencies": {
