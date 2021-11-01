@@ -83,7 +83,7 @@
     "npm": "8.1.2",
     "pkg-dir": "^6.0.1",
     "semver": "^7.3.5",
-    "synp": "^1.9.7",
+    "synp": "^1.9.8",
     "tslib": "^2.3.1"
   },
   "devDependencies": {
@@ -91,18 +91,18 @@
     "@qiwi/libdefkit": "^3.1.1",
     "@qiwi/npm-run-all": "^4.1.7",
     "@types/jest": "^27.0.2",
-    "@types/node": "^16.11.4",
+    "@types/node": "^16.11.6",
     "cpy-cli": "^3.1.1",
     "eslint": "^8.1.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-config-qiwi": "^1.14.0",
+    "eslint-config-qiwi": "^1.15.0",
     "jest": "^27.3.1",
     "mkdirp": "^1.0.4",
     "prettier": "^2.4.1",
     "terser": "^5.9.0",
     "ts-jest": "^27.0.7",
     "tsc-esm-fix": "^2.7.3",
-    "typedoc": "^0.22.6",
+    "typedoc": "^0.22.7",
     "typescript": "4.4.4"
   },
   "repository": {
