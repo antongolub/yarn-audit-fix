@@ -605,10 +605,10 @@
     treeverse "^1.0.4"
     walk-up-path "^1.0.0"
 
-"@npmcli/arborist@^4.0.3":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-4.0.3.tgz#5e1632192f970c3a4e43c4699ad875089418bed0"
-  integrity sha512-gFz/dNJtpv2bYXlupcUpEaWlFDRUNmvVnQNbE6dY4ild6beZ2SkG4R5/CM4GZZwj9HD2TyfGjO350Ja+xlLzuA==
+"@npmcli/arborist@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@npmcli/arborist/-/arborist-4.0.4.tgz#a532a7cc430ccbd87c0595a8828f9614f29d2dac"
+  integrity sha512-5hRkiHF9zu62z6a7CJqhVG5CFUVnbYqvrrcxxEmhxFgyH2ovICyULOrj7nF4VBlfzp7OPu/rveV2ts9iYrn74g==
   dependencies:
     "@isaacs/string-locale-compare" "^1.0.1"
     "@npmcli/installed-package-contents" "^1.0.7"
@@ -654,9 +654,9 @@
   integrity sha512-3BGrt6FLjqM6br5AhWRKTr3u5GIVkjRYeAFrMp3HjnfICrg4xOrVRwFavKT6tsp++bq5dluL5t8ME/Nha/6c1Q==
 
 "@npmcli/config@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@npmcli/config/-/config-2.3.0.tgz#364fbe942037e562a832a113206e14ccb651f7bc"
-  integrity sha512-yjiC1xv7KTmUTqfRwN2ZL7BHV160ctGF0fLXmKkkMXj40UOvBe45Apwvt5JsFRtXSoHkUYy1ouzscziuWNzklg==
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@npmcli/config/-/config-2.3.1.tgz#41d80ce272831461b5cb158afa110525d4be0fed"
+  integrity sha512-F/8R/Zqun8682TgaCILUNoaVfd1LVaYZ/jcVt9KWzfKpzcPus1zEApAl54PqVqVJbNq6f01QTDQHD6L/n56BXw==
   dependencies:
     ini "^2.0.0"
     mkdirp-infer-owner "^2.0.0"
@@ -1193,10 +1193,15 @@ ansi-escapes@^4.2.1:
   dependencies:
     type-fest "^0.21.3"
 
-ansi-regex@^2.0.0, ansi-regex@^3.0.0, ansi-regex@^6.0.0:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-6.0.1.tgz#3183e38fae9a65d7cb5e53945cd5897d0260a06a"
-  integrity sha512-n5M855fKb2SsfMIiFFoVrABHJC8QtHwVx+mHWP3QcEqBHYienj5dHSgjbxtC0WEZXYt4wcD6zrQElDPhFuZgfA==
+ansi-regex@^2.0.0:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
+  integrity sha1-w7M6te42DYbg5ijwRorn7yfWVN8=
+
+ansi-regex@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-3.0.0.tgz#ed0317c322064f79466c02966bddb605ab37d998"
+  integrity sha1-7QMXwyIGT3lGbAKWa922Bas32Zg=
 
 ansi-regex@^5.0.1:
   version "5.0.1"
@@ -4646,9 +4651,9 @@ node-gyp@^8.2.0:
     which "^2.0.2"
 
 node-gyp@^8.3.0:
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-8.3.0.tgz#ebc36a146d45095e1c6af6ccb0e47d1c8fc3fe69"
-  integrity sha512-e+vmKyTiybKgrmvs4M2REFKCnOd+NcrAAnn99Yko6NQA+zZdMlRvbIUHojfsHrSQ1CddLgZnHicnEVgDHziJzA==
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-8.4.0.tgz#6e1112b10617f0f8559c64b3f737e8109e5a8338"
+  integrity sha512-Bi/oCm5bH6F+FmzfUxJpPaxMEyIhszULGR3TprmTeku8/dMFcdTcypk120NeZqEt54r1BrgEKtm2jJiuIKE28Q==
   dependencies:
     env-paths "^2.2.0"
     glob "^7.1.4"
@@ -4804,13 +4809,13 @@ npm-user-validate@^1.0.1:
   resolved "https://registry.yarnpkg.com/npm-user-validate/-/npm-user-validate-1.0.1.tgz#31428fc5475fe8416023f178c0ab47935ad8c561"
   integrity sha512-uQwcd/tY+h1jnEaze6cdX/LrhWhoBxfSknxentoqmIuStxUExxjWd3ULMLFPiFUrZKbOVMowH6Jq2FRWfmhcEw==
 
-npm@8.1.2:
-  version "8.1.2"
-  resolved "https://registry.yarnpkg.com/npm/-/npm-8.1.2.tgz#d273423f06113f2fa95319e24438ec0cc20358d9"
-  integrity sha512-9awPeSZ+3sS4cBwGsJQnbt3M+ZyBRBokEJYdm2nmu9n8HSuGEEOR1cLy7NLB08veoj21I6ZtMhwM1ARz6HWYHg==
+npm@8.1.3:
+  version "8.1.3"
+  resolved "https://registry.yarnpkg.com/npm/-/npm-8.1.3.tgz#fa8db17811dd3259ef4911ee5e01d6e69ce19ea4"
+  integrity sha512-7AnYyaVdF3vEpHMb+tq5ALbmsE9CIJYu0KJvGawn03yc1HGw778H7UNLV2tcHTAa6VjJk4c1yKbovOC0674PAw==
   dependencies:
     "@isaacs/string-locale-compare" "^1.1.0"
-    "@npmcli/arborist" "^4.0.3"
+    "@npmcli/arborist" "^4.0.4"
     "@npmcli/ci-detect" "^1.4.0"
     "@npmcli/config" "^2.3.0"
     "@npmcli/map-workspaces" "^2.0.0"
