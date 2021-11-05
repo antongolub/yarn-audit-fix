@@ -137,19 +137,19 @@ describe('yarn-audit-fix', () => {
       // Preparing...
       expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        'yarn.lock',
+        join(cwd, 'yarn.lock'),
         strMatching(temp, 'yarn.lock'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        'package.json',
+        join(cwd, 'package.json'),
         strMatching(temp, 'package.json'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        '.yarnrc',
+        join(cwd, '.yarnrc'),
         strMatching(temp, '.yarnrc'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        '.npmrc',
+        join(cwd, '.npmrc'),
         strMatching(temp, '.npmrc'),
       )
       expect(fs.createSymlinkSync).toHaveBeenCalledWith(

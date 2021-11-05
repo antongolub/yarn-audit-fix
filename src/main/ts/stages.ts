@@ -83,11 +83,11 @@ export const printRuntimeDigest: TCallback = ({
  * @param {TContext} cxt
  * @return {void}
  */
-export const createTempAssets: TCallback = ({ temp }) => {
-  fs.copyFileSync('yarn.lock', join(temp, 'yarn.lock'))
-  fs.copyFileSync('package.json', join(temp, 'package.json'))
-  fs.existsSync('.npmrc') && fs.copyFileSync('.npmrc', join(temp, '.npmrc'))
-  fs.existsSync('.yarnrc') && fs.copyFileSync('.yarnrc', join(temp, '.yarnrc'))
+export const createTempAssets: TCallback = ({ cwd, temp }) => {
+  fs.copyFileSync(join(cwd, 'yarn.lock'), join(temp, 'yarn.lock'))
+  fs.copyFileSync(join(cwd, 'package.json'), join(temp, 'package.json'))
+  fs.existsSync(join(cwd, '.npmrc')) && fs.copyFileSync(join(cwd, '.npmrc'), join(temp, '.npmrc'))
+  fs.existsSync(join(cwd, '.yarnrc')) && fs.copyFileSync(join(cwd, '.yarnrc'), join(temp, '.yarnrc'))
 }
 
 /**
