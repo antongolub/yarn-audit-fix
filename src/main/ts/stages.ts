@@ -220,3 +220,18 @@ export const patchLockfile: TCallback = ({ temp, ctx }) => {
   lf.patch(lockfile, report, ctx)
   lf.write(lockfilePath, lockfile)
 }
+
+/**
+ * Check that everything is fine with pkg dir.
+ * @param {TContext} cxt
+ * @return {void}
+ */
+export const verify: TCallback = ({ cwd }) => {
+  const required = ['yarn.lock', 'package.json', 'node_modules']
+
+  required.forEach(resource => {
+    if (!fs.existsSync(join(cwd, resource))) {
+      throw new Error(`not found: ${resource}`)
+    }
+  })
+}
