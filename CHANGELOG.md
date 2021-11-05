@@ -1,3 +1,16 @@
+# [7.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v7.1.5...v7.2.0) (2021-11-05)
+
+
+### Bug Fixes
+
+* **deps:** update npm to v8.1.3 ([d087c41](https://github.com/antongolub/yarn-audit-fix/commit/d087c41ce4ca1e0d1f6981c1575cf14ac4818af9))
+* use cwd on temp assets generation ([ae2f7f4](https://github.com/antongolub/yarn-audit-fix/commit/ae2f7f47ddf833652d15ee470ca229cb51566227))
+
+
+### Features
+
+* verify package structure ([93b254a](https://github.com/antongolub/yarn-audit-fix/commit/93b254a3f60c74f5e86c32e8c4d820bc54fe561a))
+
 ## [7.1.5](https://github.com/antongolub/yarn-audit-fix/compare/v7.1.4...v7.1.5) (2021-11-01)
 
 
