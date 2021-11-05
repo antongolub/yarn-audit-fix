@@ -8,6 +8,7 @@ import {
   patchLockfile,
   printRuntimeDigest,
   syncLockfile,
+  verify,
   yarnImport,
   yarnInstall,
   yarnLockToPkgLock,
@@ -17,6 +18,7 @@ import {
 export const convert: TFlow = {
   main: [
     ['Runtime digest', printRuntimeDigest],
+    ['Verifying package structure...', verify],
     ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
     ['Generating package-lock.json from yarn.lock...', yarnLockToPkgLock],
     ['Applying npm audit fix...', npmAuditFix],
@@ -36,6 +38,7 @@ export const convert: TFlow = {
 export const patch: TFlow = {
   main: [
     ['Runtime digest', printRuntimeDigest],
+    ['Verifying package structure...', verify],
     ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
     [
       'Patching yarn.lock with audit data...',

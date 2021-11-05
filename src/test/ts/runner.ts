@@ -213,10 +213,20 @@ describe('yarn-audit-fix', () => {
       expect(handler).toHaveBeenCalledTimes(1)
     })
 
+    it('throws error on broken package structure', async () => {
+      // @ts-ignore
+      fs.existsSync.mockReturnValueOnce(false)
+
+      expect(run({cwd: 'unknown'})).rejects.toEqual(
+        new Error('not found: yarn.lock')
+      )
+    })
+
     it('throws error on unsupported flow', async () =>
       expect(run({ flow: 'unknown' })).rejects.toEqual(
         new Error('Unsupported flow: unknown'),
-      ))
+      )
+    )
 
     describe('`patch` flow', () => {
       it('invokes cmd queue with proper args', async () => {
