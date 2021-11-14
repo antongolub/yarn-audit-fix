@@ -1,3 +1,5 @@
+## [7.2.1](https://github.com/antongolub/yarn-audit-fix/compare/v7.2.0...v7.2.1) (2021-11-14)
+
 # [7.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v7.1.5...v7.2.0) (2021-11-05)
 
 
