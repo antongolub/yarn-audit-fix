@@ -9,7 +9,7 @@
 </h1>
 
 [![Build Status](https://travis-ci.com/antongolub/yarn-audit-fix.svg?branch=master)](https://travis-ci.com/antongolub/yarn-audit-fix)
-[![Libraries.io deps status](https://img.shields.io/librariesio/release/npm/yarn-audit-fix?label=deps)](https://libraries.io/github/antongolub/yarn-audit-fix/sourcerank)
+[![Libraries.io deps status](https://img.shields.io/librariesio/release/npm/yarn-audit-fix?label=deps)](https://libraries.io/npm/yarn-audit-fix/sourcerank)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability)](https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage)](https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage)
 [![Sonar](https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status)](https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix)
