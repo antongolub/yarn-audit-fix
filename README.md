@@ -102,7 +102,7 @@ success Already up-to-date.
 |`--help/-h`| Print help message |
 |`--legacy-peer-deps` | Accept an incorrect (potentially broken) deps resolution |  | ✔
 |`--loglevel` | Set custom [log level](https://docs.npmjs.com/cli/v7/using-npm/config#loglevel) | | ✔
-|`--npm-path` | Define npm path: switch to system **npm** version instead of default package's own. Or provide a custom path. `system / local / <custom path>` | `local`
+|`--npm-path` | Switch to project's local **npm** version instead of system default. Or provide a custom path. `system / local / <custom path>` | `system`
 |`--only` | Set package [update scope](https://docs.npmjs.com/cli/v7/using-npm/config#only): `dev`/`prod`
 |`--package-lock-only` | Run audit fix without modifying `node_modules`. Highly recommended to **enable**. | `true` | ✔ |
 |`--registry` | Custom registry url | | ✔ |
@@ -162,6 +162,11 @@ await run({}, flow)
 ```
 
 ## Migration notes
+### ^8.0.0
+From v8 the library does not contain **npm** dependency, so the system default is used instead. If necessary you can:
+* Install the required npm version and provide a custom path via [CLI](#cli) / [ENV](#env) / [JS API](#js-api)
+* Use a pinch of **npx** magic: `npm_config_yes=true YAF_NPM_PATH=local npx -p yarn-audit-fix -p npm@8 -c yarn-audit-fix`
+
 ### ^7.0.0
 Following the deps, converted to ESM. So legacy `require` API has been dropped since v7.0.0. Use the shiny new `import` instead or try your luck with [esm-hook](https://www.npmjs.com/package/@qiwi/esm). CLI works as before.
 ```js
