@@ -13,6 +13,7 @@
 <a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability" alt="Maintainability"></a>
 <a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage" alt="Test Coverage"></a>
 <a href="https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix"><img src="https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status" alt="Sonar"></a>
+<a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/dt/yarn-audit-fix" alt="Downloads"></a>
 <a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/v/yarn-audit-fix" alt="npm (tag)"></a></p>
 <p>Apply <code>npm audit fix</code> logic to <code>yarn.lock</code></p>
 <ul>
@@ -178,8 +179,8 @@ success Already up-to-date.
 </tr>
 <tr>
 <td><code>--npm-path</code></td>
-<td>Define npm path: switch to system <strong>npm</strong> version instead of default package&#39;s own. Or provide a custom path. <code>system / local / &lt;custom path&gt;</code></td>
-<td><code>local</code></td>
+<td>Switch to project&#39;s local <strong>npm</strong> version instead of system default. Or provide a custom path. <code>system / local / &lt;custom path&gt;</code></td>
+<td><code>system</code></td>
 <td></td>
 </tr>
 <tr>
@@ -249,6 +250,15 @@ Typedoc: <a href="https://antongolub.github.io/yarn-audit-fix/modules/">https://
 <a href="#migration-notes" id="migration-notes" style="color: inherit; text-decoration: none;">
   <h2>Migration notes</h2>
 </a>
+
+<a href="#800" id="800" style="color: inherit; text-decoration: none;">
+  <h3>^8.0.0</h3>
+</a>
+<p>From v8 the library does not contain <strong>npm</strong> dependency, so the system default is used instead. If necessary you can:</p>
+<ul>
+<li>Install the required npm version and provide a custom path via <a href="#cli">CLI</a> / <a href="#env">ENV</a> / <a href="#js-api">JS API</a></li>
+<li>Use a pinch of <strong>npx</strong> magic: <code>npm_config_yes=true YAF_NPM_PATH=local npx -p yarn-audit-fix -p npm@8 -c yarn-audit-fix</code></li>
+</ul>
 
 <a href="#700" id="700" style="color: inherit; text-decoration: none;">
   <h3>^7.0.0</h3>
