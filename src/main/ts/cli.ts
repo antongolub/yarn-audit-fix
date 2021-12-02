@@ -51,7 +51,7 @@ const flags = new Command()
       "Switch to system default version of npm instead of package's own.",
     )
       .choices(['system', 'local'])
-      .default(env.YAF_NPM_PATH || 'local'),
+      .default(env.YAF_NPM_PATH || 'system'),
   )
   .addOption(
     new Option('--only [scope]', 'Set package updating scope')
