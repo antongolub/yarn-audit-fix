@@ -130,7 +130,7 @@ export const getClosestBin = (cmd: string): string =>
     ),
   )
 
-export const getNpm = (npmPath = 'local', isWin = isWindows()): string => {
+export const getNpm = (npmPath = 'system', isWin = isWindows()): string => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
 
   if (npmPath === 'system') {
