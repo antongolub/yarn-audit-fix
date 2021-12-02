@@ -29,6 +29,7 @@ Apply `npm audit fix` logic to `yarn.lock`
    - [ENV](#env)
    - [JS API](#js-api)
 - [Migration notes](#migration-notes)
+   - [^8.0.0](#800)
    - [^7.0.0](#700)
    - [^6.0.0](#600)
    - [^4.0.0](#400)
@@ -51,7 +52,7 @@ Fortunately, there are several workarounds:
 
 ### Key features
 * A couple of strategies to fix security issues
-* Mac / Linux / Windows support
+* macOS / Linux / Windows support
 * CLI / JS API
 * TS and flow typings
 
