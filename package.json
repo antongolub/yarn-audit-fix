@@ -65,7 +65,8 @@
   ],
   "resolutions": {
     "**/strip-ansi/ansi-regex": "^5.0.1",
-    "**/globby/fast-glob": "^3.2.7"
+    "**/globby/fast-glob": "^3.2.7",
+    "**/json-schema": "^0.4.0"
   },
   "dependencies": {
     "@types/find-cache-dir": "^3.2.1",
