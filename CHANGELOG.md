@@ -1,3 +1,20 @@
+# [8.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v7.2.3...v8.0.0) (2021-12-02)
+
+
+### Bug Fixes
+
+* fix npm-path cli default option value ([2c58a9b](https://github.com/antongolub/yarn-audit-fix/commit/2c58a9b8e52e596289aec2f8229f38af06bf8864))
+
+
+### Features
+
+* use system npm bin by default ([9b21933](https://github.com/antongolub/yarn-audit-fix/commit/9b21933674353090a8fc49c73aa3da3973d9aa95)), closes [#200](https://github.com/antongolub/yarn-audit-fix/issues/200) [#199](https://github.com/antongolub/yarn-audit-fix/issues/199)
+
+
+### BREAKING CHANGES
+
+* dropped npm dependency
+
 ## [7.2.3](https://github.com/antongolub/yarn-audit-fix/compare/v7.2.2...v7.2.3) (2021-11-27)
 
 ## [7.2.2](https://github.com/antongolub/yarn-audit-fix/compare/v7.2.1...v7.2.2) (2021-11-18)
