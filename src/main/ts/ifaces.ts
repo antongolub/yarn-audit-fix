@@ -47,6 +47,10 @@ export type TLockfileObject = {
     version: string
     resolved: string
     integrity: string
-    dependencies: string[]
+    dependencies: Record<string, string>
+
+    // v2
+    resolution: string
+    [rest: string]: any
   }
 }

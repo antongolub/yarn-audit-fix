@@ -10,6 +10,7 @@ import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { packageDirectorySync } from 'pkg-dir'
+import yaml from 'js-yaml'
 
 import { TFlags, TFlagsMapping } from './ifaces'
 
@@ -197,3 +198,13 @@ export const attempt = <T>(f: () => T): T | null => {
     return null // eslint-disable-line
   }
 }
+
+export const parseYaml = <T = Record<string, any>>(contents: string): T => {
+  try {
+    return yaml.load(contents) as T
+  } catch (e) {
+    throw new Error(`YAML required: ${e}`)
+  }
+}
+
+export const formatYaml = yaml.dump
