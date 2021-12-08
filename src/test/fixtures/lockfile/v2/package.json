@@ -1,0 +1,53 @@
+{
+  "name": "@qiwi/uniconfig-monorepo",
+  "workspaces": [
+    "packages/*"
+  ],
+  "version": "1.7.0",
+  "private": true,
+  "esm": {
+    "mode": "all",
+    "cjs": true
+  },
+  "scripts": {
+    "clean": "lerna clean --yes && lerna run --stream clean",
+    "build": "lerna run --stream build",
+    "build:es6": "lerna run --stream build:es6",
+    "build:es5": "lerna run --stream build:es5",
+    "build:clean": "yarn clean && yarn run build",
+    "bootstrap": "lerna bootstrap",
+    "test": "yarn lint && yarn jest",
+    "test:report": "yarn test && yarn coveralls:push",
+    "coverage:merge": "node scripts/js/coverage-merge.js",
+    "codeclimate:push": "codeclimate-test-reporter < ./coverage/lcov.info || exit 0",
+    "coveralls:push": "cat ./coverage/lcov.info | coveralls || exit 0",
+    "jest": "NODE_ENV=test BAZ=baz jest --no-cache --maxWorkers=100 -w=1 --detectOpenHandles --config jest.config.json",
+    "test:parallel": "lerna run --concurrency 1 --stream --no-prefix test",
+    "jest:parallel": "lerna run jest --concurrency=2 --parallel",
+    "lint": "tslint -p tsconfig.json",
+    "lint:fix": "tslint -p tsconfig.json --fix",
+    "rebuild": "yarn && yarn bootstrap && yarn build && yarn test",
+    "docs": "docma -c ./docma.json",
+    "show:docs": "node scripts/js/docsapp.js",
+    "postupdate": "yarn && yarn bootstrap && npx yarn-audit-fix && yarn build && yarn test"
+  },
+  "devDependencies": {
+    "@types/node": "^16.9.6",
+    "codeclimate-test-reporter": "^0.5.1",
+    "coveralls": "^3.1.1",
+    "docma": "^3.2.2",
+    "jest": "27.4.3",
+    "lcov-parse": "^1.0.0",
+    "lerna": "^4.0.0",
+    "parcel": "2.0.1",
+    "parcel-bundler": "^1.12.4",
+    "ts-jest": "^27.0.5",
+    "tslint": "^6.1.2",
+    "tslint-config-qiwi": "^1.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qiwi/uniconfig.git"
+  },
+  "packageManager": "yarn@3.1.1"
+}

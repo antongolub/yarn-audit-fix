@@ -208,3 +208,5 @@ export const parseYaml = <T = Record<string, any>>(contents: string): T => {
 }
 
 export const formatYaml = yaml.dump
+
+// export const getCmdVersion = (cmd: string, cwd: string)

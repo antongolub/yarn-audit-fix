@@ -16,6 +16,7 @@ import {
   pkgDir,
   readJson,
 } from './util'
+import {format, getLockfileType} from "./lockfile";
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -214,11 +215,13 @@ export const exit: TCallback = ({ flags, err }) => {
 
 export const patchLockfile: TCallback = ({ temp, ctx }) => {
   const lockfilePath = join(temp, 'yarn.lock')
-  const lockfile = lf.read(lockfilePath)
-  const report = lf.audit(ctx)
+  const raw = fs.readFileSync(lockfilePath, 'utf-8')
+  const lockfileType = getLockfileType(raw)
+  const lockfile = lf.parse(raw, lockfileType)
+  const report = lf.audit(ctx.flags, ctx.temp, lockfileType)
+  const patched = lf.patch(lockfile, report, ctx)
 
-  lf.patch(lockfile, report, ctx)
-  lf.write(lockfilePath, lockfile)
+  fs.writeFileSync(lockfilePath, format(patched, lockfileType))
 }
 
 /**

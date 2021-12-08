@@ -58,9 +58,9 @@ const stdio = ['inherit', 'inherit', 'inherit']
 const stdionull = [null, null, null] // eslint-disable-line
 
 const lfAudit = jest.spyOn(lf, '_audit')
-const lfRead = jest.spyOn(lf, '_read')
+const lfParse = jest.spyOn(lf, '_parse')
 const lfPatch = jest.spyOn(lf, '_patch')
-const lfWrite = jest.spyOn(lf, '_write')
+const lfFormat = jest.spyOn(lf, '_format')
 
 // https://ar.al/2021/02/22/cache-busting-in-node.js-dynamic-esm-imports/
 const reimport = async (modulePath: string) => {
@@ -229,7 +229,7 @@ describe('yarn-audit-fix', () => {
     )
 
     describe('`patch` flow', () => {
-      it('invokes cmd queue with proper args', async () => {
+      fit('invokes cmd queue with proper args', async () => {
         await run({
           flow: 'patch',
         })
@@ -237,7 +237,7 @@ describe('yarn-audit-fix', () => {
         checkTempAssets()
 
         // Patching `yarn.lock`
-        expect(lfRead).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
+        expect(lfParse).toHaveBeenCalledWith(expect.any(String), 'yarn1')
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
@@ -245,7 +245,7 @@ describe('yarn-audit-fix', () => {
           { cwd: strMatching(temp), stdio: stdionull },
         )
         expect(lfPatch).toHaveBeenCalledTimes(1)
-        expect(lfWrite).toHaveBeenCalledTimes(1)
+        expect(lfFormat).toHaveBeenCalledTimes(1)
         expect(fs.writeFileSync).toHaveBeenCalledWith(
           strMatching(temp, 'yarn.lock'),
           yarnLockAfter,

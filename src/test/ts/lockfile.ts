@@ -25,15 +25,19 @@ describe('parseReport', () => {
 
 describe('read', () => {
   it('throws error if lockfile is broken', () => {
-    expect(() => read(join(fixtures, 'lockfile/unsupported-formal.lock'))).toThrowError('Unsupported lockfile format')
+    expect(() => read(join(fixtures, 'lockfile/broken-lockfile/yarn.lock'))).toThrowError('Unsupported lockfile format')
   })
 
   it('parses yarnlock v1', () => {
-    expect(read(join(fixtures, 'lockfile/v1/yarn.lock.before'))).toMatchSnapshot()
+    expect(read(join(fixtures, 'lockfile/v1/yarn.lock'))).toMatchSnapshot()
   })
 
   fit('parses yarnlock v2', () => {
     fs.writeFileSync('test.yaml', format(read(join(fixtures, 'lockfile/v2/yarn.lock.before')), 'yarn2'))
     // expect(format(read(join(fixtures, 'lockfile/v2/yarn.lock.before')), 'yarn2')).toMatchSnapshot()
   })
+})
+
+describe('patch', () => {
+
 })

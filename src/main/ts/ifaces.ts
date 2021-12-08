@@ -54,3 +54,5 @@ export type TLockfileObject = {
     [rest: string]: any
   }
 }
+
+export type TLockfileType = 'yarn1' | 'yarn2' | null

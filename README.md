@@ -51,6 +51,7 @@ Fortunately, there are several workarounds:
 2. Fetch `yarn/npm audit --json` and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)). `yarn-audit-fix --flow=patch`
 
 ### Key features
+* Works with Yarn 1 Classic & Yarn v2+ lockfiles (⚠️ experimental)
 * A couple of strategies to fix security issues
 * macOS / Linux / Windows support
 * CLI / JS API
