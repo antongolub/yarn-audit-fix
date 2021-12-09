@@ -42,17 +42,19 @@ export type TAuditReport = {
   [versionInfo: string]: TAuditAdvisory
 }
 
-export type TLockfileObject = {
-  [versionInfo: string]: {
-    version: string
-    resolved: string
-    integrity: string
-    dependencies: Record<string, string>
+export type TLockfileEntry = {
+  version: string
+  resolved: string
+  integrity: string
+  dependencies?: Record<string, string>
 
-    // v2
-    resolution: string
-    [rest: string]: any
-  }
+  // v2
+  resolution: string
+  [rest: string]: any
+}
+
+export type TLockfileObject = {
+  [versionInfo: string]: TLockfileEntry
 }
 
 export type TLockfileType = 'yarn1' | 'yarn2' | null
