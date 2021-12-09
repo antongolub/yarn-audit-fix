@@ -14,7 +14,7 @@ const findCacheDir = (await import('find-cache-dir')).default
 const fs = (await import('fs-extra')).default
 const synp = (await import('synp')).default
 
-const lf = (await import('../../main/ts/lockfile'))._internal
+const lf = (await import('../../main/ts/lockfile/index'))._internal
 const { createSymlinks, getContext, run, runSync } = await import('../../main/ts')
 const { getNpm, getYarn } = await import('../../main/ts/util')
 

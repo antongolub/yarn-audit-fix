@@ -16,7 +16,7 @@ import {
   pkgDir,
   readJson,
 } from './util'
-import {format, getLockfileType} from "./lockfile";
+import {format, getLockfileType} from './lockfile'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -37,6 +37,7 @@ export const printRuntimeDigest: TCallback = ({
   const npmPath = getNpm(flags['npm-path'])
   const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
   const nodeVersion = invoke('node', ['--version'], temp, true, false)
+  const yarnVersion = invoke('yarn', ['--version'], temp, true, false)
   const latestYafVersion = invoke(
     npmPath,
     ['view', 'yarn-audit-fix', 'version'],
@@ -68,6 +69,7 @@ export const printRuntimeDigest: TCallback = ({
         npmPath,
         npmVersion,
         nodeVersion,
+        // yarnVersion,
         yafVersion,
         temp,
         cwd,
@@ -219,7 +221,7 @@ export const patchLockfile: TCallback = ({ temp, ctx }) => {
   const lockfileType = getLockfileType(raw)
   const lockfile = lf.parse(raw, lockfileType)
   const report = lf.audit(ctx.flags, ctx.temp, lockfileType)
-  const patched = lf.patch(lockfile, report, ctx)
+  const patched = lf.patch(lockfile, report, ctx, lockfileType)
 
   fs.writeFileSync(lockfilePath, format(patched, lockfileType))
 }

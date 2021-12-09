@@ -5,19 +5,21 @@ import {
   TContext, TFlags,
   TLockfileObject,
   TLockfileType
-} from './ifaces'
+} from '../ifaces'
 
 import {
   audit as auditV1,
+  format as formatV1,
   parse as parseV1,
-  format as formatV1
-} from './lockfile-v1'
+  patchEntry as patchEntryV1,
+} from './v1'
 
 import {
   audit as auditV2,
+  format as formatV2,
   parse as parseV2,
-  format as formatV2
-} from './lockfile-v2'
+  patchEntry as patchEntryV2,
+} from './v2'
 
 export const getLockfileType = (lockfile: string): TLockfileType => {
   if (lockfile.match(/yarn lockfile v1/)) {
@@ -53,6 +55,7 @@ export const _patch = (
   lockfile: TLockfileObject,
   report: TAuditReport,
   { flags }: TContext,
+  lockfileType: TLockfileType,
 ): TLockfileObject => {
   if (Object.keys(report).length === 0) {
     !flags.silent && console.log('Audit check found no issues')
@@ -62,7 +65,12 @@ export const _patch = (
   const upgraded: string[] = []
 
   for (const depSpec of Object.keys(lockfile)) {
-    const [pkgName, desiredRange] = depSpec.split('@')
+    // @babel/code-frame@^7.0.0
+    // @babel/code-frame@npm:^7.0.0
+
+    const [,pkgName, desiredRange] = /^(@?[^@]+).*[@:]([^@:]+)$/.exec(depSpec) || []
+    // const [pkgName, desiredRange] = depSpec.split('@')
+
     const pkgAudit = report[pkgName]
     if (!pkgAudit) continue
     const pkgSpec = lockfile[depSpec]
@@ -86,14 +94,10 @@ export const _patch = (
         continue
       }
       upgraded.push(`${pkgName}@${fix}`)
-      pkgSpec.version = fix
-      pkgSpec.dependencies = {}
-      pkgSpec.integrity = ''
-      pkgSpec.resolved = ''
 
-      // v2
-      // pkgSpec.resolution = `${pkgName}@npm:${fix}`
-      // delete pkgSpec.checksum
+      lockfileType === 'yarn1'
+        ? patchEntryV1(pkgSpec, pkgName, fix)
+        : patchEntryV2(pkgSpec, pkgName, fix)
     }
   }
 

@@ -1,20 +1,20 @@
 {
-  "name": "@qiwi/pijma",
+  "name": "pijma",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "bootstrap": "exit 0 || lerna bootstrap",
+    "bootstrap": "lerna bootstrap",
     "clean": "lerna clean --yes && lerna run clean",
-    "build": "yarn workspaces foreach -pt run build",
-    "watch": "yarn workspaces foreach -pt run watch",
+    "build": "lerna run build",
+    "watch": "lerna run --parallel watch",
     "test": "yarn lint",
     "test:report": "yarn test",
     "test:unit": "yarn test",
     "lint": "lerna run --no-bail --parallel lint",
     "lint:fix": "lerna run --no-bail --parallel lint:fix",
-    "guide": "yarn workspaces foreach run guide",
+    "guide": "lerna run --concurrency=1 guide",
     "guide_ci": "lerna run --concurrency=1 guide_ci",
     "upgrade": "npx npm-upgrade-monorepo"
   },
@@ -34,6 +34,5 @@
   "bugs": {
     "url": "https://github.com/qiwi/pijma/issues"
   },
-  "homepage": "https://github.com/qiwi/pijma/#readme",
-  "packageManager": "yarn@3.1.1"
+  "homepage": "https://github.com/qiwi/pijma/#readme"
 }
