@@ -15,7 +15,9 @@ const fs = (await import('fs-extra')).default
 const synp = (await import('synp')).default
 
 const lf = (await import('../../main/ts/lockfile/index'))._internal
-const { createSymlinks, getContext, run, runSync } = await import('../../main/ts')
+const { createSymlinks, getContext, run, runSync } = await import(
+  '../../main/ts'
+)
 const { getNpm, getYarn } = await import('../../main/ts/util')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -217,16 +219,15 @@ describe('yarn-audit-fix', () => {
       // @ts-ignore
       fs.existsSync.mockReturnValueOnce(false)
 
-      expect(run({cwd: 'unknown'})).rejects.toEqual(
-        new Error('not found: yarn.lock')
+      expect(run({ cwd: 'unknown' })).rejects.toEqual(
+        new Error('not found: yarn.lock'),
       )
     })
 
     it('throws error on unsupported flow', async () =>
       expect(run({ flow: 'unknown' })).rejects.toEqual(
         new Error('Unsupported flow: unknown'),
-      )
-    )
+      ))
 
     describe('`patch` flow', () => {
       it('invokes cmd queue with proper args', async () => {
@@ -347,14 +348,16 @@ describe('yarn-audit-fix', () => {
       const bar = 'baz'
       const ctx = getContext({
         cwd,
-        bar
+        bar,
       })
 
-      expect(ctx).toEqual(expect.objectContaining({
-        cwd,
-        flags: { cwd, bar },
-        manifest: { version: '1.0.0' }
-      }))
+      expect(ctx).toEqual(
+        expect.objectContaining({
+          cwd,
+          flags: { cwd, bar },
+          manifest: { version: '1.0.0' },
+        }),
+      )
     })
   })
 
