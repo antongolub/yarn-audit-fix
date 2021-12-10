@@ -321,8 +321,9 @@ describe('yarn-audit-fix', () => {
           })
 
           jest.isolateModules(() => {
+            let skip = 4
             // @ts-ignore
-            cp.spawnSync.mockImplementationOnce(() => reason)
+            cp.spawnSync.mockImplementation(() => (skip-- ? '1.0.0' : reason))
             reimport('../../main/ts/cli').catch(_resolve)
           })
 

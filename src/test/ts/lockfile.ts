@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import {getNpm, getYarn, TContext} from '../../main/ts'
+import { getNpm, getYarn, TContext } from '../../main/ts'
 import { format, parse, patch } from '../../main/ts/lockfile/'
 import { parseAuditReport as parseAuditV1 } from '../../main/ts/lockfile/v1'
 import { parseAuditReport as parseAuditV2 } from '../../main/ts/lockfile/v2'
@@ -13,7 +13,7 @@ const fixtures = resolve(__dirname, '../fixtures')
 describe('patch', () => {
   const bins: Record<string, string> = {
     npm: getNpm(),
-    yarn: getYarn()
+    yarn: getYarn(),
   }
 
   it('yarnlock v2', () => {

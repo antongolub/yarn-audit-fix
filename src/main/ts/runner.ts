@@ -1,9 +1,20 @@
 import chalk from 'chalk'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { getFlow } from './flows'
 import { TCallback, TContext, TFlags, TFlow, TStage } from './ifaces'
-import {getNpm, getTemp, getYarn, invoke, normalizeFlags, pkgDir, readJson} from './util'
+import {
+  getNpm,
+  getTemp,
+  getYarn,
+  invoke,
+  normalizeFlags,
+  pkgDir,
+  readJson,
+} from './util'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /**
  * Build running context.
@@ -26,11 +37,11 @@ export const getContext = (flags: TFlags = {}): TContext => {
       temp,
       true,
       false,
-    ) as string
+    ) as string,
   }
   const bins: Record<string, string> = {
     yarn: getYarn(),
-    npm: getNpm(flags['npm-path'])
+    npm: getNpm(flags['npm-path']),
   }
   const ctx = {
     cwd,
