@@ -35,27 +35,18 @@ export const patchEntry = (
   entry: TLockfileEntry,
   name: string,
   newVersion: string,
+  npmBin: string,
 ): TLockfileEntry => {
   entry.version = newVersion
   entry.resolution = `${name}@npm:${newVersion}`
 
-  // NOTE seems like deps are not updated by `yarn mode='--update-lockfile'`, only checksums
-  const yarnVersion = invoke('yarn', ['--version'], process.cwd(), true, false)
-  const args = semver.gte(yarnVersion, '2.0.0')
-    ? [
-        'npm',
-        'info',
-        `${name}@${newVersion}`,
-        '--fields',
-        'dependencies',
-        '--json',
-      ]
-    : ['info', `${name}@${newVersion}`, 'dependencies', '--json']
+  console.log('!!!', `${name}@${newVersion}`)
+  console.log('!!!!', invoke(npmBin, ['view', `${name}@${newVersion}`, 'dependencies', '--json'], process.cwd(), true, false),)
 
-  const dependencies = JSON.parse(
-    invoke('yarn', args, process.cwd(), true, false),
-  )
-  entry.dependencies = dependencies.data || dependencies
+  // NOTE seems like deps are not updated by `yarn mode='--update-lockfile'`, only checksums
+  entry.dependencies = JSON.parse(
+    invoke(npmBin, ['view', `${name}@${newVersion}`, 'dependencies', '--json'], process.cwd(), true, false) || 'null',
+  ) || undefined
 
   delete entry.checksum
 
@@ -102,8 +93,8 @@ ${formatYaml(data, {
   .replace(/resolution: ([^\n"]+)/g, 'resolution: "$1"')}`
 }
 
-export const audit = (flags: TFlags, temp: string): TAuditReport => {
-  const cmd = flags.reporter === 'npm' ? getNpm(flags['npm-path']) : getYarn()
+export const audit = (flags: TFlags, temp: string, bins: Record<string, string>): TAuditReport => {
+  const cmd = flags.reporter === 'npm' ? bins.npm : bins.yarn
   const mapping = {
     'audit-level': 'level',
     only: {

@@ -55,7 +55,7 @@ export const _format = (
 export const _patch = (
   lockfile: TLockfileObject,
   report: TAuditReport,
-  { flags }: TContext,
+  { flags, bins }: TContext,
   lockfileType: TLockfileType,
 ): TLockfileObject => {
   if (Object.keys(report).length === 0) {
@@ -99,7 +99,7 @@ export const _patch = (
 
       lockfileType === 'yarn1'
         ? patchEntryV1(pkgSpec, pkgName, fix)
-        : patchEntryV2(pkgSpec, pkgName, fix)
+        : patchEntryV2(pkgSpec, pkgName, fix, bins.npm)
     }
   }
 
@@ -113,11 +113,10 @@ export const _patch = (
 }
 
 export const _audit = (
-  flags: TFlags,
-  temp: string,
+  {flags, temp, bins}: TContext,
   lockfileType: TLockfileType,
 ): TAuditReport =>
-  lockfileType === 'yarn2' ? auditV2(flags, temp) : auditV1(flags, temp)
+  lockfileType === 'yarn2' ? auditV2(flags, temp, bins) : auditV1(flags, temp, bins)
 
 // FIXME Jest cannot mock esm yet
 // https://github.com/facebook/jest/commit/90d6908492d164392ce8429923e7f0fa17946d2d

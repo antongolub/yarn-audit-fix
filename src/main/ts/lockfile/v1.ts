@@ -44,8 +44,8 @@ export const patchEntry = (
 export const format = (lockfile: TLockfileObject): string =>
   lf.stringify(lockfile)
 
-export const audit = (flags: TFlags, temp: string): TAuditReport => {
-  const cmd = flags.reporter === 'npm' ? getNpm(flags['npm-path']) : getYarn()
+export const audit = (flags: TFlags, temp: string, bins: Record<string, string>): TAuditReport => {
+  const cmd = flags.reporter === 'npm' ? bins.npm : bins.yarn
   const mapping = {
     'audit-level': 'level',
     only: {
