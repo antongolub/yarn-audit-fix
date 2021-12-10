@@ -9,14 +9,7 @@ import {
   TLockfileEntry,
   TLockfileObject,
 } from '../ifaces'
-import {
-  attempt,
-  formatFlags,
-  getNpm,
-  getYarn,
-  invoke,
-  mapFlags,
-} from '../util'
+import { attempt, formatFlags, invoke, mapFlags } from '../util'
 
 export const parse = (raw: string): TLockfileObject => {
   const data = lf.parse(raw)
@@ -44,7 +37,11 @@ export const patchEntry = (
 export const format = (lockfile: TLockfileObject): string =>
   lf.stringify(lockfile)
 
-export const audit = (flags: TFlags, temp: string, bins: Record<string, string>): TAuditReport => {
+export const audit = (
+  flags: TFlags,
+  temp: string,
+  bins: Record<string, string>,
+): TAuditReport => {
   const cmd = flags.reporter === 'npm' ? bins.npm : bins.yarn
   const mapping = {
     'audit-level': 'level',

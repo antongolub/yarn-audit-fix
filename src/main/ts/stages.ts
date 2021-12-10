@@ -189,8 +189,6 @@ export const yarnInstall: TCallback = ({ cwd, flags }) => {
     return
   }
 
-
-
   invoke(
     getYarn(),
     [

@@ -3,7 +3,6 @@ import sv from 'semver'
 import {
   TAuditReport,
   TContext,
-  TFlags,
   TLockfileObject,
   TLockfileType,
 } from '../ifaces'
@@ -113,10 +112,12 @@ export const _patch = (
 }
 
 export const _audit = (
-  {flags, temp, bins}: TContext,
+  { flags, temp, bins }: TContext,
   lockfileType: TLockfileType,
 ): TAuditReport =>
-  lockfileType === 'yarn2' ? auditV2(flags, temp, bins) : auditV1(flags, temp, bins)
+  lockfileType === 'yarn2'
+    ? auditV2(flags, temp, bins)
+    : auditV1(flags, temp, bins)
 
 // FIXME Jest cannot mock esm yet
 // https://github.com/facebook/jest/commit/90d6908492d164392ce8429923e7f0fa17946d2d
