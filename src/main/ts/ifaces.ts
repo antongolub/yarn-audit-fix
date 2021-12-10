@@ -12,6 +12,8 @@ export type TContext = {
   temp: string
   flags: TFlags
   manifest: Record<string, any>
+  versions: Record<string, string>
+  bins: Record<string, string>
   err?: any
 }
 

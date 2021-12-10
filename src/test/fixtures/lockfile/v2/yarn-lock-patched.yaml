@@ -12368,8 +12368,6 @@ __metadata:
   resolution: "trim-newlines@npm:3.0.1"
   languageName: node
   linkType: hard
-  dependencies:
-    type: inspect
 
 "trim-off-newlines@npm:^1.0.0":
   version: 1.0.1

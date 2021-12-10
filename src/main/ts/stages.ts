@@ -189,6 +189,8 @@ export const yarnInstall: TCallback = ({ cwd, flags }) => {
     return
   }
 
+
+
   invoke(
     getYarn(),
     [
@@ -222,7 +224,7 @@ export const patchLockfile: TCallback = ({ temp, ctx }) => {
   const raw = fs.readFileSync(lockfilePath, 'utf-8')
   const lockfileType = getLockfileType(raw)
   const lockfile = lf.parse(raw, lockfileType)
-  const report = lf.audit(ctx.flags, ctx.temp, lockfileType)
+  const report = lf.audit(ctx, lockfileType)
   const patched = lf.patch(lockfile, report, ctx, lockfileType)
 
   fs.writeFileSync(lockfilePath, format(patched, lockfileType))
