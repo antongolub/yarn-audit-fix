@@ -2,18 +2,17 @@ import sv from 'semver'
 
 import {
   TAuditReport,
-  TContext, TFlags,
+  TContext,
+  TFlags,
   TLockfileObject,
-  TLockfileType
+  TLockfileType,
 } from '../ifaces'
-
 import {
   audit as auditV1,
   format as formatV1,
   parse as parseV1,
   patchEntry as patchEntryV1,
 } from './v1'
-
 import {
   audit as auditV2,
   format as formatV2,
@@ -30,23 +29,25 @@ export const getLockfileType = (lockfile: string): TLockfileType => {
     return 'yarn2'
   }
 
-  return null
+  return undefined
 }
 
-export const _parse = (lockfile: string, lockfileType : TLockfileType): TLockfileObject => {
-  if (lockfileType === null) {
+export const _parse = (
+  lockfile: string,
+  lockfileType: TLockfileType,
+): TLockfileObject => {
+  if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
   }
 
-  return lockfileType === 'yarn2'
-    ? parseV2(lockfile)
-    : parseV1(lockfile)
+  return lockfileType === 'yarn2' ? parseV2(lockfile) : parseV1(lockfile)
 }
 
-export const _format = (lockfile: TLockfileObject, lockfileType: TLockfileType): string =>
-  lockfileType === 'yarn2'
-    ? formatV2(lockfile)
-    : formatV1(lockfile)
+export const _format = (
+  lockfile: TLockfileObject,
+  lockfileType: TLockfileType,
+): string =>
+  lockfileType === 'yarn2' ? formatV2(lockfile) : formatV1(lockfile)
 
 /**
  * Pulled up from https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts
@@ -68,7 +69,8 @@ export const _patch = (
     // @babel/code-frame@^7.0.0
     // @babel/code-frame@npm:^7.0.0
 
-    const [,pkgName, desiredRange] = /^(@?[^@]+).*[@:]([^@:]+)$/.exec(depSpec) || []
+    const [, pkgName, desiredRange] =
+      /^(@?[^@]+).*[:@]([^:@]+)$/.exec(depSpec) || []
     // const [pkgName, desiredRange] = depSpec.split('@')
 
     const pkgAudit = report[pkgName]
@@ -110,10 +112,12 @@ export const _patch = (
   return lockfile
 }
 
-export const _audit = (flags: TFlags, temp: string, lockfileType: TLockfileType): TAuditReport =>
-  lockfileType === 'yarn2'
-    ? auditV2(flags, temp)
-    : auditV1(flags, temp)
+export const _audit = (
+  flags: TFlags,
+  temp: string,
+  lockfileType: TLockfileType,
+): TAuditReport =>
+  lockfileType === 'yarn2' ? auditV2(flags, temp) : auditV1(flags, temp)
 
 // FIXME Jest cannot mock esm yet
 // https://github.com/facebook/jest/commit/90d6908492d164392ce8429923e7f0fa17946d2d

@@ -9,6 +9,12 @@ module.exports = {
             rules: {
                 'sonarjs/no-duplicate-string': 'off'
             }
+        },
+        {
+            files: ['src/**/*.ts'],
+            rules: {
+                'camelcase': 'off'
+            }
         }
     ]
 }

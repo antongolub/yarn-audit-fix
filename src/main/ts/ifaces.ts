@@ -57,4 +57,4 @@ export type TLockfileObject = {
   [versionInfo: string]: TLockfileEntry
 }
 
-export type TLockfileType = 'yarn1' | 'yarn2' | null
+export type TLockfileType = 'yarn1' | 'yarn2' | undefined

@@ -5,10 +5,10 @@ import { keyBy } from 'lodash-es'
 import {
   TAuditEntry,
   TAuditReport,
-  TFlags, TLockfileEntry,
-  TLockfileObject
+  TFlags,
+  TLockfileEntry,
+  TLockfileObject,
 } from '../ifaces'
-
 import {
   attempt,
   formatFlags,
@@ -28,7 +28,11 @@ export const parse = (raw: string): TLockfileObject => {
   return data.object
 }
 
-export const patchEntry = (entry: TLockfileEntry, name: string, newVersion: string): TLockfileEntry => {
+export const patchEntry = (
+  entry: TLockfileEntry,
+  name: string,
+  newVersion: string,
+): TLockfileEntry => {
   entry.version = newVersion
   entry.dependencies = {}
   entry.integrity = ''

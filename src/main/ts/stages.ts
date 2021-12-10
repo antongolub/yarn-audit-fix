@@ -6,6 +6,7 @@ import synp from 'synp'
 
 import { TCallback } from './ifaces'
 import * as lf from './lockfile'
+import { format, getLockfileType } from './lockfile'
 import {
   formatFlags,
   getNpm,
@@ -16,7 +17,6 @@ import {
   pkgDir,
   readJson,
 } from './util'
-import {format, getLockfileType} from './lockfile'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -37,7 +37,7 @@ export const printRuntimeDigest: TCallback = ({
   const npmPath = getNpm(flags['npm-path'])
   const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
   const nodeVersion = invoke('node', ['--version'], temp, true, false)
-  const yarnVersion = invoke('yarn', ['--version'], temp, true, false)
+  // const yarnVersion = invoke('yarn', ['--version'], temp, true, false)
   const latestYafVersion = invoke(
     npmPath,
     ['view', 'yarn-audit-fix', 'version'],
@@ -89,8 +89,10 @@ export const printRuntimeDigest: TCallback = ({
 export const createTempAssets: TCallback = ({ cwd, temp }) => {
   fs.copyFileSync(join(cwd, 'yarn.lock'), join(temp, 'yarn.lock'))
   fs.copyFileSync(join(cwd, 'package.json'), join(temp, 'package.json'))
-  fs.existsSync(join(cwd, '.npmrc')) && fs.copyFileSync(join(cwd, '.npmrc'), join(temp, '.npmrc'))
-  fs.existsSync(join(cwd, '.yarnrc')) && fs.copyFileSync(join(cwd, '.yarnrc'), join(temp, '.yarnrc'))
+  fs.existsSync(join(cwd, '.npmrc')) &&
+    fs.copyFileSync(join(cwd, '.npmrc'), join(temp, '.npmrc'))
+  fs.existsSync(join(cwd, '.yarnrc')) &&
+    fs.copyFileSync(join(cwd, '.yarnrc'), join(temp, '.yarnrc'))
 }
 
 /**
@@ -234,7 +236,7 @@ export const patchLockfile: TCallback = ({ temp, ctx }) => {
 export const verify: TCallback = ({ cwd }) => {
   const required = ['yarn.lock', 'package.json', 'node_modules']
 
-  required.forEach(resource => {
+  required.forEach((resource) => {
     if (!fs.existsSync(join(cwd, resource))) {
       throw new Error(`not found: ${resource}`)
     }
