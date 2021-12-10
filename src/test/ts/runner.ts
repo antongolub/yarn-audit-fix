@@ -22,7 +22,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const noop = () => {
   /* noop */
 }
-const fixtures = resolve(__dirname, '../fixtures')
+const fixtures = resolve(__dirname, '../fixtures/')
 const registryUrl = 'https://example.com'
 const strMatching = (start = '', end = '') =>
   expect.stringMatching(new RegExp(`^${start}.+${end}$`))
@@ -48,9 +48,9 @@ const revive = <T = any>(data: string): T =>
     }
     return v
   })
-const audit = revive(readFixture('lockfile/yarn-audit-report.json'))
-const yarnLockBefore = readFixture('lockfile/yarn.lock.before')
-const yarnLockAfter = readFixture('lockfile/yarn.lock.after')
+const audit = revive(readFixture('lockfile/legacy/yarn-audit-report.json'))
+const yarnLockBefore = readFixture('lockfile/legacy/yarn.lock.before')
+const yarnLockAfter = readFixture('lockfile/legacy/yarn.lock.after')
 
 const temp = findCacheDir({ name: 'yarn-audit-fix', create: true }) + ''
 const cwd = process.cwd()
@@ -229,7 +229,7 @@ describe('yarn-audit-fix', () => {
     )
 
     describe('`patch` flow', () => {
-      fit('invokes cmd queue with proper args', async () => {
+      it('invokes cmd queue with proper args', async () => {
         await run({
           flow: 'patch',
         })

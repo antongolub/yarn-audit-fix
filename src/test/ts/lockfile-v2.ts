@@ -15,7 +15,7 @@ describe('reader', () => {
 })
 
 describe('parseReport', () => {
-  fit('processes yarn2 audit report', () => {
+  it('processes yarn2 audit report', () => {
     const input = fs.readFileSync(join(fixtures, 'lockfile/v2/yarn-audit-report.json'), 'utf-8')
 
     expect(parseAuditReport(input)).toEqual({
@@ -24,35 +24,40 @@ describe('parseReport', () => {
         vulnerable_versions: '>2.1.1 <5.0.1',
         module_name: 'ansi-regex'
       },
+      immer: {
+        patched_versions: '>=9.0.6',
+        vulnerable_versions: '<9.0.6',
+        module_name: 'immer'
+      },
+      'trim-off-newlines': {
+        patched_versions: '<0.0.0',
+        vulnerable_versions: '<=1.0.1',
+        module_name: 'trim-off-newlines'
+      },
+      'ansi-html': {
+        patched_versions: '<0.0.0',
+        vulnerable_versions: '<=0.0.7',
+        module_name: 'ansi-html'
+      },
+      '@npmcli/git': {
+        patched_versions: '>=2.0.8',
+        vulnerable_versions: '<2.0.8',
+        module_name: '@npmcli/git'
+      },
       'glob-parent': {
         patched_versions: '>=5.1.2',
         vulnerable_versions: '<5.1.2',
         module_name: 'glob-parent'
       },
-      'yargs-parser': {
-        patched_versions: '>=13.1.2',
-        vulnerable_versions: '>=6.0.0 <13.1.2',
-        module_name: 'yargs-parser'
+      browserslist: {
+        patched_versions: '>=4.16.5',
+        vulnerable_versions: '>=4.0.0 <4.16.5',
+        module_name: 'browserslist'
       },
-      'url-regex': {
-        patched_versions: '<0.0.0',
-        vulnerable_versions: '<=5.0.0',
-        module_name: 'url-regex'
-      },
-      braces: {
-        patched_versions: '>=2.3.1',
-        vulnerable_versions: '<2.3.1',
-        module_name: 'braces'
-      },
-      'clean-css': {
-        patched_versions: '>=4.1.11',
-        vulnerable_versions: '<4.1.11',
-        module_name: 'clean-css'
-      },
-      'json-schema': {
-        patched_versions: '>=0.4.0',
-        vulnerable_versions: '<0.4.0',
-        module_name: 'json-schema'
+      'trim-newlines': {
+        patched_versions: '>=3.0.1',
+        vulnerable_versions: '<3.0.1',
+        module_name: 'trim-newlines'
       }
     })
   })
