@@ -1,6 +1,5 @@
 import fs from 'fs-extra'
 import { dirname, join, relative } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 import synp from 'synp'
 
@@ -14,11 +13,7 @@ import {
   getWorkspaces,
   getYarn,
   invoke,
-  pkgDir,
-  readJson,
 } from './util'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /**
  * Print runtime context digest.
@@ -27,38 +22,25 @@ export const printRuntimeDigest: TCallback = ({
   temp,
   cwd,
   flags,
+  bins,
+  versions,
   manifest,
 }) => {
   if (flags.silent) {
     return
   }
-
   const isMonorepo = !!manifest.workspaces
-  const npmPath = getNpm(flags['npm-path'])
-  const npmVersion = invoke(npmPath, ['--version'], temp, true, false)
-  const nodeVersion = invoke('node', ['--version'], temp, true, false)
-  // const yarnVersion = invoke('yarn', ['--version'], temp, true, false)
-  const latestYafVersion = invoke(
-    npmPath,
-    ['view', 'yarn-audit-fix', 'version'],
-    temp,
-    true,
-    false,
-  ) as string
-  const yafVersion = readJson(
-    join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
-  ).version
-
+  invoke('node', ['--version'], temp, true, false)
   // NOTE npm > 7.0.0 provides monorepo support
-  if (isMonorepo && (semver.parse(npmVersion as string)?.major as number) < 7) {
+  if (isMonorepo && (semver.parse(versions.npm as string)?.major as number) < 7) {
     console.warn(
       "This project looks like monorepo, so it's recommended to use `npm v7` at least to process workspaces",
     )
   }
 
-  if (semver.gt(latestYafVersion, yafVersion)) {
+  if (semver.gt(versions.yafLatest, versions.yaf)) {
     console.warn(
-      `yarn-audit-fix version ${yafVersion} is out of date. Install the latest ${latestYafVersion} for better results`,
+      `yarn-audit-fix version ${versions.yaf} is out of date. Install the latest ${versions.yafLatest} for better results`,
     )
   }
 
@@ -66,11 +48,8 @@ export const printRuntimeDigest: TCallback = ({
     JSON.stringify(
       {
         isMonorepo,
-        npmPath,
-        npmVersion,
-        nodeVersion,
-        // yarnVersion,
-        yafVersion,
+        bins,
+        versions,
         temp,
         cwd,
         flags,
@@ -184,21 +163,31 @@ export const syncLockfile: TCallback = ({ temp, flags }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const yarnInstall: TCallback = ({ cwd, flags }) => {
+export const yarnInstall: TCallback = ({ cwd, flags , versions}) => {
   if (flags.dryRun) {
     return
   }
 
-  invoke(
-    getYarn(),
-    [
-      'install',
-      '--update-checksums',
-      ...formatFlags(flags, 'verbose', 'silent', 'registry', 'ignore-engines'),
-    ],
-    cwd,
-    flags.silent,
-  )
+  semver.gte(versions.yarn, '2.0.0')
+    ? invoke(
+      getYarn(),
+      [
+        'install',
+        '--mode="update-lockfile"'
+      ],
+      cwd,
+      flags.silent,
+    )
+    : invoke(
+      getYarn(),
+      [
+        'install',
+        '--update-checksums',
+        ...formatFlags(flags, 'verbose', 'silent', 'registry', 'ignore-engines'),
+      ],
+      cwd,
+      flags.silent,
+    )
 }
 /**
  * Clean up temporaries.
