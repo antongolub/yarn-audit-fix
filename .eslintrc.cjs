@@ -5,7 +5,7 @@ module.exports = {
     ],
     overrides: [
         {
-            files: ['src/test/ts/runner.ts'],
+            files: ['src/test/ts/runner.ts', 'src/main/ts/stages.ts'],
             rules: {
                 'sonarjs/no-duplicate-string': 'off'
             }

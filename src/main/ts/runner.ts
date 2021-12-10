@@ -23,26 +23,26 @@ export const getContext = (flags: TFlags = {}): TContext => {
   const cwd = flags.cwd || process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
-  const npmPath = getNpm(flags['npm-path'])
+  const bins: Record<string, string> = {
+    yarn: getYarn(),
+    npm: getNpm(flags['npm-path']),
+  }
   const versions: Record<string, string> = {
     node: invoke('node', ['--version'], temp, true, false),
-    npm: invoke(npmPath, ['--version'], temp, true, false),
-    yarn: invoke('yarn', ['--version'], temp, true, false),
+    npm: invoke(bins.npm, ['--version'], temp, true, false),
+    yarn: invoke(bins.yarn, ['--version'], temp, true, false),
     yaf: readJson(
       join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
     ).version,
     yafLatest: invoke(
-      npmPath,
+      bins.npm,
       ['view', 'yarn-audit-fix', 'version'],
       temp,
       true,
       false,
     ) as string,
   }
-  const bins: Record<string, string> = {
-    yarn: getYarn(),
-    npm: getNpm(flags['npm-path']),
-  }
+
   const ctx = {
     cwd,
     temp,

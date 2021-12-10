@@ -92,14 +92,19 @@ export const audit = (
   temp: string,
   bins: Record<string, string>,
 ): TAuditReport => {
-  const cmd = flags.reporter === 'npm' ? bins.npm : bins.yarn
   const mapping = {
-    'audit-level': 'level',
-    only: {
-      key: 'groups',
+    'audit-level': 'severity',
+    'level': 'severity',
+    groups: {
+      key: 'environment',
       values: {
-        prod: 'dependencies',
-        dev: 'devDependencies',
+        dependencies: 'production'
+      },
+    },
+    only: {
+      key: 'environment',
+      values: {
+        prod: 'production'
       },
     },
   }
@@ -107,11 +112,10 @@ export const audit = (
     mapFlags(flags, mapping),
     'groups',
     'verbose',
-    'level',
   )
   const report = invoke(
-    cmd,
-    ['audit', '--json', ..._flags],
+    bins.yarn,
+    ['npm', 'audit', '--all', '--json', '--recursive', ..._flags],
     temp,
     !!flags.silent,
     false,
