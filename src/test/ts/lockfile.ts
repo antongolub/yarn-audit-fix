@@ -24,7 +24,7 @@ describe('patch', () => {
     expect(result).toEqual(expected)
   })
 
-  fit('yarnlock v1', () => {
+  it('yarnlock v1', () => {
     const report = fs.readFileSync(join(fixtures, 'lockfile/v1/yarn-audit-report.json'), 'utf-8')
     const lockfile = fs.readFileSync(join(fixtures, 'lockfile/v1/yarn.lock'), 'utf-8')
     const expected = fs.readFileSync(join(fixtures, 'lockfile/v1/yarn-lock-patched.yaml'), 'utf-8')
