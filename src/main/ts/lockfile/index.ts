@@ -69,7 +69,7 @@ export const _patch = (
     // @babel/code-frame@npm:^7.0.0
 
     const [, pkgName, desiredRange] =
-      /^(@?[^@]+).*[:@]([^:@]+)$/.exec(depSpec) || []
+      /^(@?[^@]+)@(?:\w+:)?(.+)$/.exec(depSpec) || []
     // const [pkgName, desiredRange] = depSpec.split('@')
 
     const pkgAudit = report[pkgName]
