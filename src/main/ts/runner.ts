@@ -1,20 +1,9 @@
 import chalk from 'chalk'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { join } from 'node:path'
 
 import { getFlow } from './flows'
 import { TCallback, TContext, TFlags, TFlow, TStage } from './ifaces'
-import {
-  getNpm,
-  getTemp,
-  getYarn,
-  invoke,
-  normalizeFlags,
-  pkgDir,
-  readJson,
-} from './util'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
+import { getTemp, normalizeFlags, readJson } from './util'
 
 /**
  * Build running context.
@@ -23,33 +12,13 @@ export const getContext = (flags: TFlags = {}): TContext => {
   const cwd = flags.cwd || process.cwd()
   const manifest = readJson(join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
-  const bins: Record<string, string> = {
-    yarn: getYarn(),
-    npm: getNpm(flags['npm-path']),
-  }
-  const versions: Record<string, string> = {
-    node: invoke('node', ['--version'], temp, true, false),
-    npm: invoke(bins.npm, ['--version'], temp, true, false),
-    yarn: invoke(bins.yarn, ['--version'], temp, true, false),
-    yaf: readJson(
-      join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
-    ).version,
-    yafLatest: invoke(
-      bins.npm,
-      ['view', 'yarn-audit-fix', 'version'],
-      temp,
-      true,
-      false,
-    ) as string,
-  }
-
   const ctx = {
     cwd,
     temp,
     flags,
     manifest,
-    versions,
-    bins,
+    versions: {},
+    bins: {},
   } as TContext
   ctx.ctx = ctx
 

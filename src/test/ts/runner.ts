@@ -106,7 +106,11 @@ describe('yarn-audit-fix', () => {
         return audit
       }
 
-      return { status: 0, stdout: '1.0.1' }
+      if ($0 === '--version' || (cmd === 'npm' && $0 === 'view')) {
+        return { status: 0, stdout: '1.0.1' }
+      }
+
+      return { status: 0, stdout: 'foobar' }
     })
   })
   afterEach(jest.clearAllMocks)
@@ -321,9 +325,8 @@ describe('yarn-audit-fix', () => {
           })
 
           jest.isolateModules(() => {
-            let skip = 4
             // @ts-ignore
-            cp.spawnSync.mockImplementation(() => (skip-- ? '1.0.0' : reason))
+            cp.spawnSync.mockImplementation(() => reason)
             reimport('../../main/ts/cli').catch(_resolve)
           })
 

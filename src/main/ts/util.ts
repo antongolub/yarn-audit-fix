@@ -209,4 +209,5 @@ export const parseYaml = <T = Record<string, any>>(contents: string): T => {
 
 export const formatYaml = yaml.dump
 
-// export const getCmdVersion = (cmd: string, cwd: string)
+export const getBinVersion = (bin: string, cwd = process.cwd()): string =>
+  invoke(bin, ['--version'], cwd, true, false)

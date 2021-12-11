@@ -94,25 +94,21 @@ export const audit = (
 ): TAuditReport => {
   const mapping = {
     'audit-level': 'severity',
-    'level': 'severity',
+    level: 'severity',
     groups: {
       key: 'environment',
       values: {
-        dependencies: 'production'
+        dependencies: 'production',
       },
     },
     only: {
       key: 'environment',
       values: {
-        prod: 'production'
+        prod: 'production',
       },
     },
   }
-  const _flags = formatFlags(
-    mapFlags(flags, mapping),
-    'groups',
-    'verbose',
-  )
+  const _flags = formatFlags(mapFlags(flags, mapping), 'groups', 'verbose')
   const report = invoke(
     bins.yarn,
     ['npm', 'audit', '--all', '--json', '--recursive', ..._flags],
