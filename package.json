@@ -32,7 +32,7 @@
     "build:es6": "mkdirp target/es6 && tsc -p tsconfig.es6.json",
     "build:ts": "cpy src/main/ts/ target/ts/",
     "build:buildstamp": "npm_config_yes=true npx buildstamp --git --out.path=buildstamp.json",
-    "build:libdef": "libdefkit --tsconfig=tsconfig.esnext.json --tsconfig=tsconfig.es6.json",
+    "build:libdef": "libdefkit --tsconfig=tsconfig.esnext.json --tsconfig=tsconfig.es6.json --entry=yarn-audit-fix/target/es6 --no-flow-out",
     "build:esmfix": "yarn tsc-esm-fix --target=target/es6 --target=target/esnext --dirnameVar=false",
     "push:report": "yarn coveralls:push",
     "docs": "typedoc",
@@ -90,13 +90,13 @@
   },
   "devDependencies": {
     "@jest/globals": "^27.4.4",
-    "@qiwi/libdefkit": "^3.1.1",
+    "@qiwi/libdefkit": "^3.1.2",
     "@qiwi/npm-run-all": "^4.1.7",
     "@types/jest": "^27.0.3",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^16.11.12",
     "cpy-cli": "^3.1.1",
-    "eslint": "^8.4.1",
+    "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-qiwi": "^1.15.2",
     "jest": "^27.4.4",
@@ -107,7 +107,7 @@
     "ts-jest": "^27.1.1",
     "tsc-esm-fix": "^2.7.4",
     "typedoc": "^0.22.10",
-    "typescript": "4.5.3"
+    "typescript": "4.4.4"
   },
   "repository": {
     "type": "git",

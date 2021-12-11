@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "rootDir": "./src/main/ts/",
-    "baseUrl": "./src/main/ts/",
+    "rootDir": "src/main/ts/",
+    "baseUrl": "src/main/ts/",
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "outDir": "./target/es5",
+    "outDir": "target/es5",
     "strict": true,
     "experimentalDecorators": true,
     "noUnusedLocals": false,

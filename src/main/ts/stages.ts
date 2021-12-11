@@ -173,7 +173,7 @@ export const yarnInstall: TCallback = ({ cwd, flags , versions}) => {
       getYarn(),
       [
         'install',
-        '--mode="update-lockfile"'
+        '--mode=update-lockfile'
       ],
       cwd,
       flags.silent,
