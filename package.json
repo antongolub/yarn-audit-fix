@@ -3,7 +3,7 @@
   "version": "8.0.1",
   "private": false,
   "type": "module",
-  "description": "Apply `npm audit fix` logic to `yarn.lock`",
+  "description": "The missing `yarn audit --fix`",
   "bin": {
     "yarn-audit-fix": "./target/es6/cli.js"
   },

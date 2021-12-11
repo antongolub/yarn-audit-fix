@@ -16,7 +16,7 @@
 [![Downloads](https://img.shields.io/npm/dt/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 [![npm (tag)](https://img.shields.io/npm/v/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 
-Apply `npm audit fix` logic to `yarn.lock`
+The missing `yarn audit --fix`
 
 - [Digest](#digest)
    - [Problem](#problem)
@@ -29,6 +29,7 @@ Apply `npm audit fix` logic to `yarn.lock`
    - [ENV](#env)
    - [JS API](#js-api)
 - [Migration notes](#migration-notes)
+   - [^9.0.0](#900)
    - [^8.0.0](#800)
    - [^7.0.0](#700)
    - [^6.0.0](#600)
@@ -164,6 +165,9 @@ await run({}, flow)
 ```
 
 ## Migration notes
+### ^9.0.0
+v9 brings experimental Yarn 2+ lockfiles support, so the previous behaviour (when `yaf` parsing failure may be used to detect them) has been changed.
+
 ### ^8.0.0
 From v8 the library does not contain **npm** dependency, so the system default is used instead. If necessary you can:
 * Install the required npm version and provide a custom path via [CLI](#cli) / [ENV](#env) / [JS API](#js-api)
