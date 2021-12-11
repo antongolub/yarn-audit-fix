@@ -7,6 +7,7 @@ import {
   npmAuditFix,
   patchLockfile,
   printRuntimeDigest,
+  resolveBins,
   syncLockfile,
   verify,
   yarnImport,
@@ -17,6 +18,7 @@ import {
 // Compose `npm audit fix` with lockfile converter.
 export const convert: TFlow = {
   main: [
+    ['Resolve bins', resolveBins],
     ['Runtime digest', printRuntimeDigest],
     ['Verifying package structure...', verify],
     ['Preparing temp assets...', clear, createTempAssets, createSymlinks],
@@ -37,6 +39,7 @@ export const convert: TFlow = {
 // Inject `yarn audit --json` data to lockfile.
 export const patch: TFlow = {
   main: [
+    ['Resolve bins', resolveBins],
     ['Runtime digest', printRuntimeDigest],
     ['Verifying package structure...', verify],
     ['Preparing temp assets...', clear, createTempAssets, createSymlinks],

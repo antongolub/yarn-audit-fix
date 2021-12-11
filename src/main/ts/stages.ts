@@ -1,5 +1,6 @@
 import fs from 'fs-extra'
 import { dirname, join, relative } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 import synp from 'synp'
 
@@ -8,12 +9,43 @@ import * as lf from './lockfile'
 import { format, getLockfileType } from './lockfile'
 import {
   formatFlags,
+  getBinVersion,
   getNpm,
   getSymlinkType,
   getWorkspaces,
   getYarn,
   invoke,
+  pkgDir,
+  readJson,
 } from './util'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+/**
+ * Resolve bins.
+ */
+export const resolveBins: TCallback = ({ ctx, temp, flags }) => {
+  const yafManifest = readJson(
+    join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
+  )
+  ctx.bins = {
+    yarn: getYarn(),
+    npm: getNpm(flags['npm-path']),
+  }
+  ctx.versions = {
+    node: getBinVersion('node'),
+    npm: getBinVersion(ctx.bins.npm),
+    yarn: getBinVersion(ctx.bins.yarn),
+    yaf: yafManifest.version,
+    yafLatest: invoke(
+      ctx.bins.npm,
+      ['view', yafManifest.name, 'version'],
+      temp,
+      true,
+      false,
+    ) as string,
+  }
+}
 
 /**
  * Print runtime context digest.
@@ -30,11 +62,13 @@ export const printRuntimeDigest: TCallback = ({
     return
   }
   const isMonorepo = !!manifest.workspaces
-  invoke('node', ['--version'], temp, true, false)
   // NOTE npm > 7.0.0 provides monorepo support
-  if (isMonorepo && (semver.parse(versions.npm as string)?.major as number) < 7) {
+  if (
+    isMonorepo &&
+    (semver.parse(versions.npm as string)?.major as number) < 7
+  ) {
     console.warn(
-      "This project looks like monorepo, so it's recommended to use `npm v7` at least to process workspaces",
+      "This project looks like monorepo, so it's recommended to use `npm v7+` to process workspaces",
     )
   }
 
@@ -116,8 +150,7 @@ export const yarnLockToPkgLock: TCallback = ({ temp, flags }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const npmAuditFix: TCallback = ({ temp, flags }) => {
-  const npm = getNpm(flags['npm-path'])
+export const npmAuditFix: TCallback = ({ temp, flags, bins }) => {
   const defaultFlags = {
     'package-lock-only': true,
   }
@@ -136,7 +169,7 @@ export const npmAuditFix: TCallback = ({ temp, flags }) => {
   )
   const auditArgs = ['audit', 'fix', ...auditFlags, '--prefix', temp]
 
-  invoke(npm, auditArgs, temp, flags.silent)
+  invoke(bins.npm, auditArgs, temp, flags.silent)
 }
 
 /**
@@ -163,31 +196,34 @@ export const syncLockfile: TCallback = ({ temp, flags }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const yarnInstall: TCallback = ({ cwd, flags , versions}) => {
+export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
   if (flags.dryRun) {
     return
   }
 
   semver.gte(versions.yarn, '2.0.0')
     ? invoke(
-      getYarn(),
-      [
-        'install',
-        '--mode=update-lockfile'
-      ],
-      cwd,
-      flags.silent,
-    )
+        bins.yarn,
+        ['install', '--mode=update-lockfile'],
+        cwd,
+        flags.silent,
+      )
     : invoke(
-      getYarn(),
-      [
-        'install',
-        '--update-checksums',
-        ...formatFlags(flags, 'verbose', 'silent', 'registry', 'ignore-engines'),
-      ],
-      cwd,
-      flags.silent,
-    )
+        bins.yarn,
+        [
+          'install',
+          '--update-checksums',
+          ...formatFlags(
+            flags,
+            'verbose',
+            'silent',
+            'registry',
+            'ignore-engines',
+          ),
+        ],
+        cwd,
+        flags.silent,
+      )
 }
 /**
  * Clean up temporaries.
