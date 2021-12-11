@@ -1,3 +1,13 @@
+# [9.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v8.1.0...v9.0.0) (2021-12-11)
+
+
+* feat(v9)!: release v9 ([0584883](https://github.com/antongolub/yarn-audit-fix/commit/0584883166406ad90ee30935f0261d3c283d29e9))
+
+
+### BREAKING CHANGES
+
+* `enabled experimental Yarn 2+ lockfiles support
+
 # [9.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v8.0.1...v9.0.0) (2021-12-11)
 
 

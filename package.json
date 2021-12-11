@@ -1,6 +1,6 @@
 {
   "name": "yarn-audit-fix",
-  "version": "8.1.0",
+  "version": "9.0.0",
   "private": false,
   "type": "module",
   "description": "The missing `yarn audit --fix`",
