@@ -1,3 +1,21 @@
+# [8.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v8.0.1...v8.1.0) (2021-12-11)
+
+
+### Documentation
+
+* **readme:** mention v9 changes ([6c0ae5c](https://github.com/antongolub/yarn-audit-fix/commit/6c0ae5ca5ba1b2d04f03734e300cf32cfe286a40))
+
+
+### Features
+
+* provide experimental lockfile v2 (yarn berry) support ([0243562](https://github.com/antongolub/yarn-audit-fix/commit/024356239ad158b5e71eceef63cda8addba8d18e))
+* use yarn2 if exists as audit provider ([0f1537b](https://github.com/antongolub/yarn-audit-fix/commit/0f1537b1aac184142403cb6bcce8c4efb9972f8a))
+
+
+### BREAKING CHANGES
+
+* **readme:** enabled experimental Yarn 2+ lockfiles support
+
 ## [8.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v8.0.0...v8.0.1) (2021-12-02)
 
 # [8.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v7.2.3...v8.0.0) (2021-12-02)
