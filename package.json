@@ -107,7 +107,7 @@
     "ts-jest": "^27.1.1",
     "tsc-esm-fix": "^2.7.5",
     "typedoc": "^0.22.10",
-    "typescript": "4.5.3"
+    "typescript": "4.5.4"
   },
   "repository": {
     "type": "git",
