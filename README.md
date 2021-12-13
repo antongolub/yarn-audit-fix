@@ -16,7 +16,7 @@
 [![Downloads](https://img.shields.io/npm/dt/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 [![npm (tag)](https://img.shields.io/npm/v/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 
-The missing `yarn audit --fix`
+The missing `yarn audit fix`
 
 - [Digest](#digest)
    - [Problem](#problem)
@@ -49,7 +49,7 @@ The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).
 Fortunately, there are several workarounds:
 1. Compose `npm audit fix` with lockfile converter (thanks to [Gianfranco P.](https://github.com/gianpaj), [stackoverflow/60878037](https://stackoverflow.com/a/60878037)).
    `yarn-audit-fix --flow=convert` just reproduces these steps with minimal changes. More details: [dev.to/yarn-audit-fix-workaround](https://dev.to/antongolub/yarn-audit-fix-workaround-i2a)
-2. Fetch `yarn/npm audit --json` and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)). `yarn-audit-fix --flow=patch`
+2. Fetch `yarn/npm audit --json` advisories and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)). `yarn-audit-fix --flow=patch`. Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antongolub/the-missing-yarn-audit-fix-for-yarn-2-berry-1p8)
 
 ### Key features
 * Works with Yarn 1 Classic & Yarn v2+ lockfiles (⚠️ experimental)

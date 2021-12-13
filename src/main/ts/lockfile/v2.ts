@@ -51,7 +51,6 @@ export const format = (lockfile: TLockfileObject): string => {
   const keymap = Object.entries(lockfile).reduce<Record<string, any>>(
     (m, [k, { resolution }]) => {
       const entry = m[resolution] || (m[resolution] = [])
-      // entry.push(k.replace(/(?<!^)@/, '@npm:'))
       entry.push(k)
 
       return m

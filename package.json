@@ -3,7 +3,7 @@
   "version": "9.0.0",
   "private": false,
   "type": "module",
-  "description": "The missing `yarn audit --fix`",
+  "description": "The missing `yarn audit fix`",
   "bin": {
     "yarn-audit-fix": "./target/es6/cli.js"
   },
