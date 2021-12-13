@@ -1,3 +1,10 @@
+## [9.0.3](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.2...v9.0.3) (2021-12-13)
+
+
+### Bug Fixes
+
+* raise an error if v2 audit report fails ([b04900b](https://github.com/antongolub/yarn-audit-fix/commit/b04900b767caf949d6b183874719d23c4c50d4e6))
+
 ## [9.0.2](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.1...v9.0.2) (2021-12-13)
 
 
