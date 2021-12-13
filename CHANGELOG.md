@@ -1,3 +1,10 @@
+## [9.0.2](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.1...v9.0.2) (2021-12-13)
+
+
+### Bug Fixes
+
+* add a symlink for .yarn assets ([7898410](https://github.com/antongolub/yarn-audit-fix/commit/7898410e2c4ba5154998e8c7935df559b201491d))
+
 ## [9.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.0...v9.0.1) (2021-12-13)
 
 # [9.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v8.1.0...v9.0.0) (2021-12-11)
