@@ -65,7 +65,7 @@ export const audit = (
     temp,
     !!flags.silent,
     false,
-    true,
+    true, // NOTE skipping error here is correct: status means the highest found severity level, not call rejection as usual.
   )
 
   return parseAuditReport(report)

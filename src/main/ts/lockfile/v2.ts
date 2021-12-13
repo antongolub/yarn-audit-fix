@@ -114,7 +114,7 @@ export const audit = (
     temp,
     !!flags.silent,
     false,
-    true,
+    false,
   )
 
   return parseAuditReport(report)
