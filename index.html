@@ -15,7 +15,7 @@
 <a href="https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix"><img src="https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status" alt="Sonar"></a>
 <a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/dt/yarn-audit-fix" alt="Downloads"></a>
 <a href="https://www.npmjs.com/package/yarn-audit-fix"><img src="https://img.shields.io/npm/v/yarn-audit-fix" alt="npm (tag)"></a></p>
-<p>The missing <code>yarn audit --fix</code></p>
+<p>The missing <code>yarn audit fix</code></p>
 <ul>
 <li><a href="#digest">Digest</a><ul>
 <li><a href="#problem">Problem</a></li>
@@ -65,7 +65,7 @@ The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issue
 <ol>
 <li>Compose <code>npm audit fix</code> with lockfile converter (thanks to <a href="https://github.com/gianpaj">Gianfranco P.</a>, <a href="https://stackoverflow.com/a/60878037">stackoverflow/60878037</a>).
 <code>yarn-audit-fix --flow=convert</code> just reproduces these steps with minimal changes. More details: <a href="https://dev.to/antongolub/yarn-audit-fix-workaround-i2a">dev.to/yarn-audit-fix-workaround</a></li>
-<li>Fetch <code>yarn/npm audit --json</code> and patch lockfile inners (kudos to <a href="https://github.com/spion">G. Kosev</a>, <a href="https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts">code reference</a>). <code>yarn-audit-fix --flow=patch</code></li>
+<li>Fetch <code>yarn/npm audit --json</code> advisories and patch lockfile inners (kudos to <a href="https://github.com/spion">G. Kosev</a>, <a href="https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts">code reference</a>). <code>yarn-audit-fix --flow=patch</code>. Full description: <a href="https://dev.to/antongolub/the-missing-yarn-audit-fix-for-yarn-2-berry-1p8">dev.to/yarn-audit-fix-for-yarn-2-berry</a></li>
 </ol>
 
 <a href="#key-features" id="key-features" style="color: inherit; text-decoration: none;">
