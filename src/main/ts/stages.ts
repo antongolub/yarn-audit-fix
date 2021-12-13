@@ -118,6 +118,7 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
   const workspaces = getWorkspaces(cwd, manifest)
   const links = [
     join(cwd, 'node_modules'),
+    join(cwd, '.yarn'),
     ...workspaces.map((ws) => dirname(ws)),
   ]
 
