@@ -24,7 +24,7 @@
     "test:unit": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.config.json --runInBand",
     "test:integration": "node ./target/es6/cli.js --package-lock-only --audit-level=moderate --ignore-engines",
     "test:integration-build": "yarn build:es5 && yarn test:integration",
-    "test:depcheck": "npm_config_yes=true npx depcheck --ignores=tslib,@types/jest,@types/node,tsc-esm-fix,eslint-config-*,typedoc,@jest/globals",
+    "test:depcheck": "npm_config_yes=true npx depcheck@^0 --ignore-patterns='src/test/fixtures' --ignores='node:*,tslib,@types/*,tsc-esm-fix,eslint-config-*,typedoc,@jest/globals'",
     "test:report": "yarn test && yarn push:report",
     "test": "npm-run-all -p -l lint test:unit test:integration test:depcheck",
     "build": "yarn clean && npm-run-all -p -l build:esnext build:es6 build:ts build:libdef build:buildstamp docs && yarn build:esmfix",
