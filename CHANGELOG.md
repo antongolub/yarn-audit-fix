@@ -1,3 +1,10 @@
+## [9.0.4](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.3...v9.0.4) (2021-12-15)
+
+
+### Bug Fixes
+
+* do not require node_modules (yarn pnp) ([e3d333a](https://github.com/antongolub/yarn-audit-fix/commit/e3d333ab60ebe8568a5374aa9c2def11ed0f42e2))
+
 ## [9.0.3](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.2...v9.0.3) (2021-12-13)
 
 
