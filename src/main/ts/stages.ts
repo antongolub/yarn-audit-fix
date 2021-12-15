@@ -127,7 +127,7 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
     const from = join(cwd, rel)
     const to = join(temp, rel)
 
-    fs.createSymlinkSync(from, to, symlinkType)
+    fs.existsSync(from) && fs.createSymlinkSync(from, to, symlinkType)
   })
 }
 
@@ -259,8 +259,13 @@ export const patchLockfile: TCallback = ({ temp, ctx }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const verify: TCallback = ({ cwd }) => {
-  const required = ['yarn.lock', 'package.json', 'node_modules']
+export const verify: TCallback = ({ cwd , versions, flags}) => {
+  const required = ['yarn.lock', 'package.json']
+
+  // NOTE yarn 2+ in PnP mode does not create `node_modules` dir
+  if (flags.flow === 'convert' || semver.lt(versions.yarn, '2.0.0')) {
+    required.push('node_modules')
+  }
 
   required.forEach((resource) => {
     if (!fs.existsSync(join(cwd, resource))) {
