@@ -83,7 +83,7 @@
     "lodash-es": "^4.17.21",
     "pkg-dir": "^6.0.1",
     "semver": "^7.3.5",
-    "synp": "^1.9.8",
+    "synp": "^1.9.9",
     "tslib": "^2.3.1"
   },
   "devDependencies": {
