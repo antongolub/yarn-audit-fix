@@ -18,6 +18,16 @@
 
 The missing `yarn audit fix`
 
+### ⚠️ Transitive dep vulnerability
+Dep chain: `yarn-audit-fix → synp → colors@^1.4.0`.  
+Please asap update `yarn-audit-fix` to `>=9.0.5`. Or at least, pin `colors` to `=1.4.0` in your projects lockfiles.
+
+* https://www.bleepingcomputer.com/news/security/dev-corrupts-npm-libs-colors-and-faker-breaking-thousands-of-apps/
+* https://github.com/Marak/colors.js/issues/285  
+
+All yarn-audit-fix versions below `9.0.5` are deprecated. Sorry for the inconvenience.
+<hr/>
+
 - [Digest](#digest)
    - [Problem](#problem)
    - [Solution](#solution)
