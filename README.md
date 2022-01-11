@@ -18,16 +18,6 @@
 
 The missing `yarn audit fix`
 
-### ⚠️ Transitive dep vulnerability
-Dep chain: `yarn-audit-fix → synp → colors@^1.4.0`.  
-Please asap update `yarn-audit-fix` to `>=9.0.5`. Or at least, pin `colors` to `=1.4.0` in your projects lockfiles.
-
-* https://www.bleepingcomputer.com/news/security/dev-corrupts-npm-libs-colors-and-faker-breaking-thousands-of-apps/
-* https://github.com/Marak/colors.js/issues/285  
-
-All yarn-audit-fix versions below `9.0.5` are deprecated. Sorry for the inconvenience.
-<hr/>
-
 - [Digest](#digest)
    - [Problem](#problem)
    - [Solution](#solution)
@@ -197,6 +187,14 @@ Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit
 `--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system` or define any custom `--npm-path=/another/npm/bin`.
 
 ## Troubleshooting
+### DoS vulnerability for colors@1.4.x
+If you have installed yaf between 7...11 of Jan 2022 and ran it with `--flow=convert` option, you might see an endless garbage loop in stdout.
+The problem was caused by the transitive dep: `yarn-audit-fix → synp → colors@^1.4.0`. Reasons and details: https://github.com/antongolub/yarn-audit-fix/issues/218  
+How to fix? There are 3 ways:
+* Update yarn-audit-fix to `>=9.0.5`
+* Pin `colors` version in your lockfile to `1.4.0`
+* Reinstall yarn-audit-fix. It looks like npm has already removed the vulnerable versions of `colors` from the registry, 2022-01-11.
+
 ### yarn-audit-fix version x.x.x is out of date
 ```
 npm_config_yes=true npx yarn-audit-fix --audit-level=moderate
