@@ -8,7 +8,7 @@
   yarn-audit-fix
 </h1>
 
-<p><a href="https://travis-ci.com/antongolub/yarn-audit-fix"><img src="https://travis-ci.com/antongolub/yarn-audit-fix.svg?branch=master" alt="Build Status"></a>
+<p><a href="https://github.com/antongolub/yarn-audit-fix/actions"><img src="https://github.com/antongolub/yarn-audit-fix/workflows/CI/badge.svg" alt="CI"></a>
 <a href="https://libraries.io/npm/yarn-audit-fix/sourcerank"><img src="https://img.shields.io/librariesio/release/npm/yarn-audit-fix?label=deps" alt="Libraries.io deps status"></a>
 <a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability" alt="Maintainability"></a>
 <a href="https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage"><img src="https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage" alt="Test Coverage"></a>
@@ -39,7 +39,7 @@
 <li><a href="#400">^4.0.0</a></li>
 </ul>
 </li>
-<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#troubleshooting">⚠️ Troubleshooting</a></li>
 <li><a href="#contributing">Contributing</a></li>
 <li><a href="#license">License</a></li>
 </ul>
@@ -289,11 +289,11 @@ Typedoc: <a href="https://antongolub.github.io/yarn-audit-fix/modules/">https://
   <h2>Troubleshooting</h2>
 </a>
 
-<a href="#dos-vulnerability-for-colors14x" id="dos-vulnerability-for-colors14x" style="color: inherit; text-decoration: none;">
-  <h3>DoS vulnerability for <a href="mailto:colors@1.4.x">colors@1.4.x</a></h3>
+<a href="#dos-vulnerability-for-colors-14x" id="dos-vulnerability-for-colors-14x" style="color: inherit; text-decoration: none;">
+  <h3>DoS vulnerability for colors 1.4.x</h3>
 </a>
 <p>If you have installed yaf between 7...11 of Jan 2022 and ran it with <code>--flow=convert</code> option, you might see an endless garbage loop in stdout.
-The problem was caused by the transitive dep: <code>yarn-audit-fix → synp → colors@^1.4.0</code>. Reasons and details: <a href="https://github.com/antongolub/yarn-audit-fix/issues/218">https://github.com/antongolub/yarn-audit-fix/issues/218</a><br>How to fix? There are 3 ways:</p>
+The problem was caused by the transitive dep: <code>yarn-audit-fix → synp → colors@^1.4.0</code>. Reasons and details: <a href="https://github.com/antongolub/yarn-audit-fix/issues/218">issues/218</a>, <a href="https://security.snyk.io/vuln/SNYK-JS-COLORS-2331906">snykvuln/2331906</a>.<br>How to fix? There are 3 ways:</p>
 <ul>
 <li>Update yarn-audit-fix to <code>&gt;=9.0.5</code></li>
 <li>Pin <code>colors</code> version in your lockfile to <code>1.4.0</code></li>
