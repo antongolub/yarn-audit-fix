@@ -17,15 +17,17 @@ export type TContext = {
   err?: any
 }
 
+export type TNote = string
+
 export type TCallback = (cxt: TContext) => void | Promise<void>
 
-export type TStage = [string, ...TCallback[]]
+export type TStage = Array<TCallback | TNote | TStage>
 
 export type ICallable<A extends any[] = any[], R = any> = (...args: A) => R
 
 export type TFlow = {
-  main: TStage[]
-  fallback: TStage[]
+  main: TStage
+  fallback: TStage
 }
 
 export type TAuditAdvisory = {
