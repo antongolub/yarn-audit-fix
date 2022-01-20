@@ -259,7 +259,7 @@ export const patchLockfile: TCallback = ({ temp, ctx }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const verify: TCallback = ({ cwd , versions, flags}) => {
+export const verify: TCallback = ({ cwd, versions, flags }) => {
   const required = ['yarn.lock', 'package.json']
 
   // NOTE yarn 2+ in PnP mode does not create `node_modules` dir

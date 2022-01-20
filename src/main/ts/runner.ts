@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { join } from 'node:path'
 
 import { getFlow } from './flows'
-import { TContext, TFlags, TFlow, TStage} from './ifaces'
+import { TContext, TFlags, TFlow, TStage } from './ifaces'
 import { getTemp, normalizeFlags, readJson } from './util'
 
 /**
@@ -34,8 +34,7 @@ export const exec = (stages: TStage, ctx: TContext): void => {
   for (const step of stages.flat(5)) {
     if (typeof step === 'string') {
       !ctx.flags.silent && console.log(chalk.bold(step))
-    }
-    else if (typeof step === 'function'){
+    } else if (typeof step === 'function') {
       step(ctx)
     }
   }
