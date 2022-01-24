@@ -1,3 +1,10 @@
+## [9.0.9](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.8...v9.0.9) (2022-01-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency globby to v13 ([b991173](https://github.com/antongolub/yarn-audit-fix/commit/b9911734f4967575e9e336d0a5b917d6ff20b9ca))
+
 ## [9.0.8](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.7...v9.0.8) (2022-01-20)
 
 ## [9.0.7](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.6...v9.0.7) (2022-01-18)
