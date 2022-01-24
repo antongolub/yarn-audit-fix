@@ -78,7 +78,7 @@
     "find-cache-dir": "^3.3.2",
     "find-up": "^6.2.0",
     "fs-extra": "^10.0.0",
-    "globby": "^12.2.0",
+    "globby": "^13.0.0",
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
     "pkg-dir": "^6.0.1",
