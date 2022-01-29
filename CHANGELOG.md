@@ -1,3 +1,10 @@
+## [9.0.10](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.9...v9.0.10) (2022-01-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency commander to v9 ([a943204](https://github.com/antongolub/yarn-audit-fix/commit/a9432045b741a34ff7b3660cf0c4863fe3b18a2e))
+
 ## [9.0.9](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.8...v9.0.9) (2022-01-24)
 
 
