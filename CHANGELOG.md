@@ -1,3 +1,10 @@
+## [9.0.11](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.10...v9.0.11) (2022-02-11)
+
+
+### Bug Fixes
+
+* re-add flow-typings, update deps ([f8efc83](https://github.com/antongolub/yarn-audit-fix/commit/f8efc83b58b42521ae0a0de9059e8099bc6396fb))
+
 ## [9.0.10](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.9...v9.0.10) (2022-01-29)
 
 
