@@ -50,9 +50,10 @@ export const runSync = (_flags: TFlags = {}, _flow?: TFlow): void => {
 
   try {
     exec(flow.main, ctx)
-  } catch (err) {
+  } catch (err: any) {
     ctx.err = err
 
+    !flags.silent && console.error((err.error || err.status || err)?.toString())
     exec(flow.fallback, ctx)
 
     throw err
