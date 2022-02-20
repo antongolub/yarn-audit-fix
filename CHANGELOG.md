@@ -1,3 +1,10 @@
+## [9.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v9.1.0...v9.1.1) (2022-02-20)
+
+
+### Performance Improvements
+
+* tweak up error logging ([88ccb5d](https://github.com/antongolub/yarn-audit-fix/commit/88ccb5dfd6d8d4b277b46292029a7cff568ad43d))
+
 # [9.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.11...v9.1.0) (2022-02-20)
 
 
