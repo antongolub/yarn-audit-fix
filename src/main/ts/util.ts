@@ -35,8 +35,10 @@ export const invoke = (
     ? ['inherit', 'inherit', 'inherit']
     : [null, null, null] // eslint-disable-line
   const result = cp.spawnSync(cmd, args, { cwd, stdio })
+  const err = result.error || result.status
 
-  if (!skipError && (result.error || result.status)) {
+  if (!skipError && err) {
+    !silent && console.error(chalk.bold('err'), err?.toString().trim())
     throw result
   }
 
