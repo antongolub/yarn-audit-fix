@@ -1,3 +1,10 @@
+## [9.1.2](https://github.com/antongolub/yarn-audit-fix/compare/v9.1.1...v9.1.2) (2022-02-20)
+
+
+### Performance Improvements
+
+* impr stderr logging ([33e9770](https://github.com/antongolub/yarn-audit-fix/commit/33e9770a1ae6fdc092648ea3ac0d7d5287693e4e))
+
 ## [9.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v9.1.0...v9.1.1) (2022-02-20)
 
 
