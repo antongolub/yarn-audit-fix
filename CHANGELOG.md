@@ -1,3 +1,10 @@
+# [9.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.11...v9.1.0) (2022-02-20)
+
+
+### Features
+
+* improve logging for cp.spawn errors ([b6ef812](https://github.com/antongolub/yarn-audit-fix/commit/b6ef812498876efc00c12efab6259e06da52de12))
+
 ## [9.0.11](https://github.com/antongolub/yarn-audit-fix/compare/v9.0.10...v9.0.11) (2022-02-11)
 
 
