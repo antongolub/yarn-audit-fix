@@ -211,3 +211,7 @@ export const formatYaml = yaml.dump
 
 export const getBinVersion = (bin: string, cwd = process.cwd()): string =>
   invoke(bin, ['--version'], cwd, true, false)
+
+export const getSelfManifest = () => readJson(
+  join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
+)

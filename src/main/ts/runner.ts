@@ -3,7 +3,7 @@ import { join } from 'node:path'
 
 import { getFlow } from './flows'
 import { TContext, TFlags, TFlow, TStage } from './ifaces'
-import { getTemp, normalizeFlags, readJson } from './util'
+import { getSelfManifest, getTemp, normalizeFlags, readJson } from './util'
 
 /**
  * Build running context.
@@ -44,6 +44,11 @@ export const exec = (stages: TStage, ctx: TContext): void => {
  * Public static void main.
  */
 export const runSync = (_flags: TFlags = {}, _flow?: TFlow): void => {
+  if (_flags.V) {
+    console.log(getSelfManifest().version)
+    return
+  }
+
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
   const flow = _flow || getFlow(flags.flow)
