@@ -1,6 +1,5 @@
 import fs from 'fs-extra'
 import { dirname, join, relative } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import semver from 'semver'
 import synp from 'synp'
 
@@ -11,23 +10,19 @@ import {
   formatFlags,
   getBinVersion,
   getNpm,
+  getSelfManifest,
   getSymlinkType,
   getWorkspaces,
   getYarn,
   invoke,
-  pkgDir,
-  readJson,
 } from './util'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 /**
  * Resolve bins.
  */
 export const resolveBins: TCallback = ({ ctx, temp, flags }) => {
-  const yafManifest = readJson(
-    join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
-  )
+  const yafManifest = getSelfManifest()
   ctx.bins = {
     yarn: getYarn(),
     npm: getNpm(flags['npm-path']),

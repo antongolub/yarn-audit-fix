@@ -73,6 +73,10 @@ const flags = new Command()
     'Switch log level to verbose/debug',
     env.YAF_VERBOSE,
   )
+  .option(
+    '--version, -v',
+    'Print current yarn-audit-fix version'
+  )
   .allowUnknownOption()
   .parse(process.argv)
   .opts()
