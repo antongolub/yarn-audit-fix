@@ -1,3 +1,10 @@
+# [9.2.0](https://github.com/antongolub/yarn-audit-fix/compare/v9.1.3...v9.2.0) (2022-03-14)
+
+
+### Features
+
+* print version via `-v` and `--version` flags ([fc2fe73](https://github.com/antongolub/yarn-audit-fix/commit/fc2fe737a25c8ed6ab48ec567e74d24342e72a27))
+
 ## [9.1.3](https://github.com/antongolub/yarn-audit-fix/compare/v9.1.2...v9.1.3) (2022-03-14)
 
 
