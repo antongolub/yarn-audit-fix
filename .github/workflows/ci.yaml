@@ -186,7 +186,7 @@ jobs:
           node-version: 16
 
       - name: Check pkg via npx
-        run: npx yarn-audit-fix@latest --version
+        run: npm_config_yes=true npx yarn-audit-fix@latest --version
 
       - name: Install -g
         run: | 
