@@ -112,7 +112,7 @@ jobs:
       - name: Yarn install
         run: yarn --ignore-engines # libdefkit requires Node.js >= 14
 
-      - name: Intergarion test
+      - name: Integration test
         if: matrix.node-version != '16' || matrix.os != 'ubuntu-20.04'
         run: yarn test:integration
 
@@ -173,3 +173,23 @@ jobs:
           GIT_COMMITTER_EMAIL: 'mailbox@antongolub.ru'
           GIT_AUTHOR_NAME: '@antongolub'
           GIT_COMMITTER_NAME: '@antongolub'
+
+  post-release:
+    name: Post-release
+    needs: release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Check pkg via npx
+        run: npx yarn-audit-fix@latest --version
+
+      - name: Install -g
+        run: | 
+          npm i -g yarn-audit-fix@latest
+          where yarn-audit-fix
+          yarn-audit-fix --version
