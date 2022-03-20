@@ -188,8 +188,8 @@ jobs:
       - name: Check pkg via npx
         run: npm_config_yes=true npx yarn-audit-fix@latest --version
 
-      - name: Install -g
+      - name: Check npm install -g
         run: | 
           npm i -g yarn-audit-fix@latest
-          where yarn-audit-fix
+          which yarn-audit-fix
           yarn-audit-fix --version
