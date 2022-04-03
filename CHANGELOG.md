@@ -1,3 +1,5 @@
+## [9.2.2](https://github.com/antongolub/yarn-audit-fix/compare/v9.2.1...v9.2.2) (2022-04-03)
+
 ## [9.2.1](https://github.com/antongolub/yarn-audit-fix/compare/v9.2.0...v9.2.1) (2022-03-20)
 
 
