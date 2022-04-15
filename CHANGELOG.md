@@ -1,3 +1,10 @@
+## [9.2.4](https://github.com/antongolub/yarn-audit-fix/compare/v9.2.3...v9.2.4) (2022-04-15)
+
+
+### Bug Fixes
+
+* fix gh-pages publishing ([1179475](https://github.com/antongolub/yarn-audit-fix/commit/117947571fc8997162ff748b4af5868df4e350d7))
+
 ## [9.2.3](https://github.com/antongolub/yarn-audit-fix/compare/v9.2.2...v9.2.3) (2022-04-15)
 
 
