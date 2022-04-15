@@ -131,7 +131,7 @@ jobs:
       - name: Checkuout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Restore artifact
         uses: actions/download-artifact@v3
