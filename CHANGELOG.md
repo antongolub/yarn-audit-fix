@@ -1,3 +1,10 @@
+# [9.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v9.2.4...v9.3.0) (2022-04-21)
+
+
+### Features
+
+* support nodejs v18 ([b20fd96](https://github.com/antongolub/yarn-audit-fix/commit/b20fd96dd820e753c88b7353b50460253dadc4a8))
+
 ## [9.2.4](https://github.com/antongolub/yarn-audit-fix/compare/v9.2.3...v9.2.4) (2022-04-15)
 
 
