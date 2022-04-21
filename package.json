@@ -14,7 +14,7 @@
     "definition": "./typings/index.d.ts"
   },
   "engines": {
-    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
+    "node": "^12.20.0 || ^14.13.1 || >= 16.0.0"
   },
   "scripts": {
     "clean": "rimraf target typings flow-typed buildcache docs coverage",
@@ -77,7 +77,7 @@
     "commander": "^9.2.0",
     "find-cache-dir": "^3.3.2",
     "find-up": "^6.3.0",
-    "fs-extra": "^10.0.1",
+    "fs-extra": "^10.1.0",
     "globby": "^13.1.1",
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
@@ -92,7 +92,7 @@
     "@qiwi/npm-run-all": "^4.1.7",
     "@types/jest": "^27.4.1",
     "@types/js-yaml": "^4.0.5",
-    "@types/node": "^17.0.24",
+    "@types/node": "^17.0.25",
     "cpy-cli": "^4.1.0",
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",

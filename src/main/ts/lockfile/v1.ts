@@ -1,6 +1,6 @@
 import lf from '@yarnpkg/lockfile'
-import { SpawnSyncReturns } from 'child_process'
 import { keyBy } from 'lodash-es'
+import { SpawnSyncReturns } from 'node:child_process'
 
 import {
   TAuditEntry,
