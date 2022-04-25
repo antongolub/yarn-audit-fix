@@ -1,4 +1,0 @@
-{
-  "name": "regular-monorepo",
-  "workspaces": ["packages/*"]
-}

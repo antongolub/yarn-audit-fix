@@ -4,28 +4,13 @@
   },
   "testEnvironment": "node",
   "collectCoverage": true,
-  "coveragePathIgnorePatterns": [],
-  "collectCoverageFrom": [
-    "<rootDir>/src/main/**/*.(j|t)s"
-  ],
   "testMatch": [
-    "<rootDir>/src/test/js/**/*.js",
     "<rootDir>/src/test/ts/**/*.ts"
   ],
-  "testPathIgnorePatterns": [
-    "/node_modules/",
-    "<rootDir>/src/test/fixtures"
-  ],
   "extensionsToTreatAsEsm": [".ts"],
-  "moduleNameMapper": {
-    "#ansi-styles": "<rootDir>/node_modules/chalk/source/vendor/ansi-styles/index.js",
-    "#supports-color": "<rootDir>/node_modules/chalk/source/vendor/ansi-styles/index.js"
-  },
   "moduleFileExtensions": [
     "ts",
-    "tsx",
     "js",
-    "jsx",
     "json",
     "node"
   ],

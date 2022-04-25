@@ -76,7 +76,7 @@ jobs:
         # https://github.com/facebook/jest/issues/12740
         run: |
           yarn test:unit
-          sed 's/src\/src/src/g' coverage/lcov.info | sponge coverage/lcov.info
+          cat coverage/lcov.info
 
       - name: Update coverage
         if: github.ref == 'refs/heads/master'
