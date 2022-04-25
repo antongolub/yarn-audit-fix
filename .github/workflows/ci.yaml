@@ -68,10 +68,15 @@ jobs:
           node-version: 16
 
       - name: Yarn install
-        run: yarn
+        run: |
+          sudo apt-get install -y moreutils
+          yarn
 
       - name: Unit test only
-        run: yarn test:unit
+        # https://github.com/facebook/jest/issues/12740
+        run: |
+          yarn test:unit
+          sed 's/src\/src/src/g' coverage/lcov.info | sponge coverage/lcov.info
 
       - name: Update coverage
         if: github.ref == 'refs/heads/master'
