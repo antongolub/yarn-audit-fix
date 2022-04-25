@@ -1,3 +1,10 @@
+## [9.3.1](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.0...v9.3.1) (2022-04-25)
+
+
+### Performance Improvements
+
+* update tslib, update jest ([0a96659](https://github.com/antongolub/yarn-audit-fix/commit/0a96659c7d18dba34805ee4b9818f8ae679e133c))
+
 # [9.3.0](https://github.com/antongolub/yarn-audit-fix/compare/v9.2.4...v9.3.0) (2022-04-21)
 
 
