@@ -10,7 +10,7 @@ const flags = new Command()
   .addOption(
     new Option(
       '--audit-level [level]',
-      'Include a vulnerability with a level as defined or higher',
+      'Include only vulnerabilities with the specified level or higher',
     )
       .choices(['low', 'moderate', 'high', 'critical'])
       .default(env.YAF_AUDIT_LEVEL),
