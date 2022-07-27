@@ -6,7 +6,7 @@ jobs:
   # Handle [skip ci] / [ci skip] directives in commit messages
   init:
     name: init
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       skip: ${{ steps.ci-skip-step.outputs.ci-skip }}
       skip-not: ${{ steps.ci-skip-step.outputs.ci-skip-not }}
@@ -20,7 +20,7 @@ jobs:
   build:
     name: build
     needs: init
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkuout
         uses: actions/checkout@v3
@@ -52,7 +52,7 @@ jobs:
   test_push:
     needs: build
     if: github.event_name == 'push'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -65,7 +65,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Yarn install
         run: |
@@ -93,7 +93,7 @@ jobs:
     if: github.event_name == 'pull_request'
     strategy:
       matrix:
-        os: [ windows-2019, ubuntu-20.04 ]
+        os: [ windows-2019, ubuntu-22.04 ]
         node-version: [ 18, 16, 14, 12 ]
 
     name: Test (Node v${{ matrix.node-version }}, OS ${{ matrix.os }})
@@ -118,19 +118,19 @@ jobs:
         run: yarn --ignore-engines # libdefkit requires Node.js >= 14
 
       - name: Integration test
-        if: matrix.node-version != '16' || matrix.os != 'ubuntu-20.04'
+        if: matrix.node-version != '16' || matrix.os != 'ubuntu-22.04'
         run: yarn test:integration
 
       # Run all tests for Ubuntu + NodeJS v16 only
       - name: Full test suite
-        if: matrix.node-version == '16' && matrix.os == 'ubuntu-20.04'
+        if: matrix.node-version == '16' && matrix.os == 'ubuntu-22.04'
         run: yarn test
 
   release:
     name: Release
     # https://github.community/t/trigger-job-on-tag-push-only/18076
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: test_push
     steps:
       - name: Checkuout
@@ -149,7 +149,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Codeclimate
         uses: paambaati/codeclimate-action@v3.0.0
@@ -180,12 +180,12 @@ jobs:
     name: Post-release
     needs: release
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Check pkg via npx
         run: npm_config_yes=true npx yarn-audit-fix@latest --version
