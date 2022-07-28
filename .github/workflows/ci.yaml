@@ -11,7 +11,7 @@ jobs:
       skip: ${{ steps.ci-skip-step.outputs.ci-skip }}
       skip-not: ${{ steps.ci-skip-step.outputs.ci-skip-not }}
     steps:
-      - name: Checkuout
+      - name: Checkout
         uses: actions/checkout@v3
 
       - id: ci-skip-step
@@ -22,7 +22,7 @@ jobs:
     needs: init
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkuout
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Setup NodeJS
@@ -101,7 +101,7 @@ jobs:
     needs: build
 
     steps:
-      - name: Checkuout
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Restore artifact
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: test_push
     steps:
-      - name: Checkuout
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           persist-credentials: false
