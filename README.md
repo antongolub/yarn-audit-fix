@@ -9,10 +9,10 @@
 </h1>
 
 [![CI](https://github.com/antongolub/yarn-audit-fix/workflows/CI/badge.svg)](https://github.com/antongolub/yarn-audit-fix/actions)
-[![Libraries.io deps status](https://img.shields.io/librariesio/release/npm/yarn-audit-fix?label=deps)](https://libraries.io/npm/yarn-audit-fix/sourcerank)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability)](https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage)](https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage)
 [![Sonar](https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status)](https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix)
+[![Known Vulnerabilities](https://snyk.io/test/github/antongolub/yarn-audit-fix/badge.svg)](https://snyk.io/test/github/antongolub/yarn-audit-fix)
 [![Downloads](https://img.shields.io/npm/dt/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 [![npm (tag)](https://img.shields.io/npm/v/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 
