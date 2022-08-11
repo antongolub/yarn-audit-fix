@@ -1,3 +1,10 @@
+## [9.3.4](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.3...v9.3.4) (2022-08-11)
+
+
+### Performance Improvements
+
+* update deps ([e2a7224](https://github.com/antongolub/yarn-audit-fix/commit/e2a722495e1ad9f811dc75d7e884990ff9cf2829))
+
 ## [9.3.3](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.2...v9.3.3) (2022-07-27)
 
 
