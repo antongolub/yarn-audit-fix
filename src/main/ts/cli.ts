@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { Command, Option } from 'commander'
 import process from 'node:process'
+
+import { Command, Option } from 'commander'
 
 import { run } from './runner'
 
