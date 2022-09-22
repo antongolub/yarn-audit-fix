@@ -1,5 +1,6 @@
-import { Command } from 'commander'
 import { dirname, join, resolve } from 'node:path'
+
+import { Command } from 'commander'
 import { fileURLToPath } from 'url'
 
 import type { TFlags, TFlagsMapping } from '../../main/ts'

@@ -1,3 +1,9 @@
+import type { StdioOptions } from 'node:child_process'
+import crypto from 'node:crypto'
+import { createRequire } from 'node:module'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import chalk from 'chalk'
 import findCacheDir from 'find-cache-dir'
 import { findUpSync, pathExistsSync } from 'find-up'
@@ -5,11 +11,6 @@ import fse, { SymlinkType } from 'fs-extra'
 import { globbySync as glob, Options as GlobbyOptions } from 'globby'
 import yaml from 'js-yaml'
 import { reduce } from 'lodash-es'
-import type { StdioOptions } from 'node:child_process'
-import crypto from 'node:crypto'
-import { createRequire } from 'node:module'
-import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { packageDirectorySync } from 'pkg-dir'
 
 import { TFlags, TFlagsMapping } from './ifaces'
@@ -19,7 +20,7 @@ const cp = createRequire(import.meta.url)('child_process')
 const { ensureDirSync, readFileSync } = fse
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export const pkgDir = (cwd: string): string => packageDirectorySync({ cwd })
+export const pkgDir = (cwd: string): string => packageDirectorySync({ cwd }) as string
 
 export const invoke = (
   cmd: string,

@@ -1,5 +1,6 @@
-import fs from 'fs-extra'
 import { dirname, join, relative } from 'node:path'
+
+import fs from 'fs-extra'
 import semver from 'semver'
 import synp from 'synp'
 

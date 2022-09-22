@@ -1,7 +1,8 @@
-import { jest } from '@jest/globals'
 import { createRequire } from 'node:module'
 import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { jest } from '@jest/globals'
 
 import type { TContext, TFlow } from '../../main/ts/ifaces'
 
