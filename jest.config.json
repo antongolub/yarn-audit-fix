@@ -1,6 +1,9 @@
 {
   "transform": {
-    "^.+\\.tsx?$": "ts-jest/legacy"
+    "^.+\\.tsx?$": ["ts-jest/legacy", {
+      "tsconfig": "<rootDir>/tsconfig.test.json",
+      "useESM": true
+    }]
   },
   "testEnvironment": "node",
   "collectCoverage": true,
@@ -28,11 +31,5 @@
     "jsx",
     "json",
     "node"
-  ],
-  "globals": {
-    "ts-jest": {
-      "tsconfig": "<rootDir>/tsconfig.test.json",
-      "useESM": true
-    }
-  }
+  ]
 }
