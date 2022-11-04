@@ -75,7 +75,7 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "chalk": "^5.0.1",
     "commander": "^9.4.0",
-    "find-cache-dir": "^3.3.2",
+    "find-cache-dir": "^4.0.0",
     "find-up": "^6.3.0",
     "fs-extra": "^10.1.0",
     "globby": "^13.1.2",
