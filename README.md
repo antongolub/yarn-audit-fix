@@ -41,7 +41,7 @@ The missing `yarn audit fix`
 ## Digest
 ### Problem
 1. `yarn audit` detects vulnerabilities, but cannot fix them.
-Authors suggest using [Depedabot](https://dependabot.com/) or [Snyk](https://snyk.io/) for security patches. Well, it is very inconvenient in some situations, to say the least of it.
+Authors suggest using [Dependabot](https://dependabot.com/) or [Snyk](https://snyk.io/) for security patches. Well, it is very inconvenient in some situations, to say the least of it.
 The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).
 2. `yarn audit` does not support custom (in-house, internal) registries. Here are the [issue](https://github.com/yarnpkg/yarn/issues/7012) & [PR](https://github.com/yarnpkg/yarn/pull/6484) which have not yet received the green light.
 
