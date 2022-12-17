@@ -88,7 +88,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^29.0.3",
-    "@qiwi/libdefkit": "^4.0.8",
+    "@qiwi/libdefkit": "^5.0.0",
     "@qiwi/npm-run-all": "^4.1.7",
     "@types/jest": "^29.0.3",
     "@types/js-yaml": "^4.0.5",
