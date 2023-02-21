@@ -65,7 +65,7 @@
 </a>
 <ol>
 <li><code>yarn audit</code> detects vulnerabilities, but cannot fix them.
-Authors suggest using <a href="https://dependabot.com/">Depedabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
+Authors suggest using <a href="https://dependabot.com/">Dependabot</a> or <a href="https://snyk.io/">Snyk</a> for security patches. Well, it is very inconvenient in some situations, to say the least of it.
 The discussion: <a href="https://github.com/yarnpkg/yarn/issues/7075">yarn/issues/7075</a>.</li>
 <li><code>yarn audit</code> does not support custom (in-house, internal) registries. Here are the <a href="https://github.com/yarnpkg/yarn/issues/7012">issue</a> &amp; <a href="https://github.com/yarnpkg/yarn/pull/6484">PR</a> which have not yet received the green light.</li>
 </ol>
@@ -371,6 +371,17 @@ In some cases <strong>npm@6</strong> works better, so if you have such a version
 <pre><code class="language-shell"><span class="hl-0">Patching yarn.lock with audit data...</span><br/><span class="hl-0">invoke yarn audit --json --level moderate</span><br/><span class="hl-0">Can</span><span class="hl-4">&#39;t find patched version that satisfies postcss@^7.0.0 in &gt;=8.2.10</span><br/><span class="hl-4">Can&#39;</span><span class="hl-0">t find patched version that satisfies postcss@^7.0.1 </span><span class="hl-3">in</span><span class="hl-0"> &gt;=8.2.10</span><br/><span class="hl-0">Can</span><span class="hl-4">&#39;t find patched version that satisfies postcss@^7.0.27 in &gt;=8.2.10</span><br/><span class="hl-4">Can&#39;</span><span class="hl-0">t find patched version that satisfies ws@^7.2.3 </span><span class="hl-3">in</span><span class="hl-0"> &gt;=6.2.2 &lt;7.0.0 || &gt;=7.4.6</span><br/><span class="hl-0">Upgraded deps: &lt;none&gt;</span><br/><span class="hl-0">invoke yarn --update-checksums</span>
 </code></pre>
 <p>Not everything can be repaired, alack.</p>
+
+<a href="#cannot-install-package-despite-being-on-correct-node-version" id="cannot-install-package-despite-being-on-correct-node-version" style="color: inherit; text-decoration: none;">
+  <h3>Cannot install package despite being on correct node version</h3>
+</a>
+<p>Nested packages can define its own engine requirements and this might be a temporary workaround.</p>
+<p>If you where to get a similar error when running the install: </p>
+<pre><code class="language-shell"><span class="hl-0">pkg-dir@7.0.0: The engine </span><span class="hl-4">&quot;node&quot;</span><span class="hl-0"> is incompatible with this module. Expected version </span><span class="hl-4">&quot;&gt;=14.16&quot;</span><span class="hl-0">. Got </span><span class="hl-4">&quot;14.15.1&quot;</span>
+</code></pre>
+<p>You can run the install command with the following flag <code>--ignore-engines</code>.</p>
+<pre><code class="language-shell"><span class="hl-0">yarn add yarn-audit-fix -D --ignore-engines</span>
+</code></pre>
 
 <a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
   <h2>Contributing</h2>
