@@ -322,6 +322,18 @@ invoke yarn --update-checksums
 ```
 Not everything can be repaired, alack.
 
+### Cannot install package despite being on correct node version
+Nested packages can define its own engine requirements and this might be a temporary workaround.
+
+If you where to get a similar error when running the install: 
+```shell
+pkg-dir@7.0.0: The engine "node" is incompatible with this module. Expected version ">=14.16". Got "14.15.1"
+```
+You can run the install command with the following flag `--ignore-engines`.
+```shell
+yarn add yarn-audit-fix -D --ignore-engines
+```
+
 ## Contributing
 Feel free to open any issues: bugs, feature requests or other questions.
 You're always welcome to suggest a PR. Just fork this repo, write some code, add some tests and push your changes.
