@@ -4,10 +4,11 @@ import {
   TLockfileEntry,
   TLockfileObject,
 } from '../ifaces'
-import { formatFlags, formatYaml, invoke, mapFlags, parseYaml } from '../util'
+import {addHiddenProp, formatFlags, formatYaml, invoke, mapFlags, parseYaml} from '../util'
 
 export const parse = (raw: string): TLockfileObject => {
   const data = parseYaml(raw)
+  const {__metadata} = data
   delete data.__metadata
 
   return Object.entries(data).reduce<Record<string, any>>(
@@ -17,7 +18,7 @@ export const parse = (raw: string): TLockfileObject => {
       })
       return m
     },
-    {},
+    addHiddenProp({}, '__metadata', __metadata),
   )
 }
 
@@ -66,7 +67,7 @@ export const format = (lockfile: TLockfileObject): string => {
       return m
     },
     {
-      __metadata: {
+      __metadata: lockfile.__metadata || {
         version: 5,
         cacheKey: 8,
       },
