@@ -1,3 +1,10 @@
+## [9.3.10](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.9...v9.3.10) (2023-03-21)
+
+
+### Bug Fixes
+
+* do no mutate __metadata ([97c5706](https://github.com/antongolub/yarn-audit-fix/commit/97c5706d36c9761dfa6e3d7545c40d8a6116c0ab)), closes [#287](https://github.com/antongolub/yarn-audit-fix/issues/287)
+
 ## [9.3.9](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.8...v9.3.9) (2023-02-21)
 
 ## [9.3.6](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.5...v9.3.6) (2022-09-22)
