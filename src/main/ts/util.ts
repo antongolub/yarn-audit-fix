@@ -216,3 +216,9 @@ export const getBinVersion = (bin: string, cwd = process.cwd()): string =>
 export const getSelfManifest = () => readJson(
   join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
 )
+
+export const addHiddenProp = (obj: Record<string, any>, prop: string, value: any) =>
+  Object.defineProperty(obj, prop, {
+    value,
+    enumerable: false
+  })
