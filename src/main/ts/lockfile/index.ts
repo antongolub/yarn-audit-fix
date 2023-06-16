@@ -20,11 +20,11 @@ import {
 } from './v2'
 
 export const getLockfileType = (lockfile: string): TLockfileType => {
-  if (lockfile.match(/yarn lockfile v1/)) {
+  if (lockfile.includes('yarn lockfile v1')) {
     return 'yarn1'
   }
 
-  if (lockfile.match(/__metadata/)) {
+  if (lockfile.includes('__metadata')) {
     return 'yarn2'
   }
 
@@ -56,7 +56,7 @@ export const _patch = (
   report: TAuditReport,
   { flags, bins }: TContext,
   lockfileType: TLockfileType,
-): TLockfileObject => {
+): TLockfileObject => { // eslint-disable-line sonarjs/cognitive-complexity
   if (Object.keys(report).length === 0) {
     !flags.silent && console.log('Audit check found no issues')
     return lockfile

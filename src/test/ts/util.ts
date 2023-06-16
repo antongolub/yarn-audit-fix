@@ -1,7 +1,7 @@
 import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { Command } from 'commander'
-import { fileURLToPath } from 'url'
 
 import type { TFlags, TFlagsMapping } from '../../main/ts'
 import {

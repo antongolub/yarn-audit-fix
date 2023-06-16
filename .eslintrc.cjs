@@ -7,7 +7,8 @@ module.exports = {
         {
             files: ['src/test/ts/runner.ts', 'src/main/ts/stages.ts'],
             rules: {
-                'sonarjs/no-duplicate-string': 'off'
+                'sonarjs/no-duplicate-string': 'off',
+                '@typescript-eslint/ban-ts-comment': 'off'
             }
         },
         {

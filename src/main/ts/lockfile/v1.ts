@@ -19,7 +19,7 @@ export const parse = (raw: string): TLockfileObject => {
     throw new Error('Merge conflict in yarn lockfile, aborting')
   }
 
-  return data.object
+  return data.object as TLockfileObject
 }
 
 export const patchEntry = (

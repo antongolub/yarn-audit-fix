@@ -337,11 +337,13 @@ describe('yarn-audit-fix', () => {
         it('sets code to 1 otherwise', async () => {
           await checkExit({ error: new Error('foobar') })
           expect(process.exitCode).toBe(1)
+          process.exitCode = 0
         })
 
         it('returns exit code if passed', async () => {
           await checkExit({ status: 2 })
           expect(process.exitCode).toBe(2)
+          process.exitCode = 0
         })
       })
     })
