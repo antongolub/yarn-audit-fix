@@ -1,3 +1,10 @@
+## [9.3.12](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.11...v9.3.12) (2023-06-16)
+
+
+### Bug Fixes
+
+* rollback commander, fix some sonar issues ([f1a9893](https://github.com/antongolub/yarn-audit-fix/commit/f1a9893580249e112cecdb1a615a13517f639b37))
+
 ## [9.3.11](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.10...v9.3.11) (2023-06-16)
 
 
