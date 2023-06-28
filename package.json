@@ -93,7 +93,7 @@
     "@types/jest": "^29.5.2",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^20.3.1",
-    "cpy-cli": "^4.2.0",
+    "cpy-cli": "^5.0.0",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-qiwi": "^2.1.3",
