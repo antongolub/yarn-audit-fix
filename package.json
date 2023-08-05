@@ -2,39 +2,48 @@
   "name": "yarn-audit-fix",
   "version": "9.3.12",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "description": "The missing `yarn audit fix`",
   "bin": {
-    "yarn-audit-fix": "./target/es6/cli.js"
+    "yarn-audit-fix": "./target/esm/cli.mjs"
   },
-  "source": "./src/main/ts/index.ts",
-  "main": "./target/es6/index.js",
-  "types": "./typings/index.d.ts",
-  "typescript": {
-    "definition": "./typings/index.d.ts"
+  "main": "./target/esm/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./target/dts/index.d.ts",
+      "import": "./target/esm/index.mjs",
+      "default": "./target/esm/index.mjs"
+    },
+    "./cli": {
+      "types": "./target/dts/cli.d.ts",
+      "import": "./target/esm/cli.mjs",
+      "default": "./target/esm/cli.mjs"
+    },
+    "./package.json": "./package.json"
   },
+  "module": "target/esm/index.mjs",
+  "types": "target/dts/index.d.ts",
   "engines": {
-    "node": "^12.20.0 || ^14.13.1 || >= 16.0.0"
+    "node": "^14.13.1 || >= 16.0.0"
   },
   "scripts": {
-    "clean": "rimraf target typings flow-typed buildcache docs coverage",
-    "lint": "eslint 'src/**/*.+(js|ts)'",
+    "clean": "rimraf target buildcache docs coverage",
     "lint:fix": "yarn lint --fix",
     "format": "prettier --write \"src/**/*.ts\"",
+    "test": "concurrently 'npm:test:*'",
     "test:unit": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.config.json --runInBand",
-    "test:integration": "node ./target/es6/cli.js --package-lock-only --audit-level=moderate --ignore-engines",
-    "test:integration-build": "yarn build:es5 && yarn test:integration",
-    "test:depcheck": "npm_config_yes=true npx depcheck@^0 --ignore-patterns='src/test/fixtures' --ignores='node:*,tslib,@types/*,tsc-esm-fix,eslint-config-*,typedoc,@jest/globals'",
-    "test": "npm-run-all -p -l lint test:unit test:integration test:depcheck",
-    "build": "yarn clean && npm-run-all -p -l build:esnext build:es6 build:ts build:libdef build:buildstamp docs && yarn build:esmfix",
-    "build:esnext": "mkdirp target/esnext && tsc -p tsconfig.esnext.json",
-    "build:es6": "mkdirp target/es6 && tsc -p tsconfig.es6.json",
-    "build:ts": "cpy src/main/ts/ target/ts/",
-    "build:buildstamp": "npm_config_yes=true npx buildstamp --git --out.path=buildstamp.json",
-    "build:libdef": "libdefkit --tsconfig=tsconfig.esnext.json --tsconfig=tsconfig.es6.json --entry=yarn-audit-fix/target/es6",
-    "build:esmfix": "yarn tsc-esm-fix --target=target/es6 --target=target/esnext --dirnameVar=false",
-    "docs": "typedoc",
-    "uglify": "for f in $(find target -name '*.js'); do short=${f%.js}; terser -c -m -o $short.js -- $f; done",
+    "test:integration": "node ./target/esm/cli.mjs --package-lock-only --audit-level=moderate --ignore-engines",
+    "test:depcheck": "npm_config_yes=true npx depcheck --ignore-patterns='src/test/fixtures' --ignores='node:*,@types/*,esbuild*,eslint-config-*,minimist,mkdirp,ts-node,typedoc,@jest/globals'",
+    "test:lint": "eslint -c src/test/lint/.eslintrc.json src",
+    "build": "concurrently 'npm:build:*'",
+    "build:buildstamp": "npm_config_yes=true npx buildstamp",
+    "build:ts": "cpy --cwd=src/main/ts . ../../../../../../target/ts/",
+    "build:esm": "node ./src/scripts/build.cjs --entry='./src/main/ts/index.ts:./src/main/ts/cli.ts'",
+    "build:dts": "tsc --emitDeclarationOnly --skipLibCheck --outDir target/dts",
+    "build:docs": "typedoc --options src/main/typedoc",
     "postupdate": "yarn && yarn build && yarn test",
     "publish:beta": "npm publish --no-git-tag-version --tag beta",
     "publish:rc": "npm publish --no-git-tag-version --tag rc",
@@ -51,9 +60,9 @@
   "files": [
     "README.md",
     "CHANGELOG.md",
-    "target",
-    "typings",
-    "flow-typed",
+    "target/esm",
+    "target/ts",
+    "target/dts",
     "buildstamp.json"
   ],
   "author": "Anton Golub <golub.anton@gmail.com>",
@@ -61,51 +70,46 @@
   "workspaces0": [
     "packages/*"
   ],
-  "resolutions": {
-    "**/strip-ansi/ansi-regex": "^5.0.1",
-    "**/globby/fast-glob": "^3.2.7",
-    "**/json-schema": "^0.4.0"
-  },
   "dependencies": {
     "@types/find-cache-dir": "^3.2.1",
     "@types/fs-extra": "^11.0.1",
-    "@types/lodash-es": "^4.17.7",
+    "@types/lodash-es": "^4.17.8",
     "@types/semver": "^7.5.0",
     "@types/yarnpkg__lockfile": "^1.1.6",
     "@yarnpkg/lockfile": "^1.1.0",
-    "chalk": "^5.2.0",
+    "chalk": "^5.3.0",
     "commander": "^10.0.1",
     "find-cache-dir": "^4.0.0",
     "find-up": "^6.3.0",
     "fs-extra": "^11.1.1",
-    "globby": "^13.1.4",
+    "fast-glob": "^3.3.1",
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
     "pkg-dir": "^7.0.0",
-    "semver": "^7.5.2",
-    "synp": "^1.9.10",
-    "tslib": "^2.5.3"
+    "semver": "^7.5.4",
+    "synp": "^1.9.10"
   },
   "devDependencies": {
-    "@jest/globals": "^29.5.0",
-    "@qiwi/libdefkit": "^5.0.0",
-    "@qiwi/npm-run-all": "^4.1.7",
-    "@types/jest": "^29.5.2",
+    "@jest/globals": "^29.6.2",
+    "@types/jest": "^29.5.3",
     "@types/js-yaml": "^4.0.5",
-    "@types/node": "^20.3.1",
-    "cpy-cli": "^4.2.0",
-    "eslint": "^8.42.0",
-    "eslint-config-prettier": "^8.8.0",
+    "@types/node": "^20.4.8",
+    "concurrently": "^8.2.0",
+    "cpy-cli": "^5.0.0",
+    "esbuild": "^0.18.17",
+    "esbuild-node-externals": "^1.8.0",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^8.10.0",
     "eslint-config-qiwi": "^2.1.3",
-    "jest": "^29.5.0",
-    "mkdirp": "^1.0.4",
-    "npm": "^8.19.2",
-    "prettier": "^2.8.8",
-    "terser": "^5.18.0",
-    "ts-jest": "^29.1.0",
-    "tsc-esm-fix": "^2.20.14",
+    "jest": "^29.6.2",
+    "minimist": "^1.2.8",
+    "mkdirp": "^3.0.1",
+    "npm": "^9.8.1",
+    "prettier": "^3.0.1",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
     "typedoc": "^0.24.8",
-    "typescript": "5.1.3"
+    "typescript": "5.1.6"
   },
   "repository": {
     "type": "git",

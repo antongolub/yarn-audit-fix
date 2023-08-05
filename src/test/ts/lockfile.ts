@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+import * as fs from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
