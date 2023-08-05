@@ -60,7 +60,7 @@ Fortunately, there are several workarounds:
 
 ## Getting started
 ### Requirements
-Node.js: `^12.20.0 || ^14.13.1 || >=16.0.0`
+Node.js: `^14.13.1 || >=16.0.0`
 
 ### Install
 ```shell script
@@ -165,6 +165,9 @@ await run({}, flow)
 ```
 
 ## Migration notes
+### ^10.0.0
+v10 bumps the pkg deps and requires NodeJS v14.
+
 ### ^9.0.0
 v9 brings experimental Yarn 2+ lockfiles support, so the previous behaviour (when `yaf` parsing failure may be used to detect them) has been changed.
 
