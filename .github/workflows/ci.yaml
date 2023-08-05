@@ -68,20 +68,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          # cache: 'yarn'
+          node-version: 20
 
       - name: Fetch deps
-        run: yarn --ignore-engines --mutex network --frozen-lockfile --network-concurrency 25 --silent --disable-self-update-check
+        run: yarn --mutex network --frozen-lockfile --network-concurrency 25 --silent --disable-self-update-check
 
       - name: Build
         run: yarn build
 
-      - name: Run tests
+      - name: Switch Node.js to ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run all tests
+        if: matrix.node-version == '20' && matrix.os == 'ubuntu-22.04'
         run: yarn test
+
+      - name: Run integration tests
+        if: matrix.node-version != '20' || matrix.os != 'ubuntu-22.04'
+        run: yarn test:integration
 
   post-release:
     name: Post-release
@@ -92,7 +101,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 14 # the lowest required
 
       - name: Check running via npx
         run: npm_config_yes=true npx yarn-audit-fix@latest --version

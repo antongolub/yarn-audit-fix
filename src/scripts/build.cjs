@@ -4,6 +4,7 @@ const esbuild = require('esbuild')
 const { nodeExternalsPlugin } = require('esbuild-node-externals')
 const glob = require('fast-glob')
 const minimist = require('minimist')
+const path = require('node:path')
 
 const {entry, external} = minimist(process.argv.slice(2), {
   default: {
@@ -12,7 +13,7 @@ const {entry, external} = minimist(process.argv.slice(2), {
 })
 
 const esmConfig = {
-  entryPoints: entry.split(':').map(e => e.includes('*') ? glob.sync(e, {absolute: false, onlyFiles: true}) : e).flat(1),
+  entryPoints: entry.split(':').map(e => e.includes('*') ? glob.sync(e, {absolute: false, onlyFiles: true, cwd: process.cwd()}) : path.normalize(path.join(process.cwd(), e))).flat(1),
   outdir: './target/esm',
   bundle: true,
   minify: true,
