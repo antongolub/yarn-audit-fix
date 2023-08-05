@@ -1,0 +1,15 @@
+{
+  "name": "yarn-audit-fix",
+  "out": "../../../target/docs",
+  "entryPoints": ["../../../src/main/ts/"],
+  "exclude": ["../../../src/test", "**/node_modules/**"],
+  "externalPattern": ["**/node_modules/**"],
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "includeVersion": true,
+  "hideGenerator": true,
+  "readme": "../../../README.md",
+  "tsconfig": "../../../tsconfig.json",
+  "theme": "default"
+}

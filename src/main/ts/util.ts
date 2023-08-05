@@ -8,13 +8,14 @@ import chalk from 'chalk'
 import findCacheDir from 'find-cache-dir'
 import { findUpSync, pathExistsSync } from 'find-up'
 import fse, { SymlinkType } from 'fs-extra'
-import { globbySync as glob, Options as GlobbyOptions } from 'globby'
+import fg, { Options as GlobOptions } from 'fast-glob'
 import yaml from 'js-yaml'
 import { reduce } from 'lodash-es'
 import { packageDirectorySync } from 'pkg-dir'
 
 import { TFlags, TFlagsMapping } from './ifaces'
 
+const glob = fg.sync
 // FIXME Jest workaround: cannot properly mock `child_process` with import API
 const cp = createRequire(import.meta.url)('child_process')
 const { ensureDirSync, readFileSync } = fse
@@ -167,7 +168,7 @@ export const getWorkspaces = (
       onlyFiles: true,
       absolute: true,
       gitignore: true,
-    } as GlobbyOptions,
+    } as GlobOptions,
   )
 }
 
