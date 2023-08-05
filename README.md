@@ -326,16 +326,25 @@ invoke yarn --update-checksums
 Not everything can be repaired, alack.
 
 ### Cannot install package despite being on correct node version
-Nested packages can define its own engine requirements and this might be a temporary workaround.
-
-If you where to get a similar error when running the install: 
+yarn-audit-fix is compatible with any NodeJS version which supports ESM, but the nested packages can define their own engine requirements.
 ```shell
 pkg-dir@7.0.0: The engine "node" is incompatible with this module. Expected version ">=14.16". Got "14.15.1"
 ```
-You can run the install command with the following flag `--ignore-engines`.
+
+The _recommended_ way is to update the runtime version. As a temporary workaround, you can simply pass `--ignore-engines` flag.
 ```shell
 yarn add yarn-audit-fix -D --ignore-engines
 ```
+
+### Response Code: 400 (Bad Request)
+```shell
+invoke yarn npm audit --all --json --recursive
+➤ YN0035: Bad Request
+➤ YN0035:   Response Code: 400 (Bad Request)
+➤ YN0035:   Request Method: POST
+➤ YN0035:   Request URL: https://registry.yarnpkg.com/-/npm/v1/security/audits/quick
+```
+https://github.com/yarnpkg/berry/issues/4117
 
 ## Contributing
 Feel free to open any issues: bugs, feature requests or other questions.
