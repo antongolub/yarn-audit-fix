@@ -3,193 +3,102 @@
 name: CI
 on: [push, pull_request]
 jobs:
-  # Handle [skip ci] / [ci skip] directives in commit messages
-  init:
-    name: init
+  push:
+    name: Push ${{ github.ref }}
+    if: github.event_name == 'push'
     runs-on: ubuntu-22.04
-    outputs:
-      skip: ${{ steps.ci-skip-step.outputs.ci-skip }}
-      skip-not: ${{ steps.ci-skip-step.outputs.ci-skip-not }}
+    permissions:
+      checks: read
+      statuses: write
+      contents: write
+      packages: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: ${{ github.ref == 'refs/heads/master' && '0' || '1' }}
 
-      - id: ci-skip-step
-        uses: mstachniuk/ci-skip@v1
-
-  build:
-    name: build
-    needs: init
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup NodeJS
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
+          # cache: 'yarn'
 
-      - name: Yarn install
-        run: yarn
+      - name: Fetch deps
+        run: yarn --mutex network --frozen-lockfile --network-concurrency 25 --silent --disable-self-update-check
 
       - name: Build
         run: yarn build
 
-      - name: Save artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifact-${{ github.run_id }}
-          retention-days: 1
-          path: |
-            docs
-            target
-            buildstamp.json
-
-  # Fast unit tests flow
-  test_push:
-    needs: build
-    if: github.event_name == 'push'
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Restore artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: artifact-${{ github.run_id }}
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Yarn install
-        run: |
-          sudo apt-get install -y moreutils
-          yarn
-
-      - name: Unit test only
-        # https://github.com/facebook/jest/issues/12740
-        run: |
-          yarn test:unit
-          sed 's/src\/src/src/g' coverage/lcov.info | sponge coverage/lcov.info
-
-      - name: Update coverage
-        if: github.ref == 'refs/heads/master'
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifact-${{ github.run_id }}
-          retention-days: 1
-          path: |
-            coverage
-            .nyc_output
-
-  # Full tests for PR
-  test_pr:
-    if: github.event_name == 'pull_request'
-    strategy:
-      matrix:
-        os: [ windows-2019, ubuntu-22.04 ]
-        node-version: [ 18, 16, 14 ]
-
-    name: Test (Node v${{ matrix.node-version }}, OS ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    needs: build
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Restore artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: artifact-${{ github.run_id }}
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Yarn install
-        run: yarn --ignore-engines # libdefkit requires Node.js >= 14
-
-      - name: Integration test
-        if: matrix.node-version != '16' || matrix.os != 'ubuntu-22.04'
-        run: yarn test:integration
-
-      # Run all tests for Ubuntu + NodeJS v16 only
-      - name: Full test suite
-        if: matrix.node-version == '16' && matrix.os == 'ubuntu-22.04'
+      - name: Run tests
         run: yarn test
 
-  release:
-    name: Release
-    # https://github.community/t/trigger-job-on-tag-push-only/18076
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-22.04
-    needs: test_push
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-
-      - name: Restore artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: artifact-${{ github.run_id }}
-
-      - name: Display structure of downloaded files
-        run: ls -R
-
-      - name: Setup NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
       - name: Codeclimate
-        uses: paambaati/codeclimate-action@v4.0.0
+        if: github.ref == 'refs/heads/master'
+        uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
           coverageLocations: |
-            ${{ github.workspace }}/coverage/lcov.info:lcov
-
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ${{ github.workspace }}/coverage/lcov.info
+            ${{github.workspace}}/target/coverage/lcov.info:lcov
 
       - name: Semantic Release
+        if: github.ref == 'refs/heads/master'
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GIT_AUTHOR_EMAIL: 'mailbox@antongolub.ru'
-          GIT_COMMITTER_EMAIL: 'mailbox@antongolub.ru'
-          GIT_AUTHOR_NAME: '@antongolub'
-          GIT_COMMITTER_NAME: '@antongolub'
-        run: npx -p @qiwi/semrel-toolkit semantic-release -e @qiwi/semrel-config
+          NPM_PROVENANCE: true
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: ${{ secrets.GIT_AUTHOR_NAME }}
+          GIT_AUTHOR_EMAIL: ${{ secrets.GIT_AUTHOR_EMAIL }}
+          GIT_COMMITTER_NAME: ${{ secrets.GIT_COMMITTER_NAME }}
+          GIT_COMMITTER_EMAIL: ${{ secrets.GIT_COMMITTER_EMAIL }}
+        run: npm_config_yes=true npx zx-semrel
+
+  pr:
+    if: github.event_name == 'pull_request'
+    name: PR (Node v${{ matrix.node-version }}, OS ${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ ubuntu-22.04, windows-latest ]
+        node-version: [ 20, 18, 16, 14 ]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          # cache: 'yarn'
+
+      - name: Fetch deps
+        run: yarn --ignore-engines --mutex network --frozen-lockfile --network-concurrency 25 --silent --disable-self-update-check
+
+      - name: Build
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
 
   post-release:
     name: Post-release
-    needs: release
+    needs: push
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-22.04
     steps:
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Check pkg via npx
+      - name: Check running via npx
         run: npm_config_yes=true npx yarn-audit-fix@latest --version
 
-      - name: Check npm install -g
-        run: | 
+      - name: Check global install
+        run: |
           npm i -g yarn-audit-fix@latest
           which yarn-audit-fix
           yarn-audit-fix --version
