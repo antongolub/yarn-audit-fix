@@ -1,3 +1,12 @@
+## [10.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.12...v10.0.0) (2023-08-05)
+
+### Fixes & improvements
+* perf: deps revision ([5ec15c0](https://github.com/antongolub/yarn-audit-fix/commit/5ec15c0ec2c90cbed9ae5aa585f35b5feeb2f453))
+* perf: improve exceptions logging on empty stderr ([ea3e501](https://github.com/antongolub/yarn-audit-fix/commit/ea3e501fed4479b1e9d415a871466ea446d10ecc))
+
+### BREAKING CHANGES
+* following the deps, require Node.js v14 ([5ec15c0](https://github.com/antongolub/yarn-audit-fix/commit/5ec15c0ec2c90cbed9ae5aa585f35b5feeb2f453))
+
 ## [9.3.12](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.11...v9.3.12) (2023-06-16)
 
 
