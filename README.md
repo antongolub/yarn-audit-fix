@@ -29,6 +29,7 @@ The missing `yarn audit fix`
    - [ENV](#env)
    - [JS API](#js-api)
 - [Migration notes](#migration-notes)
+   - [^10.0.0](#1000)
    - [^9.0.0](#900)
    - [^8.0.0](#800)
    - [^7.0.0](#700)
