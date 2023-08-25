@@ -1,3 +1,8 @@
+## [10.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.0...v10.0.1) (2023-08-25)
+
+### Fixes & improvements
+* fix(deps): update dependency find-cache-dir to v5 ([0c7a0eb](https://github.com/antongolub/yarn-audit-fix/commit/0c7a0ebec84b48d8c6a4f97b1c3872eaba1dd955))
+
 ## [10.0.0](https://github.com/antongolub/yarn-audit-fix/compare/v9.3.12...v10.0.0) (2023-08-05)
 
 ### Fixes & improvements
