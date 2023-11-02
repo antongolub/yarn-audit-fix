@@ -1,3 +1,8 @@
+## [10.0.3](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.2...v10.0.3) (2023-11-02)
+
+### Fixes & improvements
+* docs: fix docs ([a346796](https://github.com/antongolub/yarn-audit-fix/commit/a3467962162e59c2a5de7892e791aa4fd39f4287))
+
 ## [10.0.2](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.1...v10.0.2) (2023-11-02)
 
 ### Fixes & improvements
