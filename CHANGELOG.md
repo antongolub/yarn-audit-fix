@@ -1,3 +1,8 @@
+## [10.0.2](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.1...v10.0.2) (2023-11-02)
+
+### Fixes & improvements
+* docs: mention presentation at HolyJS 2022 ([b1641f0](https://github.com/antongolub/yarn-audit-fix/commit/b1641f0f4dfb1453f6c9d028fbf300a3f2d6306d))
+
 ## [10.0.1](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.0...v10.0.1) (2023-08-25)
 
 ### Fixes & improvements
