@@ -59,11 +59,6 @@ Fortunately, there are several workarounds:
 * CLI / JS API
 * TS and flow typings
 
-### Presentation
-[npm vulnerabilities: challenge accepted](https://holyjs.ru/talks/703ae2781cbc46d49a007f16834d7c0b/?referer=/persons/15a4605d3664430ba116f38fc7d0613d/) at HolyJS 2022 Spring  
-[slides](https://squidex.jugru.team/api/assets/srm/5f08d7c7-00d4-4387-bd22-370b7660d9d7/holyjs-2020-spring-slides-reforged.pptx)
-
-
 ## Getting started
 ### Requirements
 Node.js: `^14.13.1 || >=16.0.0`
