@@ -1,3 +1,8 @@
+## [10.0.4](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.3...v10.0.4) (2023-11-04)
+
+### Fixes & improvements
+* fix(deps): update dependency pkg-dir to v8 ([9b5feac](https://github.com/antongolub/yarn-audit-fix/commit/9b5feacb174fe83a5700a1b85cc475717e19cedd))
+
 ## [10.0.3](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.2...v10.0.3) (2023-11-02)
 
 ### Fixes & improvements
