@@ -1,3 +1,8 @@
+## [10.0.5](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.4...v10.0.5) (2023-11-16)
+
+### Fixes & improvements
+* fix(deps): update dependency find-up to v7 ([284fb63](https://github.com/antongolub/yarn-audit-fix/commit/284fb632660dc0f90e02e123a9e809671246d6b1))
+
 ## [10.0.4](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.3...v10.0.4) (2023-11-04)
 
 ### Fixes & improvements
