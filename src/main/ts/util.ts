@@ -205,17 +205,16 @@ const findParent = (dir: string, target: string): string | null => {
     return dir
   }
   const parentDir = path.resolve(dir, '..')
-  if (dir === parentDir) {
-    return null
-  }
-  return findParent(parentDir, target)
+
+  return dir === parentDir
+    ? null
+    : findParent(parentDir, target)
 }
 
 const findClosest = (target: string, cwd = __dirname): string | null => {
   const found = findParent(cwd, target)
 
-  if (!found) {
-    throw new Error(target)
-  }
-  return found ? path.join(found, target) : null
+  return found
+    ? path.join(found, target)
+    : null
 }
