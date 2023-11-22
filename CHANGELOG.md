@@ -1,3 +1,9 @@
+## [10.0.6](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.5...v10.0.6) (2023-11-22)
+
+### Fixes & improvements
+* refactor: use os.temp() instead of find-cache-dir ([85776a0](https://github.com/antongolub/yarn-audit-fix/commit/85776a013e00402e966a715747859c2a1be654ab))
+* fix: rm find-up and pkg-dir from deps to bring back nodejs 16 support ([5ac29c1](https://github.com/antongolub/yarn-audit-fix/commit/5ac29c172c333df2ce7716f2face54ecfb383c3e))
+
 ## [10.0.5](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.4...v10.0.5) (2023-11-16)
 
 ### Fixes & improvements
