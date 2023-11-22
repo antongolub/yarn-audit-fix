@@ -221,8 +221,10 @@ describe('yarn-audit-fix', () => {
     })
 
     it('throws error on broken package structure', async () => {
-      // @ts-ignore
-      fs.existsSync.mockReturnValueOnce(false)
+      fs.existsSync
+        // @ts-ignore
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false)
 
       expect(run({ cwd: 'unknown' })).rejects.toEqual(
         new Error('not found: yarn.lock'),

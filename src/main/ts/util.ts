@@ -1,17 +1,15 @@
 import type { StdioOptions } from 'node:child_process'
 import crypto from 'node:crypto'
 import { createRequire } from 'node:module'
-import { dirname, join, resolve } from 'node:path'
+import path, { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import chalk from 'chalk'
 import findCacheDir from 'find-cache-dir'
-import { findUpSync, pathExistsSync } from 'find-up'
 import fse, { SymlinkType } from 'fs-extra'
 import fg, { Options as GlobOptions } from 'fast-glob'
 import yaml from 'js-yaml'
 import { reduce } from 'lodash-es'
-import { packageDirectorySync } from 'pkg-dir'
 
 import { TFlags, TFlagsMapping } from './ifaces'
 
@@ -21,7 +19,6 @@ const cp = createRequire(import.meta.url)('child_process')
 const { ensureDirSync, readFileSync } = fse
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export const pkgDir = (cwd: string): string => packageDirectorySync({ cwd }) as string
 
 export const invoke = (
   cmd: string,
@@ -119,19 +116,7 @@ export const getSymlinkType = (type?: string): SymlinkType =>
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
 
-export const getClosestBin = (cmd: string): string =>
-  String(
-    findUpSync(
-      (dir) => {
-        const ref = resolve(dir, 'node_modules', '.bin', cmd)
-
-        return pathExistsSync(ref) ? ref : undefined
-      },
-      {
-        cwd: String(pkgDir(__dirname)),
-      },
-    ),
-  )
+export const getClosestBin = (cmd: string): string => findClosest(`./node_modules/.bin/${cmd}`) as string
 
 export const getNpm = (npmPath = 'system', isWin = isWindows()): string => {
   const cmd = isWin ? 'npm.cmd' : 'npm'
@@ -214,12 +199,31 @@ export const formatYaml = yaml.dump
 export const getBinVersion = (bin: string, cwd = process.cwd()): string =>
   invoke(bin, ['--version'], cwd, true, false)
 
-export const getSelfManifest = () => readJson(
-  join(pkgDir(__dirname) + '', 'package.json'), // eslint-disable-line
-)
+export const getSelfManifest = () => readJson(findClosest('package.json') as string)
 
 export const addHiddenProp = (obj: Record<string, any>, prop: string, value: any) =>
   Object.defineProperty(obj, prop, {
     value,
     enumerable: false
   })
+
+
+const findParent = (dir: string, target: string): string | null => {
+  if (fse.existsSync(path.join(dir, target))) {
+    return dir
+  }
+  const parentDir = path.resolve(dir, '..')
+  if (dir === parentDir) {
+    return null
+  }
+  return findParent(parentDir, target)
+}
+
+const findClosest = (target: string, cwd = __dirname): string | null => {
+  const found = findParent(cwd, target)
+
+  if (!found) {
+    throw new Error(target)
+  }
+  return found ? path.join(found, target) : null
+}
