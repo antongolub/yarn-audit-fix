@@ -61,7 +61,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, windows-latest ]
-        node-version: [ 20, 18, 16, 14 ]
+        node-version: [ 20, 14 ]
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -71,7 +71,7 @@ jobs:
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version:  ${{ matrix.node-version }}
 
       - name: Fetch deps
         run: yarn --mutex network --frozen-lockfile --network-concurrency 25 --silent --disable-self-update-check
