@@ -138,9 +138,9 @@ describe('util', () => {
     it('properly resolves temp dir path', () => {
       const pwd = process.cwd()
       const tempdir = resolve(__dirname, '../temp')
-      const cases: [string, string | undefined, string][] = [
+      const cases: [string, string | undefined, string | RegExp][] = [
         [pwd, tempdir, tempdir],
-        [pwd, undefined, resolve(pwd, 'node_modules/.cache/yarn-audit-fix')],
+        [pwd, undefined, /tempy-/],
       ]
 
       cases.forEach(([cwd, temp, result]) => {
