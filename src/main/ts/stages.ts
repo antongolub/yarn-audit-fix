@@ -36,7 +36,7 @@ export const resolveBins: TCallback = ({ ctx, temp, flags }) => {
     yafLatest: invoke(
       ctx.bins.npm,
       ['view', yafManifest.name, 'version'],
-      temp,
+      process.cwd(),
       true,
       false,
     ) as string,

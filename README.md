@@ -61,7 +61,7 @@ Fortunately, there are several workarounds:
 
 ## Getting started
 ### Requirements
-Node.js: `^14.13.1 || >=16.0.0`
+Node.js: `>=16.0.0`
 
 ### Install
 ```shell script

@@ -19,7 +19,6 @@ const cp = createRequire(import.meta.url)('child_process')
 const { ensureDirSync, readFileSync } = fse
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-
 export const invoke = (
   cmd: string,
   args: string[],
