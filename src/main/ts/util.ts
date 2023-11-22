@@ -3,9 +3,9 @@ import crypto from 'node:crypto'
 import { createRequire } from 'node:module'
 import path, { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import os from 'node:os'
 
 import chalk from 'chalk'
-import findCacheDir from 'find-cache-dir'
 import fse, { SymlinkType } from 'fs-extra'
 import fg, { Options as GlobOptions } from 'fast-glob'
 import yaml from 'js-yaml'
@@ -166,17 +166,17 @@ export const ensureDir = (dir: string): string => {
   return dir
 }
 
-export const getTemp = (cwd: string, temp?: string): string => {
+export const getTemp = (cwd: string, temp?: string) => {
   if (temp) {
-    return ensureDir(resolve(temp))
+    return ensureDir(resolve(cwd, temp))
   }
 
-  const id = crypto.randomBytes(16).toString('hex')
-  const cacheDir = findCacheDir({ name: 'yarn-audit-fix', cwd }) + ''
-  const tempDir = join(cacheDir, id)
+  const _temp = path.join(os.tmpdir(), `tempy-${crypto.randomBytes(16).toString('hex')}`)
+  fse.mkdtempSync(_temp) // Hmm... should return string, but returns undefined
 
-  return ensureDir(tempDir)
+  return _temp
 }
+
 
 export const attempt = <T>(f: () => T): T | null => {
   try {

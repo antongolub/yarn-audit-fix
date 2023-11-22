@@ -11,7 +11,6 @@ jest.mock('fs-extra')
 jest.mock('synp')
 
 const cp = createRequire(import.meta.url)('child_process')
-const findCacheDir = (await import('find-cache-dir')).default
 const fs = (await import('fs-extra')).default
 const synp = (await import('synp')).default
 
@@ -55,8 +54,9 @@ const audit = revive(readFixture('lockfile/legacy/yarn-audit-report.json'))
 const yarnLockBefore = readFixture('lockfile/legacy/yarn.lock.before')
 const yarnLockAfter = readFixture('lockfile/legacy/yarn.lock.after')
 
-const temp = findCacheDir({ name: 'yarn-audit-fix', create: true }) + ''
 const cwd = process.cwd()
+
+const temp = resolve(__dirname, '../../../.temp')
 const stdio = ['inherit', 'inherit', 'inherit']
 const stdionull = [null, null, null] // eslint-disable-line
 
@@ -142,7 +142,7 @@ describe('yarn-audit-fix', () => {
     // eslint-disable-next-line
     const checkTempAssets = () => {
       // Preparing...
-      expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
+      expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
       expect(fs.copyFileSync).toHaveBeenCalledWith(
         join(cwd, 'yarn.lock'),
         strMatching(temp, 'yarn.lock'),
@@ -170,7 +170,7 @@ describe('yarn-audit-fix', () => {
       checkTempAssets()
 
       // Generating package-lock.json from yarn.lock...
-      expect(synp.yarnToNpm).toHaveBeenCalledWith(strMatching(temp), true)
+      expect(synp.yarnToNpm).toHaveBeenCalledWith(temp, true)
       expect(fs.removeSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
 
       // Applying npm audit fix...
@@ -240,6 +240,7 @@ describe('yarn-audit-fix', () => {
       it('invokes cmd queue with proper args', async () => {
         await run({
           flow: 'patch',
+          temp
         })
 
         checkTempAssets()
@@ -250,7 +251,7 @@ describe('yarn-audit-fix', () => {
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
           ['audit', '--json'],
-          { cwd: strMatching(temp), stdio: stdionull },
+          { cwd: temp, stdio: stdionull },
         )
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
@@ -281,6 +282,7 @@ describe('yarn-audit-fix', () => {
           registry: registryUrl,
           flow: 'convert',
           ignoreEngines: true,
+          temp,
         })
         checkConvertFlow()
       })
