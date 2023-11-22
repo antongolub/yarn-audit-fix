@@ -165,17 +165,10 @@ export const ensureDir = (dir: string): string => {
   return dir
 }
 
-export const getTemp = (cwd: string, temp?: string) => {
-  if (temp) {
-    return ensureDir(resolve(cwd, temp))
-  }
-
-  const _temp = path.join(os.tmpdir(), `tempy-${crypto.randomBytes(16).toString('hex')}`)
-  fse.mkdtempSync(_temp) // Hmm... should return string, but returns undefined
-
-  return _temp
-}
-
+export const getTemp = (cwd: string, temp?: string) =>
+  temp
+    ? ensureDir(resolve(cwd, temp))
+    : fse.mkdtempSync(path.join(os.tmpdir(), `tempy-${crypto.randomBytes(16).toString('hex')}`))
 
 export const attempt = <T>(f: () => T): T | null => {
   try {
