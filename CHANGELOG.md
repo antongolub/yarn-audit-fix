@@ -1,3 +1,8 @@
+## [10.0.7](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.6...v10.0.7) (2023-11-23)
+
+### Fixes & improvements
+* fix(deps): update dependency commander to v11 ([1cd29fa](https://github.com/antongolub/yarn-audit-fix/commit/1cd29fac31128167b29f4dc098d0df9b10cc6184))
+
 ## [10.0.6](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.5...v10.0.6) (2023-11-22)
 
 ### Fixes & improvements

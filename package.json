@@ -1,6 +1,6 @@
 {
   "name": "yarn-audit-fix",
-  "version": "10.0.6",
+  "version": "10.0.7",
   "private": false,
   "publishConfig": {
     "access": "public"
