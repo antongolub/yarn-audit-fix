@@ -4,7 +4,7 @@ import {
   TLockfileEntry,
   TLockfileObject,
 } from '../ifaces'
-import {addHiddenProp, formatFlags, formatYaml, invoke, mapFlags, parseYaml} from '../util'
+import { addHiddenProp, formatFlags, formatYaml, invoke, mapFlags, parseYaml, sortObject } from '../util'
 
 export const parse = (raw: string): TLockfileObject => {
   const data = parseYaml(raw)
@@ -33,7 +33,7 @@ export const patchEntry = (
 
   // NOTE seems like deps are not updated by `yarn mode='--update-lockfile'`, only checksums
   entry.dependencies =
-    JSON.parse(
+    sortObject(JSON.parse(
       invoke(
         npmBin,
         ['view', `${name}@${newVersion}`, 'dependencies', '--json'],
@@ -41,7 +41,7 @@ export const patchEntry = (
         true,
         false,
       ) || 'null',
-    ) || undefined
+    ) || undefined)
 
   delete entry.checksum
 
