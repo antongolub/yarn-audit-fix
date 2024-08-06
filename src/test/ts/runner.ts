@@ -56,6 +56,7 @@ const yarnLockAfter = readFixture('lockfile/legacy/yarn.lock.after')
 
 const cwd = process.cwd()
 
+const shell = true
 const temp = resolve(__dirname, '../../../.temp')
 const stdio = ['inherit', 'inherit', 'inherit']
 const stdionull = [null, null, null] // eslint-disable-line
@@ -186,7 +187,7 @@ describe('yarn-audit-fix', () => {
           '--prefix',
           expect.stringMatching(temp),
         ].filter((v) => v !== undefined),
-        { cwd: expect.stringMatching(temp), stdio },
+        { cwd: expect.stringMatching(temp), stdio, shell },
       )
 
       // Updating yarn.lock from package-lock.json...
@@ -204,7 +205,7 @@ describe('yarn-audit-fix', () => {
           registryUrl,
           '--ignore-engines',
         ],
-        { cwd, stdio },
+        { cwd, stdio, shell },
       )
       expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
     }
@@ -251,7 +252,7 @@ describe('yarn-audit-fix', () => {
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
           ['audit', '--json'],
-          { cwd: temp, stdio: stdionull },
+          { cwd: temp, stdio: stdionull, shell },
         )
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
@@ -268,7 +269,7 @@ describe('yarn-audit-fix', () => {
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
           ['install', '--update-checksums'],
-          { cwd, stdio },
+          { cwd, stdio, shell },
         )
       })
     })

@@ -218,3 +218,9 @@ const findClosest = (target: string, cwd = __dirname): string | null => {
     ? path.join(found, target)
     : null
 }
+
+export const sortObject = <T extends Record<any, any>>(obj: T): T =>
+  obj ? Object.keys(obj).sort().reduce((result, key) => {
+    result[key] = obj[key]
+    return result
+  }, Object.create(null)) : obj
