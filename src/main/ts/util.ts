@@ -32,7 +32,7 @@ export const invoke = (
   const stdio: StdioOptions = inherit
     ? ['inherit', 'inherit', 'inherit']
     : [null, null, null] // eslint-disable-line
-  const result = cp.spawnSync(cmd, args, { cwd, stdio })
+  const result = cp.spawnSync(cmd, args, { cwd, stdio, shell: true })
 
   if (!skipError && (result.error || result.status)) {
     throw result
