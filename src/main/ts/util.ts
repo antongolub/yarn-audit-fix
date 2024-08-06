@@ -220,7 +220,7 @@ const findClosest = (target: string, cwd = __dirname): string | null => {
 }
 
 export const sortObject = <T extends Record<any, any>>(obj: T): T =>
-  obj ? Object.keys(obj).sort().reduce((result, key) => {
+  obj ? Object.keys(obj).sort((a: string, b: string) => a.localeCompare(b)).reduce((result, key) => {
     result[key] = obj[key]
     return result
   }, Object.create(null)) : obj
