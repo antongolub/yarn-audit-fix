@@ -1,3 +1,9 @@
+## [10.0.8](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.7...v10.0.8) (2024-08-06)
+
+### Fixes & improvements
+* fix: apply object key sort to npm view deps output (#336) ([106229b](https://github.com/antongolub/yarn-audit-fix/commit/106229b7a187eac94fa1aaa88aa4e9a4d9c6ca78))
+* fix: set shell true to handle sec fix for windows (#335) ([6a29f1c](https://github.com/antongolub/yarn-audit-fix/commit/6a29f1c204a3cc0245059c91ae9fb2bf3c6c2b53))
+
 ## [10.0.7](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.6...v10.0.7) (2023-11-23)
 
 ### Fixes & improvements
