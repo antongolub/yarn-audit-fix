@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           # cache: 'yarn'
 
       - name: Fetch deps
@@ -36,7 +36,7 @@ jobs:
 
       - name: Codeclimate
         if: github.ref == 'refs/heads/master'
-        uses: paambaati/codeclimate-action@v5.0.0
+        uses: paambaati/codeclimate-action@v8.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
@@ -61,14 +61,14 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, windows-latest ]
-        node-version: [ 20, 16 ]
+        node-version: [ 22, 18 ]
 
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version:  ${{ matrix.node-version }}
@@ -85,11 +85,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Run all tests
-        if: matrix.node-version == '20' && matrix.os == 'ubuntu-22.04'
+        if: matrix.node-version == '22' && matrix.os == 'ubuntu-22.04'
         run: yarn test
 
       - name: Run integration tests
-        if: matrix.node-version != '20' || matrix.os != 'ubuntu-22.04'
+        if: matrix.node-version != '22' || matrix.os != 'ubuntu-22.04'
         run: yarn test:integration
 
   post-release:
