@@ -92,7 +92,7 @@
     "@types/node": "^22.5.4",
     "concurrently": "^9.0.0",
     "cpy-cli": "^5.0.0",
-    "esbuild": "^0.23.1",
+    "esbuild": "^0.24.0",
     "esbuild-node-externals": "^1.14.0",
     "eslint": "^8.46.0",
     "eslint-config-prettier": "^9.1.0",
