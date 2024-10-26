@@ -89,6 +89,18 @@ describe('util', () => {
           ['force', 'audit-level', 'only', 'bar', 'b'],
           ['--force', '--audit-level', 'moderate', '--only', 'dev'],
         ],
+        [{ exclude: [] }, ['exclude'], []],
+        [
+          { exclude: ['@scope/package'] },
+          ['exclude'],
+          ['--exclude', '@scope/package'],
+        ],
+        [
+          { exclude: ['@scope/package', 'another-package'] },
+          ['exclude'],
+          ['--exclude', '@scope/package', '--exclude', 'another-package'],
+        ],
+        [{ verbose: true, exclude: [] }, [], ['--verbose']],
       ]
 
       cases.forEach(([input, picklist, output]) => {
