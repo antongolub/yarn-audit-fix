@@ -68,6 +68,14 @@ export const printRuntimeDigest: TCallback = ({
     )
   }
 
+  // NOTE yarn > v3.3.0 fixed plugin-npm-cli minor compatibility
+  // https://github.com/yarnpkg/berry/pull/4356#issuecomment-1316653931
+  if (semver.gt('3.3.0', versions.yarn) && (flags.exclude || flags.ignore)) {
+    console.warn(
+      `This project yarn version ${versions.yarn} doesn't support the 'exclude' and 'ignore' flags. Please upgrade to yarn 3.3.0 or higher to use those flags`,
+    )
+  }
+
   if (semver.gt(versions.yafLatest, versions.yaf)) {
     console.warn(
       `yarn-audit-fix version ${versions.yaf} is out of date. Install the latest ${versions.yafLatest} for better results`,
