@@ -91,7 +91,7 @@ describe('util', () => {
         ],
         [{ exclude: [] }, ['exclude'], []],
         [
-          { exclude: ['@scope/package'] },
+          { exclude: ['@scope/package'] }, // eslint-disable-line sonarjs/no-duplicate-string
           ['exclude'],
           ['--exclude', '@scope/package'],
         ],

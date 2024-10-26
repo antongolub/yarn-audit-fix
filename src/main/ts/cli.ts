@@ -14,8 +14,7 @@ const parseMultipleValueArg = (
     return value
   }
 
-  const previousArray = Array.isArray(previous) ? previous : [previous]
-  return previousArray.concat([value])
+  return [previous, value].flat()
 }
 
 const env = process.env
