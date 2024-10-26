@@ -22,7 +22,7 @@ import {
 /**
  * Resolve bins.
  */
-export const resolveBins: TCallback = ({ ctx, temp, flags }) => {
+export const resolveBins: TCallback = ({ ctx, flags }) => {
   const yafManifest = getSelfManifest()
   ctx.bins = {
     yarn: getYarn(),
