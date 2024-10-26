@@ -1,3 +1,9 @@
+## [10.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.9...v10.1.0) (2024-10-26)
+
+### Features
+* feat: use "exclude" and "ignore" CLI options when running `yarn npm audit` command ([015a4b9](https://github.com/antongolub/yarn-audit-fix/commit/015a4b919a73279d1415466b6879e79cd8364ce7))
+* feat: support multi-value CLI options ([2664c66](https://github.com/antongolub/yarn-audit-fix/commit/2664c66c0b83aa7250df715e7ac6beef8b17646c))
+
 ## [10.0.9](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.8...v10.0.9) (2024-08-21)
 
 ### Fixes & improvements
