@@ -71,10 +71,16 @@ export const formatFlags = (flags: TFlags, ...picklist: string[]): string[] =>
     const flag = formatFlag(key)
 
     if (checkValue(key, value, omitlist, picklist)) {
-      memo.push(flag)
+      if (!Array.isArray(value)) {
+        memo.push(flag)
 
-      if (value !== true) {
-        memo.push(value)
+        if (value !== true) {
+          memo.push(String(value))
+        }
+      } else {
+        value.forEach((val) => {
+          memo.push(flag, String(val))
+        })
       }
     }
 
