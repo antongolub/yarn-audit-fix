@@ -8,7 +8,7 @@
   "type": "module",
   "description": "The missing `yarn audit fix`",
   "bin": {
-    "yarn-audit-fix": "./target/esm/cli.mjs"
+    "yarn-audit-fix": "target/esm/cli.mjs"
   },
   "main": "./target/esm/index.mjs",
   "exports": {
@@ -109,6 +109,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/antongolub/yarn-audit-fix.git"
+    "url": "git+https://github.com/antongolub/yarn-audit-fix.git"
   }
 }
