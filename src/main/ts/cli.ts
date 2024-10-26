@@ -6,6 +6,18 @@ import { Command, Option } from 'commander'
 
 import { run } from './runner'
 
+const parseMultipleValueArg = (
+  value: string,
+  previous: string | string[] | undefined,
+) => {
+  if (!previous) {
+    return value
+  }
+
+  const previousArray = Array.isArray(previous) ? previous : [previous]
+  return previousArray.concat([value])
+}
+
 const env = process.env
 const flags = new Command()
   .addOption(
