@@ -108,7 +108,13 @@ export const audit = (
       },
     },
   }
-  const _flags = formatFlags(mapFlags(flags, mapping), 'groups', 'verbose')
+  const _flags = formatFlags(
+    mapFlags(flags, mapping),
+    'exclude',
+    'ignore',
+    'groups',
+    'verbose',
+  )
   const report = invoke(
     bins.yarn,
     ['npm', 'audit', '--all', '--json', '--recursive', ..._flags],
