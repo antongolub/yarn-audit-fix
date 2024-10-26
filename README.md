@@ -114,6 +114,8 @@ success Already up-to-date.
 | `--symlink`           | Symlink type for `node_modules` ref                                                                                                                                     | `junction` for Windows, `dir` otherwise    |                            |
 | `--temp`              | Directory for temporary assets                                                                                                                                          | `<cwd>/node_modules/.cache/yarn-audit-fix` |                            |
 | `--verbose`           | Switch log level to verbose/debug                                                                                                                                       | `false`                                    |                            |
+| `--exclude`           | Array of glob patterns of packages to exclude from audit                                                                                                                |                                            |                            |
+| `--ignore`            | Array of glob patterns of advisory IDs to ignore in the audit report                                                                                                    |                                            |                            |
 
 ### ENV
 All mentioned above CLI options can be replaced with the corresponding env variables with leading **YAF** prefix. For example:
@@ -338,6 +340,13 @@ yarn add yarn-audit-fix -D --ignore-engines
 ```
 
 ### Response Code: 400 (Bad Request)
+
+In some cases **yarn npm audit** fails because the `yarn.lock` file contains a transitive dependency in unreadable format:
+```
+  'example-dependency': 'npm:example-dependency@1.0.0'
+```
+
+This will results in:
 ```shell
 invoke yarn npm audit --all --json --recursive
 ➤ YN0035: Bad Request
@@ -346,6 +355,10 @@ invoke yarn npm audit --all --json --recursive
 ➤ YN0035:   Request URL: https://registry.yarnpkg.com/-/npm/v1/security/audits/quick
 ```
 https://github.com/yarnpkg/berry/issues/4117
+
+A workaround is available using the `exclude` option:
+1. Update project **yarn** to >=3.3.0 (lower version doesn't support this parameter for **yarn npm audit**).
+2. Apply `npx yarn-audit-fix --exclude example-dependency`. This will cause **yarn** to ignore `example-dependency` while creating the audit report.
 
 ## Contributing
 Feel free to open any issues: bugs, feature requests or other questions.
