@@ -34,6 +34,12 @@ const flags = new Command()
     'Get an idea of what audit fix will do',
     env.YAF_DRY_RUN,
   )
+  .option(
+    '--exclude <path>',
+    'Array of glob patterns of packages to exclude from audit',
+    parseMultipleValueArg,
+    env.YAF_EXCLUDE,
+  )
   .addOption(
     new Option('--flow [flow]', 'Define how `yarn.lock` is modified')
       .choices(['convert', 'patch'])
@@ -43,6 +49,12 @@ const flags = new Command()
     '--force [bool]',
     'Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones',
     env.YAF_FORCE,
+  )
+  .option(
+    '--ignore <id>',
+    'Array of glob patterns of advisory IDs to ignore in the audit report',
+    parseMultipleValueArg,
+    env.YAF_IGNORE,
   )
   .option(
     '--ignore-engines [bool]',
