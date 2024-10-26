@@ -31,7 +31,6 @@
   },
   "scripts": {
     "clean": "rimraf target buildcache docs coverage",
-    "lint:fix": "yarn lint --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "concurrently 'npm:test:*'",
     "test:unit": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.config.json --runInBand",
