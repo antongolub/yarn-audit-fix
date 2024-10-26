@@ -26,6 +26,8 @@ const noop = () => {
 }
 const fixtures = resolve(__dirname, '../fixtures/')
 const registryUrl = 'https://example.com'
+const dependency = 'example-package'
+const scopedDependency = '@scope/package'
 const strMatching = (start = '', end = '') =>
   expect.stringMatching(new RegExp(`^${start}.+${end}$`))
 const readFixture = (name: string): string =>
@@ -184,6 +186,10 @@ describe('yarn-audit-fix', () => {
           '--verbose',
           '--registry',
           registryUrl,
+          '--exclude',
+          dependency,
+          '--exclude',
+          scopedDependency,
           '--prefix',
           expect.stringMatching(temp),
         ].filter((v) => v !== undefined),
@@ -241,7 +247,7 @@ describe('yarn-audit-fix', () => {
       it('invokes cmd queue with proper args', async () => {
         await run({
           flow: 'patch',
-          temp
+          temp,
         })
 
         checkTempAssets()
@@ -282,6 +288,7 @@ describe('yarn-audit-fix', () => {
           'package-lock-only': true,
           registry: registryUrl,
           flow: 'convert',
+          exclude: [dependency, scopedDependency],
           ignoreEngines: true,
           temp,
         })
@@ -315,6 +322,8 @@ describe('yarn-audit-fix', () => {
           '--package-lock-only=false',
           `--registry=${registryUrl}`,
           '--flow=convert',
+          `--exclude=${dependency}`,
+          `--exclude=${scopedDependency}`,
           '--ignore-engines',
         )
         await reimport('../../main/ts/cli')
