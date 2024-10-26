@@ -1,7 +1,7 @@
 import type { StdioOptions } from 'node:child_process'
 import crypto from 'node:crypto'
 import { createRequire } from 'node:module'
-import path, { dirname, join, resolve } from 'node:path'
+import path, { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import os from 'node:os'
 
