@@ -31,6 +31,7 @@
   },
   "scripts": {
     "clean": "rimraf target buildcache docs coverage",
+    "lint:fix": "eslint -c src/test/lint/.eslintrc.json src --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "concurrently 'npm:test:*'",
     "test:unit": "NODE_OPTIONS=\"--experimental-vm-modules\" jest --config=jest.config.json --runInBand",
