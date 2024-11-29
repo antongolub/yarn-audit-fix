@@ -83,14 +83,14 @@
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
     "semver": "^7.6.3",
-    "synp": "^1.9.13"
+    "synp": "^1.9.14"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.8.1",
-    "concurrently": "^9.0.1",
+    "@types/node": "^22.10.1",
+    "concurrently": "^9.1.0",
     "cpy-cli": "^5.0.0",
     "esbuild": "^0.24.0",
     "esbuild-node-externals": "^1.15.0",
@@ -101,10 +101,10 @@
     "minimist": "^1.2.8",
     "mkdirp": "^3.0.1",
     "npm": "^10.0.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.4.1",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typedoc": "^0.27.0",
+    "typedoc": "^0.27.1",
     "typescript": "5.7.2"
   },
   "repository": {
