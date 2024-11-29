@@ -1,3 +1,8 @@
+## [10.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v10.1.0...v10.1.1) (2024-11-29)
+
+### Fixes & improvements
+* fix: up deps to fix cross-spawn vuln ([faafdeb](https://github.com/antongolub/yarn-audit-fix/commit/faafdeba429338c0c1e1f3b162deac116158ac43))
+
 ## [10.1.0](https://github.com/antongolub/yarn-audit-fix/compare/v10.0.9...v10.1.0) (2024-10-26)
 
 ### Features
