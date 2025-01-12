@@ -8,7 +8,7 @@
   yarn-audit-fix
 </h1>
 
-[![CI](https://github.com/antongolub/yarn-audit-fix/workflows/CI/badge.svg)](https://github.com/antongolub/yarn-audit-fix/actions)
+[![CI](https://github.com/antongolub/yarn-audit-fix/actions/workflows/ci.yaml/badge.svg?event=push)](https://github.com/antongolub/yarn-audit-fix/actions/workflows/ci.yaml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability)](https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage)](https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage)
 [![Sonar](https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status)](https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix)
