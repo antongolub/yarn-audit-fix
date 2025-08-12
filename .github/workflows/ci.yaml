@@ -101,7 +101,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: 14 # the lowest required
+          node-version: 22 # the lowest required
 
       - name: Check running via npx
         run: npm_config_yes=true npx yarn-audit-fix@latest --version
