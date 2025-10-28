@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           # cache: 'yarn'
 
       - name: Fetch deps
@@ -101,7 +101,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v6
         with:
-          node-version: 22 # the lowest required
+          node-version: 24 # the lowest required
 
       - name: Check running via npx
         run: npm_config_yes=true npx yarn-audit-fix@latest --version
