@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.0.0",
-    "@types/jest": "^29.5.14",
+    "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.0.0",
     "concurrently": "^9.1.2",
