@@ -1,11 +1,4 @@
-import * as fs from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-import { format, parse, parseAuditReport } from '../../main/ts/lockfile/v1'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const fixtures = resolve(__dirname, '../fixtures')
+import { parseAuditReport } from '../../main/ts/audit/v1'
 
 describe('parseReport', () => {
   it('processes \\n-separated chunks', () => {
@@ -21,15 +14,5 @@ describe('parseReport', () => {
         vulnerable_versions: '>=7.0.0 <8.2.10',
       },
     })
-  })
-})
-
-describe('reader', () => {
-  it('provides parse/format interop', () => {
-    const contents = fs.readFileSync(
-      join(fixtures, 'lockfile/v1/yarn.lock'),
-      'utf-8',
-    )
-    expect(format(parse(contents))).toEqual(contents)
   })
 })

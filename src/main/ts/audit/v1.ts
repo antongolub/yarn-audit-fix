@@ -1,43 +1,19 @@
 import { SpawnSyncReturns } from 'node:child_process'
 
-import lf from '@yarnpkg/lockfile'
 import { keyBy } from 'lodash-es'
 
 import {
   TAuditEntry,
   TAuditReport,
   TFlags,
-  TLockfileEntry,
-  TLockfileObject,
 } from '../ifaces'
 import { attempt, formatFlags, invoke, mapFlags } from '../util'
 
-export const parse = (raw: string): TLockfileObject => {
-  const data = lf.parse(raw)
-
-  if (data.type !== 'success') {
-    throw new Error('Merge conflict in yarn lockfile, aborting')
-  }
-
-  return data.object as TLockfileObject
-}
-
-export const patchEntry = (
-  entry: TLockfileEntry,
-  name: string,
-  newVersion: string,
-): TLockfileEntry => {
-  entry.version = newVersion
-  entry.dependencies = {}
-  entry.integrity = ''
-  entry.resolved = ''
-
-  return entry
-}
-
-export const format = (lockfile: TLockfileObject): string =>
-  lf.stringify(lockfile)
-
+/**
+ * npm / yarn-classic audit invocation (`npm audit --json` or
+ * `yarn audit --json`). Produces a stream of `auditAdvisory` events
+ * (one JSON object per line) that we collapse into a `TAuditReport`.
+ */
 export const audit = (
   flags: TFlags,
   temp: string,

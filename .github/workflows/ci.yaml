@@ -43,17 +43,19 @@ jobs:
           coverageLocations: |
             ${{github.workspace}}/target/coverage/lcov.info:lcov
 
-      - name: Semantic Release
-        if: github.ref == 'refs/heads/master'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_PROVENANCE: true
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_AUTHOR_NAME: ${{ secrets.GIT_AUTHOR_NAME }}
-          GIT_AUTHOR_EMAIL: ${{ secrets.GIT_AUTHOR_EMAIL }}
-          GIT_COMMITTER_NAME: ${{ secrets.GIT_COMMITTER_NAME }}
-          GIT_COMMITTER_EMAIL: ${{ secrets.GIT_COMMITTER_EMAIL }}
-        run: npm_config_yes=true npx zx-semrel
+      # Semantic Release temporarily disabled — yarn 4 support landing as a
+      # hand-published snapshot first. Re-enable after the snapshot soaks.
+      # - name: Semantic Release
+      #   if: github.ref == 'refs/heads/master'
+      #   env:
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #     NPM_PROVENANCE: true
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GIT_AUTHOR_NAME: ${{ secrets.GIT_AUTHOR_NAME }}
+      #     GIT_AUTHOR_EMAIL: ${{ secrets.GIT_AUTHOR_EMAIL }}
+      #     GIT_COMMITTER_NAME: ${{ secrets.GIT_COMMITTER_NAME }}
+      #     GIT_COMMITTER_EMAIL: ${{ secrets.GIT_COMMITTER_EMAIL }}
+      #   run: npm_config_yes=true npx zx-semrel
 
   pr:
     if: github.event_name == 'pull_request'
@@ -92,22 +94,24 @@ jobs:
         if: matrix.node-version != '22' || matrix.os != 'ubuntu-22.04'
         run: yarn test:integration
 
-  post-release:
-    name: Post-release
-    needs: push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Setup NodeJS
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24 # the lowest required
-
-      - name: Check running via npx
-        run: npm_config_yes=true npx yarn-audit-fix@latest --version
-
-      - name: Check global install
-        run: |
-          npm i -g yarn-audit-fix@latest
-          which yarn-audit-fix
-          yarn-audit-fix --version
+  # post-release disabled while Semantic Release is paused. Re-enable in
+  # the same commit that re-enables the release step above.
+  # post-release:
+  #   name: Post-release
+  #   needs: push
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: Setup NodeJS
+  #       uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 24 # the lowest required
+  #
+  #     - name: Check running via npx
+  #       run: npm_config_yes=true npx yarn-audit-fix@latest --version
+  #
+  #     - name: Check global install
+  #       run: |
+  #         npm i -g yarn-audit-fix@latest
+  #         which yarn-audit-fix
+  #         yarn-audit-fix --version

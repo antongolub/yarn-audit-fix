@@ -53,11 +53,23 @@ Fortunately, there are several workarounds:
 2. Fetch `yarn/npm audit --json` advisories and patch lockfile inners (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)). `yarn-audit-fix --flow=patch`. Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antongolub/the-missing-yarn-audit-fix-for-yarn-2-berry-1p8)
 
 ### Key features
-* Works with Yarn 1 Classic & Yarn v2+ lockfiles (⚠️ experimental)
+* Supports every yarn lockfile schema in the wild: Yarn 1 Classic, Yarn 2/3 (berry v4–v6) and **Yarn 4+** (berry v8/v9/v10). Schema detection is automatic via [`@antongolub/lockfile`](https://github.com/antongolub/lockfile).
 * A couple of strategies to fix security issues
 * macOS / Linux / Windows support
 * CLI / JS API
 * TS and flow typings
+
+#### Lockfile compatibility
+
+| Yarn  | Lockfile schema           | Supported |
+|-------|---------------------------|:---------:|
+| 1.x   | `yarn-classic`            | ✅        |
+| 2.x   | `yarn-berry-v4`           | ✅        |
+| 3.0   | `yarn-berry-v5`           | ✅        |
+| 3.1+  | `yarn-berry-v6`           | ✅        |
+| 4.0–4.13 | `yarn-berry-v8`        | ✅        |
+| 4.14+ | `yarn-berry-v9`           | ✅        |
+| 5.x dev | `yarn-berry-v10`        | ✅        |
 
 ## Getting started
 ### Requirements
@@ -168,6 +180,9 @@ await run({}, flow)
 ```
 
 ## Migration notes
+### ^11.0.0
+Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema in the wild (classic + berry v4–v10). The audit-output parser now handles both the legacy yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON tree format, deriving `patched_versions` from the `Vulnerable Versions` upper bound when the field is absent. Lockfile entries are mutated via the canonical graph model (edge-redirect) rather than the legacy in-place version-rewrite — descriptor keys may merge in the output (e.g. `"lodash@npm:4.17.21, lodash@npm:4.17.20":`), which is semantically equivalent and reconciled by the subsequent `yarn install --mode=update-lockfile`.
+
 ### ^10.0.0
 v10 bumps the pkg deps and requires NodeJS v14.
 

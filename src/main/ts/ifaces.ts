@@ -46,6 +46,8 @@ export type TAuditReport = {
   [versionInfo: string]: TAuditAdvisory
 }
 
+import type { FormatId, Graph } from '@antongolub/lockfile'
+
 export type TLockfileEntry = {
   version: string
   resolved: string
@@ -57,8 +59,11 @@ export type TLockfileEntry = {
   [rest: string]: any
 }
 
-export type TLockfileObject = {
-  [versionInfo: string]: TLockfileEntry
-}
+// Re-exported from @antongolub/lockfile. The legacy plain-object shape lives
+// behind the Graph now — operations go through parse/format/patch from
+// ./lockfile, which delegates to the package's parse/stringify/mutate.
+export type TLockfileObject = Graph
 
-export type TLockfileType = 'yarn1' | 'yarn2' | undefined
+// FormatId from @antongolub/lockfile (e.g. 'yarn-classic', 'yarn-berry-v8').
+// `undefined` retained for the "format not recognised" sentinel.
+export type TLockfileType = FormatId | undefined

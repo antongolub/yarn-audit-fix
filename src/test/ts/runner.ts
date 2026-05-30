@@ -14,7 +14,7 @@ const cp = createRequire(import.meta.url)('child_process')
 const fs = (await import('fs-extra')).default
 const synp = (await import('synp')).default
 
-const lf = (await import('../../main/ts/lockfile/index'))._internal
+const lf = (await import('../../main/ts/lockfile'))._internal
 const { createSymlinks, getContext, run, runSync } = await import(
   '../../main/ts'
 )
@@ -253,7 +253,7 @@ describe('yarn-audit-fix', () => {
         checkTempAssets()
 
         // Patching `yarn.lock`
-        expect(lfParse).toHaveBeenCalledWith(expect.any(String), 'yarn1')
+        expect(lfParse).toHaveBeenCalledWith(expect.any(String), 'yarn-classic')
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),

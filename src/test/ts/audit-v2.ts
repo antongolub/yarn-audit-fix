@@ -2,24 +2,13 @@ import * as fs from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { format, parse, parseAuditReport } from '../../main/ts/lockfile/v2'
+import { parseAuditReport } from '../../main/ts/audit/v2'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const fixtures = resolve(__dirname, '../fixtures')
 
-describe('reader', () => {
-  it('provides parse/format interop', () => {
-    const contents = fs.readFileSync(
-      join(fixtures, 'lockfile/v2/yarn.lock'),
-      'utf-8',
-    )
-    expect(format(parse(contents))).toEqual(contents)
-    // fs.writeFileSync('foo.yaml', format(parse(contents)))
-  })
-})
-
 describe('parseReport', () => {
-  it('processes yarn2 audit report', () => {
+  it('processes yarn 2/3 audit report', () => {
     const input = fs.readFileSync(
       join(fixtures, 'lockfile/v2/yarn-audit-report.json'),
       'utf-8',

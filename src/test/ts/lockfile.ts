@@ -3,9 +3,10 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { getNpm, getYarn, TContext } from '../../main/ts'
-import { format, parse, patch } from '../../main/ts/lockfile/'
-import { parseAuditReport as parseAuditV1 } from '../../main/ts/lockfile/v1'
-import { parseAuditReport as parseAuditV2 } from '../../main/ts/lockfile/v2'
+import { format, getLockfileType, parse, patch } from '../../main/ts/lockfile'
+import { parseAuditReport as parseAuditV1 } from '../../main/ts/audit/v1'
+import { parseAuditReport as parseAuditV2 } from '../../main/ts/audit/v2'
+import { parseAuditReport as parseAuditV4 } from '../../main/ts/audit/v4'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const fixtures = resolve(__dirname, '../fixtures')
@@ -16,56 +17,40 @@ describe('patch', () => {
     yarn: getYarn(),
   }
 
-  it('yarnlock v2', () => {
-    const report = fs.readFileSync(
-      join(fixtures, 'lockfile/v2/yarn-audit-report.json'),
-      'utf-8',
-    )
-    const lockfile = fs.readFileSync(
-      join(fixtures, 'lockfile/v2/yarn.lock'),
-      'utf-8',
-    )
-    const expected = fs.readFileSync(
-      join(fixtures, 'lockfile/v2/yarn-lock-patched.yaml'),
-      'utf-8',
-    )
-    const result = format(
-      patch(
-        parse(lockfile, 'yarn2'),
-        parseAuditV2(report),
-        { flags: {}, bins } as TContext,
-        'yarn2',
-      ),
-      'yarn2',
-    )
+  const cases = [
+    { name: 'yarn-berry-v5', dir: 'v2', parseAudit: parseAuditV2, ext: 'json' },
+    { name: 'yarn-berry-v8', dir: 'v4', parseAudit: parseAuditV4, ext: 'ndjson' }, // yarn v4 (issue #248)
+    { name: 'yarn-classic',  dir: 'v1', parseAudit: parseAuditV1, ext: 'json' },
+  ] as const
 
-    expect(result).toEqual(expected)
-  })
+  for (const { name, dir, parseAudit, ext } of cases) {
+    it(`patches ${name} lockfile`, () => {
+      const report = fs.readFileSync(
+        join(fixtures, `lockfile/${dir}/yarn-audit-report.${ext}`),
+        'utf-8',
+      )
+      const lockfile = fs.readFileSync(
+        join(fixtures, `lockfile/${dir}/yarn.lock`),
+        'utf-8',
+      )
+      const expected = fs.readFileSync(
+        join(fixtures, `lockfile/${dir}/yarn-lock-patched.yaml`),
+        'utf-8',
+      )
+      const fmt = getLockfileType(lockfile)
+      expect(fmt).toBe(name)
 
-  it('yarnlock v1', () => {
-    const report = fs.readFileSync(
-      join(fixtures, 'lockfile/v1/yarn-audit-report.json'),
-      'utf-8',
-    )
-    const lockfile = fs.readFileSync(
-      join(fixtures, 'lockfile/v1/yarn.lock'),
-      'utf-8',
-    )
-    const expected = fs.readFileSync(
-      join(fixtures, 'lockfile/v1/yarn-lock-patched.yaml'),
-      'utf-8',
-    )
-    const result = format(
-      patch(
-        parse(lockfile, 'yarn1'),
-        parseAuditV1(report),
-        { flags: {}, bins } as TContext,
-        'yarn1',
-      ),
-      'yarn1',
-    )
+      const result = format(
+        patch(
+          parse(lockfile, fmt),
+          parseAudit(report),
+          { flags: { silent: true }, bins } as unknown as TContext,
+          fmt,
+        ),
+        fmt,
+      )
 
-    // fs.writeFileSync('result.yaml', result)
-    expect(result).toEqual(expected)
-  })
+      expect(result).toEqual(expected)
+    })
+  }
 })
