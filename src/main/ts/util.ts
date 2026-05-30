@@ -1,7 +1,7 @@
 import type { StdioOptions } from 'node:child_process'
 import crypto from 'node:crypto'
 import { createRequire } from 'node:module'
-import path, { dirname, resolve } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import os from 'node:os'
 
@@ -17,7 +17,7 @@ const glob = fg.sync
 // FIXME Jest workaround: cannot properly mock `child_process` with import API
 const cp = createRequire(import.meta.url)('child_process')
 const { ensureDirSync, readFileSync } = fse
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export const invoke = (
   cmd: string,
@@ -172,7 +172,7 @@ export const ensureDir = (dir: string): string => {
 
 export const getTemp = (cwd: string, temp?: string) =>
   temp
-    ? ensureDir(resolve(cwd, temp))
+    ? ensureDir(path.resolve(cwd, temp))
     : fse.mkdtempSync(path.join(os.tmpdir(), `tempy-${crypto.randomBytes(16).toString('hex')}`))
 
 export const attempt = <T>(f: () => T): T | null => {

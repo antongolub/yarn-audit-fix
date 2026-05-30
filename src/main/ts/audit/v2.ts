@@ -1,4 +1,5 @@
 import {
+  TAuditAdvisory,
   TAuditReport,
   TFlags,
 } from '../ifaces'
@@ -55,15 +56,13 @@ export const auditFlags = (flags: TFlags): string[] => {
   )
 }
 
-export const parseAuditReport = (data: string): TAuditReport =>
-  Object.values(JSON.parse(data).advisories).reduce<TAuditReport>(
-    (m, { vulnerable_versions, module_name, patched_versions }: any) => {
-      m[module_name] = {
-        patched_versions,
-        vulnerable_versions,
-        module_name,
-      }
+export const parseAuditReport = (data: string): TAuditReport => {
+  const advisories = JSON.parse(data).advisories as Record<string, TAuditAdvisory>
+  return Object.values(advisories).reduce<TAuditReport>(
+    (m, { vulnerable_versions, module_name, patched_versions }) => {
+      m[module_name] = { module_name, vulnerable_versions, patched_versions }
       return m
     },
     {},
   )
+}

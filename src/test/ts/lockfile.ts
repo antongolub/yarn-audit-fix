@@ -1,5 +1,5 @@
 import * as fs from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { getNpm, getYarn, TContext } from '../../main/ts'
@@ -8,8 +8,8 @@ import { parseAuditReport as parseAuditV1 } from '../../main/ts/audit/v1'
 import { parseAuditReport as parseAuditV2 } from '../../main/ts/audit/v2'
 import { parseAuditReport as parseAuditV4 } from '../../main/ts/audit/v4'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const fixtures = resolve(__dirname, '../fixtures')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const fixtures = path.resolve(__dirname, '../fixtures')
 
 describe('patch', () => {
   const bins: Record<string, string> = {
@@ -26,15 +26,15 @@ describe('patch', () => {
   for (const { name, dir, parseAudit, ext } of cases) {
     it(`patches ${name} lockfile`, () => {
       const report = fs.readFileSync(
-        join(fixtures, `lockfile/${dir}/yarn-audit-report.${ext}`),
+        path.join(fixtures, `lockfile/${dir}/yarn-audit-report.${ext}`),
         'utf-8',
       )
       const lockfile = fs.readFileSync(
-        join(fixtures, `lockfile/${dir}/yarn.lock`),
+        path.join(fixtures, `lockfile/${dir}/yarn.lock`),
         'utf-8',
       )
       const expected = fs.readFileSync(
-        join(fixtures, `lockfile/${dir}/yarn-lock-patched.yaml`),
+        path.join(fixtures, `lockfile/${dir}/yarn-lock-patched.yaml`),
         'utf-8',
       )
       const fmt = getLockfileType(lockfile)

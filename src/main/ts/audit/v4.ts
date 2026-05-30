@@ -56,11 +56,11 @@ export const derivePatchedVersions = (vulnerableVersions: string): string => {
 
   const orClauses: string[] = []
   for (const comparatorSet of range.set) {
-    const upperBounds = comparatorSet.filter((c: any) =>
-      c.operator === '<' || c.operator === '<=',
+    const upperBounds: sv.Comparator[] = comparatorSet.filter(
+      (c) => c.operator === '<' || c.operator === '<=',
     )
     if (upperBounds.length === 0) return '<0.0.0' // unbounded
-    const tightest = upperBounds.reduce((acc: any, c: any) =>
+    const tightest = upperBounds.reduce((acc, c) =>
       sv.gt(c.semver.version, acc.semver.version) ? c : acc,
     )
     orClauses.push(

@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import path from 'node:path'
 
 import chalk from 'chalk'
 
@@ -11,7 +11,7 @@ import { getSelfManifest, getTemp, normalizeFlags, readJson } from './util'
  */
 export const getContext = (flags: TFlags = {}): TContext => {
   const cwd = flags.cwd || process.cwd()
-  const manifest = readJson(join(cwd, 'package.json'))
+  const manifest = readJson(path.join(cwd, 'package.json'))
   const temp = getTemp(cwd, flags.temp)
   const ctx = {
     cwd,

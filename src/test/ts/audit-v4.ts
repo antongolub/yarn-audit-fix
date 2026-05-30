@@ -1,18 +1,18 @@
 import * as fs from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import sv from 'semver'
 
 import { derivePatchedVersions, parseAuditReport } from '../../main/ts/audit/v4'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const fixtures = resolve(__dirname, '../fixtures')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const fixtures = path.resolve(__dirname, '../fixtures')
 
 describe('parseReport (yarn 4 NDJSON)', () => {
   it('processes yarn 4 audit NDJSON', () => {
     const input = fs.readFileSync(
-      join(fixtures, 'lockfile/v4/yarn-audit-report.ndjson'),
+      path.join(fixtures, 'lockfile/v4/yarn-audit-report.ndjson'),
       'utf-8',
     )
     // Real yarn 4.6.0 output captured from `yarn npm audit --all --json --recursive`

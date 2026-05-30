@@ -1,16 +1,16 @@
 import * as fs from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { parseAuditReport } from '../../main/ts/audit/v2'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const fixtures = resolve(__dirname, '../fixtures')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const fixtures = path.resolve(__dirname, '../fixtures')
 
 describe('parseReport', () => {
   it('processes yarn 2/3 audit report', () => {
     const input = fs.readFileSync(
-      join(fixtures, 'lockfile/v2/yarn-audit-report.json'),
+      path.join(fixtures, 'lockfile/v2/yarn-audit-report.json'),
       'utf-8',
     )
 

@@ -1,4 +1,4 @@
-import { dirname, join, resolve } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { Command } from 'commander'
@@ -16,7 +16,7 @@ import {
   readJson,
 } from '../../main/ts/util'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DEFAULT_OSTYPE = process.env.OSTYPE
 
 describe('util', () => {
@@ -128,7 +128,7 @@ describe('util', () => {
   describe('#getNpm', () => {
     const isWin = isWindows()
     const cmd = isWin ? 'npm.cmd' : 'npm'
-    const localNpm = resolve(__dirname, '../../../node_modules/.bin', cmd)
+    const localNpm = path.resolve(__dirname, '../../../node_modules/.bin', cmd)
     const cases: [any, string?, string?][] = [
       ['local', localNpm],
       ['system', cmd],
@@ -149,7 +149,7 @@ describe('util', () => {
   describe('#getTemp', () => {
     it('properly resolves temp dir path', () => {
       const pwd = process.cwd()
-      const tempdir = resolve(__dirname, '../temp')
+      const tempdir = path.resolve(__dirname, '../temp')
       const cases: [string, string | undefined, string | RegExp][] = [
         [pwd, tempdir, tempdir],
         [pwd, undefined, /tempy-/],
@@ -163,11 +163,11 @@ describe('util', () => {
 
   describe('getWorkspaces', () => {
     it('returns paths of found package.json files', () => {
-      const cwd = resolve(__dirname, '../fixtures/regular-monorepo')
-      const manifest = readJson(join(cwd, 'package.json'))
+      const cwd = path.resolve(__dirname, '../fixtures/regular-monorepo')
+      const manifest = readJson(path.join(cwd, 'package.json'))
       const files = getWorkspaces(cwd, manifest)
       const expected = ['a', 'b'].map((p) =>
-        join(cwd, 'packages', p, 'package.json'),
+        path.join(cwd, 'packages', p, 'package.json'),
       )
 
       expect(files).toEqual(expected)

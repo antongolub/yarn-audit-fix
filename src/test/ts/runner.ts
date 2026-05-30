@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module'
-import { basename, dirname, join, resolve } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { jest } from '@jest/globals'
@@ -20,11 +20,11 @@ const { createSymlinks, getContext, run, runSync } = await import(
 )
 const { getNpm, getYarn } = await import('../../main/ts/util')
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const noop = () => {
   /* noop */
 }
-const fixtures = resolve(__dirname, '../fixtures/')
+const fixtures = path.resolve(__dirname, '../fixtures/')
 const registryUrl = 'https://example.com'
 const dependency = 'example-package'
 const scopedDependency = '@scope/package'
@@ -32,7 +32,7 @@ const strMatching = (start = '', end = '') =>
   expect.stringMatching(new RegExp(`^${start}.+${end}$`))
 const readFixture = (name: string): string =>
   (jest.requireActual('fs') as typeof fs).readFileSync(
-    resolve(fixtures, name),
+    path.resolve(fixtures, name),
     {
       encoding: 'utf-8',
     },
@@ -59,7 +59,7 @@ const yarnLockAfter = readFixture('lockfile/legacy/yarn.lock.after')
 const cwd = process.cwd()
 
 const shell = true
-const temp = resolve(__dirname, '../../../.temp')
+const temp = path.resolve(__dirname, '../../../.temp')
 const stdio = ['inherit', 'inherit', 'inherit']
 const stdionull = [null, null, null] // eslint-disable-line
 
@@ -82,7 +82,7 @@ describe('yarn-audit-fix', () => {
     fs.copyFileSync.mockImplementation(noop)
     // @ts-ignore
     fs.readFileSync.mockImplementation((name) => {
-      const _name = basename(name)
+      const _name = path.basename(name)
 
       if (_name === 'yarn.lock') {
         return yarnLockBefore
@@ -123,7 +123,7 @@ describe('yarn-audit-fix', () => {
   describe('createSymlinks', () => {
     it('establishes proper links', () => {
       const temp = 'foo/bar'
-      const cwd = join(fixtures, 'regular-monorepo')
+      const cwd = path.join(fixtures, 'regular-monorepo')
       const manifest = {
         workspaces: ['packages/*'],
       }
@@ -133,7 +133,7 @@ describe('yarn-audit-fix', () => {
       const links = ['node_modules', 'packages/a', 'packages/b']
       links.forEach((link) => {
         expect(fs.createSymlinkSync).toHaveBeenCalledWith(
-          join(cwd, link),
+          path.join(cwd, link),
           strMatching(temp, link),
           'dir',
         )
@@ -147,23 +147,23 @@ describe('yarn-audit-fix', () => {
       // Preparing...
       expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        join(cwd, 'yarn.lock'),
+        path.join(cwd, 'yarn.lock'),
         strMatching(temp, 'yarn.lock'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        join(cwd, 'package.json'),
+        path.join(cwd, 'package.json'),
         strMatching(temp, 'package.json'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        join(cwd, '.yarnrc'),
+        path.join(cwd, '.yarnrc'),
         strMatching(temp, '.yarnrc'),
       )
       expect(fs.copyFileSync).toHaveBeenCalledWith(
-        join(cwd, '.npmrc'),
+        path.join(cwd, '.npmrc'),
         strMatching(temp, '.npmrc'),
       )
       expect(fs.createSymlinkSync).toHaveBeenCalledWith(
-        join(cwd, 'node_modules'),
+        path.join(cwd, 'node_modules'),
         strMatching(temp, 'node_modules'),
         'dir',
       )

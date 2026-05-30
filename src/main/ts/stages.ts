@@ -1,4 +1,4 @@
-import { dirname, join, relative } from 'node:path'
+import path from 'node:path'
 
 import fs from 'fs-extra'
 import semver from 'semver'
@@ -104,12 +104,12 @@ export const printRuntimeDigest: TCallback = ({
  * @return {void}
  */
 export const createTempAssets: TCallback = ({ cwd, temp }) => {
-  fs.copyFileSync(join(cwd, 'yarn.lock'), join(temp, 'yarn.lock'))
-  fs.copyFileSync(join(cwd, 'package.json'), join(temp, 'package.json'))
-  fs.existsSync(join(cwd, '.npmrc')) &&
-    fs.copyFileSync(join(cwd, '.npmrc'), join(temp, '.npmrc'))
-  fs.existsSync(join(cwd, '.yarnrc')) &&
-    fs.copyFileSync(join(cwd, '.yarnrc'), join(temp, '.yarnrc'))
+  fs.copyFileSync(path.join(cwd, 'yarn.lock'), path.join(temp, 'yarn.lock'))
+  fs.copyFileSync(path.join(cwd, 'package.json'), path.join(temp, 'package.json'))
+  fs.existsSync(path.join(cwd, '.npmrc')) &&
+    fs.copyFileSync(path.join(cwd, '.npmrc'), path.join(temp, '.npmrc'))
+  fs.existsSync(path.join(cwd, '.yarnrc')) &&
+    fs.copyFileSync(path.join(cwd, '.yarnrc'), path.join(temp, '.yarnrc'))
 }
 
 /**
@@ -121,15 +121,15 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
   const symlinkType = getSymlinkType(flags.symlink)
   const workspaces = getWorkspaces(cwd, manifest)
   const links = [
-    join(cwd, 'node_modules'),
-    join(cwd, '.yarn'),
-    ...workspaces.map((ws) => dirname(ws)),
+    path.join(cwd, 'node_modules'),
+    path.join(cwd, '.yarn'),
+    ...workspaces.map((ws) => path.dirname(ws)),
   ]
 
   links.forEach((link: string) => {
-    const rel = relative(cwd, link)
-    const from = join(cwd, rel)
-    const to = join(temp, rel)
+    const rel = path.relative(cwd, link)
+    const from = path.join(cwd, rel)
+    const to = path.join(temp, rel)
 
     fs.existsSync(from) && fs.createSymlinkSync(from, to, symlinkType)
   })
@@ -143,10 +143,10 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
 export const yarnLockToPkgLock: TCallback = ({ temp, flags }) => {
   const pgkLockJsonData = synp.yarnToNpm(temp, true)
 
-  fs.writeFileSync(join(temp, 'package-lock.json'), pgkLockJsonData)
+  fs.writeFileSync(path.join(temp, 'package-lock.json'), pgkLockJsonData)
 
   if (flags.flow !== 'patch') {
-    fs.removeSync(join(temp, 'yarn.lock'))
+    fs.removeSync(path.join(temp, 'yarn.lock'))
   }
 }
 
@@ -187,7 +187,7 @@ export const npmAuditFix: TCallback = ({ temp, flags, bins }) => {
 export const yarnImport: TCallback = ({ temp }) => {
   const yarnLockData = synp.npmToYarn(temp, true)
 
-  fs.writeFileSync(join(temp, 'yarn.lock'), yarnLockData)
+  fs.writeFileSync(path.join(temp, 'yarn.lock'), yarnLockData)
 }
 
 export const syncLockfile: TCallback = ({ temp, flags }) => {
@@ -195,7 +195,7 @@ export const syncLockfile: TCallback = ({ temp, flags }) => {
     return
   }
 
-  fs.copyFileSync(join(temp, 'yarn.lock'), 'yarn.lock')
+  fs.copyFileSync(path.join(temp, 'yarn.lock'), 'yarn.lock')
 }
 
 /**
@@ -250,7 +250,7 @@ export const exit: TCallback = ({ flags, err }) => {
 }
 
 export const patchLockfile: TCallback = ({ temp, ctx }) => {
-  const lockfilePath = join(temp, 'yarn.lock')
+  const lockfilePath = path.join(temp, 'yarn.lock')
   const raw = fs.readFileSync(lockfilePath, 'utf-8')
   const lockfileType = getLockfileType(raw)
   const lockfile = lf.parse(raw, lockfileType)
@@ -274,7 +274,7 @@ export const verify: TCallback = ({ cwd, versions, flags }) => {
   }
 
   required.forEach((resource) => {
-    if (!fs.existsSync(join(cwd, resource))) {
+    if (!fs.existsSync(path.join(cwd, resource))) {
       throw new Error(`not found: ${resource}`)
     }
   })

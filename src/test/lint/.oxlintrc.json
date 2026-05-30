@@ -1,0 +1,60 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "node",
+    "promise"
+  ],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-non-null-assertion": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "no-empty-function": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "no-loss-of-precision": "off",
+    "no-unused-expressions": "off",
+    "unicorn/catch-error-name": "off",
+    "unicorn/custom-error-definition": "off",
+    "unicorn/empty-brace-spaces": "off",
+    "unicorn/filename-case": "off",
+    "unicorn/no-abusive-eslint-disable": "off",
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/no-await-expression-member": "warn",
+    "unicorn/no-nested-ternary": "off",
+    "unicorn/no-null": "off",
+    "unicorn/number-literal-case": "off",
+    "unicorn/prefer-at": "off",
+    "unicorn/prefer-event-target": "off",
+    "unicorn/prefer-math-trunc": "off",
+    "unicorn/prefer-module": "off",
+    "unicorn/prefer-string-replace-all": "off",
+    "unicorn/prefer-top-level-await": "warn",
+    "unicorn/require-post-message-target-origin": "off",
+    "unicorn/switch-case-braces": "off",
+    "unicorn/text-encoding-identifier-case": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/test/ts/runner.ts",
+        "src/main/ts/stages.ts",
+        "src/test/ts/util.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/ban-ts-comment": "off"
+      }
+    },
+    {
+      "files": ["src/**/*.ts"],
+      "rules": {}
+    }
+  ]
+}
