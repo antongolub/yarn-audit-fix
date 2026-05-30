@@ -74,13 +74,20 @@ export const derivePatchedVersions = (vulnerableVersions: string): string => {
 }
 
 /**
- * Parse yarn 4's NDJSON audit output. Aggregates multiple advisories per
- * package by OR-joining both the vulnerable and patched ranges — so
- * `minVersion(patched)` later picks the lowest version that addresses
- * *any* advisory. Avoids the "advisory references unreleased patch" trap:
- * lodash advisories list fixes >4.17.23, but 4.17.21 is the actual
- * latest published version. Over-strict merging (taking the highest fix
- * floor) would jam the lockfile at an unsatisfiable target.
+ * Parse yarn 4's NDJSON audit output. Aggregates multiple advisories for the
+ * same package:
+ *   - vulnerable_versions are OR-joined (`||`) — a version is vulnerable if it
+ *     matches *any* advisory.
+ *   - patched_versions are AND-joined (intersection, space-separated) — a fix
+ *     must clear *every* advisory simultaneously. e.g. lodash advisories
+ *     `>=4.17.21` ∧ `>4.17.22` ∧ `>4.17.23` collapse to `>4.17.23`.
+ *
+ * The AND-join can produce a floor that was never published (here `>4.17.23`
+ * implies 4.17.24, which doesn't exist). Resolving that floor to a real,
+ * installable version is the patch step's job — it snaps to the lowest
+ * registry-published version satisfying the range (4.18.0). See `_patch` in
+ * ../lockfile.ts. OR-joining patched ranges here would be wrong: it would
+ * accept a version that only fixes one advisory while leaving others open.
  */
 export const parseAuditReport = (data: string): TAuditReport => {
   const report: TAuditReport = {}
@@ -97,9 +104,19 @@ export const parseAuditReport = (data: string): TAuditReport => {
       ? {
           module_name: name,
           vulnerable_versions: `${prev.vulnerable_versions} || ${vuln}`,
-          patched_versions: `${prev.patched_versions} || ${patched}`,
+          patched_versions: joinAnd(prev.patched_versions, patched),
         }
       : { module_name: name, vulnerable_versions: vuln, patched_versions: patched }
   }
   return report
+}
+
+/**
+ * Intersect two semver ranges. `<0.0.0` is yaf's "no fix" sentinel — if
+ * either side is unfixable the intersection is too. Otherwise a plain
+ * space-join expresses AND in semver range syntax.
+ */
+const joinAnd = (a: string, b: string): string => {
+  if (a === '<0.0.0' || b === '<0.0.0') return '<0.0.0'
+  return `${a} ${b}`
 }

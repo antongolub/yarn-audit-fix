@@ -253,7 +253,11 @@ describe('yarn-audit-fix', () => {
         checkTempAssets()
 
         // Patching `yarn.lock`
-        expect(lfParse).toHaveBeenCalledWith(expect.any(String), 'yarn-classic')
+        expect(lfParse).toHaveBeenCalledWith(
+          expect.any(String),
+          'yarn-classic',
+          expect.any(String),
+        )
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),

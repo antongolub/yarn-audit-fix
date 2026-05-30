@@ -25,11 +25,14 @@ describe('parseReport (yarn 4 NDJSON)', () => {
       vulnerable_versions: '>=1.0.0 <1.2.6',
       patched_versions: '>=1.2.6',
     })
-    // 5 lodash advisories merge as ORed patched ranges → minVersion is the
-    // lowest installable fix that addresses *any* advisory (4.17.21, the
-    // actual latest published — even though some advisories report
-    // unreleased fixes >4.17.23).
-    expect(sv.minVersion(result.lodash.patched_versions)?.format()).toBe('4.17.21')
+    // 5 lodash advisories AND-merge: a fix must clear *all* of them. The
+    // strictest is `<=4.17.23` → patched `>4.17.23`, so only versions above
+    // 4.17.23 are safe. (The resulting floor 4.17.24 was never published —
+    // the patch step snaps it to the real next release, 4.18.0, via the
+    // registry; see lockfile.ts `_patch`.)
+    expect(sv.satisfies('4.18.0', result.lodash.patched_versions)).toBe(true)
+    expect(sv.satisfies('4.17.23', result.lodash.patched_versions)).toBe(false)
+    expect(sv.satisfies('4.17.21', result.lodash.patched_versions)).toBe(false)
   })
 })
 
