@@ -1,15 +1,12 @@
 {
   "name": "yarn-audit-fix",
-  "version": "10.1.1",
-  "private": false,
+  "version": "11.0.0-snapshot.0",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
   "description": "The missing `yarn audit fix`",
-  "bin": {
-    "yarn-audit-fix": "target/esm/cli.mjs"
-  },
+  "bin": "target/esm/cli.mjs",
   "main": "./target/esm/index.mjs",
   "exports": {
     ".": {
