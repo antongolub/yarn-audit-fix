@@ -6,12 +6,8 @@ import {
 import { formatFlags, invoke, mapFlags } from '../util'
 
 /**
- * Yarn 2/3 audit invocation (`yarn npm audit --all --json --recursive`).
- * Output is a single JSON object: `{advisories: {<id>: {module_name,
- * vulnerable_versions, patched_versions, …}}}`.
- *
- * Yarn 4 changed the output to NDJSON and dropped `patched_versions` —
- * that path lives in `./v4`.
+ * Yarn 2/3 audit. Output is one JSON object `{advisories: {<id>: …}}`.
+ * Yarn 4 switched to NDJSON — that path lives in `./v4`.
  */
 export const audit = (
   flags: TFlags,
@@ -24,7 +20,7 @@ export const audit = (
     temp,
     !!flags.silent,
     false,
-    true, // `yarn npm audit` exits non-zero when vulnerabilities are found — that's a successful audit run, not a tool failure.
+    true, // audit exits non-zero when vulns found — not a failure
   )
 
   return parseAuditReport(report)

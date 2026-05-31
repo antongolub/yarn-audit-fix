@@ -10,9 +10,8 @@ import {
 import { attempt, formatFlags, invoke, mapFlags } from '../util'
 
 /**
- * npm / yarn-classic audit invocation (`npm audit --json` or
- * `yarn audit --json`). Produces a stream of `auditAdvisory` events
- * (one JSON object per line) that we collapse into a `TAuditReport`.
+ * npm / yarn-classic audit. Produces a stream of `auditAdvisory` events
+ * (one JSON object per line).
  */
 export const audit = (
   flags: TFlags,

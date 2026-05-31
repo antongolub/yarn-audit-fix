@@ -8,14 +8,8 @@ import { attempt, invoke } from '../util'
 import { auditFlags } from './v2'
 
 /**
- * Yarn 4+ audit invocation (`yarn npm audit --all --json --recursive`).
- * Output is **NDJSON** — one yarn-tree node per line, of the form
- * `{value: <pkgName>, children: {ID, "Vulnerable Versions", Severity,
- * URL, "Tree Versions", Dependents}}`.
- *
- * Notable change from yarn 2/3: the explicit `patched_versions` field is
- * gone. We derive it from the `Vulnerable Versions` upper bound — see
- * `derivePatchedVersions` below.
+ * Yarn 4+ audit. Output is NDJSON (one node per line); the explicit
+ * `patched_versions` field is gone — derived from `Vulnerable Versions`.
  */
 export const audit = (
   flags: TFlags,
@@ -28,27 +22,16 @@ export const audit = (
     temp,
     !!flags.silent,
     false,
-    true, // `yarn npm audit` exits non-zero when vulnerabilities are found — that's a successful audit run, not a tool failure.
+    true, // audit exits non-zero when vulns found — not a failure
   )
 
   return parseAuditReport(report)
 }
 
 /**
- * Derive a `patched_versions` semver range from yarn 4's `Vulnerable
- * Versions` (yarn 4 dropped the explicit `patched_versions` field).
- *
- * Strategy: parse the vulnerable range, find every upper-bound comparator
- * (`<X` or `<=X`), and flip each into a lower-bound for the patched range:
- *   `<X`  → `>=X`
- *   `<=X` → `>X`
- *
- * Comparators in the same AND-set are reduced to the tightest one;
- * `||`-separated OR clauses become OR clauses in the patched output.
- *
- * Falls back to `<0.0.0` (yaf's "no fix available" sentinel — same
- * convention the legacy v2/v3 reports use) when the range has no
- * expressible upper bound.
+ * Flip a vulnerable range into a patched one: each upper bound becomes a lower
+ * bound (`<X`→`>=X`, `<=X`→`>X`), tightest per AND-set, OR-clauses preserved.
+ * Returns the `<0.0.0` "no fix" sentinel when a clause has no upper bound.
  */
 export const derivePatchedVersions = (vulnerableVersions: string): string => {
   const range = attempt(() => new sv.Range(vulnerableVersions))
@@ -74,20 +57,9 @@ export const derivePatchedVersions = (vulnerableVersions: string): string => {
 }
 
 /**
- * Parse yarn 4's NDJSON audit output. Aggregates multiple advisories for the
- * same package:
- *   - vulnerable_versions are OR-joined (`||`) — a version is vulnerable if it
- *     matches *any* advisory.
- *   - patched_versions are AND-joined (intersection, space-separated) — a fix
- *     must clear *every* advisory simultaneously. e.g. lodash advisories
- *     `>=4.17.21` ∧ `>4.17.22` ∧ `>4.17.23` collapse to `>4.17.23`.
- *
- * The AND-join can produce a floor that was never published (here `>4.17.23`
- * implies 4.17.24, which doesn't exist). Resolving that floor to a real,
- * installable version is the patch step's job — it snaps to the lowest
- * registry-published version satisfying the range (4.18.0). See `_patch` in
- * ../lockfile.ts. OR-joining patched ranges here would be wrong: it would
- * accept a version that only fixes one advisory while leaving others open.
+ * Parse yarn 4 NDJSON. Per package: vulnerable ranges OR-joined (match any),
+ * patched ranges AND-joined (a fix must clear all). The AND floor may be
+ * unpublished (>4.17.23 → 4.17.24); _patch snaps it to a real release.
  */
 export const parseAuditReport = (data: string): TAuditReport => {
   const report: TAuditReport = {}
@@ -97,6 +69,10 @@ export const parseAuditReport = (data: string): TAuditReport => {
     const child = entry?.children
     const vuln = child?.['Vulnerable Versions']
     if (!name || !child || !vuln) continue
+
+    // Skip deprecations: yarn 4 reports them too, with a string ID (not a
+    // numeric advisory id) and no fixable version. Out of scope for audit-fix.
+    if (typeof child.ID !== 'number') continue
 
     const patched = derivePatchedVersions(vuln)
     const prev = report[name]
@@ -111,11 +87,7 @@ export const parseAuditReport = (data: string): TAuditReport => {
   return report
 }
 
-/**
- * Intersect two semver ranges. `<0.0.0` is yaf's "no fix" sentinel — if
- * either side is unfixable the intersection is too. Otherwise a plain
- * space-join expresses AND in semver range syntax.
- */
+/** Intersect two ranges (space = AND); the `<0.0.0` "no fix" sentinel wins. */
 const joinAnd = (a: string, b: string): string => {
   if (a === '<0.0.0' || b === '<0.0.0') return '<0.0.0'
   return `${a} ${b}`

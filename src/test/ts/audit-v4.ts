@@ -34,6 +34,24 @@ describe('parseReport (yarn 4 NDJSON)', () => {
     expect(sv.satisfies('4.17.23', result.lodash.patched_versions)).toBe(false)
     expect(sv.satisfies('4.17.21', result.lodash.patched_versions)).toBe(false)
   })
+
+  it('drops yarn 4 deprecation notices (non-numeric ID)', () => {
+    // Yarn 4 surfaces package deprecations through `yarn npm audit` with a
+    // string ID and an exact "vulnerable" version. They aren't fixable by a
+    // version bump, so the parser must drop them and keep only real CVEs.
+    const ndjson = [
+      // deprecation — string ID, exact version → must be skipped
+      JSON.stringify({ value: '@babel/polyfill', children: { ID: '@babel/polyfill (deprecation)', Severity: 'moderate', 'Vulnerable Versions': '7.12.1' } }),
+      // deprecation — another package
+      JSON.stringify({ value: 'core-js', children: { ID: 'core-js (deprecation)', Severity: 'moderate', 'Vulnerable Versions': '2.6.12' } }),
+      // real CVE — numeric ID, bounded range → must be kept
+      JSON.stringify({ value: '@babel/runtime', children: { ID: 1104000, Severity: 'moderate', 'Vulnerable Versions': '<7.26.10' } }),
+    ].join('\n')
+
+    const result = parseAuditReport(ndjson)
+    expect(Object.keys(result)).toEqual(['@babel/runtime'])
+    expect(result['@babel/runtime'].patched_versions).toBe('>=7.26.10')
+  })
 })
 
 describe('derivePatchedVersions', () => {

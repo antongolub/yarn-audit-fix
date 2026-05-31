@@ -24,11 +24,8 @@ export const _parse = (
   if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
   }
-  // NOTE workspaceRoot lets the berry adapter resolve yarn's builtin patch
-  // hashes (compat/typescript, compat/resolve, compat/fsevents). Without it
-  // the parser falls back to a sentinel hash; mutating + re-serialising then
-  // emits patch entries that `yarn install` can't resolve
-  // ("This package doesn't seem to be present in your lockfile").
+  // workspaceRoot lets the berry adapter resolve yarn's builtin patch hashes;
+  // without it re-serialised patch entries break `yarn install`.
   return lfParse(lockfileType as FormatId, lockfile, { workspaceRoot })
 }
 
@@ -43,19 +40,10 @@ export const _format = (
 }
 
 /**
- * Resolve the lowest **published** version that satisfies `range`.
- *
- * `minVersion` alone is not enough: a patched range derived from an
- * inclusive vulnerable bound (`<=4.17.23` → `>4.17.23`) points at a version
- * that may have never been released (4.17.24), which 404s on `yarn install`.
- * Querying `npm view <name> versions` lets us snap to the real next release
- * (4.18.0) and keeps the operation idempotent — a re-run finds the package
- * already at a non-vulnerable version and leaves it alone.
- *
- * Falls back to `minVersion(range)` when the registry can't be reached
- * (offline / no npm bin), preserving the previous pure-semver behaviour.
- * Returns `undefined` when the registry is reachable but nothing published
- * satisfies the range (genuinely unfixable — caller skips the entry).
+ * Lowest *published* version satisfying `range`. `minVersion` alone can yield
+ * an unreleased version (`>4.17.23` → 4.17.24, a 404), so query the registry
+ * and pick the real next release. Falls back to `minVersion` offline; returns
+ * undefined when nothing published satisfies (caller skips).
  */
 const resolveFix = (
   name: string,
@@ -79,30 +67,19 @@ const resolveFix = (
     }
     const versions = cache.get(name)
     if (versions && versions.length > 0) {
-      const satisfying = versions
+      return versions
         .filter((v) => sv.valid(v) && sv.satisfies(v, range))
-        .sort(sv.compare)
-      return satisfying[0] // undefined ⇒ no published fix ⇒ caller skips
+        .sort(sv.compare)[0] // undefined ⇒ no published fix
     }
   }
   return sv.minVersion(range)?.format()
 }
 
 /**
- * Patch a lockfile graph by upgrading every node that matches an audit
- * advisory to the lowest published version that clears it.
- *
- * Strategy: edge-redirect. For each vulnerable node we
- *   1. add (or reuse) a node at the patched version,
- *   2. redirect every incoming edge from the old node to the new one, and
- *   3. drop the old node + its tarball payload.
- *
- * This is the canonical Graph-model expression of an audit-fix, replacing
- * the legacy in-place "rewrite version, clear checksum" hack. The trade-off
- * is that descriptor keys merge in the rendered YAML (e.g.
- * `"lodash@npm:4.18.0, lodash@npm:4.17.21"`) — semantically honest but
- * visually different from the old output. The subsequent `yarn install`
- * stage reconciles the result.
+ * Upgrade every vulnerable node to the lowest published version that clears
+ * its advisory, by edge-redirect: add the patched node, repoint incoming
+ * edges, drop the old node + tarball. Descriptor keys may merge in the output
+ * (`"lodash@npm:4.18.0, lodash@npm:4.17.21"`); `yarn install` reconciles it.
  */
 export const _patch = (
   lockfile: TLockfileObject,
@@ -118,9 +95,9 @@ export const _patch = (
   const graph = lockfile as Graph
   const versionCache = new Map<string, string[] | null>()
 
-  // Pass 1: collect (node, patched-version) pairs. Iterating then mutating
-  // keeps the read view stable for `graph.in(...)` lookups.
+  // Collect upgrades first; mutating mid-iteration would disturb graph.in().
   const upgrades: { id: string; name: string; version: string; patch?: string; fix: string }[] = []
+  const noFix = new Set<string>()
   for (const node of graph.nodes()) {
     const advisory = report[node.name]
     if (!advisory) continue
@@ -128,16 +105,10 @@ export const _patch = (
 
     const fix = resolveFix(node.name, advisory.patched_versions, bins?.npm, cwd, versionCache)
     if (fix === undefined) {
-      console.error(
-        "Can't find satisfactory version for",
-        advisory.module_name,
-        advisory.patched_versions,
-      )
+      noFix.add(advisory.module_name) // no published version clears it
       continue
     }
-    // Already at (or above) a clean version — nothing to do. Keeps re-runs
-    // idempotent and avoids needless descriptor-key churn.
-    if (!sv.gt(fix, node.version)) continue
+    if (!sv.gt(fix, node.version)) continue // already clean; keeps re-runs idempotent
     upgrades.push({ id: node.id, name: node.name, version: node.version, patch: node.patch, fix })
   }
 
@@ -146,8 +117,7 @@ export const _patch = (
     for (const { id, name, version, patch, fix } of upgrades) {
       const newId = `${name}@${fix}`
 
-      // Add the patched node if neither the graph nor an earlier upgrade in
-      // this same transaction has already materialised it.
+      // Add the patched node once (graph or earlier upgrade may already have it).
       if (!graph.getNode(newId) && !seenIds.has(newId)) {
         seenIds.add(newId)
         m.addNode({
@@ -159,15 +129,13 @@ export const _patch = (
         })
       }
 
-      // Redirect every incoming edge to the patched node, preserving range
-      // attrs so downstream `yarn install` can refresh descriptors.
+      // Repoint incoming edges, keeping attrs for `yarn install` to refresh.
       for (const edge of graph.in(id)) {
         m.removeEdge(edge.src, edge.dst, edge.kind)
         m.addEdge(edge.src, newId, edge.kind, edge.attrs)
       }
       m.removeNode(id)
-      // yarn-classic doesn't carry per-node tarball payloads, so only drop
-      // the tarball when one was actually registered by the parser.
+      // yarn-classic has no per-node tarball, so guard the removal.
       if (graph.tarball({ name, version, patch })) {
         m.removeTarball({ name, version, patch })
       }
@@ -175,10 +143,17 @@ export const _patch = (
   })
 
   if (!flags.silent) {
-    const summary = upgrades.length > 0
-      ? upgrades.map((u) => `${u.name}@${u.fix}`).join(', ')
-      : '<none>'
-    console.log('Upgraded deps:', summary)
+    // Dedupe by from→to (one node spans many descriptors), one line each.
+    const pairs = [...new Set(upgrades.map((u) => `${u.name}@${u.version} → ${u.fix}`))].sort()
+    if (pairs.length > 0) {
+      console.log(`Upgraded deps (${pairs.length}):`)
+      for (const line of pairs) console.log(`  ${line}`)
+    } else {
+      console.log('Upgraded deps: <none>')
+    }
+    if (noFix.size > 0) {
+      console.log('No fix available:', [...noFix].sort().join(', '))
+    }
     reportDiagnostics(result.unresolved, flags.verbose)
   }
 
@@ -186,14 +161,9 @@ export const _patch = (
 }
 
 /**
- * Surface graph diagnostics without flooding the console.
- *
- * `graph.mutate()` re-emits parse-time diagnostics too — notably yarn-classic
- * lockfiles raise one `YARN_CLASSIC_INVALID_INTEGRITY` per legacy sha1 hash
- * (hundreds in a real lockfile). Those are converter artefacts, not audit-fix
- * problems, and yarn regenerates the integrity on the subsequent install — so
- * by default we print a one-line count per code and reserve the per-entry
- * detail for `--verbose`.
+ * Print graph diagnostics: a count per code by default, per-entry on verbose.
+ * mutate() re-emits parse-time noise (e.g. one YARN_CLASSIC_INVALID_INTEGRITY
+ * per legacy sha1 — hundreds), so collapse it unless asked.
  */
 const reportDiagnostics = (
   diagnostics: readonly { severity: string; code: string; message: string }[],
@@ -218,20 +188,10 @@ const reportDiagnostics = (
 }
 
 /**
- * Audit dispatch — orthogonal to the lockfile model.
- *
- * Which audit *output shape* we get is decided by the yarn binary running
- * the command, NOT by the lockfile schema on disk:
- *   - yarn 4+ emits NDJSON, drops `patched_versions`           → audit/v4
- *   - yarn 2/3 emits `{advisories: …}` JSON                    → audit/v2
- *   - yarn 1 / npm emits a stream of `auditAdvisory` events    → audit/v1
- *
- * Dispatching by yarn binary version (rather than by lockfile schema)
- * handles the "yarn 4 running against a yarn-classic lockfile" case
- * correctly — yarn 4 has no `yarn audit` command, only `yarn npm audit`,
- * so routing classic lockfiles through v1 would silently no-op on a
- * yarn-4 host. When yarn isn't available at all (e.g. npm flow,
- * `--reporter=npm`), v1's `npm audit` invocation still applies.
+ * Audit dispatch by yarn *binary* version (not lockfile schema) — the binary
+ * decides the output shape, and yarn 4 has no `yarn audit`, only `yarn npm
+ * audit`, so a classic lockfile on a yarn-4 host must still take v4:
+ *   yarn 4+ → v4 (NDJSON) · yarn 2/3 → v2 (JSON) · yarn 1 / npm → v1
  */
 export const _audit = (
   { flags, temp, bins, versions }: TContext,

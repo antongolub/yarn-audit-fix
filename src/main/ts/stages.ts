@@ -253,9 +253,7 @@ export const patchLockfile: TCallback = ({ temp, cwd, ctx }) => {
   const lockfilePath = path.join(temp, 'yarn.lock')
   const raw = fs.readFileSync(lockfilePath, 'utf-8')
   const lockfileType = getLockfileType(raw)
-  // workspaceRoot = real project cwd: that's where `.yarn` (release) and
-  // `.yarnrc.yml` live intact, so the berry adapter can resolve builtin
-  // patch hashes instead of falling back to a sentinel.
+  // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes.
   const lockfile = lf.parse(raw, lockfileType, cwd)
   const report = lf.audit(ctx, lockfileType)
   const patched = lf.patch(lockfile, report, ctx, lockfileType)
