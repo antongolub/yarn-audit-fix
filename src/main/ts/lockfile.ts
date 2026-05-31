@@ -5,6 +5,7 @@ import sv from 'semver'
 import { audit as auditV1 } from './audit/v1'
 import { audit as auditV2 } from './audit/v2'
 import { audit as auditV4 } from './audit/v4'
+import { formatAdvisoryMeta } from './audit/meta'
 import {
   TAuditReport,
   TContext,
@@ -153,11 +154,20 @@ export const _patch = (
   })
 
   if (!flags.silent) {
-    // Dedupe by from→to (one node spans many descriptors), one line each.
-    const pairs = [...new Set(upgrades.map((u) => `${u.name}@${u.version} → ${u.fix}`))].sort()
-    if (pairs.length > 0) {
-      console.log(`Upgraded deps (${pairs.length}):`)
-      for (const line of pairs) console.log(`  ${line}`)
+    // Dedupe by from→to (one node spans many descriptors); annotate each with
+    // the advisory severity / CVSS / CVE refs that motivated the bump.
+    const seen = new Set<string>()
+    const lines: string[] = []
+    for (const u of upgrades) {
+      const head = `${u.name}@${u.version} → ${u.fix}`
+      if (seen.has(head)) continue
+      seen.add(head)
+      lines.push(head + formatAdvisoryMeta(report[u.name]))
+    }
+    lines.sort()
+    if (lines.length > 0) {
+      console.log(`Upgraded deps (${lines.length}):`)
+      for (const line of lines) console.log(`  ${line}`)
     } else {
       console.log('Upgraded deps: <none>')
     }

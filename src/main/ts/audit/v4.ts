@@ -5,6 +5,7 @@ import {
   TFlags,
 } from '../ifaces'
 import { attempt, invoke } from '../util'
+import { extractRefs, mergeMeta } from './meta'
 import { auditFlags } from './v2'
 
 /**
@@ -64,9 +65,9 @@ export const derivePatchedVersions = (vulnerableVersions: string): string => {
 export const parseAuditReport = (data: string): TAuditReport => {
   const report: TAuditReport = {}
   for (const line of data.toString().split('\n')) {
-    const entry = attempt(() => JSON.parse(line))
-    const name = entry?.value
-    const child = entry?.children
+    const node = attempt(() => JSON.parse(line))
+    const name = node?.value
+    const child = node?.children
     const vuln = child?.['Vulnerable Versions']
     if (!name || !child || !vuln) continue
 
@@ -74,15 +75,23 @@ export const parseAuditReport = (data: string): TAuditReport => {
     // numeric advisory id) and no fixable version. Out of scope for audit-fix.
     if (typeof child.ID !== 'number') continue
 
-    const patched = derivePatchedVersions(vuln)
+    const entry = {
+      module_name: name,
+      vulnerable_versions: vuln,
+      patched_versions: derivePatchedVersions(vuln),
+      severity: child.Severity,
+      refs: extractRefs(undefined, child.URL, child.Issue),
+      url: child.URL,
+    }
     const prev = report[name]
     report[name] = prev
       ? {
-          module_name: name,
+          ...entry,
+          ...mergeMeta(prev, entry),
           vulnerable_versions: `${prev.vulnerable_versions} || ${vuln}`,
-          patched_versions: joinAnd(prev.patched_versions, patched),
+          patched_versions: joinAnd(prev.patched_versions, entry.patched_versions),
         }
-      : { module_name: name, vulnerable_versions: vuln, patched_versions: patched }
+      : entry
   }
   return report
 }

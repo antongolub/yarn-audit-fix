@@ -1,9 +1,10 @@
 import {
-  TAuditAdvisory,
   TAuditReport,
   TFlags,
+  TRawAdvisory,
 } from '../ifaces'
 import { formatFlags, invoke, mapFlags } from '../util'
+import { extractRefs, mergeMeta } from './meta'
 
 /**
  * Yarn 2/3 audit. Output is one JSON object `{advisories: {<id>: …}}`.
@@ -53,12 +54,22 @@ export const auditFlags = (flags: TFlags): string[] => {
 }
 
 export const parseAuditReport = (data: string): TAuditReport => {
-  const advisories = JSON.parse(data).advisories as Record<string, TAuditAdvisory>
-  return Object.values(advisories).reduce<TAuditReport>(
-    (m, { vulnerable_versions, module_name, patched_versions }) => {
-      m[module_name] = { module_name, vulnerable_versions, patched_versions }
-      return m
-    },
-    {},
-  )
+  const advisories = JSON.parse(data).advisories as Record<string, TRawAdvisory>
+  const report: TAuditReport = {}
+  for (const a of Object.values(advisories)) {
+    const entry = {
+      module_name: a.module_name,
+      vulnerable_versions: a.vulnerable_versions,
+      patched_versions: a.patched_versions,
+      severity: a.severity,
+      cvss: typeof a.cvss?.score === 'number' ? a.cvss.score : undefined,
+      refs: extractRefs(a.cves, a.url, a.references, a.title),
+      url: a.url,
+    }
+    const prev = report[entry.module_name]
+    report[entry.module_name] = prev
+      ? { ...entry, ...mergeMeta(prev, entry) }
+      : entry
+  }
+  return report
 }

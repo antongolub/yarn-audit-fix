@@ -30,15 +30,34 @@ export type TFlow = {
   fallback: TStage
 }
 
+// Normalized advisory used across the patch pipeline. Metadata fields are
+// optional — yarn 4's NDJSON carries no CVE/CVSS, only severity + a GHSA url.
 export type TAuditAdvisory = {
   module_name: string // eslint-disable-line camelcase
   vulnerable_versions: string // eslint-disable-line camelcase
   patched_versions: string // eslint-disable-line camelcase
+  severity?: string
+  cvss?: number
+  refs?: string[] // CVE / GHSA identifiers
+  url?: string
+}
+
+// Raw npm/yarn advisory as emitted by `(yarn|npm) audit --json` (v1/v2).
+export type TRawAdvisory = {
+  module_name: string // eslint-disable-line camelcase
+  vulnerable_versions: string // eslint-disable-line camelcase
+  patched_versions: string // eslint-disable-line camelcase
+  severity?: string
+  cves?: string[]
+  cvss?: { score?: number } | null
+  url?: string
+  references?: string
+  title?: string
 }
 
 export type TAuditEntry = {
   data: {
-    advisory: TAuditAdvisory
+    advisory: TRawAdvisory
   }
 }
 

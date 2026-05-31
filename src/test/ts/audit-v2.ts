@@ -14,47 +14,34 @@ describe('parseReport', () => {
       'utf-8',
     )
 
-    expect(parseAuditReport(input)).toEqual({
-      'ansi-regex': {
-        patched_versions: '>=5.0.1',
-        vulnerable_versions: '>2.1.1 <5.0.1',
-        module_name: 'ansi-regex',
-      },
-      immer: {
-        patched_versions: '>=9.0.6',
-        vulnerable_versions: '<9.0.6',
-        module_name: 'immer',
-      },
-      'trim-off-newlines': {
-        patched_versions: '<0.0.0',
-        vulnerable_versions: '<=1.0.1',
-        module_name: 'trim-off-newlines',
-      },
-      'ansi-html': {
-        patched_versions: '<0.0.0',
-        vulnerable_versions: '<=0.0.7',
-        module_name: 'ansi-html',
-      },
-      '@npmcli/git': {
-        patched_versions: '>=2.0.8',
-        vulnerable_versions: '<2.0.8',
-        module_name: '@npmcli/git',
-      },
-      'glob-parent': {
-        patched_versions: '>=5.1.2',
-        vulnerable_versions: '<5.1.2',
-        module_name: 'glob-parent',
-      },
-      browserslist: {
-        patched_versions: '>=4.16.5',
-        vulnerable_versions: '>=4.0.0 <4.16.5',
-        module_name: 'browserslist',
-      },
-      'trim-newlines': {
-        patched_versions: '>=3.0.1',
-        vulnerable_versions: '<3.0.1',
-        module_name: 'trim-newlines',
-      },
+    const report = parseAuditReport(input)
+
+    // Version ranges (projection keeps the assertion readable across 8 advisories).
+    const ranges = Object.fromEntries(
+      Object.entries(report).map(([k, a]) => [
+        k,
+        [a.vulnerable_versions, a.patched_versions],
+      ]),
+    )
+    expect(ranges).toEqual({
+      'ansi-regex': ['>2.1.1 <5.0.1', '>=5.0.1'],
+      immer: ['<9.0.6', '>=9.0.6'],
+      'trim-off-newlines': ['<=1.0.1', '<0.0.0'],
+      'ansi-html': ['<=0.0.7', '<0.0.0'],
+      '@npmcli/git': ['<2.0.8', '>=2.0.8'],
+      'glob-parent': ['<5.1.2', '>=5.1.2'],
+      browserslist: ['>=4.0.0 <4.16.5', '>=4.16.5'],
+      'trim-newlines': ['<3.0.1', '>=3.0.1'],
     })
+
+    // Metadata is threaded through for the upgrade summary.
+    expect(report['ansi-regex'].severity).toBe('moderate')
+    expect(report['ansi-regex'].refs).toEqual(['CVE-2021-3807', 'GHSA-93q8-gq69-wqmw'])
+    expect(report['glob-parent'].severity).toBe('high')
+    // immer has two advisories merged → severity escalates to the max (critical).
+    expect(report.immer.severity).toBe('critical')
+    expect(report.immer.refs).toEqual(
+      expect.arrayContaining(['CVE-2021-3757', 'CVE-2021-23436']),
+    )
   })
 })

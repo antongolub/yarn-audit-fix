@@ -20,11 +20,21 @@ describe('parseReport (yarn 4 NDJSON)', () => {
     const result = parseAuditReport(input)
     expect(Object.keys(result).sort()).toEqual(['lodash', 'minimist'])
     expect(result.lodash.module_name).toBe('lodash')
+    // minimist: single critical advisory; GHSA mined from the URL (yarn 4
+    // carries no `cves`, only a GHSA link).
     expect(result.minimist).toEqual({
       module_name: 'minimist',
       vulnerable_versions: '>=1.0.0 <1.2.6',
       patched_versions: '>=1.2.6',
+      severity: 'critical',
+      url: 'https://github.com/advisories/GHSA-xvch-5gv4-984h',
+      refs: ['GHSA-xvch-5gv4-984h'],
     })
+    // 5 lodash advisories merge → severity escalates to the max (high).
+    expect(result.lodash.severity).toBe('high')
+    expect(result.lodash.refs).toEqual(
+      expect.arrayContaining(['GHSA-35jh-r3h4-6jhm', 'GHSA-f23m-r3pf-42rh']),
+    )
     // 5 lodash advisories AND-merge: a fix must clear *all* of them. The
     // strictest is `<=4.17.23` → patched `>4.17.23`, so only versions above
     // 4.17.23 are safe. (The resulting floor 4.17.24 was never published —

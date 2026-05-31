@@ -12,6 +12,11 @@ describe('parseReport', () => {
         module_name: 'postcss',
         patched_versions: '>=8.2.10',
         vulnerable_versions: '>=7.0.0 <8.2.10',
+        severity: 'moderate',
+        cvss: undefined,
+        url: 'https://npmjs.com/advisories/1693',
+        // CVE from `cves`, GHSA mined from the free-text `references`.
+        refs: ['CVE-2021-23368', 'GHSA-hwj9-h5mp-3pm3'],
       },
     })
   })
