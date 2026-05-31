@@ -1,0 +1,3 @@
+{"type":"auditAdvisory","data":{"resolution":{"id":1,"path":"glob","dev":false,"optional":false,"bundled":false},"advisory":{"module_name":"glob","vulnerable_versions":"<11.0.0","patched_versions":">=11.0.0","severity":"moderate","title":"glob test advisory"}}}
+{"type":"auditAdvisory","data":{"resolution":{"id":2,"path":"glob>minimatch","dev":false,"optional":false,"bundled":false},"advisory":{"module_name":"minimatch","vulnerable_versions":"<10.0.0","patched_versions":">=10.0.0","severity":"moderate","title":"minimatch test advisory"}}}
+{"type":"auditSummary","data":{"vulnerabilities":{"info":0,"low":0,"moderate":2,"high":0,"critical":0},"dependencies":2,"devDependencies":0,"optionalDependencies":0,"totalDependencies":2}}

@@ -83,4 +83,29 @@ describe('patch', () => {
     expect(result).toContain('minimatch@10.0.0')
     expect(result).not.toContain('glob@^10.0.0:\n  version "10.4.5"')
   })
+
+  // Mirror of the above with the child declared BEFORE the parent, so node
+  // iteration removes the child first. The per-node interleaving threw
+  // "removeNode: <child> has incoming edges"; the phased mutate is order-free.
+  it('patches a vulnerable child + parent regardless of declaration order', () => {
+    const dir = path.join(fixtures, 'lockfile/v1-cross2')
+    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
+    const report = parseAuditV1(
+      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
+    )
+    const fmt = getLockfileType(lockfile)
+
+    const result = format(
+      patch(
+        parse(lockfile, fmt),
+        report,
+        { flags: { silent: true }, bins: {} } as unknown as TContext,
+        fmt,
+      ),
+      fmt,
+    )
+
+    expect(result).toContain('glob@11.0.0')
+    expect(result).toContain('minimatch@10.0.0')
+  })
 })

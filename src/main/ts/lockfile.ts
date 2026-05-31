@@ -114,41 +114,60 @@ export const _patch = (
   }
 
   const removedIds = new Set(upgrades.map((u) => u.id))
-  const result = graph.mutate((m) => {
-    const seenIds = new Set<string>()
-    const addedEdges = new Set<string>()
-    for (const { id, name, version, patch, fix } of upgrades) {
-      const newId = `${name}@${fix}`
+  const newIdOf = (u: { name: string; fix: string }) => `${u.name}@${u.fix}`
+  const sep = String.fromCharCode(0) // NUL — can't occur in a package name
 
-      // Add the patched node once (graph or earlier upgrade may already have it).
+  // Three ordered phases. The graph rejects removeNode while a node still has
+  // incoming edges, and removeNode auto-drops the node's outgoing edges — so
+  // interleaving per-node breaks when a vulnerable parent and child are both
+  // upgraded (order-dependent). Doing all edge removals before any node
+  // removal is order-independent.
+  const result = graph.mutate((m) => {
+    // 1. Materialise each patched node once.
+    const seenIds = new Set<string>()
+    for (const u of upgrades) {
+      const newId = newIdOf(u)
       if (!graph.getNode(newId) && !seenIds.has(newId)) {
         seenIds.add(newId)
         m.addNode({
           id: newId,
-          name,
-          version: fix,
+          name: u.name,
+          version: u.fix,
           peerContext: [],
-          resolution: `${name}@npm:${fix}`,
+          resolution: `${u.name}@npm:${u.fix}`,
         })
       }
+    }
 
-      // Repoint incoming edges, keeping attrs for `yarn install` to refresh.
-      for (const edge of graph.in(id)) {
-        // Skip sources also being removed: removing their node already drops
-        // this edge, so removeEdge here would fail on a stale graph.in() view.
+    // 2. Drop every incoming edge of a removed node; redirect those from
+    //    surviving sources onto the patched node. Edges between two removed
+    //    nodes are just dropped — both endpoints are replaced and yarn install
+    //    regenerates deps. Dedupe removals and additions.
+    const removedEdges = new Set<string>()
+    const addedEdges = new Set<string>()
+    for (const u of upgrades) {
+      const newId = newIdOf(u)
+      for (const edge of graph.in(u.id)) {
+        const ekey = [edge.src, edge.dst, edge.kind].join(sep)
+        if (!removedEdges.has(ekey)) {
+          removedEdges.add(ekey)
+          m.removeEdge(edge.src, edge.dst, edge.kind)
+        }
         if (removedIds.has(edge.src)) continue
-        m.removeEdge(edge.src, edge.dst, edge.kind)
-        // Dedupe: two vulnerable deps of one source may collapse to one fix.
-        const key = [edge.src, newId, edge.kind].join(String.fromCharCode(0))
-        if (!addedEdges.has(key)) {
-          addedEdges.add(key)
+        const akey = [edge.src, newId, edge.kind].join(sep)
+        if (!addedEdges.has(akey)) {
+          addedEdges.add(akey)
           m.addEdge(edge.src, newId, edge.kind, edge.attrs)
         }
       }
-      m.removeNode(id)
-      // yarn-classic has no per-node tarball, so guard the removal.
-      if (graph.tarball({ name, version, patch })) {
-        m.removeTarball({ name, version, patch })
+    }
+
+    // 3. Incoming-edge-free now → drop the old nodes and their tarballs
+    //    (yarn-classic carries none, so guard).
+    for (const u of upgrades) {
+      m.removeNode(u.id)
+      if (graph.tarball({ name: u.name, version: u.version, patch: u.patch })) {
+        m.removeTarball({ name: u.name, version: u.version, patch: u.patch })
       }
     }
   })
