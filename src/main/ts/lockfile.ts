@@ -112,8 +112,10 @@ export const _patch = (
     upgrades.push({ id: node.id, name: node.name, version: node.version, patch: node.patch, fix })
   }
 
+  const removedIds = new Set(upgrades.map((u) => u.id))
   const result = graph.mutate((m) => {
     const seenIds = new Set<string>()
+    const addedEdges = new Set<string>()
     for (const { id, name, version, patch, fix } of upgrades) {
       const newId = `${name}@${fix}`
 
@@ -131,8 +133,16 @@ export const _patch = (
 
       // Repoint incoming edges, keeping attrs for `yarn install` to refresh.
       for (const edge of graph.in(id)) {
+        // Skip sources also being removed: removing their node already drops
+        // this edge, so removeEdge here would fail on a stale graph.in() view.
+        if (removedIds.has(edge.src)) continue
         m.removeEdge(edge.src, edge.dst, edge.kind)
-        m.addEdge(edge.src, newId, edge.kind, edge.attrs)
+        // Dedupe: two vulnerable deps of one source may collapse to one fix.
+        const key = [edge.src, newId, edge.kind].join(String.fromCharCode(0))
+        if (!addedEdges.has(key)) {
+          addedEdges.add(key)
+          m.addEdge(edge.src, newId, edge.kind, edge.attrs)
+        }
       }
       m.removeNode(id)
       // yarn-classic has no per-node tarball, so guard the removal.

@@ -53,4 +53,34 @@ describe('patch', () => {
       expect(result).toEqual(expected)
     })
   }
+
+  // Regression: a vulnerable parent and its vulnerable child both in the
+  // upgrade set. Removing the parent cascades its outgoing edge, so the
+  // child's stale graph.in() view referenced an already-gone edge and
+  // mutate() threw PATCH_REJECTED. See lockfile.ts removedIds guard.
+  it('patches a vulnerable parent + child without rejecting', () => {
+    const dir = path.join(fixtures, 'lockfile/v1-cross')
+    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
+    const report = parseAuditV1(
+      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
+    )
+    const fmt = getLockfileType(lockfile)
+    expect(fmt).toBe('yarn-classic')
+
+    // bins:{} → offline minVersion fallback, deterministic: glob→11.0.0,
+    // minimatch→10.0.0.
+    const result = format(
+      patch(
+        parse(lockfile, fmt),
+        report,
+        { flags: { silent: true }, bins: {} } as unknown as TContext,
+        fmt,
+      ),
+      fmt,
+    )
+
+    expect(result).toContain('glob@11.0.0')
+    expect(result).toContain('minimatch@10.0.0')
+    expect(result).not.toContain('glob@^10.0.0:\n  version "10.4.5"')
+  })
 })
