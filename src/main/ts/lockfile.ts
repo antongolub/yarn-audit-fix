@@ -76,6 +76,13 @@ const resolveFix = (
   return sv.minVersion(range)?.format()
 }
 
+/** Strip yarn's `npm:` protocol; return a usable semver range or undefined. */
+const normalizeRange = (raw?: string): string | undefined => {
+  if (!raw) return undefined
+  const r = raw.startsWith('npm:') ? raw.slice(4) : raw
+  return sv.validRange(r) ? r : undefined
+}
+
 /**
  * Upgrade every vulnerable node to the lowest published version that clears
  * its advisory, by edge-redirect: add the patched node, repoint incoming
@@ -96,8 +103,12 @@ export const _patch = (
   const graph = lockfile as Graph
   const versionCache = new Map<string, string[] | null>()
 
-  // Collect upgrades first; mutating mid-iteration would disturb graph.in().
-  const upgrades: { id: string; name: string; version: string; patch?: string; fix: string }[] = []
+  // Pass 1: every vulnerable node that has a usable fix newer than current.
+  // This is the set of nodes that *would* upgrade ignoring compat — it's also
+  // the exemption set for the compat gate below (a consumer being replaced
+  // re-declares its own deps, so its old range no longer governs).
+  type Candidate = { id: string; name: string; version: string; patch?: string; fix: string }
+  const candidates: Candidate[] = []
   const noFix = new Set<string>()
   for (const node of graph.nodes()) {
     const advisory = report[node.name]
@@ -110,7 +121,32 @@ export const _patch = (
       continue
     }
     if (!sv.gt(fix, node.version)) continue // already clean; keeps re-runs idempotent
-    upgrades.push({ id: node.id, name: node.name, version: node.version, patch: node.patch, fix })
+    candidates.push({ id: node.id, name: node.name, version: node.version, patch: node.patch, fix })
+  }
+  const candidateIds = new Set(candidates.map((c) => c.id))
+
+  // Pass 2: compat gate (legacy behaviour, restored). A fix that falls outside
+  // a *surviving* consumer's declared range silently breaks that consumer.
+  // Skip such fixes unless --force, recording why. A consumer that is itself a
+  // candidate is exempt — it'll be replaced and re-declare its deps.
+  const upgrades: Candidate[] = []
+  const incompatible = new Map<string, Set<string>>()
+  for (const c of candidates) {
+    let breaks: string[] | undefined
+    if (!flags.force) {
+      for (const edge of graph.in(c.id)) {
+        if (candidateIds.has(edge.src)) continue // consumer is being replaced too
+        const range = normalizeRange(edge.attrs?.range)
+        if (range && !sv.satisfies(c.fix, range)) {
+          (breaks ??= []).push(`${edge.src} wants "${edge.attrs!.range}"`)
+        }
+      }
+    }
+    if (breaks?.length) {
+      incompatible.set(`${c.name}@${c.version} → ${c.fix}`, new Set(breaks))
+      continue
+    }
+    upgrades.push(c)
   }
 
   const removedIds = new Set(upgrades.map((u) => u.id))
@@ -192,6 +228,15 @@ export const _patch = (
     }
     if (noFix.size > 0) {
       console.log('No fix available:', [...noFix].sort().join(', '))
+    }
+    if (incompatible.size > 0) {
+      console.warn(
+        'Skipped (fix breaks a consumer\'s declared range; re-run with --force to apply):',
+      )
+      for (const [spec, consumers] of [...incompatible].sort()) {
+        console.warn(`  ${spec}`)
+        for (const c of [...consumers].sort()) console.warn(`    - ${c}`)
+      }
     }
     reportDiagnostics(result.unresolved, flags.verbose)
   }

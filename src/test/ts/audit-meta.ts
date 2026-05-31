@@ -73,4 +73,15 @@ describe('formatAdvisoryMeta', () => {
     expect(formatAdvisoryMeta(undefined)).toBe('')
     expect(formatAdvisoryMeta({} as TAuditAdvisory)).toBe('')
   })
+
+  it('suppresses the npm "unscored" CVSS 0 placeholder', () => {
+    // form-data ships severity=critical, cvss.score=0 — never render "CVSS 0".
+    expect(
+      formatAdvisoryMeta({
+        severity: 'critical',
+        cvss: 0,
+        refs: ['CVE-2025-7783'],
+      } as TAuditAdvisory),
+    ).toBe('  [critical] CVE-2025-7783')
+  })
 })

@@ -54,7 +54,10 @@ export const formatAdvisoryMeta = (a?: TAuditAdvisory): string => {
   if (!a) return ''
   const badge: string[] = []
   if (a.severity) badge.push(a.severity)
-  if (a.cvss != null) badge.push(`CVSS ${a.cvss}`)
+  // Show CVSS only when scored. npm advisories ship score 0 (vectorString
+  // null) as an "unscored" placeholder — never a real 0.0/None rating — so a
+  // falsy score is suppressed to avoid the contradictory "[critical, CVSS 0]".
+  if (a.cvss) badge.push(`CVSS ${a.cvss}`)
 
   const parts: string[] = []
   if (badge.length > 0) parts.push(`[${badge.join(', ')}]`)

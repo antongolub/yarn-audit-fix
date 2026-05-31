@@ -40,11 +40,14 @@ describe('patch', () => {
       const fmt = getLockfileType(lockfile)
       expect(fmt).toBe(name)
 
+      // force: these fixtures exercise the full patch mechanics — they bump
+      // transitive deps across majors that the compat gate would otherwise
+      // skip. The gate itself is covered by the v1-compat case below.
       const result = format(
         patch(
           parse(lockfile, fmt),
           parseAudit(report),
-          { flags: { silent: true }, bins } as unknown as TContext,
+          { flags: { silent: true, force: true }, bins } as unknown as TContext,
           fmt,
         ),
         fmt,
@@ -107,5 +110,43 @@ describe('patch', () => {
 
     expect(result).toContain('glob@11.0.0')
     expect(result).toContain('minimatch@10.0.0')
+  })
+
+  // Compat gate: the only fix for uuid (v11) leaves its consumer request's
+  // declared "^3.3.2" range. request isn't itself patchable, so the bump is
+  // skipped by default and applied only with --force.
+  it('skips a fix that breaks a surviving consumer range unless --force', () => {
+    const dir = path.join(fixtures, 'lockfile/v1-compat')
+    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
+    const report = parseAuditV1(
+      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
+    )
+    const fmt = getLockfileType(lockfile)
+
+    // default: gate on → uuid untouched, stays at 3.4.0
+    const guarded = format(
+      patch(
+        parse(lockfile, fmt),
+        report,
+        { flags: { silent: true }, bins: {} } as unknown as TContext,
+        fmt,
+      ),
+      fmt,
+    )
+    expect(guarded).toContain('version "3.4.0"')
+    expect(guarded).not.toContain('version "11.0.0"')
+
+    // --force: gate bypassed → the uuid@^3.3.2 descriptor now resolves to 11.x
+    const forced = format(
+      patch(
+        parse(lockfile, fmt),
+        report,
+        { flags: { silent: true, force: true }, bins: {} } as unknown as TContext,
+        fmt,
+      ),
+      fmt,
+    )
+    expect(forced).toContain('version "11.0.0"')
+    expect(forced).not.toContain('version "3.4.0"')
   })
 })

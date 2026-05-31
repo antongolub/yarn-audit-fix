@@ -59,7 +59,8 @@ export const parseAuditReport = (
       vulnerable_versions: a.vulnerable_versions,
       patched_versions: a.patched_versions,
       severity: a.severity,
-      cvss: typeof a.cvss?.score === 'number' ? a.cvss.score : undefined,
+      // npm ships score 0 (vectorString null) as "unscored" — treat as absent.
+      cvss: a.cvss?.score || undefined,
       refs: extractRefs(a.cves, a.url, a.references, a.title),
       url: a.url,
     }
