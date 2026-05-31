@@ -117,7 +117,7 @@ export const _patch = (
 
     const fix = resolveFix(node.name, advisory.patched_versions, bins?.npm, cwd, versionCache)
     if (fix === undefined) {
-      noFix.add(advisory.module_name) // no published version clears it
+      noFix.add(`${node.name}@${node.version}`) // no published version clears it
       continue
     }
     if (!sv.gt(fix, node.version)) continue // already clean; keeps re-runs idempotent
