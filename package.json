@@ -78,8 +78,7 @@
     "fs-extra": "^11.3.0",
     "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
-    "semver": "^7.7.1",
-    "synp": "^1.9.14"
+    "semver": "^7.7.1"
   },
   "devDependencies": {
     "@jest/globals": "^30.0.0",

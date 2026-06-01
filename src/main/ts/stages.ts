@@ -2,7 +2,6 @@ import path from 'node:path'
 
 import fs from 'fs-extra'
 import semver from 'semver'
-import synp from 'synp'
 
 import { TCallback } from './ifaces'
 import * as lf from './lockfile'
@@ -135,61 +134,6 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
   })
 }
 
-/**
- * Convert yarn.lock to package-lock.json for further audit.
- * @param {TContext} cxt
- * @return {void}
- */
-export const yarnLockToPkgLock: TCallback = ({ temp, flags }) => {
-  const pgkLockJsonData = synp.yarnToNpm(temp, true)
-
-  fs.writeFileSync(path.join(temp, 'package-lock.json'), pgkLockJsonData)
-
-  if (flags.flow !== 'patch') {
-    fs.removeSync(path.join(temp, 'yarn.lock'))
-  }
-}
-
-/**
- * Apply npm audit fix.
- * @param {TContext} cxt
- * @return {void}
- */
-export const npmAuditFix: TCallback = ({ temp, flags, bins }) => {
-  const defaultFlags = {
-    'package-lock-only': true,
-  }
-  const auditFlags = formatFlags(
-    { ...defaultFlags, ...flags },
-    'audit-level',
-    'dry-run',
-    'exclude',
-    'force',
-    'ignore',
-    'loglevel',
-    'legacy-peer-deps',
-    'only',
-    'package-lock-only',
-    'registry',
-    'silent',
-    'verbose',
-  )
-  const auditArgs = ['audit', 'fix', ...auditFlags, '--prefix', temp]
-
-  invoke(bins.npm, auditArgs, temp, flags.silent)
-}
-
-/**
- * Generate yarn.lock by package-lock.json data.
- * @param {TContext} cxt
- * @return {void}
- */
-export const yarnImport: TCallback = ({ temp }) => {
-  const yarnLockData = synp.npmToYarn(temp, true)
-
-  fs.writeFileSync(path.join(temp, 'yarn.lock'), yarnLockData)
-}
-
 export const syncLockfile: TCallback = ({ temp, flags }) => {
   if (flags.dryRun) {
     return
@@ -266,11 +210,11 @@ export const patchLockfile: TCallback = ({ temp, cwd, ctx }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const verify: TCallback = ({ cwd, versions, flags }) => {
+export const verify: TCallback = ({ cwd, versions }) => {
   const required = ['yarn.lock', 'package.json']
 
   // NOTE yarn 2+ in PnP mode does not create `node_modules` dir
-  if (flags.flow === 'convert' || semver.lt(versions.yarn, '2.0.0')) {
+  if (semver.lt(versions.yarn, '2.0.0')) {
     required.push('node_modules')
   }
 

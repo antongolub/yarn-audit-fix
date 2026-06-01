@@ -1,4 +1,3 @@
-export { getFlow } from './flows'
 export * from './ifaces'
 export * from './lockfile'
 export * from './runner'

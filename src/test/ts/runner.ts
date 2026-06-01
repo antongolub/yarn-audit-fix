@@ -4,21 +4,19 @@ import { fileURLToPath } from 'node:url'
 
 import { jest } from '@jest/globals'
 
-import type { TContext, TFlow } from '../../main/ts/ifaces'
+import type { TContext } from '../../main/ts/ifaces'
 
 jest.mock('child_process')
 jest.mock('fs-extra')
-jest.mock('synp')
 
 const cp = createRequire(import.meta.url)('child_process')
 const fs = (await import('fs-extra')).default
-const synp = (await import('synp')).default
 
 const lf = (await import('../../main/ts/lockfile'))._internal
 const { createSymlinks, getContext, run, runSync } = await import(
   '../../main/ts'
 )
-const { getNpm, getYarn } = await import('../../main/ts/util')
+const { getYarn } = await import('../../main/ts/util')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const noop = () => {
@@ -101,10 +99,6 @@ describe('yarn-audit-fix', () => {
     // @ts-ignore
     fs.createSymlinkSync.mockImplementation(noop)
     // @ts-ignore
-    synp.yarnToNpm.mockImplementation(() => '{}')
-    // @ts-ignore
-    synp.npmToYarn.mockImplementation(() => '{}')
-    // @ts-ignore
     cp.spawnSync.mockImplementation((cmd, [$0, $1]) => {
       if ($0 === 'audit' && $1 === '--json') {
         return audit
@@ -168,65 +162,6 @@ describe('yarn-audit-fix', () => {
         'dir',
       )
     }
-    // eslint-disable-next-line
-    const checkConvertFlow = (skipPkgLockOnly?: boolean) => {
-      checkTempAssets()
-
-      // Generating package-lock.json from yarn.lock...
-      expect(synp.yarnToNpm).toHaveBeenCalledWith(temp, true)
-      expect(fs.removeSync).toHaveBeenCalledWith(strMatching(temp, 'yarn.lock'))
-
-      // Applying npm audit fix...
-      expect(cp.spawnSync).toHaveBeenCalledWith(
-        getNpm(),
-        [
-          'audit',
-          'fix',
-          skipPkgLockOnly ? undefined : '--package-lock-only',
-          '--verbose',
-          '--registry',
-          registryUrl,
-          '--exclude',
-          dependency,
-          '--exclude',
-          scopedDependency,
-          '--prefix',
-          expect.stringMatching(temp),
-        ].filter((v) => v !== undefined),
-        { cwd: expect.stringMatching(temp), stdio, shell },
-      )
-
-      // Updating yarn.lock from package-lock.json...
-      expect(fs.copyFileSync).toHaveBeenCalledWith(
-        strMatching(temp, 'yarn.lock'),
-        'yarn.lock',
-      )
-      expect(cp.spawnSync).toHaveBeenCalledWith(
-        getYarn(),
-        [
-          'install',
-          '--update-checksums',
-          '--verbose',
-          '--registry',
-          registryUrl,
-          '--ignore-engines',
-        ],
-        { cwd, stdio, shell },
-      )
-      expect(fs.emptyDirSync).toHaveBeenCalledWith(expect.stringMatching(temp))
-    }
-
-    it('executes custom flows', async () => {
-      const handler = jest.fn(noop)
-      const flow: TFlow = {
-        main: [['Test', handler]],
-        fallback: [],
-      }
-      await run({}, flow)
-
-      expect(handler).toHaveBeenCalledTimes(1)
-    })
-
     it('throws error on broken package structure', async () => {
       fs.existsSync
         // @ts-ignore
@@ -237,11 +172,6 @@ describe('yarn-audit-fix', () => {
         new Error('not found: yarn.lock'),
       )
     })
-
-    it('throws error on unsupported flow', async () =>
-      expect(run({ flow: 'unknown' })).rejects.toEqual(
-        new Error('Unsupported flow: unknown'),
-      ))
 
     describe('`patch` flow', () => {
       it('invokes cmd queue with proper args', async () => {
@@ -284,55 +214,42 @@ describe('yarn-audit-fix', () => {
       })
     })
 
-    describe('`convert` flow', () => {
-      it('invokes cmd queue with proper args', async () => {
-        await run({
-          verbose: true,
-          foo: 'bar',
-          'package-lock-only': true,
-          registry: registryUrl,
-          flow: 'convert',
-          exclude: [dependency, scopedDependency],
-          ignoreEngines: true,
-          temp,
-        })
-        checkConvertFlow()
-      })
-
-      it('handles exceptions', async () => {
-        let reason = { error: new Error('foobar') } as any
-        // @ts-ignore
-        cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({ silent: true })).rejects.toBe(reason)
-
-        reason = { status: 1 }
-        // @ts-ignore
-        cp.spawnSync.mockImplementation(() => reason)
-        await expect(run({ silent: true })).rejects.toBe(reason)
-
-        reason = new TypeError('foo')
-        // @ts-ignore
-        cp.spawnSync.mockImplementation(() => {
-          throw reason
-        })
-        await expect(run()).rejects.toBe(reason)
-      })
-    })
-
     describe('cli', () => {
       it('invokes cmd queue with proper args', async () => {
         process.argv.push(
           '--verbose',
-          '--package-lock-only=false',
+          `--temp=${temp}`,
           `--registry=${registryUrl}`,
-          '--flow=convert',
           `--exclude=${dependency}`,
           `--exclude=${scopedDependency}`,
           '--ignore-engines',
         )
         await reimport('../../main/ts/cli')
-          .then(() => checkConvertFlow(true))
-          .catch(noop)
+
+        checkTempAssets()
+
+        // Audit + patch the lockfile graph
+        expect(lfAudit).toHaveBeenCalledTimes(1)
+        expect(lfPatch).toHaveBeenCalledTimes(1)
+        expect(lfFormat).toHaveBeenCalledTimes(1)
+
+        // Replace the original lockfile, then install with flag-derived args
+        expect(fs.copyFileSync).toHaveBeenCalledWith(
+          strMatching(temp, 'yarn.lock'),
+          'yarn.lock',
+        )
+        expect(cp.spawnSync).toHaveBeenCalledWith(
+          getYarn(),
+          [
+            'install',
+            '--update-checksums',
+            '--verbose',
+            '--registry',
+            registryUrl,
+            '--ignore-engines',
+          ],
+          { cwd, stdio, shell },
+        )
       })
 
       describe('on error', () => {

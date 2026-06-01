@@ -39,11 +39,6 @@ const flags = new Command()
     parseMultipleValueArg,
     env.YAF_EXCLUDE,
   )
-  .addOption(
-    new Option('--flow [flow]', 'Define how `yarn.lock` is modified')
-      .choices(['convert', 'patch'])
-      .default(env.YAF_FLOW || 'patch'),
-  )
   .option(
     '--force [bool]',
     'Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones',
@@ -60,12 +55,6 @@ const flags = new Command()
     'Ignore engines check',
     env.YAF_IGNORE_ENGINES,
   )
-  .option('--loglevel [level]', 'Set custom log level', env.YAF_LOGLEVEL)
-  .option(
-    '--legacy-peer-deps [bool]',
-    'Accept an incorrect (potentially broken) deps resolution',
-    env.YAF_LEGACY_PEER_DEPS,
-  )
   .addOption(
     new Option(
       '--npm-path [path]',
@@ -73,16 +62,6 @@ const flags = new Command()
     )
       .choices(['system', 'local'])
       .default(env.YAF_NPM_PATH || 'system'),
-  )
-  .addOption(
-    new Option('--only [scope]', 'Set package updating scope')
-      .choices(['prod', 'dev'])
-      .default(env.YAF_ONLY),
-  )
-  .option(
-    '--package-lock-only [bool]',
-    'Run audit fix without modifying `node_modules`.',
-    env.YAF_PACKAGE_LOCK_ONLY,
   )
   .option('--registry [registry]', 'Custom registry url', env.YAF_REGISTRY)
   .option('--silent [bool]', 'Disable log output', env.YAF_SILENT)

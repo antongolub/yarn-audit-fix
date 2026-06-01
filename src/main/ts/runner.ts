@@ -2,8 +2,19 @@ import path from 'node:path'
 
 import chalk from 'chalk'
 
-import { getFlow } from './flows'
-import { TContext, TFlags, TFlow, TStage } from './ifaces'
+import { TContext, TFlags } from './ifaces'
+import {
+  clear,
+  createSymlinks,
+  createTempAssets,
+  exit,
+  patchLockfile,
+  printRuntimeDigest,
+  resolveBins,
+  syncLockfile,
+  verify,
+  yarnInstall,
+} from './stages'
 import { getSelfManifest, getTemp, normalizeFlags, readJson } from './util'
 
 /**
@@ -27,24 +38,9 @@ export const getContext = (flags: TFlags = {}): TContext => {
 }
 
 /**
- * Run cmd stack.
- * @param stages
- * @param ctx
+ * Inject `yarn audit --json` data straight into the lockfile graph.
  */
-export const exec = (stages: TStage, ctx: TContext): void => {
-  for (const step of stages.flat(5)) {
-    if (typeof step === 'string') {
-      !ctx.flags.silent && console.log(chalk.bold(step))
-    } else if (typeof step === 'function') {
-      step(ctx)
-    }
-  }
-}
-
-/**
- * Public static void main.
- */
-export const runSync = (_flags: TFlags = {}, _flow?: TFlow): void => {
+export const runSync = (_flags: TFlags = {}): void => {
   if (_flags.V) {
     console.log(getSelfManifest().version)
     return
@@ -52,25 +48,50 @@ export const runSync = (_flags: TFlags = {}, _flow?: TFlow): void => {
 
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
-  const flow = _flow || getFlow(flags.flow)
+  const log = (note: string) => !flags.silent && console.log(chalk.bold(note))
 
   try {
-    exec(flow.main, ctx)
+    log('Resolve bins')
+    resolveBins(ctx)
+    log('Runtime digest')
+    printRuntimeDigest(ctx)
+    log('Verifying package structure...')
+    verify(ctx)
+    log('Preparing temp assets...')
+    clear(ctx)
+    createTempAssets(ctx)
+    createSymlinks(ctx)
+    log('Patching yarn.lock with audit data...')
+    patchLockfile(ctx)
+    syncLockfile(ctx)
+    clear(ctx)
+    log('Installing deps update...')
+    yarnInstall(ctx)
+    log('Done')
   } catch (err: any) {
     ctx.err = err
 
-    !flags.silent && console.error((err.stderr?.toString?.() || err.stdout?.toString?.() || err.error || err.status || err))
-    exec(flow.fallback, ctx)
+    !flags.silent &&
+      console.error(
+        err.stderr?.toString?.() ||
+          err.stdout?.toString?.() ||
+          err.error ||
+          err.status ||
+          err,
+      )
+    log('Failure!')
+    clear(ctx)
+    exit(ctx)
 
     throw err
   }
 }
 
-// Legacy async implementation
-export const run = (_flags: TFlags = {}, _flow?: TFlow): Promise<void> =>
+// Promisified alias for `runSync`.
+export const run = (_flags: TFlags = {}): Promise<void> =>
   new Promise((resolve, reject) => {
     try {
-      runSync(_flags, _flow)
+      runSync(_flags)
       resolve()
     } catch (e) {
       reject(e)
