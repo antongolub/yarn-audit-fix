@@ -15,8 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export type SymlinkType = 'dir' | 'file' | 'junction'
 
-// Minimal stand-in for chalk.bold: emit the SGR bold sequence only for a TTY
-// (or when FORCE_COLOR is set) and never when NO_COLOR is present.
+// chalk.bold stand-in: SGR bold on a TTY (or FORCE_COLOR), off under NO_COLOR.
 const colorize =
   !('NO_COLOR' in process.env) &&
   (!!process.stdout.isTTY || 'FORCE_COLOR' in process.env)
@@ -171,7 +170,7 @@ export const ensureDir = (dir: string): string => {
   return dir
 }
 
-// fs-extra replacements built on node:fs.
+// fs-extra replacements on node:fs.
 export const emptyDir = (dir: string): void => {
   fs.rmSync(dir, { recursive: true, force: true })
   fs.mkdirSync(dir, { recursive: true })

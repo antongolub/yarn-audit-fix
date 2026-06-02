@@ -25,8 +25,8 @@ export const _parse = (
   if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
   }
-  // workspaceRoot lets the berry adapter resolve yarn's builtin patch hashes;
-  // without it re-serialised patch entries break `yarn install`.
+  // workspaceRoot lets the berry adapter resolve builtin patch hashes; without
+  // it, re-serialised patch entries break `yarn install`.
   return lfParse(lockfileType as FormatId, lockfile, { workspaceRoot })
 }
 
@@ -41,10 +41,9 @@ export const _format = (
 }
 
 /**
- * Lowest *published* version satisfying `range`. `minVersion` alone can yield
- * an unreleased version (`>4.17.23` → 4.17.24, a 404), so query the registry
- * and pick the real next release. Falls back to `minVersion` offline; returns
- * undefined when nothing published satisfies (caller skips).
+ * Lowest *published* version satisfying `range`. `minVersion` alone can return
+ * an unreleased version (a 404), so query the registry; falls back to
+ * `minVersion` offline, or undefined when nothing published fits (caller skips).
  */
 const resolveFix = (
   name: string,
@@ -84,10 +83,9 @@ const normalizeRange = (raw?: string): string | undefined => {
 }
 
 /**
- * Upgrade every vulnerable node to the lowest published version that clears
- * its advisory, by edge-redirect: add the patched node, repoint incoming
- * edges, drop the old node + tarball. Descriptor keys may merge in the output
- * (`"lodash@npm:4.18.0, lodash@npm:4.17.21"`); `yarn install` reconciles it.
+ * Upgrade every vulnerable node to the lowest published version that clears its
+ * advisory, by edge-redirect: add the patched node, repoint incoming edges, drop
+ * the old node + tarball. Merged descriptor keys are reconciled by `yarn install`.
  */
 export const _patch = (
   lockfile: TLockfileObject,
@@ -103,10 +101,8 @@ export const _patch = (
   const graph = lockfile as Graph
   const versionCache = new Map<string, string[] | null>()
 
-  // Pass 1: every vulnerable node that has a usable fix newer than current.
-  // This is the set of nodes that *would* upgrade ignoring compat — it's also
-  // the exemption set for the compat gate below (a consumer being replaced
-  // re-declares its own deps, so its old range no longer governs).
+  // Pass 1: vulnerable nodes with a usable newer fix. Also the exemption set for
+  // the compat gate below — a replaced consumer re-declares its own deps.
   type Candidate = { id: string; name: string; version: string; patch?: string; fix: string }
   const candidates: Candidate[] = []
   const noFix = new Set<string>()
@@ -125,10 +121,9 @@ export const _patch = (
   }
   const candidateIds = new Set(candidates.map((c) => c.id))
 
-  // Pass 2: compat gate (legacy behaviour, restored). A fix that falls outside
-  // a *surviving* consumer's declared range silently breaks that consumer.
-  // Skip such fixes unless --force, recording why. A consumer that is itself a
-  // candidate is exempt — it'll be replaced and re-declare its deps.
+  // Pass 2: compat gate. Skip a fix that falls outside a *surviving* consumer's
+  // declared range (unless --force), recording why. Candidate consumers are
+  // exempt — they'll be replaced and re-declare their deps.
   const upgrades: Candidate[] = []
   const incompatible = new Map<string, Set<string>>()
   for (const c of candidates) {
@@ -153,11 +148,9 @@ export const _patch = (
   const newIdOf = (u: { name: string; fix: string }) => `${u.name}@${u.fix}`
   const sep = String.fromCharCode(0) // NUL — can't occur in a package name
 
-  // Three ordered phases. The graph rejects removeNode while a node still has
-  // incoming edges, and removeNode auto-drops the node's outgoing edges — so
-  // interleaving per-node breaks when a vulnerable parent and child are both
-  // upgraded (order-dependent). Doing all edge removals before any node
-  // removal is order-independent.
+  // Three ordered phases: add nodes, redirect/drop all edges, then remove old
+  // nodes. removeNode rejects nodes that still have incoming edges, so batching
+  // every edge op before any node removal keeps it order-independent.
   const result = graph.mutate((m) => {
     // 1. Materialise each patched node once.
     const seenIds = new Set<string>()
@@ -175,10 +168,8 @@ export const _patch = (
       }
     }
 
-    // 2. Drop every incoming edge of a removed node; redirect those from
-    //    surviving sources onto the patched node. Edges between two removed
-    //    nodes are just dropped — both endpoints are replaced and yarn install
-    //    regenerates deps. Dedupe removals and additions.
+    // 2. Drop each removed node's incoming edges; redirect those from surviving
+    //    sources onto the patched node (edges between two removed nodes just go).
     const removedEdges = new Set<string>()
     const addedEdges = new Set<string>()
     for (const u of upgrades) {
@@ -198,8 +189,7 @@ export const _patch = (
       }
     }
 
-    // 3. Incoming-edge-free now → drop the old nodes and their tarballs
-    //    (yarn-classic carries none, so guard).
+    // 3. Old nodes are edge-free now — drop them and their tarballs (classic has none).
     for (const u of upgrades) {
       m.removeNode(u.id)
       if (graph.tarball({ name: u.name, version: u.version, patch: u.patch })) {
@@ -209,8 +199,7 @@ export const _patch = (
   })
 
   if (!flags.silent) {
-    // Dedupe by from→to (one node spans many descriptors); annotate each with
-    // the advisory severity / CVSS / CVE refs that motivated the bump.
+    // Dedupe by from→to; annotate with severity / CVSS / CVE refs.
     const seen = new Set<string>()
     const lines: string[] = []
     for (const u of upgrades) {
@@ -245,9 +234,8 @@ export const _patch = (
 }
 
 /**
- * Print graph diagnostics: a count per code by default, per-entry on verbose.
- * mutate() re-emits parse-time noise (e.g. one YARN_CLASSIC_INVALID_INTEGRITY
- * per legacy sha1 — hundreds), so collapse it unless asked.
+ * Print graph diagnostics: one count per code, or per-entry on verbose. mutate()
+ * re-emits parse-time noise (hundreds of lines), so collapse it unless asked.
  */
 const reportDiagnostics = (
   diagnostics: readonly { severity: string; code: string; message: string }[],
@@ -272,9 +260,8 @@ const reportDiagnostics = (
 }
 
 /**
- * Audit dispatch by yarn *binary* version (not lockfile schema) — the binary
- * decides the output shape, and yarn 4 has no `yarn audit`, only `yarn npm
- * audit`, so a classic lockfile on a yarn-4 host must still take v4:
+ * Dispatch by yarn *binary* version, not lockfile schema — the binary sets the
+ * output shape (yarn 4 only has `yarn npm audit`):
  *   yarn 4+ → v4 (NDJSON) · yarn 2/3 → v2 (JSON) · yarn 1 / npm → v1
  */
 export const _audit = (
@@ -287,8 +274,7 @@ export const _audit = (
   return auditV1(flags, temp, bins)
 }
 
-// FIXME Jest cannot mock esm yet
-// https://github.com/facebook/jest/commit/90d6908492d164392ce8429923e7f0fa17946d2d
+// Exposed for test spies.
 export const _internal = {
   _parse,
   _audit,

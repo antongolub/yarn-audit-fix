@@ -21,9 +21,7 @@ import {
 } from './util'
 
 
-/**
- * Resolve bins.
- */
+/** Resolve bin paths and tool versions. */
 export const resolveBins: TCallback = ({ ctx, flags }) => {
   const yafManifest = getSelfManifest()
   ctx.bins = {
@@ -45,9 +43,7 @@ export const resolveBins: TCallback = ({ ctx, flags }) => {
   }
 }
 
-/**
- * Print runtime context digest.
- */
+/** Print the runtime digest and version warnings. */
 export const printRuntimeDigest: TCallback = ({
   temp,
   cwd,
@@ -100,11 +96,7 @@ export const printRuntimeDigest: TCallback = ({
   )
 }
 
-/**
- * Prepare temp assets.
- * @param {TContext} cxt
- * @return {void}
- */
+/** Copy yarn.lock, package.json and rc files into temp. */
 export const createTempAssets: TCallback = ({ cwd, temp }) => {
   fs.copyFileSync(path.join(cwd, 'yarn.lock'), path.join(temp, 'yarn.lock'))
   fs.copyFileSync(path.join(cwd, 'package.json'), path.join(temp, 'package.json'))
@@ -114,11 +106,7 @@ export const createTempAssets: TCallback = ({ cwd, temp }) => {
     fs.copyFileSync(path.join(cwd, '.yarnrc'), path.join(temp, '.yarnrc'))
 }
 
-/**
- * Provide symlinks to node_modules and workspaces
- * @param {TContext} cxt
- * @return {void}
- */
+/** Symlink node_modules, .yarn and workspaces into temp. */
 export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
   const symlinkType = getSymlinkType(flags.symlink)
   const workspaces = getWorkspaces(cwd, manifest)
@@ -145,11 +133,7 @@ export const syncLockfile: TCallback = ({ temp, flags }) => {
   fs.copyFileSync(path.join(temp, 'yarn.lock'), 'yarn.lock')
 }
 
-/**
- * Apply yarn install to fetch packages after yarn.lock update.
- * @param {TContext} cxt
- * @return {void}
- */
+/** Run yarn install to refresh packages after the lockfile update. */
 export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
   if (flags.dryRun) {
     return
@@ -179,18 +163,10 @@ export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
         flags.silent,
       )
 }
-/**
- * Clean up temporaries.
- * @param {TContext} cxt
- * @return {void}
- */
+/** Empty the temp dir. */
 export const clear: TCallback = ({ temp }) => emptyDir(temp)
 
-/**
- * Exit on error.
- * @param {TContext} cxt
- * @return {void}
- */
+/** Set the process exit code from the error. */
 export const exit: TCallback = ({ flags, err }) => {
   !flags.silent && console.error(err)
   process.exitCode = err?.status | 0 || 1
@@ -208,11 +184,7 @@ export const patchLockfile: TCallback = ({ temp, cwd, ctx }) => {
   fs.writeFileSync(lockfilePath, format(patched, lockfileType))
 }
 
-/**
- * Check that everything is fine with pkg dir.
- * @param {TContext} cxt
- * @return {void}
- */
+/** Verify the working dir has the required files. */
 export const verify: TCallback = ({ cwd, versions }) => {
   const required = ['yarn.lock', 'package.json']
 

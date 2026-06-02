@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://yarnpkg.com/">
-    <img alt="Yarn audit fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true?raw=true" width="546">
+    <img alt="Yarn audit fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true" width="546">
   </a>
 </p>
 
@@ -42,10 +42,8 @@ The missing `yarn audit fix`
 
 ## Digest
 ### Problem
-1. `yarn audit` detects vulnerabilities, but cannot fix them.
-Authors suggest using [Dependabot](https://dependabot.com/) or [Snyk](https://snyk.io/) for security patches. Well, it is very inconvenient in some situations, to say the least of it.
-The discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).
-2. `yarn audit` does not support custom (in-house, internal) registries. Here are the [issue](https://github.com/yarnpkg/yarn/issues/7012) & [PR](https://github.com/yarnpkg/yarn/pull/6484) which have not yet received the green light.
+1. `yarn audit` detects vulnerabilities but cannot fix them. The authors suggest [Dependabot](https://dependabot.com/) or [Snyk](https://snyk.io/), which is inconvenient in many setups. Discussion: [yarn/issues/7075](https://github.com/yarnpkg/yarn/issues/7075).
+2. `yarn audit` does not support custom (in-house) registries — see this [issue](https://github.com/yarnpkg/yarn/issues/7012) & [PR](https://github.com/yarnpkg/yarn/pull/6484), still unmerged.
 
 ### Solution
 yarn-audit-fix fetches `yarn/npm audit --json` advisories and patches the
@@ -54,11 +52,11 @@ lockfile graph directly via [`@antongolub/lockfile`](https://github.com/antongol
 Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antongolub/the-missing-yarn-audit-fix-for-yarn-2-berry-1p8)
 
 ### Key features
-* Supports every yarn lockfile schema in the wild: Yarn 1 Classic, Yarn 2/3 (berry v4–v6) and **Yarn 4+** (berry v8/v9/v10). Schema detection is automatic via [`@antongolub/lockfile`](https://github.com/antongolub/lockfile).
-* A couple of strategies to fix security issues
-* macOS / Linux / Windows support
-* CLI / JS API
-* TS and flow typings
+* Supports every yarn lockfile schema in the wild: Yarn 1 Classic, Yarn 2/3 (berry v4–v6) and **Yarn 4+** (berry v8/v9/v10), auto-detected via [`@antongolub/lockfile`](https://github.com/antongolub/lockfile).
+* Fixes vulnerabilities by patching the lockfile graph directly
+* macOS / Linux / Windows
+* CLI and JS API
+* TypeScript typings
 
 #### Lockfile compatibility
 
@@ -77,11 +75,11 @@ Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antong
 Node.js: `>=16.0.0`
 
 ### Install
-```shell script
-$ yarn add yarn-audit-fix -D
+```sh
+yarn add yarn-audit-fix -D
 ```
-or even better
-```
+or run it directly:
+```sh
 npm_config_yes=true npx yarn-audit-fix
 ```
 
@@ -119,13 +117,13 @@ success Saved lockfile.
 | `--ignore`            | Array of glob patterns of advisory IDs to ignore in the audit report                                                                                                    |                                            |
 
 ### ENV
-All mentioned above CLI options can be replaced with the corresponding env variables with leading **YAF** prefix. For example:
-* `YAF_FORCE` equals `--force`
+Any CLI option can be set via a `YAF`-prefixed env var. For example:
+* `YAF_FORCE` — `--force`
 * `YAF_AUDIT_LEVEL=high` — `--audit-level=high`
 
 ### JS API
-**yarn-audit-fix** is a naive and optimistic workaround, so it exposes all of its inners to give anybody a chance to tweak up and find a better steps combination.
-Typedoc: [https://antongolub.github.io/yarn-audit-fix/modules/](https://antongolub.github.io/yarn-audit-fix/modules/)
+**yarn-audit-fix** exposes its internals, so you can tweak the steps or build your own flow.
+Typedoc: [antongolub.github.io/yarn-audit-fix/modules](https://antongolub.github.io/yarn-audit-fix/modules/)
 
 ```ts
 import { run, runSync } from 'yarn-audit-fix'
@@ -149,21 +147,21 @@ Individual stages (`resolveBins`, `patchLockfile`, `yarnInstall`, …) are expor
 
 With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` / `TStage` types, and the optional custom-flow argument to `run` / `runSync` are removed. Call `run(flags)` / `runSync(flags)` — the patch pipeline is inlined. The individual stages are still exported if you want to assemble your own.
 
-Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema in the wild (classic + berry v4–v10). The audit-output parser now handles both the legacy yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON tree format, deriving `patched_versions` from the `Vulnerable Versions` upper bound when the field is absent. Lockfile entries are mutated via the canonical graph model (edge-redirect) rather than the legacy in-place version-rewrite — descriptor keys may merge in the output (e.g. `"lodash@npm:4.17.21, lodash@npm:4.17.20":`), which is semantically equivalent and reconciled by the subsequent `yarn install --mode=update-lockfile`.
+Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Entries are patched via graph edge-redirect instead of in-place rewrite; merged descriptor keys (e.g. `"lodash@npm:4.17.21, lodash@npm:4.17.20":`) are reconciled by the following `yarn install`.
 
 ### ^10.0.0
 v10 bumps the pkg deps and requires NodeJS v14.
 
 ### ^9.0.0
-v9 brings experimental Yarn 2+ lockfiles support, so the previous behaviour (when `yaf` parsing failure may be used to detect them) has been changed.
+v9 adds experimental Yarn 2+ lockfile support and changes how lockfiles are detected (no longer via parse failure).
 
 ### ^8.0.0
-From v8 the library does not contain **npm** dependency, so the system default is used instead. If necessary you can:
+From v8 the library no longer bundles **npm**, so the system default is used instead. If needed, you can:
 * Install the required npm version and provide a custom path via [CLI](#cli) / [ENV](#env) / [JS API](#js-api)
 * Use a pinch of **npx** magic: `npm_config_yes=true YAF_NPM_PATH=local npx -p yarn-audit-fix -p npm@8 -c yarn-audit-fix`
 
 ### ^7.0.0
-Following the deps, converted to ESM. So legacy `require` API has been dropped since v7.0.0. Use the shiny new `import` instead or try your luck with [esm-hook](https://www.npmjs.com/package/@qiwi/esm). CLI works as before.
+Converted to ESM along with its deps, so the legacy `require` API was dropped in v7. Use `import` instead, or try [esm-hook](https://www.npmjs.com/package/@qiwi/esm). The CLI works as before.
 ```js
 // const {run} = require('yarn-audit-fix') turns into
 import {run} from 'yarn-audit-fix'
@@ -173,7 +171,7 @@ import {run} from 'yarn-audit-fix'
 Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. The previous _legacy_ `convert` flow was opt-in via `--flow=convert` until v11, where it was removed entirely.
 
 ### ^4.0.0
-`--npm-v7` flag is redundant. From v4.0.0 package's own version of **npm** is used by default. But you're still able to invoke system default with `--npm-path=system` or define any custom `--npm-path=/another/npm/bin`.
+The `--npm-v7` flag is redundant. From v4.0.0 the package's own **npm** is used by default. You can still pick the system default with `--npm-path=system`, or a custom one with `--npm-path=/another/npm/bin`.
 
 ## Troubleshooting
 ### yarn-audit-fix version x.x.x is out of date
@@ -183,14 +181,13 @@ Runtime digest
 yarn-audit-fix version 4.3.6 is out of date. Install the latest 6.0.0 for better results
 ```
 **npx** caches previously loaded packages, so you need one of:
-1. Define version to load: `npm yarn-audit-fix@6.0.0`
-2. Reset npx cache. For Mac/Linux: `rm -rf ~/.npm/_npx`
+1. Pin the version: `npx yarn-audit-fix@6.0.0`
+2. Reset the npx cache. On macOS/Linux: `rm -rf ~/.npm/_npx`
 
 ### yarn-audit-fix command not found
-After installation, the package may not be found. This is probably an issue with $PATH finding `node_modules/.bin` contents or smth like that ([npm/issues/957](https://github.com/npm/npm/issues/957)).
-A bit annoying, but it's easy to handle in several ways.
-* You're able to run the cmd through **yarn**: `yarn yarn-audit-fix`.
-* Simply invoke `node_modules/.bin/yarn-audit-fix` script.
+After installation, the binary may not be found — usually a `$PATH` issue locating `node_modules/.bin` ([npm/issues/957](https://github.com/npm/npm/issues/957)). Two easy ways around it:
+* Run it through **yarn**: `yarn yarn-audit-fix`
+* Invoke the script directly: `node_modules/.bin/yarn-audit-fix`
 
 ### No fix available for some advisories
 Some advisories can't be auto-fixed — there's no published version that satisfies the consumer's declared range, so the bump is skipped (re-run with `--force` to apply cross-major updates anyway).
@@ -207,7 +204,7 @@ Can't find patched version that satisfies ws@^7.2.3 in >=6.2.2 <7.0.0 || >=7.4.6
 Upgraded deps: <none>
 invoke yarn install --update-checksums
 ```
-Not everything can be repaired, alack.
+Not everything can be repaired.
 
 ### Cannot install package despite being on correct node version
 yarn-audit-fix is compatible with any NodeJS version which supports ESM, but the nested packages can define their own engine requirements.
@@ -222,12 +219,12 @@ yarn add yarn-audit-fix -D --ignore-engines
 
 ### Response Code: 400 (Bad Request)
 
-In some cases **yarn npm audit** fails because the `yarn.lock` file contains a transitive dependency in unreadable format:
+In some cases **yarn npm audit** fails because `yarn.lock` contains a transitive dependency in an unreadable format:
 ```
   'example-dependency': 'npm:example-dependency@1.0.0'
 ```
 
-This will results in:
+This results in:
 ```shell
 invoke yarn npm audit --all --json --recursive
 ➤ YN0035: Bad Request
@@ -237,9 +234,9 @@ invoke yarn npm audit --all --json --recursive
 ```
 https://github.com/yarnpkg/berry/issues/4117
 
-A workaround is available using the `exclude` option:
-1. Update project **yarn** to >=3.3.0 (lower version doesn't support this parameter for **yarn npm audit**).
-2. Apply `npx yarn-audit-fix --exclude example-dependency`. This will cause **yarn** to ignore `example-dependency` while creating the audit report.
+Work around it with the `exclude` option:
+1. Update project **yarn** to >=3.3.0 (earlier versions don't support this flag for **yarn npm audit**).
+2. Run `npx yarn-audit-fix --exclude example-dependency` so **yarn** skips `example-dependency` while building the audit report.
 
 ## Contributing
 Feel free to open any issues: bugs, feature requests or other questions.

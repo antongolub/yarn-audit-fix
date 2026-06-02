@@ -69,9 +69,7 @@ export type TLockfileEntry = {
   [rest: string]: any
 }
 
-// Re-exported from @antongolub/lockfile. The legacy plain-object shape lives
-// behind the Graph now — operations go through parse/format/patch from
-// ./lockfile, which delegates to the package's parse/stringify/mutate.
+// Graph from @antongolub/lockfile; all operations go through ./lockfile.
 export type TLockfileObject = Graph
 
 // FormatId from @antongolub/lockfile (e.g. 'yarn-classic', 'yarn-berry-v8').
