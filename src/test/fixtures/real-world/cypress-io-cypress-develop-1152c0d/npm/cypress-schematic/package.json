@@ -1,0 +1,71 @@
+{
+  "name": "@cypress/schematic",
+  "version": "0.0.0-development",
+  "description": "Official Cypress schematic for the Angular CLI",
+  "main": "./src",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "lint": "eslint",
+    "test": "vitest run --no-file-parallelism"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1",
+    "rxjs": "~7.8.2",
+    "semver": "^7.7.3"
+  },
+  "devDependencies": {
+    "@angular-devkit/architect": "^0.2100.5",
+    "@angular-devkit/core": "^21.0.5",
+    "@angular-devkit/schematics": "^21.0.5",
+    "@angular-devkit/schematics-cli": "^21.0.5",
+    "@schematics/angular": "^21.0.5",
+    "@types/mocha": "8.0.3",
+    "@types/node": "^22.18.7",
+    "eslint": "^9.31.0",
+    "typescript": "~5.4.5",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@angular/cli": ">=20.0.0",
+    "@angular/core": ">=20.0.0",
+    "cypress": "^15.8.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress/tree/develop/npm/cypress-schematic#readme",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fcypress-schematics&template=1-bug-report.md&title=",
+  "keywords": [
+    "schematics",
+    "cypress",
+    "e2e",
+    "testing",
+    "angular",
+    "automation"
+  ],
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "builders": "./src/builders/builders.json",
+  "ng-add": {
+    "save": "devDependencies"
+  },
+  "nx": {
+    "targets": {
+      "build": {
+        "outputs": [
+          "{projectRoot}/src/**/*.js",
+          "{projectRoot}/src/**/*.d.ts",
+          "{projectRoot}/src/**/*.js.map"
+        ]
+      }
+    }
+  },
+  "schematics": "./src/schematics/collection.json"
+}

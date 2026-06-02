@@ -1,0 +1,8 @@
+{
+  "name": "missing-webpack-config",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "webpack": "^5.96.1",
+    "webpack-dev-server": "5.1.0"
+  }
+}

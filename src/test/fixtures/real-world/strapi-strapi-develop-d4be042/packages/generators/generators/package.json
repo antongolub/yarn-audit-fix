@@ -1,0 +1,75 @@
+{
+  "name": "@strapi/generators",
+  "version": "5.46.1",
+  "description": "Interactive API generator.",
+  "keywords": [
+    "strapi",
+    "generators"
+  ],
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/generators/generators"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T run-p build:code:rollup copy-files",
+    "build:code:rollup": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
+    "lint": "run -T eslint .",
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
+    "@strapi/typescript-utils": "5.46.1",
+    "@strapi/utils": "5.46.1",
+    "chalk": "4.1.2",
+    "fs-extra": "11.3.4",
+    "handlebars": "4.7.9",
+    "jscodeshift": "17.3.0",
+    "lodash": "4.18.1",
+    "plop": "4.0.5",
+    "pluralize": "8.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "11.0.4",
+    "@types/jscodeshift": "17.3.0",
+    "copyfiles": "2.4.1",
+    "eslint-config-custom": "5.46.1",
+    "outdent": "^0.8.0",
+    "tsconfig": "5.46.1"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  }
+}

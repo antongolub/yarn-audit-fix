@@ -1,0 +1,20 @@
+{
+  "name": "@fluentui/ssr-tests",
+  "version": "1.0.0",
+  "description": "Server-side rendering tests for @fluentui/react.",
+  "private": true,
+  "scripts": {
+    "type-check": "tsc -p . --noEmit --baseUrl .",
+    "bundle": "just-scripts bundle",
+    "test-ssr": "just-scripts test"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "10.0.10",
+    "mocha": "11.2.2",
+    "@microsoft/load-themed-styles": "^1.10.26"
+  },
+  "dependencies": {
+    "tslib": "^2.1.0"
+  }
+}

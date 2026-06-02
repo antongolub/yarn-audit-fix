@@ -1,0 +1,24 @@
+{
+  "name": "@fluentui/ssr-tests-v9",
+  "version": "9.0.0",
+  "description": "Stories with SSR tests for v9",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "scripts": {
+    "clean": "just-scripts clean",
+    "code-style": "just-scripts code-style",
+    "lint": "just-scripts lint",
+    "storybook": "storybook dev",
+    "test": "jest --passWithNoTests",
+    "type-check": "just-scripts type-check",
+    "test-ssr": "test-ssr \"./src/stories/**/*.stories.tsx\""
+  },
+  "dependencies": {
+    "@fluentui/react-components": "*",
+    "@fluentui/react-utilities": "*"
+  }
+}

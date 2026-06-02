@@ -1,0 +1,44 @@
+{
+  "name": "@fluentui/react-utilities",
+  "version": "9.26.4",
+  "description": "A set of general React-specific utilities.",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "./dist/index.d.ts",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@fluentui/keyboard-keys": "^9.0.8",
+    "@fluentui/react-shared-contexts": "^9.26.2",
+    "@swc/helpers": "^0.5.1"
+  },
+  "peerDependencies": {
+    "@types/react": ">=16.14.0 <20.0.0",
+    "react": ">=16.14.0 <20.0.0"
+  },
+  "beachball": {
+    "disallowedChangeTypes": [
+      "major",
+      "prerelease"
+    ]
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.md",
+    "dist/*.d.ts",
+    "lib",
+    "lib-commonjs"
+  ]
+}

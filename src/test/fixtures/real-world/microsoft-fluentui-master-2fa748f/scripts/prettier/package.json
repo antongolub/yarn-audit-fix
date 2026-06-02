@@ -1,0 +1,10 @@
+{
+  "name": "@fluentui/scripts-prettier",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.js",
+  "dependencies": {
+    "@fluentui/scripts-monorepo": "*"
+  },
+  "devDependencies": {}
+}

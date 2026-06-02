@@ -1,0 +1,51 @@
+{
+  "name": "strapi-plugin-todo-example",
+  "version": "0.0.0",
+  "description": "Keep track of your content management with todo lists",
+  "license": "SEE LICENSE IN LICENSE",
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "source": "./admin/src/index.jsx",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./server/src/index.js",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "scripts": {
+    "build": "npx @strapi/sdk-plugin@6.0.1 build",
+    "watch": "npx @strapi/sdk-plugin@6.0.1 watch",
+    "lint": "eslint ."
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "workspace:*"
+  },
+  "dependencies": {
+    "@strapi/design-system": "2.2.0",
+    "@strapi/icons": "2.2.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.30.3",
+    "styled-components": "6.4.1"
+  },
+  "devDependencies": {
+    "@strapi/strapi": "workspace:*",
+    "eslint": "8.57.1"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "todo-example",
+    "displayName": "Todo example",
+    "description": "Keep track of your content management with todo lists.",
+    "kind": "plugin"
+  }
+}

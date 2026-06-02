@@ -1,0 +1,12 @@
+{
+  "name": "@fluentui/scripts-beachball",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.js",
+  "dependencies": {
+    "@fluentui/scripts-github": "*",
+    "@fluentui/scripts-monorepo": "*",
+    "@fluentui/scripts-ts-node": "*"
+  },
+  "devDependencies": {}
+}

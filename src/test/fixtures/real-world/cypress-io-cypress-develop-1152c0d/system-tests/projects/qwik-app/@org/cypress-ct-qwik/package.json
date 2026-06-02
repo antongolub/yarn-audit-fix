@@ -1,0 +1,9 @@
+{
+  "name": "@org/cypress-ct-qwik",
+  "version": "0.0.0-test",
+  "main": "index.js",
+  "exports": {
+    "node": "./definition.cjs",
+    "default": "./index.mjs"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "description": "Routing and navigation for your React Native apps",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "example"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/react-navigation/react-navigation.git"
+  },
+  "author": "Satyajit Sahoo <satyajit.happy@gmail.com> (https://github.com/satya164/), Michał Osadnik <micosa97@gmail.com> (https://github.com/osdnk/)",
+  "scripts": {
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "typecheck:declarations": "tsc --declaration --emitDeclarationOnly --composite false --outDir /tmp/react-navigation-typescript-dts",
+    "test": "jest",
+    "clean": "lerna run clean",
+    "build": "lerna run prepack",
+    "publish": "lerna publish",
+    "release": "run-s build publish",
+    "versions": "node scripts/dependency-versions.mjs",
+    "example": "yarn workspace @react-navigation/example"
+  },
+  "engines": {
+    "node": "^22.12.0"
+  },
+  "packageManager": "yarn@4.10.3",
+  "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@commitlint/config-conventional": "^21.0.1",
+    "@evilmartians/lefthook": "^2.1.8",
+    "@lerna-lite/cli": "^5.2.2",
+    "@lerna-lite/publish": "^5.2.2",
+    "@lerna-lite/run": "^5.2.2",
+    "@react-native/babel-preset": "0.85.3",
+    "@react-native/jest-preset": "^0.85.3",
+    "@types/babel__core": "^7.20.5",
+    "@types/semver": "^7.7.1",
+    "commitlint": "^21.0.1",
+    "eslint": "^9.39.4",
+    "eslint-config-satya164": "^5.1.8",
+    "eslint-plugin-simple-import-sort": "^13.0.0",
+    "jest": "~29.7.0",
+    "npm-run-all2": "^9.0.1",
+    "prettier": "^3.8.3",
+    "semver": "^7.8.1",
+    "typescript": "^6.0.3"
+  },
+  "jest": {
+    "preset": "@react-native/jest-preset",
+    "testEnvironmentOptions": {
+      "customExportConditions": [
+        "require",
+        "react-native",
+        "source"
+      ]
+    },
+    "testRegex": "/__tests__/.*\\.(test|spec)\\.(js|tsx?)$",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest/setup.js"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?@react-native|react-native|react-native-reanimated|react-native-worklets|react-native-gesture-handler|react-native-safe-area-context|nanoid|query-string|decode-uri-component|filter-obj|split-on-first|escape-string-regexp|immer)/)"
+    ]
+  },
+  "prettier": {
+    "quoteProps": "as-needed",
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@fluentui/scripts-tasks",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@fluentui/scripts-monorepo": "*",
+    "@fluentui/scripts-utils": "*",
+    "@fluentui/scripts-prettier": "*",
+    "flamegrill": "0.2.0",
+    "just-scripts": "1.8.2"
+  },
+  "devDependencies": {}
+}

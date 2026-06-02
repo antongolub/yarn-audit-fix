@@ -1,0 +1,16 @@
+{
+  "name": "webpack-dev-server-relative",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "babel-loader": "^9.2.1",
+    "copy-webpack-plugin": "^12.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "webpack": "^5.96.1",
+    "webpack-dev-server": "^5.1.0"
+  }
+}

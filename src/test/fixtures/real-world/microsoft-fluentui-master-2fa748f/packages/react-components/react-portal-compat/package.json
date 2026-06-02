@@ -1,0 +1,46 @@
+{
+  "name": "@fluentui/react-portal-compat",
+  "version": "9.2.40",
+  "description": "A package that contains compatibility layer for React Portals",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "./dist/index.d.ts",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@fluentui/react-portal-compat-context": "^9.0.15",
+    "@fluentui/react-tabster": "^9.26.15",
+    "@swc/helpers": "^0.5.1"
+  },
+  "peerDependencies": {
+    "@fluentui/react-components": "^9.74.1",
+    "@types/react": ">=16.14.0 <20.0.0",
+    "react": ">=16.14.0 <20.0.0"
+  },
+  "beachball": {
+    "disallowedChangeTypes": [
+      "major",
+      "prerelease"
+    ]
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.md",
+    "dist/*.d.ts",
+    "lib",
+    "lib-amd",
+    "lib-commonjs"
+  ]
+}

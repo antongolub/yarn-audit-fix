@@ -1,0 +1,42 @@
+{
+  "name": "@fluentui/react-theme-sass",
+  "version": "9.0.0-alpha.30",
+  "description": "SASS variables referencing react-theme design tokens injected to DOM by react-provider.",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "./dist/index.d.ts",
+  "style": "sass/tokens.scss",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "beachball": {
+    "disallowedChangeTypes": [
+      "major",
+      "minor",
+      "patch"
+    ]
+  },
+  "dependencies": {
+    "@swc/helpers": "^0.5.1"
+  },
+  "exports": {
+    ".": {
+      "style": "./sass/tokens.scss",
+      "types": "./dist/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.md",
+    "dist/*.d.ts",
+    "lib",
+    "lib-commonjs",
+    "sass"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "integration-tests-http",
+  "version": "1.1.15",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "test:integration": "jest --no-cache --bail --detectOpenHandles --forceExit --logHeapUsage",
+    "test:integration:chunk": "jest --silent --no-cache --bail --forceExit",
+    "build": "tsc --allowJs --outDir ./dist"
+  },
+  "dependencies": {
+    "@medusajs/api-key": "workspace:^",
+    "@medusajs/auth": "workspace:*",
+    "@medusajs/cache-inmemory": "workspace:*",
+    "@medusajs/core-flows": "workspace:*",
+    "@medusajs/customer": "workspace:^",
+    "@medusajs/event-bus-local": "workspace:*",
+    "@medusajs/event-bus-redis": "workspace:*",
+    "@medusajs/framework": "workspace:*",
+    "@medusajs/fulfillment": "workspace:^",
+    "@medusajs/fulfillment-manual": "workspace:^",
+    "@medusajs/inventory": "workspace:^",
+    "@medusajs/loyalty-plugin": "workspace:^",
+    "@medusajs/medusa": "workspace:*",
+    "@medusajs/modules-sdk": "workspace:^",
+    "@medusajs/pricing": "workspace:^",
+    "@medusajs/product": "workspace:^",
+    "@medusajs/promotion": "workspace:^",
+    "@medusajs/region": "workspace:^",
+    "@medusajs/stock-location": "workspace:^",
+    "@medusajs/store": "workspace:^",
+    "@medusajs/tax": "workspace:^",
+    "@medusajs/test-utils": "workspace:*",
+    "@medusajs/translation": "workspace:*",
+    "@medusajs/user": "workspace:^",
+    "@medusajs/utils": "workspace:^",
+    "@medusajs/workflow-engine-inmemory": "workspace:*",
+    "form-data": "^4.0.4",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@medusajs/types": "workspace:^",
+    "@swc/core": "^1.7.28",
+    "@swc/jest": "^0.2.36",
+    "jest": "^29.7.0",
+    "json-2-csv": "^5.5.9",
+    "typescript": "^5.6.2"
+  }
+}

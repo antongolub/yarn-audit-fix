@@ -1,0 +1,8 @@
+{
+  "name": "sourcemaps",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
+    "cypress": "file:../../../cli/build"
+  }
+}

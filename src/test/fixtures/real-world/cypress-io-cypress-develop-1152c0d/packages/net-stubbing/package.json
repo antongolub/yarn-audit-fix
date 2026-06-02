@@ -1,0 +1,40 @@
+{
+  "name": "@packages/net-stubbing",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "./lib/server",
+  "scripts": {
+    "build-prod": "tsc --project .",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean-deps": "rimraf node_modules",
+    "lint": "eslint --ext .ts,.json, .",
+    "test": "vitest",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "test-watch": "vitest watch",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
+  },
+  "dependencies": {
+    "@packages/network-interception": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
+    "debug": "^4.4.0",
+    "is-html": "^2.0.0",
+    "istextorbinary": "6.0.0",
+    "lodash": "^4.17.15",
+    "mime": "^3.0.0",
+    "minimatch": "^3.1.2",
+    "throttle": "^1.0.3"
+  },
+  "devDependencies": {
+    "@packages/errors": "0.0.0-development",
+    "@packages/network": "0.0.0-development",
+    "@packages/proxy": "0.0.0-development",
+    "@packages/telemetry": "0.0.0-development",
+    "@types/mime": "^3.0.1",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "lib"
+  ],
+  "license": "MIT",
+  "nx": {}
+}

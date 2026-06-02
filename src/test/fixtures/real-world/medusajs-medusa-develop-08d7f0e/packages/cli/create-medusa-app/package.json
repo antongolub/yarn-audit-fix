@@ -1,0 +1,49 @@
+{
+  "name": "create-medusa-app",
+  "version": "2.15.5",
+  "description": "Create a Medusa project using a single command.",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "bin": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "start": "node dist/index.js",
+    "build": "yarn run -T tsc",
+    "watch": "yarn run -T tsc --watch",
+    "test": "../../../node_modules/.bin/jest --passWithNoTests src"
+  },
+  "dependencies": {
+    "@medusajs/deps": "2.15.5",
+    "@medusajs/telemetry": "2.15.5",
+    "boxen": "^5.0.1",
+    "chalk": "^4.1.2",
+    "commander": "^11.0.0",
+    "inquirer": "^8.0.0",
+    "nanoid": "^4.0.2",
+    "node-emoji": "^2.0.2",
+    "node-fetch": "^3.3.1",
+    "open": "^9.1.0",
+    "ora": "^5.4.1",
+    "slugify": "^1.6.6",
+    "terminal-link": "^5.0.0",
+    "uuid": "^9.0.0",
+    "validator": "^13.15.22",
+    "wait-on": "^9.0.1",
+    "winston": "^3.9.0",
+    "yaml": "^2.8.3"
+  },
+  "engines": {
+    "node": ">=14.16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medusajs/medusa.git",
+    "directory": "packages/cli/create-medusa-app"
+  },
+  "author": "Medusa",
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "41a5425405aea5045a26def95c0dc00cf4a5a44d"
+}

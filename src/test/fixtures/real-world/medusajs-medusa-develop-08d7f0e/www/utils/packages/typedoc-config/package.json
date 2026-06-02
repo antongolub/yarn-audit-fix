@@ -1,0 +1,19 @@
+{
+  "name": "typedoc-config",
+  "private": true,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "typedoc": "0.27.x"
+  },
+  "main": "_base.js",
+  "version": "0.0.0",
+  "dependencies": {
+    "glob": "13.0.6"
+  },
+  "devDependencies": {
+    "types": "*"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "tailwind",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "tailwind.config.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "tailwind.config.js",
+    "postcss.config.js"
+  ],
+  "dependencies": {
+    "@medusajs/ui-preset": "2.15.5",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "peerDependencies": {
+    "docs-ui": "*"
+  }
+}

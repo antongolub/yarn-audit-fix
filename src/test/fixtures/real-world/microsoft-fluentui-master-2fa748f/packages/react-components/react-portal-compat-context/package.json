@@ -1,0 +1,43 @@
+{
+  "name": "@fluentui/react-portal-compat-context",
+  "version": "9.0.15",
+  "description": "A package that holds React context for compatibility of React Contexts",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "./dist/index.d.ts",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@swc/helpers": "^0.5.1"
+  },
+  "peerDependencies": {
+    "@types/react": ">=16.14.0 <20.0.0",
+    "react": ">=16.14.0 <20.0.0"
+  },
+  "beachball": {
+    "disallowedChangeTypes": [
+      "major",
+      "prerelease"
+    ]
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.md",
+    "dist/*.d.ts",
+    "lib",
+    "lib-amd",
+    "lib-commonjs"
+  ]
+}

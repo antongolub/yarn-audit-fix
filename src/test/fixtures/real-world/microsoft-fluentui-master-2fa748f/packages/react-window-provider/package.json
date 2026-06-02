@@ -1,0 +1,35 @@
+{
+  "name": "@fluentui/react-window-provider",
+  "version": "2.3.2",
+  "description": "Utilities for providing and consuming the window/document objects even across portal/iframe/child-window boundaries.",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "sideEffects": [
+    "lib/version.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "just-scripts build",
+    "clean": "just-scripts clean"
+  },
+  "dependencies": {
+    "@fluentui/set-version": "^8.2.24",
+    "tslib": "^2.1.0"
+  },
+  "peerDependencies": {
+    "@types/react": ">=16.8.0 <20.0.0",
+    "react": ">=16.8.0 <20.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    }
+  }
+}

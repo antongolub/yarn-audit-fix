@@ -1,0 +1,47 @@
+{
+  "name": "@medusajs/admin-vite-plugin",
+  "version": "2.15.5",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medusajs/medusa",
+    "directory": "packages/admin/admin-vite-plugin"
+  },
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "scripts": {
+    "build": "yarn run -T tsup",
+    "watch": "yarn run -T tsup --watch",
+    "test": "../../../node_modules/.bin/vitest --run",
+    "test:watch": "../../../node_modules/.bin/vitest"
+  },
+  "devDependencies": {
+    "vite": "^5.4.21"
+  },
+  "peerDependencies": {
+    "vite": "^5.4.21"
+  },
+  "dependencies": {
+    "@babel/parser": "7.25.6",
+    "@babel/traverse": "7.25.6",
+    "@babel/types": "7.25.6",
+    "@medusajs/admin-shared": "2.15.5",
+    "chokidar": "^3.5.3",
+    "fdir": "6.1.1",
+    "magic-string": "0.30.5",
+    "outdent": "^0.8.0",
+    "picocolors": "^1.1.0"
+  },
+  "packageManager": "yarn@3.2.1"
+}

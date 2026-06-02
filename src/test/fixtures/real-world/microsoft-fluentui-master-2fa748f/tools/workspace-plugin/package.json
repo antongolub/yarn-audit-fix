@@ -1,0 +1,12 @@
+{
+  "name": "@fluentui/workspace-plugin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs",
+  "generators": "./generators.json",
+  "executors": "./executors.json",
+  "dependencies": {
+    "@nx/devkit": "~20.8.1"
+  },
+  "devDependencies": {}
+}

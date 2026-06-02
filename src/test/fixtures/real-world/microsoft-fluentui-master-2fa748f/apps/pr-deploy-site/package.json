@@ -1,0 +1,14 @@
+{
+  "name": "@fluentui/pr-deploy-site",
+  "version": "1.0.0",
+  "description": "A site to be deployed as a static site to view what is built during PR",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "clean": "just-scripts clean",
+    "generate:site": "just-scripts generate:site",
+    "lint": "eslint --cache .",
+    "type-check": "tsc -p . --noEmit"
+  },
+  "license": "MIT"
+}

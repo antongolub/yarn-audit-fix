@@ -1,0 +1,85 @@
+{
+  "name": "@react-navigation/bottom-tabs",
+  "description": "Bottom tab navigator following iOS design guidelines",
+  "version": "8.0.0-alpha.33",
+  "keywords": [
+    "react-native-component",
+    "react-component",
+    "react-native",
+    "react-navigation",
+    "ios",
+    "android",
+    "tab"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/react-navigation/react-navigation.git",
+    "directory": "packages/bottom-tabs"
+  },
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "!**/__tests__"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prepack": "bob build",
+    "clean": "del lib"
+  },
+  "dependencies": {
+    "@react-navigation/elements": "workspace:^"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@react-navigation/native": "workspace:^",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/react": "~19.2.15",
+    "del-cli": "^7.0.0",
+    "react": "19.2.0",
+    "react-native": "0.83.6",
+    "react-native-builder-bob": "^0.41.0",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "^4.25.2",
+    "react-test-renderer": "19.2.0",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "@react-navigation/native": "workspace:^",
+    "react": ">= 19.2.0",
+    "react-native": "*",
+    "react-native-safe-area-context": ">= 5.5.0",
+    "react-native-screens": ">= 4.25.0"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  }
+}

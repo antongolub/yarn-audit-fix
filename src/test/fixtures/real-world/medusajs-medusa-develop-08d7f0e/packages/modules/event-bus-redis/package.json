@@ -1,0 +1,43 @@
+{
+  "name": "@medusajs/event-bus-redis",
+  "version": "2.15.5",
+  "description": "Redis Event Bus Module for Medusa",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/**/__tests__",
+    "!dist/**/__mocks__",
+    "!dist/**/__fixtures__"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medusajs/medusa",
+    "directory": "packages/modules/event-bus-redis"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "author": "Medusa",
+  "license": "MIT",
+  "devDependencies": {
+    "@medusajs/framework": "2.15.5",
+    "@medusajs/types": "2.15.5",
+    "@medusajs/utils": "2.15.5"
+  },
+  "scripts": {
+    "watch": "yarn run -T tsc --build --watch",
+    "build": "yarn run -T rimraf dist && yarn run -T tsc --build",
+    "test": "../../../node_modules/.bin/jest --silent --bail --forceExit",
+    "test:integration": "../../../node_modules/.bin/jest --passWithNoTests --no-cache --bail --detectOpenHandles --forceExit --logHeapUsage --testPathPattern=\"integration-tests/__tests__/.*\\.spec\\.ts\""
+  },
+  "dependencies": {
+    "bullmq": "5.13.0",
+    "ioredis": "^5.4.1"
+  },
+  "peerDependencies": {
+    "@medusajs/framework": "2.15.5"
+  }
+}

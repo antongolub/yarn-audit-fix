@@ -1,0 +1,9 @@
+{
+  "name": "@fluentui/scripts-cypress",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.ts",
+  "browser": "src/browser/index.ts",
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,8 @@
+{
+  "name": "selectFile",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "dropzone": "6.0.0-beta.2",
+    "uppy": "^5.1.0"
+  }
+}

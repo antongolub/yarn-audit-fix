@@ -1,0 +1,43 @@
+{
+  "name": "@medusajs/js-sdk",
+  "version": "2.15.5",
+  "description": "SDK for the Medusa API",
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medusajs/medusa",
+    "directory": "packages/core/js-sdk"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "!dist/**/__tests__",
+    "!dist/**/__mocks__",
+    "!dist/**/__fixtures__"
+  ],
+  "author": "Medusa",
+  "license": "MIT",
+  "devDependencies": {
+    "@medusajs/types": "2.15.5"
+  },
+  "dependencies": {
+    "fetch-event-stream": "^0.1.5",
+    "qs": "^6.12.1"
+  },
+  "scripts": {
+    "build": "yarn run -T rimraf dist && yarn run -T tsc -p tsconfig.json && yarn run -T tsc -p tsconfig.esm.json",
+    "test": "../../../node_modules/.bin/jest --passWithNoTests --bail --forceExit --detectOpenHandles",
+    "watch": "yarn run -T tsc --build --watch"
+  }
+}

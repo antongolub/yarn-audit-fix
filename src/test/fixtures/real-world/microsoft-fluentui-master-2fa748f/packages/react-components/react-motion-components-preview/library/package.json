@@ -1,0 +1,46 @@
+{
+  "name": "@fluentui/react-motion-components-preview",
+  "version": "0.15.5",
+  "description": "A preview package for Fluent UI motion components, providing a collection of components",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "*.md",
+    "dist/*.d.ts",
+    "lib",
+    "lib-commonjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@fluentui/react-motion": "*",
+    "@fluentui/react-utilities": "*",
+    "@swc/helpers": "^0.5.1"
+  },
+  "peerDependencies": {
+    "@types/react": ">=16.14.0 <20.0.0",
+    "@types/react-dom": ">=16.9.0 <20.0.0",
+    "react": ">=16.14.0 <20.0.0",
+    "react-dom": ">=16.14.0 <20.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "beachball": {
+    "disallowedChangeTypes": [
+      "major",
+      "prerelease"
+    ]
+  }
+}

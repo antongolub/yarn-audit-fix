@@ -1,0 +1,13 @@
+{
+  "name": "@fluentui/scripts-test-ssr",
+  "version": "0.0.1",
+  "private": true,
+  "bin": {
+    "test-ssr": "./bin/test-ssr.js"
+  },
+  "dependencies": {
+    "@fluentui/scripts-puppeteer": "*",
+    "@fluentui/scripts-ts-node": "*"
+  },
+  "devDependencies": {}
+}

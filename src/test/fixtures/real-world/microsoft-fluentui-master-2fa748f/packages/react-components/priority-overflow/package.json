@@ -1,0 +1,38 @@
+{
+  "name": "@fluentui/priority-overflow",
+  "version": "9.3.0",
+  "description": "Vanilla JS utilities to implement overflow menus",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "./dist/index.d.ts",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@swc/helpers": "^0.5.1"
+  },
+  "beachball": {
+    "disallowedChangeTypes": [
+      "prerelease",
+      "major"
+    ]
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "*.md",
+    "dist/*.d.ts",
+    "lib",
+    "lib-commonjs"
+  ]
+}

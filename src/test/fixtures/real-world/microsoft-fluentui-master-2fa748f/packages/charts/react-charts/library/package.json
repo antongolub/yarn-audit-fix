@@ -1,0 +1,80 @@
+{
+  "name": "@fluentui/react-charts",
+  "version": "9.3.19",
+  "description": "React web chart controls for Microsoft fluentui v9 system.",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "*.md",
+    "dist/*.d.ts",
+    "lib",
+    "lib-commonjs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "syncpack": {
+    "dependencyTypes": []
+  },
+  "dependencies": {
+    "@fluentui/chart-utilities": "^1.1.39",
+    "@fluentui/react-button": "^9.9.2",
+    "@fluentui/react-jsx-runtime": "^9.4.3",
+    "@fluentui/react-overflow": "^9.8.0",
+    "@fluentui/react-popover": "^9.14.3",
+    "@fluentui/react-shared-contexts": "^9.26.2",
+    "@fluentui/react-tabster": "^9.26.15",
+    "@fluentui/react-theme": "^9.2.1",
+    "@fluentui/react-tooltip": "^9.10.2",
+    "@fluentui/react-utilities": "^9.26.4",
+    "@griffel/react": "^1.5.32",
+    "@swc/helpers": "^0.5.1",
+    "@types/d3-array": "^3.0.0",
+    "@types/d3-axis": "^3.0.0",
+    "@types/d3-color": "^3.0.0",
+    "@types/d3-format": "^3.0.0",
+    "@types/d3-hierarchy": "^3.0.0",
+    "@types/d3-sankey": "^0.12.3",
+    "@types/d3-scale": "^4.0.0",
+    "@types/d3-selection": "^3.0.0",
+    "@types/d3-shape": "^3.0.0",
+    "@types/d3-time": "^3.0.0",
+    "@types/d3-time-format": "^3.0.0",
+    "d3-array": "^3.0.0",
+    "d3-axis": "^3.0.0",
+    "d3-color": "^3.0.0",
+    "d3-format": "^3.0.0",
+    "d3-hierarchy": "^3.0.0",
+    "d3-sankey": "^0.12.3",
+    "d3-scale": "^4.0.0",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.0.0",
+    "d3-time": "^3.0.0",
+    "d3-time-format": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@types/react": ">=16.14.0 <20.0.0",
+    "@types/react-dom": ">=16.9.0 <20.0.0",
+    "react": ">=16.14.0 <20.0.0",
+    "react-dom": ">=16.14.0 <20.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": "./lib-commonjs/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "beachball": {
+    "disallowedChangeTypes": [
+      "major",
+      "prerelease"
+    ]
+  }
+}

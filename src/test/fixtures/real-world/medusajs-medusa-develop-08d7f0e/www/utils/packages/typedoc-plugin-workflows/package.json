@@ -1,0 +1,46 @@
+{
+  "name": "typedoc-plugin-workflows",
+  "private": true,
+  "version": "0.0.0",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "A plugin that generates information relevant for workflows",
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "author": "Shahed Nasser",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "lint": "eslint --ext .ts src"
+  },
+  "peerDependencies": {
+    "typedoc": "0.27.x"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8.56.6",
+    "@types/node": "^20.12.10",
+    "types": "*",
+    "typescript": "^5.6.2"
+  },
+  "keywords": [
+    "typedocplugin",
+    "packages",
+    "monorepo",
+    "typedoc"
+  ],
+  "dependencies": {
+    "@medusajs/core-flows": "link:../../../../packages/core/core-flows",
+    "@medusajs/framework": "link:../../../../packages/core/framework",
+    "@medusajs/loyalty-plugin": "link:../../../../packages/plugins/loyalty",
+    "eslint": "^8.53.0",
+    "glob": "13.0.6",
+    "utils": "*",
+    "yaml": "^2.3.3"
+  }
+}

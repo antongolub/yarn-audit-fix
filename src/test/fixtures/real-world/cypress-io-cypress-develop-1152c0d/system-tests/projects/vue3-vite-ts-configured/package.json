@@ -1,0 +1,17 @@
+{
+  "name": "vue-vite-ts-configured",
+  "version": "0.0.0-test",
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.5.12"
+  },
+  "devDependencies": {
+    "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.18"
+  }
+}

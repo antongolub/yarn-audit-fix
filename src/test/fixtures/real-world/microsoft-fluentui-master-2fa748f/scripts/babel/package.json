@@ -1,0 +1,22 @@
+{
+  "name": "@fluentui/scripts-babel",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "exports": {
+    ".": {
+      "require": "./src/index.js",
+      "import": "./src/index.js"
+    },
+    "./register": {
+      "require": "./register.js",
+      "import": "./register.js"
+    },
+    "./preset-v9": {
+      "require": "./src/preset-v9.js",
+      "import": "./src/preset-v9.js"
+    }
+  }
+}

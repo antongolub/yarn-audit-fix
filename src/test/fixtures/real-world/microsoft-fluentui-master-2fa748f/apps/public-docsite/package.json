@@ -1,0 +1,51 @@
+{
+  "name": "@fluentui/public-docsite",
+  "version": "8.2.41",
+  "private": true,
+  "description": "The official website for the Fluent UI project.",
+  "sideEffects": true,
+  "main": "lib-commonjs/root.js",
+  "module": "lib/root.js",
+  "typings": "lib/root.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "scripts": {
+    "prebundle": "just-scripts build",
+    "bundle": "just-scripts bundle",
+    "lint": "just-scripts lint",
+    "just": "just-scripts",
+    "clean": "just-scripts clean",
+    "code-style": "just-scripts code-style",
+    "start": "just-scripts dev",
+    "type-check": "tsc -p . --noEmit --baseUrl ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "write-file-webpack-plugin": "^4.1.0"
+  },
+  "dependencies": {
+    "@fluentui/font-icons-mdl2": "*",
+    "@fluentui/public-docsite-resources": "*",
+    "@fluentui/public-docsite-setup": "*",
+    "@fluentui/react": "*",
+    "@fluentui/react-docsite-components": "*",
+    "@fluentui/react-examples": "*",
+    "@fluentui/react-experiments": "*",
+    "@fluentui/fluent2-theme": "*",
+    "@fluentui/react-file-type-icons": "*",
+    "@fluentui/react-icons-mdl2": "*",
+    "@fluentui/react-icons-mdl2-branded": "*",
+    "@fluentui/set-version": "*",
+    "@fluentui/theme": "*",
+    "@fluentui/theme-samples": "*",
+    "@fluentui/utilities": "*",
+    "@microsoft/load-themed-styles": "^1.10.26",
+    "office-ui-fabric-core": "^11.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "tslib": "^2.1.0",
+    "whatwg-fetch": "2.0.4"
+  }
+}

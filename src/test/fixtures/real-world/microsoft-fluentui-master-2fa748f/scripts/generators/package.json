@@ -1,0 +1,11 @@
+{
+  "name": "@fluentui/scripts-generators",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@fluentui/scripts-monorepo": "*",
+    "@fluentui/scripts-projects-test": "*"
+  },
+  "devDependencies": {}
+}

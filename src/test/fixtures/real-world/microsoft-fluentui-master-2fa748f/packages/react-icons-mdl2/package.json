@@ -1,0 +1,42 @@
+{
+  "name": "@fluentui/react-icons-mdl2",
+  "version": "1.4.6",
+  "description": "SVG icon components for @fluentui/react",
+  "main": "lib-commonjs/index.js",
+  "module": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "sideEffects": [
+    "lib/version.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/fluentui"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "just-scripts build",
+    "clean": "just-scripts clean"
+  },
+  "dependencies": {
+    "@microsoft/load-themed-styles": "^1.10.26",
+    "@fluentui/react-icon-provider": "^1.4.6",
+    "@fluentui/set-version": "^8.2.24",
+    "@fluentui/utilities": "^8.17.2",
+    "tslib": "^2.1.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0 <20.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib-commonjs/index.js"
+    },
+    "./lib/utils/createSvgIcon": {
+      "types": "./lib/utils/createSvgIcon.d.ts",
+      "import": "./lib/utils/createSvgIcon.js",
+      "require": "./lib-commonjs/utils/createSvgIcon.js"
+    }
+  }
+}

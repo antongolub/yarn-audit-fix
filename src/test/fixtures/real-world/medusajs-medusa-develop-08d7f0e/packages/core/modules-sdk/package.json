@@ -1,0 +1,41 @@
+{
+  "name": "@medusajs/modules-sdk",
+  "version": "2.15.5",
+  "description": "SDK for medusa modules",
+  "main": "dist/index.js",
+  "export": {
+    ".": "./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medusajs/medusa",
+    "directory": "packages/core/modules-sdk"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "!dist/**/__tests__",
+    "!dist/**/__fixtures__",
+    "!dist/**/__mocks__"
+  ],
+  "author": "Medusa",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn run -T rimraf dist && yarn run -T tsc --build",
+    "test": "../../../node_modules/.bin/jest --bail --forceExit",
+    "watch": "yarn run -T tsc --build --watch"
+  },
+  "devDependencies": {
+    "@medusajs/types": "2.15.5"
+  },
+  "dependencies": {
+    "@medusajs/deps": "2.15.5",
+    "@medusajs/orchestration": "2.15.5",
+    "@medusajs/utils": "2.15.5"
+  }
+}

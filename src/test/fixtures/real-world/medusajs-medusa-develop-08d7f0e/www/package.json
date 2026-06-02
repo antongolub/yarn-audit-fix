@@ -1,0 +1,56 @@
+{
+  "name": "docs-root",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "build:docs": "turbo run build --filter=book",
+    "build:resources": "turbo run build --filter=resources",
+    "build:user-guide": "turbo run build --filter=user-guide",
+    "build:packages": "turbo run build --filter='./packages/*'",
+    "start": "turbo run start:monorepo",
+    "dev": "turbo run dev:monorepo",
+    "lint": "turbo run lint",
+    "lint:content": "turbo run lint:content",
+    "watch": "turbo run watch",
+    "prep": "turbo run prep",
+    "test": "turbo run test -- run",
+    "up:medusa": "yarn workspaces foreach -v --topological-dev --recursive exec yarn up @medusajs/icons @medusajs/ui @medusajs/ui-preset --exact"
+  },
+  "dependencies": {
+    "autoprefixer": "10.4.14",
+    "eslint": "^9.13.0",
+    "postcss": "8.4.27",
+    "prettier": "^3.3.3",
+    "tailwindcss": "3.3.3",
+    "tsconfig": "*",
+    "turbo": "latest"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.25.9",
+    "@eslint/js": "9.13.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/eslint__js": "8.42.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint-config-next": "15.3.6",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-config-turbo": "2.2.3",
+    "eslint-plugin-markdown": "5.1.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "eslint-plugin-react": "7.37.2",
+    "jsdom": "^25.0.1",
+    "typescript-eslint": "8.11.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  }
+}

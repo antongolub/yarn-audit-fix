@@ -1,0 +1,59 @@
+{
+  "name": "@docusaurus/theme-live-codeblock",
+  "version": "3.10.1",
+  "description": "Docusaurus live code block component.",
+  "main": "lib/index.js",
+  "types": "src/theme-live-codeblock.d.ts",
+  "sideEffects": [
+    "lib/theme/Playground/*"
+  ],
+  "exports": {
+    "./lib/*": "./lib/*",
+    "./src/*": "./src/*",
+    "./client": {
+      "type": "./lib/client/index.d.ts",
+      "default": "./lib/client/index.js"
+    },
+    ".": {
+      "types": "./src/theme-live-codeblock.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build && node ../../admin/scripts/copyUntypedFiles.js && oxfmt \"lib/theme/**/*.js\"",
+    "watch": "run-p -c copy:watch build:watch",
+    "build:watch": "tsc --build --watch",
+    "copy:watch": "node ../../admin/scripts/copyUntypedFiles.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/facebook/docusaurus.git",
+    "directory": "packages/docusaurus-theme-live-codeblock"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@docusaurus/core": "3.10.1",
+    "@docusaurus/theme-common": "3.10.1",
+    "@docusaurus/theme-translations": "3.10.1",
+    "@docusaurus/utils-validation": "3.10.1",
+    "@philpl/buble": "^0.19.7",
+    "clsx": "^2.0.0",
+    "fs-extra": "^11.2.0",
+    "react-live": "^4.1.8",
+    "tslib": "^2.6.0"
+  },
+  "devDependencies": {
+    "@docusaurus/types": "3.10.1",
+    "@types/buble": "^0.20.1"
+  },
+  "peerDependencies": {
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "engines": {
+    "node": ">=24.14"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "@docs/demos",
+  "version": "1.0.0",
+  "description": "Mantine components demos used on mantine.dev website",
+  "homepage": "https://mantine.dev",
+  "license": "MIT",
+  "author": "Vitaly Rtishchev <rtivital@gmail.com>",
+  "keywords": [
+    "jest",
+    "mantine",
+    "tests"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./cjs/index.cjs",
+  "module": "./esm/index.mjs",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/index.d.mts",
+        "default": "./esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/index.d.ts",
+        "default": "./cjs/index.cjs"
+      }
+    },
+    "./styles.css": "./styles.css",
+    "./styles.layer.css": "./styles.layer.css"
+  },
+  "repository": {
+    "url": "https://github.com/mantinedev/mantine.git",
+    "type": "git",
+    "directory": "packages/@docs/demos"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@docs/styles-api": "workspace:*",
+    "@mantine/carousel": "workspace:*",
+    "@mantine/charts": "workspace:*",
+    "@mantine/code-highlight": "workspace:*",
+    "@mantine/core": "workspace:*",
+    "@mantine/dates": "workspace:*",
+    "@mantine/dropzone": "workspace:*",
+    "@mantine/form": "workspace:*",
+    "@mantine/hooks": "workspace:*",
+    "@mantine/notifications": "workspace:*",
+    "@mantine/nprogress": "workspace:*",
+    "@mantine/schedule": "workspace:*",
+    "@mantine/spotlight": "workspace:*",
+    "@mantine/tiptap": "workspace:*",
+    "@mantinex/demo": "workspace:*",
+    "@mantinex/dev-icons": "workspace:*",
+    "@mantinex/mantine-logo": "workspace:*",
+    "@tiptap/core": "^3.23.6",
+    "@tiptap/extension-floating-menu": "^3.23.6",
+    "@tiptap/extension-link": "^3.23.6",
+    "@tiptap/pm": "^3.23.6",
+    "@tiptap/react": "^3.23.6",
+    "dayjs": "^1.11.21",
+    "embla-carousel-react": "^8.6.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "recharts": "^3.8.1"
+  }
+}

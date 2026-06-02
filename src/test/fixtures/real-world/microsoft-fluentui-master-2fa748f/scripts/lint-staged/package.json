@@ -1,0 +1,11 @@
+{
+  "name": "@fluentui/scripts-lint-staged",
+  "version": "0.0.1",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@fluentui/scripts-monorepo": "*",
+    "@fluentui/scripts-utils": "*"
+  },
+  "devDependencies": {}
+}

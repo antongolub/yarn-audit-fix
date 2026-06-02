@@ -1,0 +1,115 @@
+{
+  "name": "@medusajs/framework",
+  "version": "2.15.5",
+  "description": "Framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "!dist/**/__tests__",
+    "!dist/**/__mocks__",
+    "!dist/**/__fixtures__"
+  ],
+  "bin": {
+    "medusa-mikro-orm": "./dist/mikro-orm-cli/bin.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./config": "./dist/config/index.js",
+    "./caching": "./dist/caching/index.js",
+    "./logger": "./dist/logger/index.js",
+    "./database": "./dist/database/index.js",
+    "./subscribers": "./dist/subscribers/index.js",
+    "./workflows": "./dist/workflows/index.js",
+    "./links": "./dist/links/index.js",
+    "./jobs": "./dist/jobs/index.js",
+    "./http": "./dist/http/index.js",
+    "./telemetry": "./dist/telemetry/index.js",
+    "./feature-flags": "./dist/feature-flags/index.js",
+    "./utils": "./dist/utils/index.js",
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/types/index.js"
+    },
+    "./build-tools": "./dist/build-tools/index.js",
+    "./orchestration": "./dist/orchestration/index.js",
+    "./workflows-sdk": "./dist/workflows-sdk/index.js",
+    "./workflows-sdk/composer": "./dist/workflows-sdk/composer.js",
+    "./modules-sdk": "./dist/modules-sdk/index.js",
+    "./migrations": "./dist/migrations/index.js",
+    "./mikro-orm/cli": "./dist/deps/mikro-orm-cli.js",
+    "./mikro-orm/core": "./dist/deps/mikro-orm-core.js",
+    "./mikro-orm/knex": "./dist/deps/mikro-orm-knex.js",
+    "./mikro-orm/migrations": "./dist/deps/mikro-orm-migrations.js",
+    "./mikro-orm/postgresql": "./dist/deps/mikro-orm-postgresql.js",
+    "./opentelemetry/instrumentation-pg": "./dist/deps/opentelemetry-instrumentation-pg.js",
+    "./opentelemetry/sdk-node": "./dist/deps/opentelemetry-sdk-node.js",
+    "./opentelemetry/sdk-trace-node": "./dist/deps/opentelemetry-sdk-trace-node.js",
+    "./opentelemetry/resources": "./dist/deps/opentelemetry-resources.js",
+    "./opentelemetry/api": "./dist/deps/opentelemetry-api.js",
+    "./awilix": "./dist/deps/awilix.js",
+    "./pg": "./dist/deps/pg.js",
+    "./zod": "./dist/deps/zod.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/medusajs/medusa",
+    "directory": "packages/core/framework"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Medusa",
+  "license": "MIT",
+  "scripts": {
+    "watch": "yarn run -T tsc --watch ",
+    "watch:test": "yarn run -T tsc --watch",
+    "build": "yarn run -T rimraf dist && yarn run -T tsc --build",
+    "test": "../../../node_modules/.bin/jest --bail --forceExit --testPathPattern=src"
+  },
+  "devDependencies": {
+    "@medusajs/cli": "2.15.5"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.218.0",
+    "@jercle/yargonaut": "^1.1.5",
+    "@medusajs/deps": "2.15.5",
+    "@medusajs/modules-sdk": "2.15.5",
+    "@medusajs/orchestration": "2.15.5",
+    "@medusajs/telemetry": "2.15.5",
+    "@medusajs/types": "2.15.5",
+    "@medusajs/utils": "2.15.5",
+    "@medusajs/workflows-sdk": "2.15.5",
+    "@types/express": "^4.17.21",
+    "chokidar": "^4.0.3",
+    "compression": "^1.8.1",
+    "connect-dynamodb": "^3.0.5",
+    "connect-redis": "5.2.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-session": "^1.17.3",
+    "glob": "13.0.6",
+    "jsonwebtoken": "^9.0.2",
+    "lodash.memoize": "^4.1.2",
+    "morgan": "^1.9.1",
+    "path-to-regexp": "^8.2.0",
+    "tsconfig-paths": "^4.2.0",
+    "zod-validation-error": "5.0.0"
+  },
+  "peerDependencies": {
+    "@medusajs/cli": "2.15.5",
+    "ioredis": "^5.4.1"
+  },
+  "peerDependenciesMeta": {
+    "ioredis": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    }
+  }
+}
