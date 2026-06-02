@@ -1,12 +1,15 @@
 import path from 'node:path'
 
-import fs from 'fs-extra'
+import fs from 'node:fs'
+
 import semver from 'semver'
 
 import { TCallback } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType } from './lockfile'
 import {
+  createSymlink,
+  emptyDir,
   formatFlags,
   getBinVersion,
   getNpm,
@@ -130,7 +133,7 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
     const from = path.join(cwd, rel)
     const to = path.join(temp, rel)
 
-    fs.existsSync(from) && fs.createSymlinkSync(from, to, symlinkType)
+    fs.existsSync(from) && createSymlink(from, to, symlinkType)
   })
 }
 
@@ -181,7 +184,7 @@ export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
  * @param {TContext} cxt
  * @return {void}
  */
-export const clear: TCallback = ({ temp }) => fs.emptyDirSync(temp)
+export const clear: TCallback = ({ temp }) => emptyDir(temp)
 
 /**
  * Exit on error.

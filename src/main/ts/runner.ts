@@ -1,7 +1,5 @@
 import path from 'node:path'
 
-import chalk from 'chalk'
-
 import { TContext, TFlags } from './ifaces'
 import {
   clear,
@@ -15,7 +13,7 @@ import {
   verify,
   yarnInstall,
 } from './stages'
-import { getSelfManifest, getTemp, normalizeFlags, readJson } from './util'
+import { bold, getSelfManifest, getTemp, normalizeFlags, readJson } from './util'
 
 /**
  * Build running context.
@@ -48,7 +46,7 @@ export const runSync = (_flags: TFlags = {}): void => {
 
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
-  const log = (note: string) => !flags.silent && console.log(chalk.bold(note))
+  const log = (note: string) => !flags.silent && console.log(bold(note))
 
   try {
     log('Resolve bins')

@@ -1,23 +1,28 @@
+import cp from 'node:child_process'
 import type { StdioOptions } from 'node:child_process'
 import crypto from 'node:crypto'
-import { createRequire } from 'node:module'
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import os from 'node:os'
 
-import chalk from 'chalk'
-import fse, { SymlinkType } from 'fs-extra'
 import fg, { Options as GlobOptions } from 'fast-glob'
-import yaml from 'js-yaml'
-import { reduce } from 'lodash-es'
 
 import { TFlags, TFlagsMapping } from './ifaces'
 
 const glob = fg.sync
-// FIXME Jest workaround: cannot properly mock `child_process` with import API
-const cp = createRequire(import.meta.url)('child_process')
-const { ensureDirSync, readFileSync } = fse
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export type SymlinkType = 'dir' | 'file' | 'junction'
+
+// Minimal stand-in for chalk.bold: emit the SGR bold sequence only for a TTY
+// (or when FORCE_COLOR is set) and never when NO_COLOR is present.
+const colorize =
+  !('NO_COLOR' in process.env) &&
+  (!!process.stdout.isTTY || 'FORCE_COLOR' in process.env)
+
+export const bold = (s: string): string =>
+  colorize ? `\u001B[1m${s}\u001B[22m` : s
 
 export const invoke = (
   cmd: string,
@@ -26,8 +31,8 @@ export const invoke = (
   silent = false,
   inherit = true,
   skipError = false,
-): string | ReturnType<typeof cp.spawnSync> => {
-  !silent && console.log(chalk.bold('invoke'), cmd, ...args)
+): string => {
+  !silent && console.log(bold('invoke'), cmd, ...args)
 
   const stdio: StdioOptions = inherit
     ? ['inherit', 'inherit', 'inherit']
@@ -87,28 +92,24 @@ export const formatFlags = (flags: TFlags, ...picklist: string[]): string[] =>
   }, [])
 
 export const mapFlags = (flags: TFlags, mapping: TFlagsMapping): TFlags =>
-  reduce(
-    flags,
-    (memo: TFlags, value: any, key: string) => {
-      const repl = mapping[key]
-      let k = key
-      let v = value
+  Object.entries(flags).reduce<TFlags>((memo, [key, value]) => {
+    const repl = mapping[key]
+    let k = key
+    let v = value
 
-      if (repl) {
-        if (typeof repl === 'string') {
-          k = repl
-        } else {
-          k = repl?.key ?? k
-          v = repl?.value ?? repl?.values?.[value] ?? v
-        }
+    if (repl) {
+      if (typeof repl === 'string') {
+        k = repl
+      } else {
+        k = repl?.key ?? k
+        v = repl?.value ?? repl?.values?.[value] ?? v
       }
+    }
 
-      memo[k] = v
+    memo[k] = v
 
-      return memo
-    },
-    {},
-  )
+    return memo
+  }, {})
 
 export const isWindows = (): boolean =>
   process.platform === 'win32' ||
@@ -162,18 +163,33 @@ export const getWorkspaces = (
 }
 
 export const readJson = (path: string): any =>
-  JSON.parse(readFileSync(path).toString('utf-8').trim())
+  JSON.parse(fs.readFileSync(path).toString('utf-8').trim())
 
 export const ensureDir = (dir: string): string => {
-  ensureDirSync(dir)
+  fs.mkdirSync(dir, { recursive: true })
 
   return dir
+}
+
+// fs-extra replacements built on node:fs.
+export const emptyDir = (dir: string): void => {
+  fs.rmSync(dir, { recursive: true, force: true })
+  fs.mkdirSync(dir, { recursive: true })
+}
+
+export const createSymlink = (
+  target: string,
+  dest: string,
+  type: SymlinkType,
+): void => {
+  fs.mkdirSync(path.dirname(dest), { recursive: true })
+  fs.symlinkSync(target, dest, type)
 }
 
 export const getTemp = (cwd: string, temp?: string) =>
   temp
     ? ensureDir(path.resolve(cwd, temp))
-    : fse.mkdtempSync(path.join(os.tmpdir(), `tempy-${crypto.randomBytes(16).toString('hex')}`))
+    : fs.mkdtempSync(path.join(os.tmpdir(), `tempy-${crypto.randomBytes(16).toString('hex')}`))
 
 export const attempt = <T>(f: () => T): T | null => {
   try {
@@ -182,16 +198,6 @@ export const attempt = <T>(f: () => T): T | null => {
     return null // eslint-disable-line
   }
 }
-
-export const parseYaml = <T = Record<string, any>>(contents: string): T => {
-  try {
-    return yaml.load(contents) as T
-  } catch (e) {
-    throw new Error(`YAML required: ${e}`)
-  }
-}
-
-export const formatYaml = yaml.dump
 
 export const getBinVersion = (bin: string, cwd = process.cwd()): string =>
   invoke(bin, ['--version'], cwd, true, false)
@@ -206,7 +212,7 @@ export const addHiddenProp = (obj: Record<string, any>, prop: string, value: any
 
 
 const findParent = (dir: string, target: string): string | null => {
-  if (fse.existsSync(path.join(dir, target))) {
+  if (fs.existsSync(path.join(dir, target))) {
     return dir
   }
   const parentDir = path.resolve(dir, '..')

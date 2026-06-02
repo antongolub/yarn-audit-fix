@@ -1,16 +1,11 @@
-import { createRequire } from 'node:module'
+import cp from 'node:child_process'
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { jest } from '@jest/globals'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { TContext } from '../../main/ts/ifaces'
-
-jest.mock('child_process')
-jest.mock('fs-extra')
-
-const cp = createRequire(import.meta.url)('child_process')
-const fs = (await import('fs-extra')).default
 
 const lf = (await import('../../main/ts/lockfile'))._internal
 const { createSymlinks, getContext, run, runSync } = await import(
@@ -19,6 +14,9 @@ const { createSymlinks, getContext, run, runSync } = await import(
 const { getYarn } = await import('../../main/ts/util')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+// Captured before the fs spies are installed; vitest lazily reads module
+// sources through fs.readFileSync, so the mock must delegate real reads.
+const realReadFileSync = fs.readFileSync
 const noop = () => {
   /* noop */
 }
@@ -28,13 +26,10 @@ const dependency = 'example-package'
 const scopedDependency = '@scope/package'
 const strMatching = (start = '', end = '') =>
   expect.stringMatching(new RegExp(`^${start}.+${end}$`))
+// Read fixtures with the real fs (this runs at load time, before the spies
+// in `beforeAll` replace fs.readFileSync).
 const readFixture = (name: string): string =>
-  (jest.requireActual('fs') as typeof fs).readFileSync(
-    path.resolve(fixtures, name),
-    {
-      encoding: 'utf-8',
-    },
-  )
+  fs.readFileSync(path.resolve(fixtures, name), { encoding: 'utf-8' })
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#using_the_reviver_parameter
 const revive = <T = any>(data: string): T =>
   JSON.parse(data, (k, v) => {
@@ -61,45 +56,42 @@ const temp = path.resolve(__dirname, '../../../.temp')
 const stdio = ['inherit', 'inherit', 'inherit']
 const stdionull = [null, null, null] // eslint-disable-line
 
-const lfAudit = jest.spyOn(lf, '_audit')
-const lfParse = jest.spyOn(lf, '_parse')
-const lfPatch = jest.spyOn(lf, '_patch')
-const lfFormat = jest.spyOn(lf, '_format')
-
-// https://ar.al/2021/02/22/cache-busting-in-node.js-dynamic-esm-imports/
-const reimport = async (modulePath: string) => {
-  const cacheBustingModulePath = `${modulePath}?update=${Date.now()}`
-  return (await import(cacheBustingModulePath)).default
-}
+const lfAudit = vi.spyOn(lf, '_audit')
+const lfParse = vi.spyOn(lf, '_parse')
+const lfPatch = vi.spyOn(lf, '_patch')
+const lfFormat = vi.spyOn(lf, '_format')
 
 describe('yarn-audit-fix', () => {
   beforeAll(() => {
+    vi.spyOn(fs, 'copyFileSync').mockImplementation(noop)
+    vi.spyOn(fs, 'writeFileSync').mockImplementation(noop)
+    vi.spyOn(fs, 'symlinkSync').mockImplementation(noop)
+    vi.spyOn(fs, 'rmSync').mockImplementation(noop)
     // @ts-ignore
-    fs.emptyDirSync.mockImplementation(noop)
+    vi.spyOn(fs, 'mkdirSync').mockImplementation(noop)
     // @ts-ignore
-    fs.copyFileSync.mockImplementation(noop)
+    vi.spyOn(fs, 'mkdtempSync').mockImplementation(() => temp)
+    vi.spyOn(fs, 'existsSync').mockImplementation(() => true)
     // @ts-ignore
-    fs.readFileSync.mockImplementation((name) => {
-      const _name = path.basename(name)
-
-      if (_name === 'yarn.lock') {
-        return yarnLockBefore
+    vi.spyOn(fs, 'readFileSync').mockImplementation((name: any, ...rest: any[]) => {
+      const s = String(name)
+      // Only stub the project's own files; delegate everything else (vitest
+      // module sources, node_modules, etc.) to the real fs.
+      if (!s.includes('node_modules')) {
+        const _name = path.basename(s)
+        if (_name === 'yarn.lock') {
+          return yarnLockBefore
+        }
+        if (_name === 'package.json') {
+          return '{"version": "1.0.0"}'
+        }
       }
 
-      if (_name === 'package.json') {
-        return '{"version": "1.0.0"}'
-      }
-
-      return ''
+      // @ts-ignore
+      return realReadFileSync(name, ...rest)
     })
     // @ts-ignore
-    fs.removeSync.mockImplementation(noop)
-    // @ts-ignore
-    fs.existsSync.mockImplementation(() => true)
-    // @ts-ignore
-    fs.createSymlinkSync.mockImplementation(noop)
-    // @ts-ignore
-    cp.spawnSync.mockImplementation((cmd, [$0, $1]) => {
+    vi.spyOn(cp, 'spawnSync').mockImplementation((cmd: string, [$0, $1]: string[]) => {
       if ($0 === 'audit' && $1 === '--json') {
         return audit
       }
@@ -111,8 +103,8 @@ describe('yarn-audit-fix', () => {
       return { status: 0, stdout: 'foobar' }
     })
   })
-  afterEach(jest.clearAllMocks)
-  afterAll(jest.resetAllMocks)
+  afterEach(() => vi.clearAllMocks())
+  afterAll(() => vi.restoreAllMocks())
 
   describe('createSymlinks', () => {
     it('establishes proper links', () => {
@@ -126,7 +118,7 @@ describe('yarn-audit-fix', () => {
 
       const links = ['node_modules', 'packages/a', 'packages/b']
       links.forEach((link) => {
-        expect(fs.createSymlinkSync).toHaveBeenCalledWith(
+        expect(fs.symlinkSync).toHaveBeenCalledWith(
           path.join(cwd, link),
           strMatching(temp, link),
           'dir',
@@ -139,7 +131,10 @@ describe('yarn-audit-fix', () => {
     // eslint-disable-next-line
     const checkTempAssets = () => {
       // Preparing...
-      expect(fs.emptyDirSync).toHaveBeenCalledWith(temp)
+      expect(fs.rmSync).toHaveBeenCalledWith(temp, {
+        recursive: true,
+        force: true,
+      })
       expect(fs.copyFileSync).toHaveBeenCalledWith(
         path.join(cwd, 'yarn.lock'),
         strMatching(temp, 'yarn.lock'),
@@ -156,7 +151,7 @@ describe('yarn-audit-fix', () => {
         path.join(cwd, '.npmrc'),
         strMatching(temp, '.npmrc'),
       )
-      expect(fs.createSymlinkSync).toHaveBeenCalledWith(
+      expect(fs.symlinkSync).toHaveBeenCalledWith(
         path.join(cwd, 'node_modules'),
         strMatching(temp, 'node_modules'),
         'dir',
@@ -176,7 +171,6 @@ describe('yarn-audit-fix', () => {
     describe('`patch` flow', () => {
       it('invokes cmd queue with proper args', async () => {
         await run({
-          flow: 'patch',
           temp,
         })
 
@@ -224,7 +218,7 @@ describe('yarn-audit-fix', () => {
           `--exclude=${scopedDependency}`,
           '--ignore-engines',
         )
-        await reimport('../../main/ts/cli')
+        await import('../../main/ts/cli')
 
         checkTempAssets()
 
@@ -253,30 +247,26 @@ describe('yarn-audit-fix', () => {
       })
 
       describe('on error', () => {
-        // eslint-disable-next-line
-        const checkExit = async (reason: any): Promise<any> => {
-          let _resolve: any
-          const promise = new Promise((resolve) => {
-            _resolve = resolve
-          })
-
-          jest.isolateModules(() => {
-            // @ts-ignore
-            cp.spawnSync.mockImplementation(() => reason)
-            reimport('../../main/ts/cli').catch(_resolve)
-          })
-
-          return promise
+        // `cli` just calls `run.sync(flags)`; drive runSync directly so the
+        // error path is exercised without re-importing the cli module.
+        const checkExit = (reason: any): void => {
+          // @ts-ignore
+          vi.mocked(cp.spawnSync).mockImplementation(() => reason)
+          try {
+            runSync({})
+          } catch {
+            /* expected */
+          }
         }
 
-        it('sets code to 1 otherwise', async () => {
-          await checkExit({ error: new Error('foobar') })
+        it('sets code to 1 otherwise', () => {
+          checkExit({ error: new Error('foobar') })
           expect(process.exitCode).toBe(1)
           process.exitCode = 0
         })
 
-        it('returns exit code if passed', async () => {
-          await checkExit({ status: 2 })
+        it('returns exit code if passed', () => {
+          checkExit({ status: 2 })
           expect(process.exitCode).toBe(2)
           process.exitCode = 0
         })

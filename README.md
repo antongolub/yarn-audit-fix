@@ -29,6 +29,7 @@ The missing `yarn audit fix`
    - [ENV](#env)
    - [JS API](#js-api)
 - [Migration notes](#migration-notes)
+   - [^11.0.0](#1100)
    - [^10.0.0](#1000)
    - [^9.0.0](#900)
    - [^8.0.0](#800)
@@ -144,7 +145,7 @@ Individual stages (`resolveBins`, `patchLockfile`, `yarnInstall`, …) are expor
 
 ## Migration notes
 ### ^11.0.0
-**BREAKING:** the legacy `convert` flow is removed, and so is the `--flow` switch (plus its `synp`-based two-way lockfile conversion and the now-dead `--package-lock-only` / `--legacy-peer-deps` / `--loglevel` / `--only` flags). Direct graph patching is the only flow now — it is more controllable and supports every yarn schema. `synp` is no longer a dependency.
+**BREAKING:** the legacy `convert` flow is removed, and so is the `--flow` switch (plus its `synp`-based two-way lockfile conversion and the now-dead `--package-lock-only` / `--legacy-peer-deps` / `--loglevel` / `--only` flags). Direct graph patching is the only flow now — it is more controllable and supports every yarn schema.
 
 With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` / `TStage` types, and the optional custom-flow argument to `run` / `runSync` are removed. Call `run(flags)` / `runSync(flags)` — the patch pipeline is inlined. The individual stages are still exported if you want to assemble your own.
 
