@@ -18,6 +18,18 @@
 
 The missing `yarn audit fix`
 
+> [!IMPORTANT]
+> **v11 is not released yet.** The current stable line is **v10.x** (`npm i -D yarn-audit-fix`).
+> v11 is published under the npm **`snapshot`** dist-tag, where experimental builds land for early testing:
+> ```sh
+> yarn add -D yarn-audit-fix@snapshot   # or: npm i -D yarn-audit-fix@snapshot
+> ```
+> **What v11 brings** — see [Migration notes](#1100) for the full breaking-change list:
+> - **New lockfile engine** on [`@antongolub/lockfile`](https://github.com/antongolub/lockfile): patches the lockfile **graph directly**, auto-detecting every yarn schema — Classic + Berry **v4–v10** ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)).
+> - **Faithful lockfile handling** — preserves checksums, integrity, `conditions`/`dependenciesMeta`/`peerDependenciesMeta`, and `patch:` / `resolutions` / git / npm-alias entries, with no spurious churn (real-world locks round-trip unchanged).
+> - **Single direct-patch flow** — the legacy `convert` flow and the `--flow` switch (and `synp` conversion) are removed.
+> - **Slimmer footprint** — `jest`→`vitest`; dropped `lodash-es` / `fs-extra` / `chalk` / `js-yaml`. Node `>= 16`.
+
 - [Digest](#digest)
    - [Problem](#problem)
    - [Solution](#solution)
