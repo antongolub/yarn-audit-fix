@@ -1745,10 +1745,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^12.1.0":
-  version: 12.1.0
-  resolution: "commander@npm:12.1.0"
-  checksum: 10c0/6e1996680c083b3b897bfc1cfe1c58dfbcd9842fd43e1aaf8a795fbc237f65efcc860a3ef457b318e73f29a4f4a28f6403c3d653d021d960e4632dd45bde54a9
+"commander@npm:^15.0.0":
+  version: 15.0.0
+  resolution: "commander@npm:15.0.0"
+  checksum: 10c0/539229c171914ea1ccd45ee5f10d924289a12a684ea3a7a44147abe54003c35ed6de9ae4ad198d88c29fdf403dca0428451a388234e6dc01b6faa978fb207206
   languageName: node
   linkType: hard
 
@@ -4968,7 +4968,7 @@ __metadata:
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.0"
     "@vitest/coverage-v8": "npm:^3.0.0"
-    commander: "npm:^12.1.0"
+    commander: "npm:^15.0.0"
     concurrently: "npm:^9.1.2"
     cpy-cli: "npm:^5.0.0"
     depcheck: "npm:^1.4.7"
