@@ -5,14 +5,14 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"ansi-styles@npm:4.3.0, ansi-styles@npm:^4.1.0":
+"ansi-styles@npm:^4.1.0":
   version: 4.3.0
   resolution: "ansi-styles@npm:4.3.0"
   dependencies:
     color-convert: "npm:^2.0.1"
-  linkType: hard
-  languageName: node
   checksum: 10c0/895a23929da416f2bd3de7e9cb4eabd340949328ab85ddd6e484a637d8f6820d485f53933446f5291c3b760cbc488beb8e88573dd0f9c7daf83dccc8fe81b041
+  languageName: node
+  linkType: hard
 
 "chalk@npm:4.1.0":
   version: 4.1.0
@@ -20,53 +20,53 @@ __metadata:
   dependencies:
     ansi-styles: "npm:^4.1.0"
     supports-color: "npm:^7.1.0"
-  linkType: hard
-  languageName: node
   checksum: 10c0/3787bd65ecd98ab3a1acc3b4f71d006268a675875e49ee6ea75fb54ba73d268b97544368358c18c42445e408e076ae8ad5cec8fbad36942a2c7ac654883dc61e
+  languageName: node
+  linkType: hard
 
-"color-convert@npm:2.0.1, color-convert@npm:^2.0.1":
+"color-convert@npm:^2.0.1":
   version: 2.0.1
   resolution: "color-convert@npm:2.0.1"
   dependencies:
     color-name: "npm:~1.1.4"
-  linkType: hard
-  languageName: node
   checksum: 10c0/37e1150172f2e311fe1b2df62c6293a342ee7380da7b9cfdba67ea539909afbd74da27033208d01d6d5cfc65ee7868a22e18d7e7648e004425441c0f8a15a7d7
+  languageName: node
+  linkType: hard
 
-"color-name@npm:1.1.4, color-name@npm:~1.1.4":
+"color-name@npm:~1.1.4":
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
-  linkType: hard
-  languageName: node
   checksum: 10c0/a1a3f914156960902f46f7f56bc62effc6c94e84b2cae157a526b1c1f74b677a47ec602bf68a61abfa2b42d15b7c5651c6dbe72a43af720bc588dff885b10f95
+  languageName: node
+  linkType: hard
 
-"has-flag@npm:4.0.0, has-flag@npm:^4.0.0":
+"has-flag@npm:^4.0.0":
   version: 4.0.0
   resolution: "has-flag@npm:4.0.0"
-  linkType: hard
-  languageName: node
   checksum: 10c0/2e789c61b7888d66993e14e8331449e525ef42aac53c627cc53d1c3334e768bcb6abdc4f5f0de1478a25beec6f0bd62c7549058b7ac53e924040d4f301f02fd1
+  languageName: node
+  linkType: hard
 
-"lodash@npm:4.18.0, lodash@npm:4.17.20":
+"lodash@npm:4.17.20":
   version: 4.18.0
   resolution: "lodash@npm:4.18.0"
-  linkType: hard
   languageName: node
+  linkType: hard
 
-"minimist@npm:1.2.6, minimist@npm:1.2.5":
+"minimist@npm:1.2.5":
   version: 1.2.6
   resolution: "minimist@npm:1.2.6"
-  linkType: hard
   languageName: node
+  linkType: hard
 
-"supports-color@npm:7.2.0, supports-color@npm:^7.1.0":
+"supports-color@npm:^7.1.0":
   version: 7.2.0
   resolution: "supports-color@npm:7.2.0"
   dependencies:
     has-flag: "npm:^4.0.0"
-  linkType: hard
-  languageName: node
   checksum: 10c0/afb4c88521b8b136b5f5f95160c98dee7243dc79d5432db7efc27efb219385bbc7d9427398e43dd6cc730a0f87d5085ce1652af7efbe391327bc0a7d0f7fc124
+  languageName: node
+  linkType: hard
 
 "yaf-v4-fix@workspace:.":
   version: 0.0.0-use.local
@@ -75,5 +75,5 @@ __metadata:
     chalk: "npm:4.1.0"
     lodash: "npm:4.17.20"
     minimist: "npm:1.2.5"
-  linkType: soft
   languageName: unknown
+  linkType: soft
