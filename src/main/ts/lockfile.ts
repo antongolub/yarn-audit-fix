@@ -158,12 +158,13 @@ export const _patch = (
       const newId = newIdOf(u)
       if (!graph.getNode(newId) && !seenIds.has(newId)) {
         seenIds.add(newId)
+        // Node carries identity only; the lib derives the resolution from
+        // name + version + source (a fresh npm fix → `name@npm:version`).
         m.addNode({
           id: newId,
           name: u.name,
           version: u.fix,
           peerContext: [],
-          resolution: `${u.name}@npm:${u.fix}`,
         })
       }
     }

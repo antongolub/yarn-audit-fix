@@ -1,6 +1,6 @@
 {
   "name": "yarn-audit-fix",
-  "version": "11.0.0-snapshot.8",
+  "version": "11.0.0-snapshot.9",
   "publishConfig": {
     "access": "public"
   },
@@ -68,7 +68,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@antongolub/lockfile": "0.0.0-snapshot.61",
+    "@antongolub/lockfile": "0.0.0-snapshot.63",
     "@types/semver": "^7.7.0",
     "commander": "^12.1.0",
     "fast-glob": "^3.3.3",
