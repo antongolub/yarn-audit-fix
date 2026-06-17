@@ -8,11 +8,9 @@ import { TFlags } from './ifaces'
 import { run } from './runner'
 import { getSelfManifest } from './util'
 
-const env = process.env
-
-// Tiny, dependency-light option spec (keeps the supported Node floor low — see
-// the v11 migration note): which flags take a value, their `YAF_*` env-var
-// defaults, and the allowed `choices` for the few enum-like ones.
+// Declarative option spec (keeps `parse` small and the Node floor low — see the
+// v11 migration note): value-taking vs boolean flags, their `YAF_*` env-var
+// fallbacks, and the allowed values for the enum-like ones.
 const BOOLEAN = ['dry-run', 'force', 'ignore-engines', 'silent', 'verbose']
 const STRING = [
   'audit-level',
@@ -24,23 +22,23 @@ const STRING = [
   'symlink',
   'temp',
 ]
+const ENV: Record<string, string> = {
+  'audit-level': 'YAF_AUDIT_LEVEL',
+  cwd: 'YAF_CWD',
+  'dry-run': 'YAF_DRY_RUN',
+  exclude: 'YAF_EXCLUDE',
+  force: 'YAF_FORCE',
+  ignore: 'YAF_IGNORE',
+  'ignore-engines': 'YAF_IGNORE_ENGINES',
+  'npm-path': 'YAF_NPM_PATH',
+  registry: 'YAF_REGISTRY',
+  silent: 'YAF_SILENT',
+  verbose: 'YAF_VERBOSE',
+}
 const CHOICES: Record<string, string[]> = {
   'audit-level': ['low', 'moderate', 'high', 'critical'],
   'npm-path': ['system', 'local'],
   symlink: ['junction', 'dir'],
-}
-const ENV_DEFAULTS: Record<string, string | undefined> = {
-  'audit-level': env.YAF_AUDIT_LEVEL,
-  cwd: env.YAF_CWD,
-  'dry-run': env.YAF_DRY_RUN,
-  exclude: env.YAF_EXCLUDE,
-  force: env.YAF_FORCE,
-  ignore: env.YAF_IGNORE,
-  'ignore-engines': env.YAF_IGNORE_ENGINES,
-  'npm-path': env.YAF_NPM_PATH || 'system',
-  registry: env.YAF_REGISTRY,
-  silent: env.YAF_SILENT,
-  verbose: env.YAF_VERBOSE,
 }
 
 const HELP = `Usage: yarn-audit-fix [options]
@@ -64,55 +62,66 @@ Options:
 
 Every flag also reads a YAF_<FLAG> env var (e.g. YAF_AUDIT_LEVEL).`
 
-const argv = process.argv.slice(2)
-const raw = minimist(argv, {
-  boolean: BOOLEAN,
-  string: STRING,
-  alias: { v: 'version', h: 'help' },
-})
+/**
+ * Parse argv into a flags object. Explicit flags win and are kept in first-seen
+ * order (so the subset later forwarded to `yarn install` matches what the user
+ * typed); `YAF_*` env vars fill the rest. `--version` / `--help` short-circuit.
+ * Throws on an out-of-range `choices` value.
+ */
+export const parse = (
+  argv: string[] = process.argv.slice(2),
+  env: NodeJS.ProcessEnv = process.env,
+): TFlags => {
+  const raw = minimist(argv, {
+    boolean: BOOLEAN,
+    string: STRING,
+    alias: { v: 'version', h: 'help' },
+  })
+  if (raw.version) return { version: true }
+  if (raw.help) return { help: true }
 
-if (raw.version) {
-  console.log(getSelfManifest().version)
-} else if (raw.help) {
-  console.log(HELP)
-} else {
-  // Collect the long flags in first-seen order so that the subset forwarded to
-  // `yarn install` keeps the order the user typed (preserves prior behaviour).
   const known = new Set([...BOOLEAN, ...STRING])
-  const orderedKeys: string[] = []
+  const flags: TFlags = {}
+
+  // Explicit flags, in first-seen order; a `--no-x` / `--x=false` boolean is off.
   for (const token of argv) {
     if (!token.startsWith('--')) continue
     const key = token.replace(/^--(no-)?/, '').split('=')[0]
-    if (known.has(key) && !orderedKeys.includes(key)) orderedKeys.push(key)
+    if (known.has(key) && !(key in flags) && raw[key] !== false) flags[key] = raw[key]
   }
-
-  const flags: TFlags = {}
-  // Explicit flags first (a boolean set to `false` via `--no-x`/`--x=false`
-  // means "off" → omit it), then `YAF_*` defaults for whatever is still unset.
-  for (const key of orderedKeys) {
-    if (raw[key] !== false) flags[key] = raw[key]
-  }
+  // `YAF_*` fallback for whatever is still unset.
   for (const key of known) {
-    if (!(key in flags) && ENV_DEFAULTS[key] !== undefined)
-      flags[key] = ENV_DEFAULTS[key]
+    const name = ENV[key]
+    if (name && !(key in flags) && env[name] !== undefined) flags[key] = env[name]
   }
+  flags['npm-path'] ??= 'system'
 
-  let valid = true
   for (const [key, allowed] of Object.entries(CHOICES)) {
     const value = flags[key]
-    if (value !== undefined && !allowed.includes(String(value))) {
-      console.error(
+    if (value !== undefined && !allowed.includes(String(value)))
+      throw new Error(
         `Invalid value for --${key}: "${value}". Expected one of: ${allowed.join(', ')}`,
       )
-      valid = false
-    }
   }
 
-  if (valid) {
-    // run() sets process.exitCode on failure; swallow the rejection so we don't
-    // also print an unhandled-rejection stack on top of run()'s own report.
-    run(flags).catch(() => {})
-  } else {
-    process.exitCode = 1
-  }
+  return flags
 }
+
+// Async IIFE rather than top-level await: the bundle targets ES2020 (the Node
+// 14 floor) where TLA isn't available. Failures are handled here, not by a caller.
+// eslint-disable-next-line unicorn/prefer-top-level-await
+void (async () => {
+  try {
+    const opts = parse()
+
+    if (opts.version) console.log(getSelfManifest().version)
+    else if (opts.help) console.log(HELP)
+    else await run(opts)
+  } catch (err) {
+    // `parse` throws on invalid CLI input; `run` already printed its own report
+    // and set process.exitCode — surface only a parse message, then ensure 1.
+    if (process.exitCode === undefined && err instanceof Error)
+      console.error(err.message)
+    process.exitCode ||= 1
+  }
+})()

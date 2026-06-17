@@ -15,12 +15,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.63":
-  version: 0.0.0-snapshot.63
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.63"
+"@antongolub/lockfile@npm:0.0.0-snapshot.64":
+  version: 0.0.0-snapshot.64
+  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.64"
   dependencies:
+    node-fetch-native: "npm:^1.6.7"
     semver: "npm:^7.6.0"
-  checksum: 10c0/31a565e5b50300656676a9e0a689345e90d718227f8343dff09a8c1a7266685bfb1bfa4779d62c51f9635ab4b3c1328fe3b09a0096a27ee15676dd9b59259660
+  checksum: 10c0/988685c1afad5a80253d941b18c49f51e97cccf4178b137b1abaeb2e0cda6c658d51cd3420c8e3ac92a5a8189972ca2e64573980a9efe6ce42d1ca14ee1b1aa4
   languageName: node
   linkType: hard
 
@@ -1143,6 +1144,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/minimist@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "@types/minimist@npm:1.2.5"
+  checksum: 10c0/3f791258d8e99a1d7d0ca2bda1ca6ea5a94e5e7b8fc6cde84dd79b0552da6fb68ade750f0e17718f6587783c24254bbca0357648dd59dc3812c150305cabdc46
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^24.0.0":
   version: 24.13.2
   resolution: "@types/node@npm:24.13.2"
@@ -1742,13 +1750,6 @@ __metadata:
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
   checksum: 10c0/a1a3f914156960902f46f7f56bc62effc6c94e84b2cae157a526b1c1f74b677a47ec602bf68a61abfa2b42d15b7c5651c6dbe72a43af720bc588dff885b10f95
-  languageName: node
-  linkType: hard
-
-"commander@npm:^12.1.0":
-  version: 12.1.0
-  resolution: "commander@npm:12.1.0"
-  checksum: 10c0/6e1996680c083b3b897bfc1cfe1c58dfbcd9842fd43e1aaf8a795fbc237f65efcc860a3ef457b318e73f29a4f4a28f6403c3d653d021d960e4632dd45bde54a9
   languageName: node
   linkType: hard
 
@@ -3234,6 +3235,13 @@ __metadata:
   version: 2.1.1
   resolution: "nested-error-stacks@npm:2.1.1"
   checksum: 10c0/feec00417e4778661cfbbe657e6add6ca9918dcc026cd697ac330b4a56a79e4882b36dde8abc138167566b1ce4c5baa17d2d4df727a96f8b96aebace1c3ffca7
+  languageName: node
+  linkType: hard
+
+"node-fetch-native@npm:^1.6.7":
+  version: 1.6.7
+  resolution: "node-fetch-native@npm:1.6.7"
+  checksum: 10c0/8b748300fb053d21ca4d3db9c3ff52593d5e8f8a2d9fe90cbfad159676e324b954fdaefab46aeca007b5b9edab3d150021c4846444e4e8ab1f4e44cd3807be87
   languageName: node
   linkType: hard
 
@@ -4964,11 +4972,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.63"
+    "@antongolub/lockfile": "npm:0.0.0-snapshot.64"
+    "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.0"
     "@vitest/coverage-v8": "npm:^3.0.0"
-    commander: "npm:^12.1.0"
     concurrently: "npm:^9.1.2"
     cpy-cli: "npm:^5.0.0"
     depcheck: "npm:^1.4.7"

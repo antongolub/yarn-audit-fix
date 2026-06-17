@@ -1,6 +1,6 @@
 {
   "name": "yarn-audit-fix",
-  "version": "11.0.0-snapshot.10",
+  "version": "11.0.0-snapshot.11",
   "publishConfig": {
     "access": "public"
   },
@@ -23,9 +23,6 @@
   },
   "module": "target/esm/index.mjs",
   "types": "target/dts/index.d.ts",
-  "engines": {
-    "node": ">= 16.0.0"
-  },
   "scripts": {
     "clean": "rimraf target buildcache docs coverage",
     "lint:fix": "oxlint -c src/test/lint/.oxlintrc.json src --fix",
@@ -68,7 +65,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@antongolub/lockfile": "0.0.0-snapshot.63",
+    "@antongolub/lockfile": "0.0.0-snapshot.64",
     "@types/semver": "^7.7.0",
     "fast-glob": "^3.3.3",
     "minimist": "^1.2.8",
