@@ -1,8 +1,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { Command } from 'commander'
-
 import type { TFlags, TFlagsMapping } from '../../main/ts'
 import {
   formatFlags,
@@ -64,28 +62,17 @@ describe('util', () => {
           ['-f', '--baz', 'qux'],
         ],
         [
-          new Command()
-            .option('-w')
-            .option('--force')
-            .option('--audit-level <level>')
-            .option('--bar')
-            .option('--only <scope>')
-            .option('-b <b>')
-            .parse(
-              [
-                '-w',
-                '1',
-                '--force',
-                '--audit-level=moderate',
-                '--only=dev',
-                '--',
-                '--bar',
-                '-b',
-                '2',
-              ],
-              { from: 'user' },
-            )
-            .opts(),
+          // The shape a real arg parser yields (minimist): `_` and `--` are
+          // present so the omitlist is exercised; everything after `--` (bar, b)
+          // is passthrough and must not be re-emitted.
+          {
+            w: true,
+            force: true,
+            'audit-level': 'moderate',
+            only: 'dev',
+            _: [],
+            '--': ['--bar', '-b', '2'],
+          },
           ['force', 'audit-level', 'only', 'bar', 'b'],
           ['--force', '--audit-level', 'moderate', '--only', 'dev'],
         ],

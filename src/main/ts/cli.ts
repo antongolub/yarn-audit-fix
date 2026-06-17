@@ -2,89 +2,117 @@
 
 import process from 'node:process'
 
-import { Command, Option } from 'commander'
+import minimist from 'minimist'
 
+import { TFlags } from './ifaces'
 import { run } from './runner'
-
-const parseMultipleValueArg = (
-  value: string,
-  previous: string | string[] | undefined,
-) => {
-  if (!previous) {
-    return value
-  }
-
-  return [previous, value].flat()
-}
+import { getSelfManifest } from './util'
 
 const env = process.env
-const flags = new Command()
-  .addOption(
-    new Option(
-      '--audit-level [level]',
-      'Include only vulnerabilities with the specified level or higher',
-    )
-      .choices(['low', 'moderate', 'high', 'critical'])
-      .default(env.YAF_AUDIT_LEVEL),
-  )
-  .option('--cwd [path]', 'CWD. Defaults to `process.cwd()`', env.YAF_CWD)
-  .option(
-    '--dry-run [bool]',
-    'Get an idea of what audit fix will do',
-    env.YAF_DRY_RUN,
-  )
-  .option(
-    '--exclude <path>',
-    'Array of glob patterns of packages to exclude from audit',
-    parseMultipleValueArg,
-    env.YAF_EXCLUDE,
-  )
-  .option(
-    '--force [bool]',
-    'Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones',
-    env.YAF_FORCE,
-  )
-  .option(
-    '--ignore <id>',
-    'Array of glob patterns of advisory IDs to ignore in the audit report',
-    parseMultipleValueArg,
-    env.YAF_IGNORE,
-  )
-  .option(
-    '--ignore-engines [bool]',
-    'Ignore engines check',
-    env.YAF_IGNORE_ENGINES,
-  )
-  .addOption(
-    new Option(
-      '--npm-path [path]',
-      "Switch to system default version of npm instead of package's own.",
-    )
-      .choices(['system', 'local'])
-      .default(env.YAF_NPM_PATH || 'system'),
-  )
-  .option('--registry [registry]', 'Custom registry url', env.YAF_REGISTRY)
-  .option('--silent [bool]', 'Disable log output', env.YAF_SILENT)
-  .addOption(
-    new Option(
-      '--symlink',
-      'Define symlink type for `node_modules` assets',
-    ).choices(['junction', 'dir']),
-  )
-  .option('--temp [dir]', 'Directory for temporary assets')
-  .option(
-    '--verbose [bool]',
-    'Switch log level to verbose/debug',
-    env.YAF_VERBOSE,
-  )
-  .option(
-    '--version, -v',
-    'Print current yarn-audit-fix version'
-  )
-  .allowUnknownOption()
-  .parse(process.argv)
-  .opts()
 
-// run() sets process.exitCode on failure; swallow the rejection so we don't
-// also print an unhandled-rejection stack on top of run()'s own report.
-run(flags).catch(() => {})
+// Tiny, dependency-light option spec (keeps the supported Node floor low — see
+// the v11 migration note): which flags take a value, their `YAF_*` env-var
+// defaults, and the allowed `choices` for the few enum-like ones.
+const BOOLEAN = ['dry-run', 'force', 'ignore-engines', 'silent', 'verbose']
+const STRING = [
+  'audit-level',
+  'cwd',
+  'exclude',
+  'ignore',
+  'npm-path',
+  'registry',
+  'symlink',
+  'temp',
+]
+const CHOICES: Record<string, string[]> = {
+  'audit-level': ['low', 'moderate', 'high', 'critical'],
+  'npm-path': ['system', 'local'],
+  symlink: ['junction', 'dir'],
+}
+const ENV_DEFAULTS: Record<string, string | undefined> = {
+  'audit-level': env.YAF_AUDIT_LEVEL,
+  cwd: env.YAF_CWD,
+  'dry-run': env.YAF_DRY_RUN,
+  exclude: env.YAF_EXCLUDE,
+  force: env.YAF_FORCE,
+  ignore: env.YAF_IGNORE,
+  'ignore-engines': env.YAF_IGNORE_ENGINES,
+  'npm-path': env.YAF_NPM_PATH || 'system',
+  registry: env.YAF_REGISTRY,
+  silent: env.YAF_SILENT,
+  verbose: env.YAF_VERBOSE,
+}
+
+const HELP = `Usage: yarn-audit-fix [options]
+
+Options:
+  --audit-level <level>   Min severity to fix: low | moderate | high | critical
+  --cwd <path>            Working directory (defaults to process.cwd())
+  --dry-run               Print what would change without writing
+  --exclude <glob>        Package glob(s) to exclude (repeatable)
+  --force                 Apply semver-major upgrades, not just compatible ones
+  --ignore <id>           Advisory id glob(s) to ignore (repeatable)
+  --ignore-engines        Forward --ignore-engines to yarn install
+  --npm-path <path>       npm to use: system | local
+  --registry <url>        Custom registry url
+  --silent                Disable log output
+  --symlink <type>        node_modules symlink type: junction | dir
+  --temp <dir>            Directory for temporary assets
+  --verbose               Verbose/debug logging
+  -v, --version           Print version
+  -h, --help              Print this help
+
+Every flag also reads a YAF_<FLAG> env var (e.g. YAF_AUDIT_LEVEL).`
+
+const argv = process.argv.slice(2)
+const raw = minimist(argv, {
+  boolean: BOOLEAN,
+  string: STRING,
+  alias: { v: 'version', h: 'help' },
+})
+
+if (raw.version) {
+  console.log(getSelfManifest().version)
+} else if (raw.help) {
+  console.log(HELP)
+} else {
+  // Collect the long flags in first-seen order so that the subset forwarded to
+  // `yarn install` keeps the order the user typed (preserves prior behaviour).
+  const known = new Set([...BOOLEAN, ...STRING])
+  const orderedKeys: string[] = []
+  for (const token of argv) {
+    if (!token.startsWith('--')) continue
+    const key = token.replace(/^--(no-)?/, '').split('=')[0]
+    if (known.has(key) && !orderedKeys.includes(key)) orderedKeys.push(key)
+  }
+
+  const flags: TFlags = {}
+  // Explicit flags first (a boolean set to `false` via `--no-x`/`--x=false`
+  // means "off" → omit it), then `YAF_*` defaults for whatever is still unset.
+  for (const key of orderedKeys) {
+    if (raw[key] !== false) flags[key] = raw[key]
+  }
+  for (const key of known) {
+    if (!(key in flags) && ENV_DEFAULTS[key] !== undefined)
+      flags[key] = ENV_DEFAULTS[key]
+  }
+
+  let valid = true
+  for (const [key, allowed] of Object.entries(CHOICES)) {
+    const value = flags[key]
+    if (value !== undefined && !allowed.includes(String(value))) {
+      console.error(
+        `Invalid value for --${key}: "${value}". Expected one of: ${allowed.join(', ')}`,
+      )
+      valid = false
+    }
+  }
+
+  if (valid) {
+    // run() sets process.exitCode on failure; swallow the rejection so we don't
+    // also print an unhandled-rejection stack on top of run()'s own report.
+    run(flags).catch(() => {})
+  } else {
+    process.exitCode = 1
+  }
+}
