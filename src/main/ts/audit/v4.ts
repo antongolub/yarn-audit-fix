@@ -1,33 +1,8 @@
 import sv from 'semver'
 
-import {
-  TAuditReport,
-  TFlags,
-} from '../ifaces'
-import { attempt, invoke } from '../util'
+import { TAuditReport } from '../ifaces'
+import { attempt } from '../util'
 import { extractRefs, mergeMeta } from './meta'
-import { auditFlags } from './v2'
-
-/**
- * Yarn 4+ audit. Output is NDJSON (one node per line); the explicit
- * `patched_versions` field is gone — derived from `Vulnerable Versions`.
- */
-export const audit = (
-  flags: TFlags,
-  temp: string,
-  bins: Record<string, string>,
-): TAuditReport => {
-  const report = invoke(
-    bins.yarn,
-    ['npm', 'audit', '--all', '--json', '--recursive', ...auditFlags(flags)],
-    temp,
-    !!flags.silent,
-    false,
-    true, // audit exits non-zero when vulns found — not a failure
-  )
-
-  return parseAuditReport(report)
-}
 
 /**
  * Flip a vulnerable range into a patched one: each upper bound becomes a lower
@@ -64,7 +39,7 @@ export const derivePatchedVersions = (vulnerableVersions: string): string => {
  */
 export const parseAuditReport = (data: string): TAuditReport => {
   const report: TAuditReport = {}
-  for (const line of data.toString().split('\n')) {
+  for (const line of data.split('\n')) {
     const node = attempt(() => JSON.parse(line))
     const name = node?.value
     const child = node?.children

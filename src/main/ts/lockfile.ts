@@ -2,10 +2,8 @@ import { detect, parse as lfParse, stringify as lfStringify } from '@antongolub/
 import type { Graph, FormatId } from '@antongolub/lockfile'
 import sv from 'semver'
 
-import { audit as auditV1 } from './audit/v1'
-import { audit as auditV2 } from './audit/v2'
-import { audit as auditV4 } from './audit/v4'
 import { formatAdvisoryMeta } from './audit/meta'
+import { auditViaRegistry } from './audit/registry'
 import {
   TAuditReport,
   TContext,
@@ -261,19 +259,13 @@ const reportDiagnostics = (
 }
 
 /**
- * Dispatch by yarn *binary* version, not lockfile schema — the binary sets the
- * output shape (yarn 4 only has `yarn npm audit`):
- *   yarn 4+ → v4 (NDJSON) · yarn 2/3 → v2 (JSON) · yarn 1 / npm → v1
+ * Fetch advisories straight from the registry (npm bulk endpoint) for the parsed
+ * graph — no `(yarn|npm) audit` child process. Registry / scope / auth resolve
+ * from `.npmrc` / `.yarnrc.yml` / `.yarnrc` + env. Async: HTTP can't be done
+ * synchronously without spawning, which is exactly what we're moving away from.
  */
-export const _audit = (
-  { flags, temp, bins, versions }: TContext,
-  _lockfileType: TLockfileType, // eslint-disable-line @typescript-eslint/no-unused-vars
-): TAuditReport => {
-  const yarn = versions?.yarn
-  if (yarn && sv.gte(yarn, '4.0.0')) return auditV4(flags, temp, bins)
-  if (yarn && sv.gte(yarn, '2.0.0')) return auditV2(flags, temp, bins)
-  return auditV1(flags, temp, bins)
-}
+export const _audit = (graph: Graph, ctx: TContext): Promise<TAuditReport> =>
+  auditViaRegistry(graph, ctx)
 
 // Exposed for test spies.
 export const _internal = {

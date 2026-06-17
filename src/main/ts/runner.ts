@@ -36,9 +36,12 @@ export const getContext = (flags: TFlags = {}): TContext => {
 }
 
 /**
- * Inject `yarn audit --json` data straight into the lockfile graph.
+ * Patch yarn.lock with registry advisory data, then reconcile via `yarn install`.
+ *
+ * Async since v11: advisories are fetched straight from the registry over HTTP
+ * (see `audit/registry`), so there is no synchronous `runSync` any more.
  */
-export const runSync = (_flags: TFlags = {}): void => {
+export const run = async (_flags: TFlags = {}): Promise<void> => {
   if (_flags.V) {
     console.log(getSelfManifest().version)
     return
@@ -60,7 +63,7 @@ export const runSync = (_flags: TFlags = {}): void => {
     createTempAssets(ctx)
     createSymlinks(ctx)
     log('Patching yarn.lock with audit data...')
-    patchLockfile(ctx)
+    await patchLockfile(ctx)
     syncLockfile(ctx)
     clear(ctx)
     log('Installing deps update...')
@@ -84,16 +87,3 @@ export const runSync = (_flags: TFlags = {}): void => {
     throw err
   }
 }
-
-// Promisified alias for `runSync`.
-export const run = (_flags: TFlags = {}): Promise<void> =>
-  new Promise((resolve, reject) => {
-    try {
-      runSync(_flags)
-      resolve()
-    } catch (e) {
-      reject(e)
-    }
-  })
-
-run.sync = runSync

@@ -116,12 +116,21 @@ export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
     ...workspaces.map((ws) => path.dirname(ws)),
   ]
 
-  links.forEach((link: string) => {
-    const rel = path.relative(cwd, link)
-    const from = path.join(cwd, rel)
-    const to = path.join(temp, rel)
+  // A directory symlink exposes its target's real children, so linking a
+  // workspace that is an ancestor of another (nested workspaces, e.g.
+  // `packages/stores/auth` that itself contains `packages/stores/auth/email`)
+  // already brings the whole subtree into temp. A subsequent link for the
+  // descendant would resolve to an existing path through that symlink → EEXIST.
+  // Keep only the topmost links — the ancestor already covers everything below
+  // it, so `yarn install` in temp still discovers the nested workspaces.
+  const isNestedUnder = (child: string, parent: string): boolean =>
+    child !== parent && (child + path.sep).startsWith(parent + path.sep)
+  const topmost = links.filter((l) => !links.some((p) => isNestedUnder(l, p)))
 
-    fs.existsSync(from) && createSymlink(from, to, symlinkType)
+  topmost.forEach((link: string) => {
+    const to = path.join(temp, path.relative(cwd, link))
+
+    fs.existsSync(link) && createSymlink(link, to, symlinkType)
   })
 }
 
@@ -172,13 +181,14 @@ export const exit: TCallback = ({ flags, err }) => {
   process.exitCode = err?.status | 0 || 1
 }
 
-export const patchLockfile: TCallback = ({ temp, cwd, ctx }) => {
+export const patchLockfile: TCallback = async ({ temp, cwd, ctx }) => {
   const lockfilePath = path.join(temp, 'yarn.lock')
   const raw = fs.readFileSync(lockfilePath, 'utf-8')
   const lockfileType = getLockfileType(raw)
   // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes.
   const lockfile = lf.parse(raw, lockfileType, cwd)
-  const report = lf.audit(ctx, lockfileType)
+  // audit now hits the registry directly (async) instead of spawning yarn/npm.
+  const report = await lf.audit(lockfile, ctx)
   const patched = lf.patch(lockfile, report, ctx, lockfileType)
 
   fs.writeFileSync(lockfilePath, format(patched, lockfileType))

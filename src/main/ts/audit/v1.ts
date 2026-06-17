@@ -1,56 +1,15 @@
-import { SpawnSyncReturns } from 'node:child_process'
-
-import {
-  TAuditEntry,
-  TAuditReport,
-  TFlags,
-} from '../ifaces'
-import { attempt, formatFlags, invoke, mapFlags } from '../util'
+import { TAuditEntry, TAuditReport } from '../ifaces'
+import { attempt } from '../util'
 import { extractRefs, mergeMeta } from './meta'
 
 /**
- * npm / yarn-classic audit. Produces a stream of `auditAdvisory` events
- * (one JSON object per line).
+ * Parse npm / yarn-classic `audit --json` output (one `{data:{advisory}}` event
+ * per line). The runtime now fetches advisories straight from the registry
+ * (see `audit/registry`); this parser is retained for the `lockfile` patch tests.
  */
-export const audit = (
-  flags: TFlags,
-  temp: string,
-  bins: Record<string, string>,
-): TAuditReport => {
-  const cmd = flags.reporter === 'npm' ? bins.npm : bins.yarn
-  const mapping = {
-    'audit-level': 'level',
-    only: {
-      key: 'groups',
-      values: {
-        prod: 'dependencies',
-        dev: 'devDependencies',
-      },
-    },
-  }
-  const _flags = formatFlags(
-    mapFlags(flags, mapping),
-    'groups',
-    'verbose',
-    'level',
-  )
-  const report = invoke(
-    cmd,
-    ['audit', '--json', ..._flags],
-    temp,
-    !!flags.silent,
-    false,
-    true, // NOTE skipping error here is correct: status means the highest found severity level, not call rejection as usual.
-  )
-
-  return parseAuditReport(report)
-}
-
-export const parseAuditReport = (
-  data: string | SpawnSyncReturns<Buffer>,
-): TAuditReport => {
+export const parseAuditReport = (data: string): TAuditReport => {
   const report: TAuditReport = {}
-  for (const line of data.toString().split('\n')) {
+  for (const line of data.split('\n')) {
     const a = (attempt(() => JSON.parse(line)) as TAuditEntry)?.data?.advisory
     if (!a) continue
 

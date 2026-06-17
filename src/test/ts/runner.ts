@@ -8,10 +8,11 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import type { TContext } from '../../main/ts/ifaces'
 
 const lf = (await import('../../main/ts/lockfile'))._internal
-const { createSymlinks, getContext, run, runSync } = await import(
-  '../../main/ts'
-)
+const { createSymlinks, getContext, run } = await import('../../main/ts')
 const { getYarn } = await import('../../main/ts/util')
+const { parseAuditReport: parseAuditV1 } = await import(
+  '../../main/ts/audit/v1'
+)
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // Captured before the fs spies are installed; vitest lazily reads module
@@ -48,6 +49,9 @@ const revive = <T = any>(data: string): T =>
 const audit = revive(readFixture('lockfile/legacy/yarn-audit-report.json'))
 const yarnLockBefore = readFixture('lockfile/legacy/yarn.lock.before')
 const yarnLockAfter = readFixture('lockfile/legacy/yarn.lock.after')
+// `_audit` now fetches advisories over HTTP; stub it with the report the legacy
+// fixture would have produced so the patch flow stays offline + deterministic.
+const auditReport = parseAuditV1(String((audit as any).stdout ?? ''))
 
 const cwd = process.cwd()
 
@@ -102,8 +106,14 @@ describe('yarn-audit-fix', () => {
 
       return { status: 0, stdout: 'foobar' }
     })
+
+    // `_audit` now fetches over HTTP — stub it (async) to stay offline.
+    lfAudit.mockResolvedValue(auditReport)
   })
-  afterEach(() => vi.clearAllMocks())
+  afterEach(() => {
+    vi.clearAllMocks()
+    lfAudit.mockResolvedValue(auditReport) // clearAllMocks keeps impls, but be explicit
+  })
   afterAll(() => vi.restoreAllMocks())
 
   describe('createSymlinks', () => {
@@ -124,6 +134,37 @@ describe('yarn-audit-fix', () => {
           'dir',
         )
       })
+    })
+
+    // Regression: nested workspaces (a package whose subtree holds more
+    // packages) used to crash with `EEXIST` — symlinking the ancestor makes the
+    // descendant's link path already resolve through it. Only the topmost link
+    // should be created. https://github.com/antongolub/yarn-audit-fix (monorepo
+    // field report: packages/stores/auth + packages/stores/auth/email).
+    it('collapses nested workspaces to the topmost link (no EEXIST)', () => {
+      const temp = 'foo/bar'
+      const cwd = path.join(fixtures, 'nested-monorepo')
+      const manifest = { workspaces: ['packages/**'] }
+
+      createSymlinks({ temp, flags: {}, cwd, manifest } as unknown as TContext)
+
+      // the ancestor workspace is linked...
+      expect(fs.symlinkSync).toHaveBeenCalledWith(
+        path.join(cwd, 'packages/stores/auth'),
+        strMatching(temp, 'packages/stores/auth'),
+        'dir',
+      )
+      // ...and the nested ones are NOT linked on top of it.
+      expect(fs.symlinkSync).not.toHaveBeenCalledWith(
+        path.join(cwd, 'packages/stores/auth/email'),
+        expect.anything(),
+        expect.anything(),
+      )
+      expect(fs.symlinkSync).not.toHaveBeenCalledWith(
+        path.join(cwd, 'packages/stores/auth/phone'),
+        expect.anything(),
+        expect.anything(),
+      )
     })
   })
 
@@ -163,7 +204,7 @@ describe('yarn-audit-fix', () => {
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(false)
 
-      expect(run({ cwd: 'unknown' })).rejects.toEqual(
+      await expect(run({ cwd: 'unknown' })).rejects.toEqual(
         new Error('not found: yarn.lock'),
       )
     })
@@ -182,12 +223,8 @@ describe('yarn-audit-fix', () => {
           'yarn-classic',
           expect.any(String),
         )
+        // _audit fetches advisories over HTTP now (stubbed) — no `yarn audit` spawn.
         expect(lfAudit).toHaveBeenCalledTimes(1)
-        expect(cp.spawnSync).toHaveBeenCalledWith(
-          getYarn(),
-          ['audit', '--json'],
-          { cwd: temp, stdio: stdionull, shell },
-        )
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
         expect(fs.writeFileSync).toHaveBeenCalledWith(
@@ -219,6 +256,8 @@ describe('yarn-audit-fix', () => {
           '--ignore-engines',
         )
         await import('../../main/ts/cli')
+        // cli now fires run() asynchronously (fire-and-forget); let it settle.
+        await new Promise((r) => setTimeout(r, 100))
 
         checkTempAssets()
 
@@ -247,26 +286,24 @@ describe('yarn-audit-fix', () => {
       })
 
       describe('on error', () => {
-        // `cli` just calls `run.sync(flags)`; drive runSync directly so the
-        // error path is exercised without re-importing the cli module.
-        const checkExit = (reason: any): void => {
+        // Drive run() with a failing spawn (resolveBins fails first) so the
+        // error/exit path is exercised.
+        const checkExit = async (reason: any): Promise<void> => {
           // @ts-ignore
           vi.mocked(cp.spawnSync).mockImplementation(() => reason)
-          try {
-            runSync({})
-          } catch {
+          await run({}).catch(() => {
             /* expected */
-          }
+          })
         }
 
-        it('sets code to 1 otherwise', () => {
-          checkExit({ error: new Error('foobar') })
+        it('sets code to 1 otherwise', async () => {
+          await checkExit({ error: new Error('foobar') })
           expect(process.exitCode).toBe(1)
           process.exitCode = 0
         })
 
-        it('returns exit code if passed', () => {
-          checkExit({ status: 2 })
+        it('returns exit code if passed', async () => {
+          await checkExit({ status: 2 })
           expect(process.exitCode).toBe(2)
           process.exitCode = 0
         })
@@ -293,9 +330,4 @@ describe('yarn-audit-fix', () => {
     })
   })
 
-  describe('aliases', () => {
-    it('runSync eq run.sync', () => {
-      expect(run.sync).toBe(runSync)
-    })
-  })
 })

@@ -161,6 +161,10 @@ With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` 
 
 Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Entries are patched via graph edge-redirect instead of in-place rewrite; merged descriptor keys (e.g. `"lodash@npm:4.17.21, lodash@npm:4.17.20":`) are reconciled by the following `yarn install`.
 
+**BREAKING:** advisories are now fetched **straight from the registry** (the npm bulk advisory endpoint) instead of spawning `yarn audit` / `npm audit`. This fixes audit against custom/in-house registries ([yarn#7012](https://github.com/yarnpkg/yarn/issues/7012)) and is faster (the lockfile graph is already parsed). The registry, per-scope registries and auth are inherited from `.npmrc` / `.yarnrc.yml` / `.yarnrc` (project then global) + env, or overridden with `--registry`. Auth tokens are bound to the host that declared them and only sent over HTTPS.
+
+**BREAKING:** because the fetch is over HTTP, the run is now async — **`runSync` is removed**. Use `await run(flags)` (the CLI is unchanged). The exported stages are still available if you assemble your own pipeline.
+
 ### ^10.0.0
 v10 bumps the pkg deps and requires NodeJS v14.
 

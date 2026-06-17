@@ -85,4 +85,6 @@ const flags = new Command()
   .parse(process.argv)
   .opts()
 
-run.sync(flags)
+// run() sets process.exitCode on failure; swallow the rejection so we don't
+// also print an unhandled-rejection stack on top of run()'s own report.
+run(flags).catch(() => {})
