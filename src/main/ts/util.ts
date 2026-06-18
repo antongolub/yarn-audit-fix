@@ -38,7 +38,10 @@ export const invoke = (
     : [null, null, null] // eslint-disable-line
   const result = cp.spawnSync(cmd, args, { cwd, stdio, shell: true })
 
-  if (!skipError && (result.error || result.status)) {
+  // `status` is null when the child was killed by a signal (e.g. Ctrl+C →
+  // SIGINT), so check `signal` too — otherwise an interrupted command would be
+  // mistaken for success and the run would carry on to "Done".
+  if (!skipError && (result.error || result.status || result.signal)) {
     throw result
   }
 

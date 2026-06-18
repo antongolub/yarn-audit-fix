@@ -239,7 +239,7 @@ describe('yarn-audit-fix', () => {
         )
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
-          ['install', '--update-checksums'],
+          ['install', '--update-checksums', '--ignore-engines'],
           { cwd, stdio, shell },
         )
       })

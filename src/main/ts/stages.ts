@@ -160,13 +160,12 @@ export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
         [
           'install',
           '--update-checksums',
-          ...formatFlags(
-            flags,
-            'verbose',
-            'silent',
-            'registry',
-            'ignore-engines',
-          ),
+          ...formatFlags(flags, 'verbose', 'silent', 'registry'),
+          // audit-fix only reconciles the lockfile, so the project's own engine
+          // constraints — a transitive demanding a newer Node than the one
+          // running yaf (e.g. node-releases@>=18 on Node 16) — must never abort
+          // the run. Classic-only flag; berry doesn't enforce engines here.
+          '--ignore-engines',
         ],
         cwd,
         flags.silent,
@@ -175,10 +174,11 @@ export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
 /** Empty the temp dir. */
 export const clear: TCallback = ({ temp }) => emptyDir(temp)
 
-/** Set the process exit code from the error. */
-export const exit: TCallback = ({ flags, err }) => {
-  !flags.silent && console.error(err)
-  process.exitCode = err?.status | 0 || 1
+/** Set the process exit code from the error (printing is handled by `run`). */
+export const exit: TCallback = ({ err }) => {
+  // POSIX convention: a signal-terminated run exits 128 + signal number.
+  const bySignal: Record<string, number> = { SIGINT: 130, SIGTERM: 143 }
+  process.exitCode = bySignal[err?.signal] ?? (err?.status | 0 || 1)
 }
 
 export const patchLockfile: TCallback = async ({ temp, cwd, ctx }) => {
