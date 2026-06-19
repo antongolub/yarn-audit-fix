@@ -253,7 +253,6 @@ describe('yarn-audit-fix', () => {
           `--registry=${registryUrl}`,
           `--exclude=${dependency}`,
           `--exclude=${scopedDependency}`,
-          '--ignore-engines',
         )
         await import('../../main/ts/cli')
         // cli now fires run() asynchronously (fire-and-forget); let it settle.

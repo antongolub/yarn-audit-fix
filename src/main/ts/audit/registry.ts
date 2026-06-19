@@ -6,6 +6,7 @@ import sv from 'semver'
 
 import { TAuditReport, TContext } from '../ifaces'
 import { resolveRegistryConfig, TRegistryConfig } from './config'
+import { matchesId, parseIdGlobs } from './filter'
 import { extractRefs, mergeMeta } from './meta'
 import { derivePatchedVersions } from './v4'
 
@@ -131,14 +132,36 @@ const fetchAdvisories = async (
   return raw
 }
 
-/** Map the bulk-advisory payload into the same TAuditReport `_patch` consumes. */
-const toReport = (raw: Record<string, any[]>, minRank: number): TAuditReport => {
+/**
+ * The ids a `--ignore` glob can target for one raw advisory. The npm bulk
+ * endpoint exposes the numeric `id` and a GHSA `url` (no `cves` field), so —
+ * like zx's npm-audit script — we match against the npm id and the GHSA.
+ */
+const advisoryIds = (a: any): string[] => {
+  const ids: string[] = []
+  if (a?.id != null) ids.push(String(a.id))
+  const ghsa = String(a?.url ?? '').match(/GHSA-[\w-]+/)?.[0]
+  if (ghsa) ids.push(ghsa)
+  return ids
+}
+
+/**
+ * Map the bulk-advisory payload into the same TAuditReport `_patch` consumes.
+ * `--ignore` globs drop matching advisories (by npm id / CVE / GHSA) before the
+ * per-package merge, so ignoring one advisory leaves a package's others intact.
+ */
+export const toReport = (
+  raw: Record<string, any[]>,
+  minRank: number,
+  ignoreGlobs: RegExp[] = [],
+): TAuditReport => {
   const report: TAuditReport = {}
   for (const [name, advs] of Object.entries(raw)) {
     for (const a of advs) {
       const vuln: string | undefined = a?.vulnerable_versions
       if (!vuln) continue
       if (rank(a.severity) < minRank) continue
+      if (matchesId(advisoryIds(a), ignoreGlobs)) continue
       const cvss =
         typeof a.cvss === 'number' ? a.cvss : a.cvss?.score || undefined
       const entry = {
@@ -178,5 +201,9 @@ export const auditViaRegistry = async (
   const packages = collectPackages(graph)
   if (Object.keys(packages).length === 0) return {}
   const raw = await fetchAdvisories(packages, cfg)
-  return toReport(raw, rank(ctx.flags?.['audit-level']))
+  return toReport(
+    raw,
+    rank(ctx.flags?.['audit-level']),
+    parseIdGlobs(ctx.flags?.ignore),
+  )
 }

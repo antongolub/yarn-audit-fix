@@ -11,7 +11,7 @@ import { getSelfManifest } from './util'
 // Declarative option spec (keeps `parse` small and the Node floor low — see the
 // v11 migration note): value-taking vs boolean flags, their `YAF_*` env-var
 // fallbacks, and the allowed values for the enum-like ones.
-const BOOLEAN = ['dry-run', 'force', 'ignore-engines', 'silent', 'verbose']
+const BOOLEAN = ['dry-run', 'force', 'silent', 'verbose']
 const STRING = [
   'audit-level',
   'cwd',
@@ -29,7 +29,6 @@ const ENV: Record<string, string> = {
   exclude: 'YAF_EXCLUDE',
   force: 'YAF_FORCE',
   ignore: 'YAF_IGNORE',
-  'ignore-engines': 'YAF_IGNORE_ENGINES',
   'npm-path': 'YAF_NPM_PATH',
   registry: 'YAF_REGISTRY',
   silent: 'YAF_SILENT',
@@ -47,10 +46,10 @@ Options:
   --audit-level <level>   Min severity to fix: low | moderate | high | critical
   --cwd <path>            Working directory (defaults to process.cwd())
   --dry-run               Print what would change without writing
-  --exclude <glob>        Package glob(s) to exclude (repeatable)
+  --exclude <rules>       Packages to skip updating: comma-sep glob[@range]
+                          (e.g. lodash,@scope/*@>=2 <3)
   --force                 Apply semver-major upgrades, not just compatible ones
-  --ignore <id>           Advisory id glob(s) to ignore (repeatable)
-  --ignore-engines        Forward --ignore-engines to yarn install
+  --ignore <ids>          Advisory ids to ignore: comma-sep globs (GHSA or npm id)
   --npm-path <path>       npm to use: system | local
   --registry <url>        Custom registry url
   --silent                Disable log output

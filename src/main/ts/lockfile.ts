@@ -2,6 +2,7 @@ import { detect, parse as lfParse, stringify as lfStringify } from '@antongolub/
 import type { Graph, FormatId } from '@antongolub/lockfile'
 import sv from 'semver'
 
+import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
 import { auditViaRegistry } from './audit/registry'
 import {
@@ -98,6 +99,10 @@ export const _patch = (
 
   const graph = lockfile as Graph
   const versionCache = new Map<string, string[] | null>()
+  // `--exclude` rules: package-name globs (+ optional version range) the user
+  // wants left untouched (e.g. a manually pinned transitive).
+  const excludeRules = parsePackageRules(flags.exclude)
+  const excluded = new Set<string>()
 
   // Pass 1: vulnerable nodes with a usable newer fix. Also the exemption set for
   // the compat gate below — a replaced consumer re-declares its own deps.
@@ -107,6 +112,13 @@ export const _patch = (
   for (const node of graph.nodes()) {
     const advisory = report[node.name]
     if (!advisory) continue
+    if (
+      excludeRules.length > 0 &&
+      matchesPackage(node.name, node.version, excludeRules)
+    ) {
+      excluded.add(`${node.name}@${node.version}`)
+      continue
+    }
     if (!sv.satisfies(node.version, advisory.vulnerable_versions)) continue
 
     const fix = resolveFix(node.name, advisory.patched_versions, bins?.npm, cwd, versionCache)
@@ -216,6 +228,9 @@ export const _patch = (
     }
     if (noFix.size > 0) {
       console.log('No fix available:', [...noFix].sort().join(', '))
+    }
+    if (excluded.size > 0) {
+      console.log('Excluded (per --exclude):', [...excluded].sort().join(', '))
     }
     if (incompatible.size > 0) {
       console.warn(

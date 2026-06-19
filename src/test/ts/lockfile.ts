@@ -84,6 +84,35 @@ describe('patch', () => {
     expect(result).not.toContain('glob@^10.0.0:\n  version "10.4.5"')
   })
 
+  // `--exclude` leaves a matched package untouched while others still patch; the
+  // optional range is scoped to the *installed* version (minimatch is 9.0.5).
+  it('skips a package matched by --exclude', () => {
+    const dir = path.join(fixtures, 'lockfile/v1-cross')
+    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
+    const report = parseAuditV1(
+      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
+    )
+    const fmt = getLockfileType(lockfile)
+    const run = (exclude: string) =>
+      format(
+        patch(
+          parse(lockfile, fmt),
+          report,
+          { flags: { silent: true, exclude }, bins: {} } as unknown as TContext,
+          fmt,
+        ),
+        fmt,
+      )
+
+    // by name: minimatch is left untouched; the unrelated glob advisory still applies
+    const byName = run('minimatch')
+    expect(byName).not.toContain('minimatch@10.0.0')
+    expect(byName).toContain('glob@11.0.0')
+
+    // range that doesn't cover the installed 9.0.5 → rule is inert, minimatch bumps
+    expect(run('minimatch@<1')).toContain('minimatch@10.0.0')
+  })
+
   // Mirror of the above with the child declared BEFORE the parent, so node
   // iteration removes the child first. The per-node interleaving threw
   // "removeNode: <child> has incoming edges"; the phased mutate is order-free.

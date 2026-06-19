@@ -28,7 +28,8 @@ The missing `yarn audit fix`
 > - **New lockfile engine** on [`@antongolub/lockfile`](https://github.com/antongolub/lockfile): patches the lockfile **graph directly**, auto-detecting every yarn schema — Classic + Berry **v4–v10** ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)).
 > - **Faithful lockfile handling** — preserves checksums, integrity, `conditions`/`dependenciesMeta`/`peerDependenciesMeta`, and `patch:` / `resolutions` / git / npm-alias entries, with no spurious churn (real-world locks round-trip unchanged).
 > - **Single direct-patch flow** — the legacy `convert` flow and the `--flow` switch (and `synp` conversion) are removed.
-> - **Slimmer footprint** — `jest`→`vitest`; dropped `lodash-es` / `fs-extra` / `chalk` / `js-yaml`. Node `>= 16`.
+> - **Registry-direct audit** — advisories come from the registry's bulk endpoint instead of spawning `yarn`/`npm audit`: works with custom/in-house registries and inherits auth from `.npmrc` / `.yarnrc`. The run is now async (`runSync` removed).
+> - **Slimmer footprint** — `jest`→`vitest`; dropped `lodash-es` / `fs-extra` / `chalk` / `js-yaml`; `commander`→`minimist`. Runs on Node **≥ 14.18**, no `engines` pin.
 
 - [Digest](#digest)
    - [Problem](#problem)
@@ -84,7 +85,7 @@ Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antong
 
 ## Getting started
 ### Requirements
-Node.js: `>=16.0.0`
+Node.js: `>=14.18` — inherited from [`@antongolub/lockfile`](https://github.com/antongolub/lockfile)
 
 ### Install
 ```sh
@@ -124,9 +125,8 @@ success Saved lockfile.
 | `--symlink`           | Symlink type for `node_modules` ref                                                                                                                                     | `junction` for Windows, `dir` otherwise    |
 | `--temp`              | Directory for temporary assets                                                                                                                                          | `<cwd>/node_modules/.cache/yarn-audit-fix` |
 | `--verbose`           | Switch log level to verbose/debug                                                                                                                                       | `false`                                    |
-| `--ignore-engines`    | Ignore engines check on `yarn install`                                                                                                                                  | `false`                                    |
-| `--exclude`           | Array of glob patterns of packages to exclude from audit                                                                                                                |                                            |
-| `--ignore`            | Array of glob patterns of advisory IDs to ignore in the audit report                                                                                                    |                                            |
+| `--exclude`           | Packages to skip updating — comma-separated `glob[@range]` rules (e.g. `lodash,@scope/*@>=2 <3`); the range is matched against the installed version. Repeatable.        |                                            |
+| `--ignore`            | Advisory ids to ignore — comma-separated globs matched against the GHSA id (from the advisory url) or the npm advisory id (e.g. `GHSA-*,1106913`). Repeatable.            |                                            |
 
 ### ENV
 Any CLI option can be set via a `YAF`-prefixed env var. For example:
@@ -138,16 +138,11 @@ Any CLI option can be set via a `YAF`-prefixed env var. For example:
 Typedoc: [antongolub.github.io/yarn-audit-fix/modules](https://antongolub.github.io/yarn-audit-fix/modules/)
 
 ```ts
-import { run, runSync } from 'yarn-audit-fix'
+import { run } from 'yarn-audit-fix'
 
-// NOTE actually it's promisified `run.sync`
+// async since v11 — advisories are fetched from the registry over HTTP
 await run({
    verbose: true
-})
-
-// `runSync` is an alias for `run.sync`
-await runSync({
-  verbose: true
 })
 ```
 
@@ -157,13 +152,19 @@ Individual stages (`resolveBins`, `patchLockfile`, `yarnInstall`, …) are expor
 ### ^11.0.0
 **BREAKING:** the legacy `convert` flow is removed, and so is the `--flow` switch (plus its `synp`-based two-way lockfile conversion and the now-dead `--package-lock-only` / `--legacy-peer-deps` / `--loglevel` / `--only` flags). Direct graph patching is the only flow now — it is more controllable and supports every yarn schema.
 
-With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` / `TStage` types, and the optional custom-flow argument to `run` / `runSync` are removed. Call `run(flags)` / `runSync(flags)` — the patch pipeline is inlined. The individual stages are still exported if you want to assemble your own.
+With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` / `TStage` types, and the optional custom-flow argument to `run` are removed. Call `run(flags)` — the patch pipeline is inlined. The individual stages are still exported if you want to assemble your own.
 
 Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Entries are patched via graph edge-redirect instead of in-place rewrite; merged descriptor keys (e.g. `"lodash@npm:4.17.21, lodash@npm:4.17.20":`) are reconciled by the following `yarn install`.
 
 **BREAKING:** advisories are now fetched **straight from the registry** (the npm bulk advisory endpoint) instead of spawning `yarn audit` / `npm audit`. This fixes audit against custom/in-house registries ([yarn#7012](https://github.com/yarnpkg/yarn/issues/7012)) and is faster (the lockfile graph is already parsed). The registry, per-scope registries and auth are inherited from `.npmrc` / `.yarnrc.yml` / `.yarnrc` (project then global) + env, or overridden with `--registry`. Auth tokens are bound to the host that declared them and only sent over HTTPS.
 
 **BREAKING:** because the fetch is over HTTP, the run is now async — **`runSync` is removed**. Use `await run(flags)` (the CLI is unchanged). The exported stages are still available if you assemble your own pipeline.
+
+**Node floor / `engines`:** v11 no longer declares `engines.node`, so installing yarn-audit-fix never warns `EBADENGINE` on its own behalf. The effective runtime floor is **Node ≥ 14.18**, inherited from [`@antongolub/lockfile`](https://github.com/antongolub/lockfile). The CLI argument parser also moved off `commander` (which had been ratcheting its own Node floor up) to a tiny `minimist`-based parser — flags, env vars and `--help` are unchanged.
+
+The reconcile `yarn install` (yarn classic) now always runs with `--ignore-engines`, so a project's own transitive engine constraints — a dependency demanding a newer Node than the one running yarn-audit-fix — no longer abort the fix.
+
+**CLI flags:** both `--exclude` and `--ignore` are applied client-side now (they used to be forwarded to `yarn npm audit`). `--exclude` takes comma-separated **package** rules — `glob[@range]`, e.g. `--exclude="lodash,@scope/*@>=2 <3"` — and skips updating any package whose name matches the glob (and, if a range is given, whose installed version satisfies it); handy for a manually pinned transitive you don't want bumped. `--ignore` keeps its advisory scope but now matches **advisory ids** — comma-separated globs against the GHSA id or the npm advisory id (e.g. `--ignore="GHSA-*"`), dropping matching advisories before the fix. (The npm bulk-advisory endpoint doesn't expose CVE numbers, so — like zx's audit script — matching is by GHSA / npm id.) The standalone `--ignore-engines` flag is removed (the reconcile install ignores engines unconditionally).
 
 ### ^10.0.0
 v10 bumps the pkg deps and requires NodeJS v14.
@@ -223,36 +224,24 @@ invoke yarn install --update-checksums
 Not everything can be repaired.
 
 ### Cannot install package despite being on correct node version
-yarn-audit-fix is compatible with any NodeJS version which supports ESM, but the nested packages can define their own engine requirements.
+yarn-audit-fix is compatible with any NodeJS version which supports ESM, but nested packages can declare their own engine requirements.
 ```shell
-pkg-dir@7.0.0: The engine "node" is incompatible with this module. Expected version ">=14.16". Got "14.15.1"
+node-releases@2.0.48: The engine "node" is incompatible with this module. Expected version ">=18". Got "16.20.1"
 ```
 
-The _recommended_ way is to update the runtime version. As a temporary workaround, you can simply pass `--ignore-engines` flag.
+The reconcile `yarn install` that yarn-audit-fix runs already passes `--ignore-engines`, so a vulnerable project's own transitive constraints won't abort the fix. If you hit this while **installing yarn-audit-fix itself**, update the runtime — or pass the flag:
 ```shell
 yarn add yarn-audit-fix -D --ignore-engines
 ```
 
-### Response Code: 400 (Bad Request)
+### Audit used to fail with a 4xx on an odd transitive
 
-In some cases **yarn npm audit** fails because `yarn.lock` contains a transitive dependency in an unreadable format:
-```
-  'example-dependency': 'npm:example-dependency@1.0.0'
-```
+Earlier versions spawned **yarn npm audit** / **npm audit**, which could choke on an unusual `yarn.lock` entry (e.g. a transitive in `npm:` alias form) and return `400 Bad Request` ([berry#4117](https://github.com/yarnpkg/berry/issues/4117)).
 
-This results in:
+v11 no longer spawns an audit subprocess — advisories are fetched straight from the registry's bulk endpoint for the parsed lockfile graph — so this failure mode is gone. If you still want to leave a specific package alone, exclude it client-side (no yarn version requirement):
 ```shell
-invoke yarn npm audit --all --json --recursive
-➤ YN0035: Bad Request
-➤ YN0035:   Response Code: 400 (Bad Request)
-➤ YN0035:   Request Method: POST
-➤ YN0035:   Request URL: https://registry.yarnpkg.com/-/npm/v1/security/audits/quick
+npx yarn-audit-fix --exclude example-dependency
 ```
-https://github.com/yarnpkg/berry/issues/4117
-
-Work around it with the `exclude` option:
-1. Update project **yarn** to >=3.3.0 (earlier versions don't support this flag for **yarn npm audit**).
-2. Run `npx yarn-audit-fix --exclude example-dependency` so **yarn** skips `example-dependency` while building the audit report.
 
 ## Contributing
 Feel free to open any issues: bugs, feature requests or other questions.
