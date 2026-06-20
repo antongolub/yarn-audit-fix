@@ -179,9 +179,10 @@ export const patchLockfile: TCallback = async ({ temp, cwd, ctx }) => {
   const lockfileType = getLockfileType(raw)
   // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes.
   const lockfile = lf.parse(raw, lockfileType, cwd)
-  // audit now hits the registry directly (async) instead of spawning yarn/npm.
+  // audit + patch both hit the registry over HTTP now (async): audit fetches
+  // advisories, patch resolves fixes + completes the new transitive closure.
   const report = await lf.audit(lockfile, ctx)
-  const patched = lf.patch(lockfile, report, ctx, lockfileType)
+  const patched = await lf.patch(lockfile, report, ctx, lockfileType)
 
   fs.writeFileSync(lockfilePath, format(patched, lockfileType))
 }

@@ -48,7 +48,6 @@ const revive = <T = any>(data: string): T =>
   })
 const audit = revive(readFixture('lockfile/legacy/yarn-audit-report.json'))
 const yarnLockBefore = readFixture('lockfile/legacy/yarn.lock.before')
-const yarnLockAfter = readFixture('lockfile/legacy/yarn.lock.after')
 // `_audit` now fetches advisories over HTTP; stub it with the report the legacy
 // fixture would have produced so the patch flow stays offline + deterministic.
 const auditReport = parseAuditV1(String((audit as any).stdout ?? ''))
@@ -107,12 +106,16 @@ describe('yarn-audit-fix', () => {
       return { status: 0, stdout: 'foobar' }
     })
 
-    // `_audit` now fetches over HTTP — stub it (async) to stay offline.
+    // `_audit` and `_patch` both hit the registry over HTTP now — stub them
+    // (async) to keep this flow test offline. Patch correctness lives in
+    // `lockfile.ts` (mock-registry tests); here we only check orchestration.
     lfAudit.mockResolvedValue(auditReport)
+    lfPatch.mockImplementation(async (graph: any) => graph)
   })
   afterEach(() => {
     vi.clearAllMocks()
-    lfAudit.mockResolvedValue(auditReport) // clearAllMocks keeps impls, but be explicit
+    lfAudit.mockResolvedValue(auditReport)
+    lfPatch.mockImplementation(async (graph: any) => graph)
   })
   afterAll(() => vi.restoreAllMocks())
 
@@ -227,9 +230,11 @@ describe('yarn-audit-fix', () => {
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
+        // `_patch` is stubbed (passthrough), so assert the temp lockfile is
+        // (re)written, not its exact patched content (covered in lockfile.ts).
         expect(fs.writeFileSync).toHaveBeenCalledWith(
           strMatching(temp, 'yarn.lock'),
-          yarnLockAfter,
+          expect.any(String),
         )
 
         // Replaces original file, triggers `yarn --update-checksums`, resets temp directory

@@ -15,6 +15,9 @@ export type TContext = {
   versions: Record<string, string>
   bins: Record<string, string>
   err?: any
+  // Optional `@antongolub/lockfile` RegistryAdapter override — tests inject a
+  // mock here; production builds a live, scope-aware one via `buildRegistry`.
+  registry?: any
 }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>

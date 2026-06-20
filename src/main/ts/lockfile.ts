@@ -1,7 +1,10 @@
 import { detect, parse as lfParse, stringify as lfStringify } from '@antongolub/lockfile'
 import type { Graph, FormatId } from '@antongolub/lockfile'
+import { completeTransitives } from '@antongolub/lockfile/complete'
+import { replaceVersion } from '@antongolub/lockfile/modify'
 import sv from 'semver'
 
+import { buildRegistry } from './audit/adapter'
 import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
 import { auditViaRegistry } from './audit/registry'
@@ -11,7 +14,9 @@ import {
   TLockfileObject,
   TLockfileType,
 } from './ifaces'
-import { attempt, invoke } from './util'
+
+// NodeId isn't re-exported from the package root — derive it from a primitive.
+type NodeId = Awaited<ReturnType<typeof replaceVersion>>['added'][number]
 
 export const getLockfileType = (lockfile: string): TLockfileType =>
   detect(lockfile)
@@ -39,41 +44,6 @@ export const _format = (
   return lfStringify(lockfileType as FormatId, lockfile as Graph)
 }
 
-/**
- * Lowest *published* version satisfying `range`. `minVersion` alone can return
- * an unreleased version (a 404), so query the registry; falls back to
- * `minVersion` offline, or undefined when nothing published fits (caller skips).
- */
-const resolveFix = (
-  name: string,
-  range: string,
-  npmBin: string | undefined,
-  cwd: string | undefined,
-  cache: Map<string, string[] | null>,
-): string | undefined => {
-  if (npmBin) {
-    if (!cache.has(name)) {
-      const out = invoke(
-        npmBin,
-        ['view', name, 'versions', '--json'],
-        cwd ?? process.cwd(),
-        true,
-        false,
-        true, // skipError: offline / 404 → fall through to semver floor
-      ) as string
-      const parsed = attempt(() => JSON.parse(out)) as string[] | string | null
-      cache.set(name, Array.isArray(parsed) ? parsed : (typeof parsed === 'string' ? [parsed] : null))
-    }
-    const versions = cache.get(name)
-    if (versions && versions.length > 0) {
-      return versions
-        .filter((v) => sv.valid(v) && sv.satisfies(v, range))
-        .sort(sv.compare)[0] // undefined ⇒ no published fix
-    }
-  }
-  return sv.minVersion(range)?.format()
-}
-
 /** Strip yarn's `npm:` protocol; return a usable semver range or undefined. */
 const normalizeRange = (raw?: string): string | undefined => {
   if (!raw) return undefined
@@ -83,138 +53,155 @@ const normalizeRange = (raw?: string): string | undefined => {
 
 /**
  * Upgrade every vulnerable node to the lowest published version that clears its
- * advisory, by edge-redirect: add the patched node, repoint incoming edges, drop
- * the old node + tarball. Merged descriptor keys are reconciled by `yarn install`.
+ * advisory — then pull in that version's *new* transitive dependency closure so
+ * the lockfile stays complete. Versions resolve from the registry packument
+ * (no shell-out); `replaceVersion` rebinds, `completeTransitives` fills the new
+ * deps, `optimize` drops anything left orphaned. Async since the registry is hit
+ * over HTTP.
  */
-export const _patch = (
+export const _patch = async (
   lockfile: TLockfileObject,
   report: TAuditReport,
-  { flags, bins, cwd }: TContext,
+  ctx: TContext,
   _lockfileType: TLockfileType, // eslint-disable-line @typescript-eslint/no-unused-vars
-): TLockfileObject => {
+): Promise<TLockfileObject> => {
+  const { flags } = ctx
   if (Object.keys(report).length === 0) {
     !flags.silent && console.log('Audit check found no issues')
     return lockfile
   }
 
-  const graph = lockfile as Graph
-  const versionCache = new Map<string, string[] | null>()
-  // `--exclude` rules: package-name globs (+ optional version range) the user
-  // wants left untouched (e.g. a manually pinned transitive).
+  let graph = lockfile as Graph
+  const registry = buildRegistry(ctx)
   const excludeRules = parsePackageRules(flags.exclude)
   const excluded = new Set<string>()
-
-  // Pass 1: vulnerable nodes with a usable newer fix. Also the exemption set for
-  // the compat gate below — a replaced consumer re-declares its own deps.
-  type Candidate = { id: string; name: string; version: string; patch?: string; fix: string }
-  const candidates: Candidate[] = []
   const noFix = new Set<string>()
-  for (const node of graph.nodes()) {
-    const advisory = report[node.name]
-    if (!advisory) continue
-    if (
-      excludeRules.length > 0 &&
-      matchesPackage(node.name, node.version, excludeRules)
-    ) {
-      excluded.add(`${node.name}@${node.version}`)
-      continue
-    }
-    if (!sv.satisfies(node.version, advisory.vulnerable_versions)) continue
-
-    const fix = resolveFix(node.name, advisory.patched_versions, bins?.npm, cwd, versionCache)
-    if (fix === undefined) {
-      noFix.add(`${node.name}@${node.version}`) // no published version clears it
-      continue
-    }
-    if (!sv.gt(fix, node.version)) continue // already clean; keeps re-runs idempotent
-    candidates.push({ id: node.id, name: node.name, version: node.version, patch: node.patch, fix })
-  }
-  const candidateIds = new Set(candidates.map((c) => c.id))
-
-  // Pass 2: compat gate. Skip a fix that falls outside a *surviving* consumer's
-  // declared range (unless --force), recording why. Candidate consumers are
-  // exempt — they'll be replaced and re-declare their deps.
-  const upgrades: Candidate[] = []
   const incompatible = new Map<string, Set<string>>()
-  for (const c of candidates) {
-    let breaks: string[] | undefined
-    if (!flags.force) {
-      for (const edge of graph.in(c.id)) {
-        if (candidateIds.has(edge.src)) continue // consumer is being replaced too
-        const range = normalizeRange(edge.attrs?.range)
-        if (range && !sv.satisfies(c.fix, range)) {
-          (breaks ??= []).push(`${edge.src} wants "${edge.attrs!.range}"`)
-        }
-      }
-    }
-    if (breaks?.length) {
-      incompatible.set(`${c.name}@${c.version} → ${c.fix}`, new Set(breaks))
-      continue
-    }
-    upgrades.push(c)
+
+  // Lowest published version that clears the advisory (minimal bump), read from
+  // the registry packument.
+  const packCache = new Map<string, Awaited<ReturnType<typeof registry.packument>>>()
+  const lowestFix = async (
+    name: string,
+    range: string,
+  ): Promise<string | undefined> => {
+    if (!packCache.has(name)) packCache.set(name, await registry.packument(name))
+    const pack = packCache.get(name)
+    if (!pack) return undefined
+    return Object.keys(pack.versions)
+      .filter((v) => sv.valid(v) && sv.satisfies(v, range))
+      .sort(sv.compare)[0] // undefined ⇒ nothing published clears it
   }
 
-  const removedIds = new Set(upgrades.map((u) => u.id))
-  const newIdOf = (u: { name: string; fix: string }) => `${u.name}@${u.fix}`
-  const sep = String.fromCharCode(0) // NUL — can't occur in a package name
+  type Plan = {
+    name: string
+    fromRange: string
+    fix: string
+    froms: { id: NodeId; version: string }[]
+  }
 
-  // Three ordered phases: add nodes, redirect/drop all edges, then remove old
-  // nodes. removeNode rejects nodes that still have incoming edges, so batching
-  // every edge op before any node removal keeps it order-independent.
-  const result = graph.mutate((m) => {
-    // 1. Materialise each patched node once.
-    const seenIds = new Set<string>()
-    for (const u of upgrades) {
-      const newId = newIdOf(u)
-      if (!graph.getNode(newId) && !seenIds.has(newId)) {
-        seenIds.add(newId)
-        // Node carries identity only; the lib derives the resolution from
-        // name + version + source (a fresh npm fix → `name@npm:version`).
-        m.addNode({
-          id: newId,
-          name: u.name,
-          version: u.fix,
-          peerContext: [],
-        })
+  // Pass 1: per vulnerable package, resolve the minimal fix and the nodes to bump.
+  const plans: Plan[] = []
+  for (const [name, advisory] of Object.entries(report)) {
+    const vuln = [...graph.nodes()].filter(
+      (n) =>
+        n.name === name && sv.satisfies(n.version, advisory.vulnerable_versions),
+    )
+    if (vuln.length === 0) continue
+
+    const kept = vuln.filter((n) => {
+      if (
+        excludeRules.length > 0 &&
+        matchesPackage(n.name, n.version, excludeRules)
+      ) {
+        excluded.add(`${n.name}@${n.version}`)
+        return false
       }
-    }
+      return true
+    })
+    if (kept.length === 0) continue
 
-    // 2. Drop each removed node's incoming edges; redirect those from surviving
-    //    sources onto the patched node (edges between two removed nodes just go).
-    const removedEdges = new Set<string>()
-    const addedEdges = new Set<string>()
-    for (const u of upgrades) {
-      const newId = newIdOf(u)
-      for (const edge of graph.in(u.id)) {
-        const ekey = [edge.src, edge.dst, edge.kind].join(sep)
-        if (!removedEdges.has(ekey)) {
-          removedEdges.add(ekey)
-          m.removeEdge(edge.src, edge.dst, edge.kind)
+    const fix = await lowestFix(name, advisory.patched_versions)
+    if (fix === undefined) {
+      kept.forEach((n) => noFix.add(`${n.name}@${n.version}`))
+      continue
+    }
+    // skip versions already at/above the fix — keeps re-runs idempotent
+    const froms = kept.filter((n) => sv.lt(n.version, fix))
+    if (froms.length === 0) continue
+
+    plans.push({
+      name,
+      fromRange: advisory.vulnerable_versions,
+      fix,
+      froms: froms.map((n) => ({ id: n.id as NodeId, version: n.version })),
+    })
+  }
+
+  // Pass 2: compat gate. Skip a fix outside a *surviving* consumer's declared
+  // range (unless --force); a consumer that is itself being bumped is exempt —
+  // replaceVersion + completeTransitives re-derive its deps from the registry.
+  const planNames = new Set(plans.map((p) => p.name))
+  const upgrades: Plan[] = []
+  for (const p of plans) {
+    let breaks: Set<string> | undefined
+    if (!flags.force) {
+      for (const from of p.froms) {
+        for (const edge of graph.in(from.id)) {
+          const consumer = graph.getNode(edge.src)
+          if (consumer && planNames.has(consumer.name)) continue // bumped too
+          const range = normalizeRange(edge.attrs?.range)
+          if (range && !sv.satisfies(p.fix, range)) {
+            ;(breaks ??= new Set()).add(`${edge.src} wants "${edge.attrs!.range}"`)
+          }
         }
-        if (removedIds.has(edge.src)) continue
-        const akey = [edge.src, newId, edge.kind].join(sep)
-        if (!addedEdges.has(akey)) {
-          addedEdges.add(akey)
-          m.addEdge(edge.src, newId, edge.kind, edge.attrs)
-        }
       }
     }
+    if (breaks?.size) {
+      incompatible.set(`${p.name}@${p.froms[0].version} → ${p.fix}`, breaks)
+      continue
+    }
+    upgrades.push(p)
+  }
 
-    // 3. Old nodes are edge-free now — drop them and their tarballs (classic has none).
-    for (const u of upgrades) {
-      m.removeNode(u.id)
-      if (graph.tarball({ name: u.name, version: u.version, patch: u.patch })) {
-        m.removeTarball({ name: u.name, version: u.version, patch: u.patch })
-      }
-    }
-  })
+  // Apply: rebind each vulnerable range to its fix, then complete the new
+  // transitive closure, then drop whatever got orphaned.
+  const recentlyAdded = new Set<NodeId>()
+  const recentlyOrphaned = new Set<NodeId>()
+  for (const u of upgrades) {
+    const res = await replaceVersion(
+      graph,
+      { name: u.name, fromRange: u.fromRange },
+      u.fix,
+      { registry },
+    )
+    graph = res.graph
+    res.added.forEach((id) => recentlyAdded.add(id))
+    res.removed.forEach((id) => recentlyOrphaned.add(id))
+  }
+
+  let completionDiagnostics: readonly {
+    severity: string
+    code: string
+    message: string
+  }[] = []
+  if (recentlyAdded.size > 0 || recentlyOrphaned.size > 0) {
+    const completion = await completeTransitives(graph, registry, {
+      seed: { recentlyAdded, recentlyOrphaned },
+    })
+    graph = completion.graph
+    completionDiagnostics = completion.unresolved
+    // NB: no reachability `optimize` here — yarn-classic lockfiles carry no root
+    // workspace node, so it would prune the whole graph. Orphaned old-version
+    // deps linger harmlessly (yarn install reconciles them), as before.
+  }
 
   if (!flags.silent) {
     // Dedupe by from→to; annotate with severity / CVSS / CVE refs.
     const seen = new Set<string>()
     const lines: string[] = []
     for (const u of upgrades) {
-      const head = `${u.name}@${u.version} → ${u.fix}`
+      const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
       if (seen.has(head)) continue
       seen.add(head)
       lines.push(head + formatAdvisoryMeta(report[u.name]))
@@ -241,10 +228,14 @@ export const _patch = (
         for (const c of [...consumers].sort()) console.warn(`    - ${c}`)
       }
     }
-    reportDiagnostics(result.unresolved, flags.verbose)
+    // info-level COMPLETION_NODE_ADDED is success noise — only surface real gaps.
+    reportDiagnostics(
+      completionDiagnostics.filter((d) => d.severity !== 'info'),
+      flags.verbose,
+    )
   }
 
-  return result.graph
+  return graph
 }
 
 /**

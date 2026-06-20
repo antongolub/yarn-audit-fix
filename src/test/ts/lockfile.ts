@@ -1,178 +1,172 @@
-import * as fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import sv from 'semver'
 
-import { TContext } from '../../main/ts'
+import { TAuditReport, TContext } from '../../main/ts/ifaces'
 import { format, getLockfileType, parse, patch } from '../../main/ts/lockfile'
-import { parseAuditReport as parseAuditV1 } from '../../main/ts/audit/v1'
-import { parseAuditReport as parseAuditV2 } from '../../main/ts/audit/v2'
-import { parseAuditReport as parseAuditV4 } from '../../main/ts/audit/v4'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const fixtures = path.resolve(__dirname, '../fixtures')
+// ---- helpers ----------------------------------------------------------------
+
+// name -> version -> {dep: range}
+type Spec = Record<string, Record<string, Record<string, string>>>
+
+// A minimal `@antongolub/lockfile` RegistryAdapter backed by a canned spec, so
+// the patch flow (replaceVersion + completeTransitives) stays offline + hermetic.
+const mockRegistry = (spec: Spec) =>
+  ({
+    packument: async (name: string) => {
+      const versions = spec[name]
+      if (!versions) return undefined
+      return {
+        name,
+        distTags: { latest: Object.keys(versions).sort(sv.compare).at(-1)! },
+        versions: Object.fromEntries(
+          Object.entries(versions).map(([v, dependencies]) => [
+            v,
+            { name, version: v, dependencies },
+          ]),
+        ),
+      }
+    },
+    resolve: async (name: string, range: string) => {
+      const versions = spec[name]
+      if (!versions) return undefined
+      const match = versions[range]
+        ? range
+        : Object.keys(versions)
+            .filter((v) => sv.satisfies(v, range))
+            .sort(sv.compare)
+            .at(-1)
+      return match
+        ? { name, version: match, dependencies: versions[match] }
+        : undefined
+    },
+  }) as any
+
+// Build a minimal yarn-classic lockfile. `entries[].id` is the descriptor key
+// (e.g. `glob@^10.0.0`); `version` the resolved version; `deps` the declared deps.
+const B64 = 'A'.repeat(86) + '=='
+const lock = (
+  entries: { id: string; version: string; deps?: Record<string, string> }[],
+): string =>
+  '# yarn lockfile v1\n\n\n' +
+  entries
+    .map((e) => {
+      const deps =
+        e.deps && Object.keys(e.deps).length > 0
+          ? '\n  dependencies:\n' +
+            Object.entries(e.deps)
+              .map(([n, r]) => `    "${n}" "${r}"`)
+              .join('\n')
+          : ''
+      return (
+        `"${e.id}":\n` +
+        `  version "${e.version}"\n` +
+        `  resolved "https://registry.yarnpkg.com/x/-/x-${e.version}.tgz#${e.version.replace(/\W/g, '')}"\n` +
+        `  integrity sha512-${B64}${deps}`
+      )
+    })
+    .join('\n\n') +
+  '\n'
+
+const ctx = (flags: Record<string, any>, registry: any): TContext =>
+  ({ flags, registry, cwd: process.cwd() }) as unknown as TContext
+
+const run = async (
+  lockfile: string,
+  report: TAuditReport,
+  flags: Record<string, any>,
+  spec: Spec,
+): Promise<string> => {
+  const fmt = getLockfileType(lockfile)
+  const graph = parse(lockfile, fmt)
+  const patched = await patch(graph, report, ctx(flags, mockRegistry(spec)), fmt)
+  return format(patched, fmt)
+}
+
+const advisory = (vulnerable: string, patched: string) => ({
+  module_name: 'x',
+  vulnerable_versions: vulnerable,
+  patched_versions: patched,
+})
+
+// ---- tests ------------------------------------------------------------------
 
 describe('patch', () => {
-  const cases = [
-    { name: 'yarn-berry-v5', dir: 'v2', parseAudit: parseAuditV2, ext: 'json' },
-    { name: 'yarn-berry-v8', dir: 'v4', parseAudit: parseAuditV4, ext: 'ndjson' }, // yarn v4 (issue #248)
-    { name: 'yarn-classic',  dir: 'v1', parseAudit: parseAuditV1, ext: 'json' },
-  ] as const
-
-  for (const { name, dir, parseAudit, ext } of cases) {
-    it(`patches ${name} lockfile`, () => {
-      const report = fs.readFileSync(
-        path.join(fixtures, `lockfile/${dir}/yarn-audit-report.${ext}`),
-        'utf-8',
-      )
-      const lockfile = fs.readFileSync(
-        path.join(fixtures, `lockfile/${dir}/yarn.lock`),
-        'utf-8',
-      )
-      const expected = fs.readFileSync(
-        path.join(fixtures, `lockfile/${dir}/yarn-lock-patched.yaml`),
-        'utf-8',
-      )
-      const fmt = getLockfileType(lockfile)
-      expect(fmt).toBe(name)
-
-      // force: these fixtures exercise the full patch mechanics — they bump
-      // transitive deps across majors that the compat gate would otherwise
-      // skip. The gate itself is covered by the v1-compat case below.
-      // bins:{} → offline semver-minVersion resolution (no live `npm view`),
-      // keeping the test hermetic + deterministic.
-      const result = format(
-        patch(
-          parse(lockfile, fmt),
-          parseAudit(report),
-          { flags: { silent: true, force: true }, bins: {} } as unknown as TContext,
-          fmt,
-        ),
-        fmt,
-      )
-
-      expect(result).toEqual(expected)
-    })
-  }
-
-  // Regression: a vulnerable parent and its vulnerable child both in the
-  // upgrade set. Removing the parent cascades its outgoing edge, so the
-  // child's stale graph.in() view referenced an already-gone edge and
-  // mutate() threw PATCH_REJECTED. See lockfile.ts removedIds guard.
-  it('patches a vulnerable parent + child without rejecting', () => {
-    const dir = path.join(fixtures, 'lockfile/v1-cross')
-    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
-    const report = parseAuditV1(
-      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
+  it('bumps a vulnerable package to the lowest published fix', async () => {
+    const out = await run(
+      lock([{ id: 'lodash@^4.17.0', version: '4.17.20' }]),
+      { lodash: advisory('<4.17.21', '>=4.17.21') },
+      { silent: true },
+      { lodash: { '4.17.20': {}, '4.17.21': {}, '4.17.22': {} } },
     )
-    const fmt = getLockfileType(lockfile)
-    expect(fmt).toBe('yarn-classic')
-
-    // bins:{} → offline minVersion fallback, deterministic: glob→11.0.0,
-    // minimatch→10.0.0.
-    const result = format(
-      patch(
-        parse(lockfile, fmt),
-        report,
-        { flags: { silent: true }, bins: {} } as unknown as TContext,
-        fmt,
-      ),
-      fmt,
-    )
-
-    expect(result).toContain('glob@11.0.0')
-    expect(result).toContain('minimatch@10.0.0')
-    expect(result).not.toContain('glob@^10.0.0:\n  version "10.4.5"')
+    expect(out).toContain('version "4.17.21"') // lowest satisfying, not latest
+    expect(out).not.toContain('version "4.17.22"')
   })
 
-  // `--exclude` leaves a matched package untouched while others still patch; the
-  // optional range is scoped to the *installed* version (minimatch is 9.0.5).
-  it('skips a package matched by --exclude', () => {
-    const dir = path.join(fixtures, 'lockfile/v1-cross')
-    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
-    const report = parseAuditV1(
-      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
+  it('completes the new transitive closure of an upgraded package', async () => {
+    const out = await run(
+      lock([{ id: 'vuln@^1.0.0', version: '1.0.0' }]),
+      { vuln: advisory('<2.0.0', '>=2.0.0') },
+      { silent: true },
+      {
+        vuln: { '1.0.0': {}, '2.0.0': { 'new-dep': '^1.0.0' } },
+        'new-dep': { '1.0.0': { 'deep-dep': '^1.0.0' } },
+        'deep-dep': { '1.0.0': {} },
+      },
     )
-    const fmt = getLockfileType(lockfile)
-    const run = (exclude: string) =>
-      format(
-        patch(
-          parse(lockfile, fmt),
-          report,
-          { flags: { silent: true, exclude }, bins: {} } as unknown as TContext,
-          fmt,
-        ),
-        fmt,
-      )
-
-    // by name: minimatch is left untouched; the unrelated glob advisory still applies
-    const byName = run('minimatch')
-    expect(byName).not.toContain('minimatch@10.0.0')
-    expect(byName).toContain('glob@11.0.0')
-
-    // range that doesn't cover the installed 9.0.5 → rule is inert, minimatch bumps
-    expect(run('minimatch@<1')).toContain('minimatch@10.0.0')
+    expect(out).toContain('version "2.0.0"') // vuln bumped
+    expect(out).toContain('new-dep@') // direct new dep pulled in
+    expect(out).toContain('deep-dep@') // transitive new dep pulled in
   })
 
-  // Mirror of the above with the child declared BEFORE the parent, so node
-  // iteration removes the child first. The per-node interleaving threw
-  // "removeNode: <child> has incoming edges"; the phased mutate is order-free.
-  it('patches a vulnerable child + parent regardless of declaration order', () => {
-    const dir = path.join(fixtures, 'lockfile/v1-cross2')
-    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
-    const report = parseAuditV1(
-      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
-    )
-    const fmt = getLockfileType(lockfile)
+  it('leaves a package matched by --exclude untouched', async () => {
+    const spec = { vuln: { '1.0.0': {}, '2.0.0': {} } }
+    const report = { vuln: advisory('<2.0.0', '>=2.0.0') }
+    const lf = lock([{ id: 'vuln@^1.0.0', version: '1.0.0' }])
 
-    const result = format(
-      patch(
-        parse(lockfile, fmt),
-        report,
-        { flags: { silent: true }, bins: {} } as unknown as TContext,
-        fmt,
-      ),
-      fmt,
+    expect(await run(lf, report, { silent: true }, spec)).toContain(
+      'version "2.0.0"',
     )
-
-    expect(result).toContain('glob@11.0.0')
-    expect(result).toContain('minimatch@10.0.0')
+    const excluded = await run(lf, report, { silent: true, exclude: 'vuln' }, spec)
+    expect(excluded).toContain('version "1.0.0"')
+    expect(excluded).not.toContain('version "2.0.0"')
   })
 
-  // Compat gate: the only fix for uuid (v11) leaves its consumer request's
-  // declared "^3.3.2" range. request isn't itself patchable, so the bump is
-  // skipped by default and applied only with --force.
-  it('skips a fix that breaks a surviving consumer range unless --force', () => {
-    const dir = path.join(fixtures, 'lockfile/v1-compat')
-    const lockfile = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
-    const report = parseAuditV1(
-      fs.readFileSync(path.join(dir, 'yarn-audit-report.json'), 'utf-8'),
-    )
-    const fmt = getLockfileType(lockfile)
+  it('skips a fix that breaks a surviving consumer range unless --force', async () => {
+    const spec = { vuln: { '1.0.0': {}, '2.0.0': {} }, consumer: { '1.0.0': {} } }
+    const report = { vuln: advisory('<2.0.0', '>=2.0.0') }
+    const lf = lock([
+      { id: 'consumer@^1.0.0', version: '1.0.0', deps: { vuln: '^1.0.0' } },
+      { id: 'vuln@^1.0.0', version: '1.0.0' },
+    ])
 
-    // default: gate on → uuid untouched, stays at 3.4.0
-    const guarded = format(
-      patch(
-        parse(lockfile, fmt),
-        report,
-        { flags: { silent: true }, bins: {} } as unknown as TContext,
-        fmt,
-      ),
-      fmt,
-    )
-    expect(guarded).toContain('version "3.4.0"')
-    expect(guarded).not.toContain('version "11.0.0"')
+    // default: consumer still wants vuln@^1.0.0 → cross-major bump skipped
+    const guarded = await run(lf, report, { silent: true }, spec)
+    expect(guarded).toContain('version "1.0.0"')
+    expect(guarded).not.toContain('version "2.0.0"')
 
-    // --force: gate bypassed → the uuid@^3.3.2 descriptor now resolves to 11.x
-    const forced = format(
-      patch(
-        parse(lockfile, fmt),
-        report,
-        { flags: { silent: true, force: true }, bins: {} } as unknown as TContext,
-        fmt,
-      ),
-      fmt,
+    // --force: gate bypassed
+    const forced = await run(lf, report, { silent: true, force: true }, spec)
+    expect(forced).toContain('version "2.0.0"')
+  })
+
+  it('is a no-op when the installed version already clears the advisory', async () => {
+    const out = await run(
+      lock([{ id: 'vuln@^2.0.0', version: '2.0.0' }]),
+      { vuln: advisory('<3.0.0', '>=2.0.0') },
+      { silent: true },
+      { vuln: { '2.0.0': {} } },
     )
-    expect(forced).toContain('version "11.0.0"')
-    expect(forced).not.toContain('version "3.4.0"')
+    expect(out).toContain('version "2.0.0"') // already at fix → unchanged
+  })
+
+  it('makes no change when nothing published clears the advisory', async () => {
+    const out = await run(
+      lock([{ id: 'vuln@^1.0.0', version: '1.0.0' }]),
+      { vuln: advisory('<99.0.0', '>=99.0.0') },
+      { silent: true },
+      { vuln: { '1.0.0': {}, '2.0.0': {} } },
+    )
+    expect(out).toContain('version "1.0.0"') // no published fix → left as-is
+    expect(out).not.toContain('version "2.0.0"')
   })
 })

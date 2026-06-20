@@ -60,8 +60,34 @@ const countVuln = (graph: ReturnType<typeof parse>, report: Record<string, Advis
     (n) => report[n.name] && sv.satisfies(n.version, report[n.name].vulnerable_versions),
   ).length
 
-const ctxForce = { flags: { silent: true, force: true }, bins: {} } as unknown as TContext
-const ctxDefault = { flags: { silent: true }, bins: {} } as unknown as TContext
+// Hermetic RegistryAdapter derived from the local advisory cache: each fixable
+// package resolves to `minVersion(patched_versions)` with no declared deps — so
+// the bump happens offline (same fix version as before) and `completeTransitives`
+// has nothing to fetch. Completion itself is covered in lockfile.ts.
+const fixVersionOf = (name: string): string | undefined =>
+  advisories[name] ? sv.minVersion(advisories[name].patched_versions)?.version : undefined
+
+const mockRegistry = {
+  packument: async (name: string) => {
+    const fix = fixVersionOf(name)
+    return fix
+      ? {
+          name,
+          distTags: { latest: fix },
+          versions: { [fix]: { name, version: fix, dependencies: {} } },
+        }
+      : undefined
+  },
+  resolve: async (name: string, range: string) => {
+    const fix = fixVersionOf(name)
+    return fix && (range === fix || sv.satisfies(fix, range))
+      ? { name, version: fix, dependencies: {} }
+      : undefined
+  },
+} as any
+
+const ctxForce = { flags: { silent: true, force: true }, registry: mockRegistry } as unknown as TContext
+const ctxDefault = { flags: { silent: true }, registry: mockRegistry } as unknown as TContext
 
 describe('real-world yarn fixtures', () => {
   it('the corpus is present', () => {
@@ -76,7 +102,7 @@ describe('real-world yarn fixtures', () => {
     let cleared = 0
 
     for (const { handle, dir } of lockfiles) {
-      it(handle, () => {
+      it(handle, async () => {
         const raw = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
         const fmt = getLockfileType(raw)
         const before = parse(raw, fmt, dir)
@@ -86,7 +112,7 @@ describe('real-world yarn fixtures', () => {
         if (targets.length === 0) return
         exercised++
 
-        const after = patch(before, report, ctxForce, fmt)
+        const after = await patch(before, report, ctxForce, fmt)
         const nodes = [...after.nodes()]
 
         for (const name of targets) {
@@ -112,7 +138,7 @@ describe('real-world yarn fixtures', () => {
   // fixes for --force. Asserted on the vulnerable snapshots.
   describe('patch applies compat-safe fixes (default)', () => {
     for (const { handle, dir } of lockfiles.filter((f) => f.vulnerable)) {
-      it(handle, () => {
+      it(handle, async () => {
         const raw = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
         const fmt = getLockfileType(raw)
         const before = parse(raw, fmt, dir)
@@ -121,7 +147,7 @@ describe('real-world yarn fixtures', () => {
         const vBefore = countVuln(before, report)
         expect(vBefore).toBeGreaterThan(0)
 
-        const after = patch(before, report, ctxDefault, fmt)
+        const after = await patch(before, report, ctxDefault, fmt)
         const vAfter = countVuln(after, report)
 
         // real, compat-safe progress (some vulns fixed in-major)
