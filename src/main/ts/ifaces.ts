@@ -9,7 +9,6 @@ export type TFlagsMapping = {
 export type TContext = {
   ctx: TContext
   cwd: string
-  temp: string
   flags: TFlags
   manifest: Record<string, any>
   versions: Record<string, string>

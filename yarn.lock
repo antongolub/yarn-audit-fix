@@ -15,13 +15,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.65":
-  version: 0.0.0-snapshot.65
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.65"
+"@antongolub/lockfile@npm:0.0.0-snapshot.67":
+  version: 0.0.0-snapshot.67
+  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.67"
   dependencies:
     node-fetch-native: "npm:^1.6.7"
     semver: "npm:^7.6.0"
-  checksum: 10c0/f47f1fad53037433baf9ccc35d70a59b618b30c03f1da73d1916db7ef83be3a4a3c4f5bd836968ad33b7d97d1763b78c1b4eed91a50fad3750a95cb485c73dc1
+  checksum: 10c0/6020e9479d7aebf7dfd6f8c1f6fe0f9d2f24b7f5a91bbf76814c36d7f9352b6cbc167942557e453375b5e226a50773ee8eb95d617ee1fe5bbaccd4fdc57a16f1
   languageName: node
   linkType: hard
 
@@ -4972,7 +4972,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.65"
+    "@antongolub/lockfile": "npm:0.0.0-snapshot.67"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.0"

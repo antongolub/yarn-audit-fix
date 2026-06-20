@@ -8,14 +8,10 @@ import { TCallback } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType } from './lockfile'
 import {
-  createSymlink,
-  emptyDir,
   formatFlags,
   getBinVersion,
   getNpm,
   getSelfManifest,
-  getSymlinkType,
-  getWorkspaces,
   getYarn,
   invoke,
 } from './util'
@@ -45,7 +41,6 @@ export const resolveBins: TCallback = ({ ctx, flags }) => {
 
 /** Print the runtime digest and version warnings. */
 export const printRuntimeDigest: TCallback = ({
-  temp,
   cwd,
   flags,
   bins,
@@ -78,7 +73,6 @@ export const printRuntimeDigest: TCallback = ({
         isMonorepo,
         bins,
         versions,
-        temp,
         cwd,
         flags,
       },
@@ -88,55 +82,9 @@ export const printRuntimeDigest: TCallback = ({
   )
 }
 
-/** Copy yarn.lock, package.json and rc files into temp. */
-export const createTempAssets: TCallback = ({ cwd, temp }) => {
-  fs.copyFileSync(path.join(cwd, 'yarn.lock'), path.join(temp, 'yarn.lock'))
-  fs.copyFileSync(path.join(cwd, 'package.json'), path.join(temp, 'package.json'))
-  fs.existsSync(path.join(cwd, '.npmrc')) &&
-    fs.copyFileSync(path.join(cwd, '.npmrc'), path.join(temp, '.npmrc'))
-  fs.existsSync(path.join(cwd, '.yarnrc')) &&
-    fs.copyFileSync(path.join(cwd, '.yarnrc'), path.join(temp, '.yarnrc'))
-}
-
-/** Symlink node_modules, .yarn and workspaces into temp. */
-export const createSymlinks: TCallback = ({ temp, flags, cwd, manifest }) => {
-  const symlinkType = getSymlinkType(flags.symlink)
-  const workspaces = getWorkspaces(cwd, manifest)
-  const links = [
-    path.join(cwd, 'node_modules'),
-    path.join(cwd, '.yarn'),
-    ...workspaces.map((ws) => path.dirname(ws)),
-  ]
-
-  // A directory symlink exposes its target's real children, so linking a
-  // workspace that is an ancestor of another (nested workspaces, e.g.
-  // `packages/stores/auth` that itself contains `packages/stores/auth/email`)
-  // already brings the whole subtree into temp. A subsequent link for the
-  // descendant would resolve to an existing path through that symlink → EEXIST.
-  // Keep only the topmost links — the ancestor already covers everything below
-  // it, so `yarn install` in temp still discovers the nested workspaces.
-  const isNestedUnder = (child: string, parent: string): boolean =>
-    child !== parent && (child + path.sep).startsWith(parent + path.sep)
-  const topmost = links.filter((l) => !links.some((p) => isNestedUnder(l, p)))
-
-  topmost.forEach((link: string) => {
-    const to = path.join(temp, path.relative(cwd, link))
-
-    fs.existsSync(link) && createSymlink(link, to, symlinkType)
-  })
-}
-
-export const syncLockfile: TCallback = ({ temp, flags }) => {
-  if (flags.dryRun) {
-    return
-  }
-
-  fs.copyFileSync(path.join(temp, 'yarn.lock'), 'yarn.lock')
-}
-
 /** Run yarn install to refresh packages after the lockfile update. */
 export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
-  if (flags.dryRun) {
+  if (flags['dry-run']) {
     return
   }
 
@@ -163,8 +111,6 @@ export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
         flags.silent,
       )
 }
-/** Empty the temp dir. */
-export const clear: TCallback = ({ temp }) => emptyDir(temp)
 
 /** Set the process exit code from the error (printing is handled by `run`). */
 export const exit: TCallback = ({ err }) => {
@@ -173,8 +119,10 @@ export const exit: TCallback = ({ err }) => {
   process.exitCode = bySignal[err?.signal] ?? (err?.status | 0 || 1)
 }
 
-export const patchLockfile: TCallback = async ({ temp, cwd, ctx }) => {
-  const lockfilePath = path.join(temp, 'yarn.lock')
+export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
+  // Operate on the real lockfile directly — patch is pure (parse → audit →
+  // patch → format), so the old copy-to-temp + symlink dance bought nothing.
+  const lockfilePath = path.join(cwd, 'yarn.lock')
   const raw = fs.readFileSync(lockfilePath, 'utf-8')
   const lockfileType = getLockfileType(raw)
   // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes.
@@ -184,7 +132,11 @@ export const patchLockfile: TCallback = async ({ temp, cwd, ctx }) => {
   const report = await lf.audit(lockfile, ctx)
   const patched = await lf.patch(lockfile, report, ctx, lockfileType)
 
-  fs.writeFileSync(lockfilePath, format(patched, lockfileType))
+  // The single write lands only after a successful in-memory patch, so a failure
+  // leaves the original lockfile untouched. `--dry-run` skips it entirely.
+  if (!flags['dry-run']) {
+    fs.writeFileSync(lockfilePath, format(patched, lockfileType))
+  }
 }
 
 /** Verify the working dir has the required files. */

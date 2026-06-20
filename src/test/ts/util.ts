@@ -5,8 +5,6 @@ import type { TFlags, TFlagsMapping } from '../../main/ts'
 import {
   formatFlags,
   getNpm,
-  getSymlinkType,
-  getTemp,
   getWorkspaces,
   isWindows,
   mapFlags,
@@ -15,7 +13,6 @@ import {
 } from '../../main/ts/util'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const DEFAULT_OSTYPE = process.env.OSTYPE
 
 describe('util', () => {
   describe('#mapFlags', () => {
@@ -96,22 +93,6 @@ describe('util', () => {
     })
   })
 
-  describe('#getSymlinkType', () => {
-    it('resolves type by system profile and arg', () => {
-      process.env.OSTYPE = 'msys'
-      expect(getSymlinkType()).toBe('junction')
-      expect(getSymlinkType('foo')).toBe('foo')
-      expect(getSymlinkType('dir')).toBe('dir')
-
-      process.env.OSTYPE = 'unknown'
-      expect(getSymlinkType()).toBe(
-        process.platform === 'win32' ? 'junction' : 'dir',
-      )
-
-      process.env.ostype = DEFAULT_OSTYPE
-    })
-  })
-
   describe('#getNpm', () => {
     const isWin = isWindows()
     const cmd = isWin ? 'npm.cmd' : 'npm'
@@ -129,21 +110,6 @@ describe('util', () => {
         } else {
           expect(getNpm(npmPath)).toBe(result)
         }
-      })
-    })
-  })
-
-  describe('#getTemp', () => {
-    it('properly resolves temp dir path', () => {
-      const pwd = process.cwd()
-      const tempdir = path.resolve(__dirname, '../temp')
-      const cases: [string, string | undefined, string | RegExp][] = [
-        [pwd, tempdir, tempdir],
-        [pwd, undefined, /tempy-/],
-      ]
-
-      cases.forEach(([cwd, temp, result]) => {
-        expect(getTemp(cwd, temp)).toMatch(result)
       })
     })
   })

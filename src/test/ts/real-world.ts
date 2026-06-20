@@ -158,8 +158,8 @@ describe('real-world yarn fixtures', () => {
     }
   })
 
-  // The current fixtures keep the full nested package.json tree, so workspace
-  // discovery (used by createSymlinks) resolves real monorepo members.
+  // The current fixtures keep the full nested package.json tree, so
+  // `getWorkspaces` resolves real monorepo members.
   describe('workspace discovery', () => {
     for (const handle of dirsOf(realWorld)) {
       const dir = path.join(realWorld, handle)

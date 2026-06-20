@@ -101,7 +101,6 @@ npm_config_yes=true npx yarn-audit-fix
 $ yarn-audit-fix [--opts]
 
 <b>Verifying package structure...</b>
-<b>Preparing temp assets...</b>
 <b>Patching yarn.lock with audit data...</b>
 <b>Installing deps update...</b>
 <b>invoke</b> yarn install --update-checksums
@@ -122,8 +121,6 @@ success Saved lockfile.
 | `--npm-path`          | Switch to project's local **npm** version instead of system default. Or provide a custom path. `system / local / <custom path>`                                         | `system`                                   |
 | `--registry`          | Custom registry url                                                                                                                                                     |                                            |
 | `--silent`            | Disable log output                                                                                                                                                      | `false`                                    |
-| `--symlink`           | Symlink type for `node_modules` ref                                                                                                                                     | `junction` for Windows, `dir` otherwise    |
-| `--temp`              | Directory for temporary assets                                                                                                                                          | `<cwd>/node_modules/.cache/yarn-audit-fix` |
 | `--verbose`           | Switch log level to verbose/debug                                                                                                                                       | `false`                                    |
 | `--exclude`           | Packages to skip updating — comma-separated `glob[@range]` rules (e.g. `lodash,@scope/*@>=2 <3`); the range is matched against the installed version. Repeatable.        |                                            |
 | `--ignore`            | Advisory ids to ignore — comma-separated globs matched against the GHSA id (from the advisory url) or the npm advisory id (e.g. `GHSA-*,1106913`). Repeatable.            |                                            |

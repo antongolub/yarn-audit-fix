@@ -1,10 +1,8 @@
 import cp from 'node:child_process'
 import type { StdioOptions } from 'node:child_process'
-import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import os from 'node:os'
 
 import fg, { Options as GlobOptions } from 'fast-glob'
 
@@ -12,8 +10,6 @@ import { TFlags, TFlagsMapping } from './ifaces'
 
 const glob = fg.sync
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-export type SymlinkType = 'dir' | 'file' | 'junction'
 
 // chalk.bold stand-in: SGR bold on a TTY (or FORCE_COLOR), off under NO_COLOR.
 const colorize =
@@ -117,9 +113,6 @@ export const isWindows = (): boolean =>
   process.platform === 'win32' ||
   /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
-export const getSymlinkType = (type?: string): SymlinkType =>
-  (type as SymlinkType) || (isWindows() ? 'junction' : 'dir')
-
 // https://github.com/facebook/jest/issues/2993
 export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
 
@@ -166,32 +159,6 @@ export const getWorkspaces = (
 
 export const readJson = (path: string): any =>
   JSON.parse(fs.readFileSync(path).toString('utf-8').trim())
-
-export const ensureDir = (dir: string): string => {
-  fs.mkdirSync(dir, { recursive: true })
-
-  return dir
-}
-
-// fs-extra replacements on node:fs.
-export const emptyDir = (dir: string): void => {
-  fs.rmSync(dir, { recursive: true, force: true })
-  fs.mkdirSync(dir, { recursive: true })
-}
-
-export const createSymlink = (
-  target: string,
-  dest: string,
-  type: SymlinkType,
-): void => {
-  fs.mkdirSync(path.dirname(dest), { recursive: true })
-  fs.symlinkSync(target, dest, type)
-}
-
-export const getTemp = (cwd: string, temp?: string) =>
-  temp
-    ? ensureDir(path.resolve(cwd, temp))
-    : fs.mkdtempSync(path.join(os.tmpdir(), `tempy-${crypto.randomBytes(16).toString('hex')}`))
 
 export const attempt = <T>(f: () => T): T | null => {
   try {

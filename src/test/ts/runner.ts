@@ -5,14 +5,10 @@ import { fileURLToPath } from 'node:url'
 
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import type { TContext } from '../../main/ts/ifaces'
-
 const lf = (await import('../../main/ts/lockfile'))._internal
-const { createSymlinks, getContext, run } = await import('../../main/ts')
+const { getContext, run } = await import('../../main/ts')
 const { getYarn } = await import('../../main/ts/util')
-const { parseAuditReport: parseAuditV1 } = await import(
-  '../../main/ts/audit/v1'
-)
+const { parseAuditReport: parseAuditV1 } = await import('../../main/ts/audit/v1')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // Captured before the fs spies are installed; vitest lazily reads module
@@ -25,10 +21,6 @@ const fixtures = path.resolve(__dirname, '../fixtures/')
 const registryUrl = 'https://example.com'
 const dependency = 'example-package'
 const scopedDependency = '@scope/package'
-const strMatching = (start = '', end = '') =>
-  expect.stringMatching(new RegExp(`^${start}.+${end}$`))
-// Read fixtures with the real fs (this runs at load time, before the spies
-// in `beforeAll` replace fs.readFileSync).
 const readFixture = (name: string): string =>
   fs.readFileSync(path.resolve(fixtures, name), { encoding: 'utf-8' })
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#using_the_reviver_parameter
@@ -48,16 +40,13 @@ const revive = <T = any>(data: string): T =>
   })
 const audit = revive(readFixture('lockfile/legacy/yarn-audit-report.json'))
 const yarnLockBefore = readFixture('lockfile/legacy/yarn.lock.before')
-// `_audit` now fetches advisories over HTTP; stub it with the report the legacy
-// fixture would have produced so the patch flow stays offline + deterministic.
+// `_audit` / `_patch` hit the registry over HTTP now; stub them so this flow
+// test stays offline + deterministic. Patch correctness lives in lockfile.ts.
 const auditReport = parseAuditV1(String((audit as any).stdout ?? ''))
 
 const cwd = process.cwd()
-
 const shell = true
-const temp = path.resolve(__dirname, '../../../.temp')
 const stdio = ['inherit', 'inherit', 'inherit']
-const stdionull = [null, null, null] // eslint-disable-line
 
 const lfAudit = vi.spyOn(lf, '_audit')
 const lfParse = vi.spyOn(lf, '_parse')
@@ -66,14 +55,7 @@ const lfFormat = vi.spyOn(lf, '_format')
 
 describe('yarn-audit-fix', () => {
   beforeAll(() => {
-    vi.spyOn(fs, 'copyFileSync').mockImplementation(noop)
     vi.spyOn(fs, 'writeFileSync').mockImplementation(noop)
-    vi.spyOn(fs, 'symlinkSync').mockImplementation(noop)
-    vi.spyOn(fs, 'rmSync').mockImplementation(noop)
-    // @ts-ignore
-    vi.spyOn(fs, 'mkdirSync').mockImplementation(noop)
-    // @ts-ignore
-    vi.spyOn(fs, 'mkdtempSync').mockImplementation(() => temp)
     vi.spyOn(fs, 'existsSync').mockImplementation(() => true)
     // @ts-ignore
     vi.spyOn(fs, 'readFileSync').mockImplementation((name: any, ...rest: any[]) => {
@@ -82,33 +64,20 @@ describe('yarn-audit-fix', () => {
       // module sources, node_modules, etc.) to the real fs.
       if (!s.includes('node_modules')) {
         const _name = path.basename(s)
-        if (_name === 'yarn.lock') {
-          return yarnLockBefore
-        }
-        if (_name === 'package.json') {
-          return '{"version": "1.0.0"}'
-        }
+        if (_name === 'yarn.lock') return yarnLockBefore
+        if (_name === 'package.json') return '{"version": "1.0.0"}'
       }
-
       // @ts-ignore
       return realReadFileSync(name, ...rest)
     })
     // @ts-ignore
-    vi.spyOn(cp, 'spawnSync').mockImplementation((cmd: string, [$0, $1]: string[]) => {
-      if ($0 === 'audit' && $1 === '--json') {
-        return audit
-      }
-
+    vi.spyOn(cp, 'spawnSync').mockImplementation((cmd: string, [$0]: string[]) => {
       if ($0 === '--version' || (cmd === 'npm' && $0 === 'view')) {
         return { status: 0, stdout: '1.0.1' }
       }
-
       return { status: 0, stdout: 'foobar' }
     })
 
-    // `_audit` and `_patch` both hit the registry over HTTP now — stub them
-    // (async) to keep this flow test offline. Patch correctness lives in
-    // `lockfile.ts` (mock-registry tests); here we only check orchestration.
     lfAudit.mockResolvedValue(auditReport)
     lfPatch.mockImplementation(async (graph: any) => graph)
   })
@@ -119,88 +88,7 @@ describe('yarn-audit-fix', () => {
   })
   afterAll(() => vi.restoreAllMocks())
 
-  describe('createSymlinks', () => {
-    it('establishes proper links', () => {
-      const temp = 'foo/bar'
-      const cwd = path.join(fixtures, 'regular-monorepo')
-      const manifest = {
-        workspaces: ['packages/*'],
-      }
-
-      createSymlinks({ temp, flags: {}, cwd, manifest } as unknown as TContext)
-
-      const links = ['node_modules', 'packages/a', 'packages/b']
-      links.forEach((link) => {
-        expect(fs.symlinkSync).toHaveBeenCalledWith(
-          path.join(cwd, link),
-          strMatching(temp, link),
-          'dir',
-        )
-      })
-    })
-
-    // Regression: nested workspaces (a package whose subtree holds more
-    // packages) used to crash with `EEXIST` — symlinking the ancestor makes the
-    // descendant's link path already resolve through it. Only the topmost link
-    // should be created. https://github.com/antongolub/yarn-audit-fix (monorepo
-    // field report: packages/stores/auth + packages/stores/auth/email).
-    it('collapses nested workspaces to the topmost link (no EEXIST)', () => {
-      const temp = 'foo/bar'
-      const cwd = path.join(fixtures, 'nested-monorepo')
-      const manifest = { workspaces: ['packages/**'] }
-
-      createSymlinks({ temp, flags: {}, cwd, manifest } as unknown as TContext)
-
-      // the ancestor workspace is linked...
-      expect(fs.symlinkSync).toHaveBeenCalledWith(
-        path.join(cwd, 'packages/stores/auth'),
-        strMatching(temp, 'packages/stores/auth'),
-        'dir',
-      )
-      // ...and the nested ones are NOT linked on top of it.
-      expect(fs.symlinkSync).not.toHaveBeenCalledWith(
-        path.join(cwd, 'packages/stores/auth/email'),
-        expect.anything(),
-        expect.anything(),
-      )
-      expect(fs.symlinkSync).not.toHaveBeenCalledWith(
-        path.join(cwd, 'packages/stores/auth/phone'),
-        expect.anything(),
-        expect.anything(),
-      )
-    })
-  })
-
   describe('runner', () => {
-    // eslint-disable-next-line
-    const checkTempAssets = () => {
-      // Preparing...
-      expect(fs.rmSync).toHaveBeenCalledWith(temp, {
-        recursive: true,
-        force: true,
-      })
-      expect(fs.copyFileSync).toHaveBeenCalledWith(
-        path.join(cwd, 'yarn.lock'),
-        strMatching(temp, 'yarn.lock'),
-      )
-      expect(fs.copyFileSync).toHaveBeenCalledWith(
-        path.join(cwd, 'package.json'),
-        strMatching(temp, 'package.json'),
-      )
-      expect(fs.copyFileSync).toHaveBeenCalledWith(
-        path.join(cwd, '.yarnrc'),
-        strMatching(temp, '.yarnrc'),
-      )
-      expect(fs.copyFileSync).toHaveBeenCalledWith(
-        path.join(cwd, '.npmrc'),
-        strMatching(temp, '.npmrc'),
-      )
-      expect(fs.symlinkSync).toHaveBeenCalledWith(
-        path.join(cwd, 'node_modules'),
-        strMatching(temp, 'node_modules'),
-        'dir',
-      )
-    }
     it('throws error on broken package structure', async () => {
       fs.existsSync
         // @ts-ignore
@@ -213,34 +101,22 @@ describe('yarn-audit-fix', () => {
     })
 
     describe('`patch` flow', () => {
-      it('invokes cmd queue with proper args', async () => {
-        await run({
-          temp,
-        })
+      it('patches the real lockfile in place, then installs', async () => {
+        await run({})
 
-        checkTempAssets()
-
-        // Patching `yarn.lock`
+        // parse → audit → patch → format, all once; the lockfile is read and
+        // (re)written in place under cwd — no temp copy / symlink dance.
         expect(lfParse).toHaveBeenCalledWith(
           expect.any(String),
           'yarn-classic',
           expect.any(String),
         )
-        // _audit fetches advisories over HTTP now (stubbed) — no `yarn audit` spawn.
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
-        // `_patch` is stubbed (passthrough), so assert the temp lockfile is
-        // (re)written, not its exact patched content (covered in lockfile.ts).
         expect(fs.writeFileSync).toHaveBeenCalledWith(
-          strMatching(temp, 'yarn.lock'),
+          path.join(cwd, 'yarn.lock'),
           expect.any(String),
-        )
-
-        // Replaces original file, triggers `yarn --update-checksums`, resets temp directory
-        expect(fs.copyFileSync).toHaveBeenCalledWith(
-          strMatching(temp, 'yarn.lock'),
-          'yarn.lock',
         )
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
@@ -251,30 +127,20 @@ describe('yarn-audit-fix', () => {
     })
 
     describe('cli', () => {
-      it('invokes cmd queue with proper args', async () => {
+      it('invokes the flow with flag-derived install args', async () => {
         process.argv.push(
           '--verbose',
-          `--temp=${temp}`,
           `--registry=${registryUrl}`,
           `--exclude=${dependency}`,
           `--exclude=${scopedDependency}`,
         )
         await import('../../main/ts/cli')
-        // cli now fires run() asynchronously (fire-and-forget); let it settle.
+        // cli fires run() asynchronously (fire-and-forget); let it settle.
         await new Promise((r) => setTimeout(r, 100))
 
-        checkTempAssets()
-
-        // Audit + patch the lockfile graph
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(lfPatch).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
-
-        // Replace the original lockfile, then install with flag-derived args
-        expect(fs.copyFileSync).toHaveBeenCalledWith(
-          strMatching(temp, 'yarn.lock'),
-          'yarn.lock',
-        )
         expect(cp.spawnSync).toHaveBeenCalledWith(
           getYarn(),
           [
@@ -319,10 +185,7 @@ describe('yarn-audit-fix', () => {
     it('parses flags, returns ctx entry', () => {
       const cwd = '/foo/bar'
       const bar = 'baz'
-      const ctx = getContext({
-        cwd,
-        bar,
-      })
+      const ctx = getContext({ cwd, bar })
 
       expect(ctx).toEqual(
         expect.objectContaining({
@@ -333,5 +196,4 @@ describe('yarn-audit-fix', () => {
       )
     })
   })
-
 })

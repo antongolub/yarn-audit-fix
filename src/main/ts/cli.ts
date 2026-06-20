@@ -19,8 +19,6 @@ const STRING = [
   'ignore',
   'npm-path',
   'registry',
-  'symlink',
-  'temp',
 ]
 const ENV: Record<string, string> = {
   'audit-level': 'YAF_AUDIT_LEVEL',
@@ -37,7 +35,6 @@ const ENV: Record<string, string> = {
 const CHOICES: Record<string, string[]> = {
   'audit-level': ['low', 'moderate', 'high', 'critical'],
   'npm-path': ['system', 'local'],
-  symlink: ['junction', 'dir'],
 }
 
 const HELP = `Usage: yarn-audit-fix [options]
@@ -53,8 +50,6 @@ Options:
   --npm-path <path>       npm to use: system | local
   --registry <url>        Custom registry url
   --silent                Disable log output
-  --symlink <type>        node_modules symlink type: junction | dir
-  --temp <dir>            Directory for temporary assets
   --verbose               Verbose/debug logging
   -v, --version           Print version
   -h, --help              Print this help
