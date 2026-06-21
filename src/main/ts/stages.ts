@@ -107,7 +107,9 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // transitive closure + prunes the stranded old one.
     progress.label('Fetching advisories…')
     const report = await lf.audit(lockfile, ctx)
-    progress.label('Resolving fixes & completing the tree…')
+    // _patch refines this with live sub-phase counts (Resolving fixes X/Y →
+    // Completing the tree N).
+    progress.label('Resolving fixes…')
     const patched = await lf.patch(lockfile, report, ctx, lockfileType)
     // Then fill any install-required field the edit left missing (the yarn-berry
     // zip checksum) straight from the registry, so the result is a complete

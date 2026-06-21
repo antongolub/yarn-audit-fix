@@ -104,7 +104,10 @@ export const _patch = async (
 
   // Pass 1: per vulnerable package, resolve the minimal fix and the nodes to bump.
   const plans: Plan[] = []
+  const advisoryCount = Object.keys(report).length
+  let resolving = 0
   for (const [name, advisory] of Object.entries(report)) {
+    ctx.progress?.label(`Resolving fixes… ${++resolving}/${advisoryCount}`)
     const vuln = [...graph.nodes()].filter(
       (n) =>
         n.name === name && sv.satisfies(n.version, advisory.vulnerable_versions),
@@ -188,8 +191,14 @@ export const _patch = async (
     message: string
   }[] = []
   if (recentlyAdded.size > 0 || recentlyOrphaned.size > 0) {
+    // Live count of nodes pulled in (the slow part — a packument fetch each).
+    let completed = 0
     const completion = await completeTransitives(graph, registry, {
       seed: { recentlyAdded, recentlyOrphaned },
+      onDiagnostic: (d: { code?: string }) => {
+        if (d.code === 'COMPLETION_NODE_ADDED')
+          ctx.progress?.label(`Completing the tree… ${++completed}`)
+      },
     })
     graph = completion.graph
     completionDiagnostics = completion.unresolved
