@@ -1,6 +1,6 @@
 {
   "name": "yarn-audit-fix",
-  "version": "11.0.0-snapshot.14",
+  "version": "11.0.0-snapshot.15",
   "publishConfig": {
     "access": "public"
   },
@@ -29,7 +29,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "concurrently 'npm:test:*'",
     "test:unit": "vitest run --coverage",
-    "test:integration": "node ./target/esm/cli.mjs --audit-level=moderate --ignore-engines",
+    "test:integration": "node ./target/esm/cli.mjs --audit-level=moderate",
     "test:depcheck": "depcheck --ignore-patterns='src/test/fixtures' --ignores='node:*,@types/*,esbuild*,mkdirp,ts-node,typedoc,@vitest/coverage-v8,depcheck'",
     "test:lint": "oxlint -c src/test/lint/.oxlintrc.json src",
     "build": "concurrently 'npm:build:*'",
@@ -65,7 +65,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@antongolub/lockfile": "0.0.0-snapshot.69",
+    "@antongolub/lockfile": "0.0.0-snapshot.73",
     "@types/semver": "^7.7.0",
     "fast-glob": "^3.3.3",
     "minimist": "^1.2.8",

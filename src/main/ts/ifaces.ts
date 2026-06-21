@@ -20,6 +20,9 @@ export type TContext = {
   // Optional `refurbish` TarballSource override — tests inject canned tarball
   // bytes here; production builds a live one via `buildTarballSource`.
   tarballSource?: any
+  // Optional progress reporter (spinner) for the network-bound patch phases;
+  // set by `patchLockfile`. Absent in direct/test calls. See `ui.createProgress`.
+  progress?: any
 }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>

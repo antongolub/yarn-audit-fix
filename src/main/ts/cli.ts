@@ -57,9 +57,9 @@ Options:
 Every flag also reads a YAF_<FLAG> env var (e.g. YAF_AUDIT_LEVEL).`
 
 /**
- * Parse argv into a flags object. Explicit flags win and are kept in first-seen
- * order (so the subset later forwarded to `yarn install` matches what the user
- * typed); `YAF_*` env vars fill the rest. `--version` / `--help` short-circuit.
+ * Parse argv into a flags object. Explicit flags win (first occurrence wins, in
+ * first-seen order, for deterministic precedence); `YAF_*` env vars fill the
+ * rest. `--version` / `--help` short-circuit.
  * Throws on an out-of-range `choices` value.
  */
 export const parse = (

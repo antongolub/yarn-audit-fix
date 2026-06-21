@@ -7,6 +7,7 @@ import semver from 'semver'
 import { TCallback } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType } from './lockfile'
+import { createProgress } from './ui'
 import {
   getBinVersion,
   getNpm,
@@ -96,19 +97,32 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
   const lockfileType = getLockfileType(raw)
   // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes.
   const lockfile = lf.parse(raw, lockfileType, cwd)
-  // audit + patch both hit the registry over HTTP now (async): audit fetches
-  // advisories, patch resolves fixes + completes the new transitive closure.
-  const report = await lf.audit(lockfile, ctx)
-  const patched = await lf.patch(lockfile, report, ctx, lockfileType)
-  // Then fill any install-required field the edit left missing (the yarn-berry
-  // zip checksum) straight from the registry, so the result is a complete
-  // lockfile needing no reconcile `yarn install` (no-op for yarn-classic).
-  const refurbished = await lf.refurbish(patched, lockfileType, ctx)
+  // audit / patch / refurbish are all silent registry HTTP, so drive a spinner
+  // to show what's happening (no-op off a TTY or under --silent). The pipeline
+  // reports through ctx.progress (advisory count, checksum count, summary lines).
+  const progress = createProgress(!flags.silent)
+  ctx.progress = progress
+  try {
+    // audit fetches advisories; patch resolves fixes + completes the new
+    // transitive closure + prunes the stranded old one.
+    progress.label('Fetching advisories…')
+    const report = await lf.audit(lockfile, ctx)
+    progress.label('Resolving fixes & completing the tree…')
+    const patched = await lf.patch(lockfile, report, ctx, lockfileType)
+    // Then fill any install-required field the edit left missing (the yarn-berry
+    // zip checksum) straight from the registry, so the result is a complete
+    // lockfile needing no reconcile `yarn install` (no-op for yarn-classic).
+    progress.label('Recomputing checksums…')
+    const refurbished = await lf.refurbish(patched, lockfileType, ctx)
 
-  // The single write lands only after a successful in-memory patch, so a failure
-  // leaves the original lockfile untouched. `--dry-run` skips it entirely.
-  if (!flags['dry-run']) {
-    fs.writeFileSync(lockfilePath, format(refurbished, lockfileType))
+    // The single write lands only after a successful in-memory patch, so a
+    // failure leaves the original lockfile untouched. `--dry-run` skips it.
+    if (!flags['dry-run']) {
+      fs.writeFileSync(lockfilePath, format(refurbished, lockfileType))
+    }
+  } finally {
+    progress.stop()
+    ctx.progress = undefined
   }
 }
 

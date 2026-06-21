@@ -117,8 +117,16 @@ describe('real-world yarn fixtures', () => {
 
         for (const name of targets) {
           const own = nodes.filter((n) => n.name === name)
+          // advisory cleared: no vulnerable version survives.
           expect(own.filter((n) => sv.satisfies(n.version, report[name].vulnerable_versions))).toEqual([])
-          expect(own.some((n) => sv.satisfies(n.version, report[name].patched_versions))).toBe(true)
+          // cleared by upgrade (a patched version present) or by removal: the
+          // offline mock gives fix versions no deps, so when --force co-bumps a
+          // package *and* its only consumer, the consumer drops the edge and
+          // pruneOrphans retires the now-orphaned target (a valid clear).
+          expect(
+            own.length === 0 ||
+              own.some((n) => sv.satisfies(n.version, report[name].patched_versions)),
+          ).toBe(true)
           cleared++
         }
 

@@ -156,6 +156,7 @@ const joinAnd = (a: string, b: string): string =>
 const fetchAdvisories = async (
   packages: Record<string, string[]>,
   cfg: TRegistryConfig,
+  onProgress?: (done: number, total: number) => void,
 ): Promise<Record<string, any[]>> => {
   // Group by the registry each package routes to (scope-aware), then chunk.
   const byRegistry = new Map<string, string[]>()
@@ -166,19 +167,24 @@ const fetchAdvisories = async (
     byRegistry.set(reg, list)
   }
 
+  const total = Object.keys(packages).length
+  let done = 0
   const raw: Record<string, any[]> = {}
   for (const [registry, names] of byRegistry) {
     const token = cfg.tokenFor(registry)
     const endpoint = registry.replace(/\/+$/, '') + BULK_PATH
     for (let i = 0; i < names.length; i += CHUNK) {
+      const slice = names.slice(i, i + CHUNK)
       const body: Record<string, string[]> = {}
-      for (const name of names.slice(i, i + CHUNK)) body[name] = packages[name]
+      for (const name of slice) body[name] = packages[name]
       const res = await post(endpoint, body, token)
       if (res && typeof res === 'object') {
         for (const [name, advs] of Object.entries(res)) {
           if (Array.isArray(advs)) (raw[name] ??= []).push(...advs)
         }
       }
+      done += slice.length
+      onProgress?.(done, total)
     }
   }
   return raw
@@ -252,7 +258,9 @@ export const auditViaRegistry = async (
   const cfg = resolveRegistryConfig(cwd, ctx.flags)
   const packages = collectPackages(graph)
   if (Object.keys(packages).length === 0) return {}
-  const raw = await fetchAdvisories(packages, cfg)
+  const raw = await fetchAdvisories(packages, cfg, (done, total) =>
+    ctx.progress?.label(`Fetching advisories… ${done}/${total}`),
+  )
   return toReport(
     raw,
     rank(ctx.flags?.['audit-level']),

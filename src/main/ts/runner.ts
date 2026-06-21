@@ -75,6 +75,7 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
   // swallowed, so this callback simply won't fire there).
   const onAbort = (signal: NodeJS.Signals): void => {
     ctx.err = { signal }
+    ctx.progress?.stop() // clear the spinner line before the abort message
     !flags.silent && console.error(bold(`\nAborted (${signal})`))
     exit(ctx)
     process.exit(process.exitCode || 130)

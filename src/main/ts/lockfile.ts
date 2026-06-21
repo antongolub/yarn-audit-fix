@@ -3,6 +3,7 @@ import type { Graph, FormatId } from '@antongolub/lockfile'
 import { completeTransitives } from '@antongolub/lockfile/complete'
 import { refurbish as lfRefurbish } from '@antongolub/lockfile/enrich'
 import { replaceVersion } from '@antongolub/lockfile/modify'
+import { pruneOrphans } from '@antongolub/lockfile/optimize'
 import sv from 'semver'
 
 import { buildRegistry, buildTarballSource } from './audit/adapter'
@@ -57,8 +58,8 @@ const normalizeRange = (raw?: string): string | undefined => {
  * advisory — then pull in that version's *new* transitive dependency closure so
  * the lockfile stays complete. Versions resolve from the registry packument
  * (no shell-out); `replaceVersion` rebinds, `completeTransitives` fills the new
- * deps, `optimize` drops anything left orphaned. Async since the registry is hit
- * over HTTP.
+ * deps, `pruneOrphans` retires the old closure the upgrade stranded. Async since
+ * the registry is hit over HTTP.
  */
 export const _patch = async (
   lockfile: TLockfileObject,
@@ -192,16 +193,21 @@ export const _patch = async (
     })
     graph = completion.graph
     completionDiagnostics = completion.unresolved
-    // NB: completeTransitives is additive, so a dep-changing upgrade leaves the
-    // *old* closure behind as orphans. We do NOT prune them with `optimize`: it
-    // is a production-reachability sweep (it drops dev / optional / peer-only
-    // nodes — e.g. fsevents, @types/* — that a valid lockfile must keep), so it
-    // over-prunes real locks. A safe orphan-GC (retire only the now-unreferenced
-    // old closure, all edge kinds) is pending in lockgraph; until then the
-    // reconcile `yarn install` does the pruning, as before.
+    // completeTransitives is additive, so a dep-changing upgrade leaves the *old*
+    // closure behind as orphans → `yarn install --immutable` would reject them.
+    // Sweep them with `pruneOrphans`: ref-counted, so it removes only nodes with
+    // no remaining incoming edge of any kind (+ the closure they strand) and
+    // preserves referenced nodes — incl. berry builtin-patch bases (fsevents) and
+    // `catalog:` targets. A yarn-classic lock has no workspace-root node, so this
+    // NO_ROOTS-noops there; its orphans linger, tolerated as before.
+    graph = pruneOrphans(graph).graph
   }
 
   if (!flags.silent) {
+    // Route through the spinner when one is active (clears → prints → redraws);
+    // plain console otherwise (direct/test calls).
+    const log = ctx.progress ? ctx.progress.log : console.log
+    const warn = ctx.progress ? ctx.progress.log : console.warn
     // Dedupe by from→to; annotate with severity / CVSS / CVE refs.
     const seen = new Set<string>()
     const lines: string[] = []
@@ -213,30 +219,31 @@ export const _patch = async (
     }
     lines.sort()
     if (lines.length > 0) {
-      console.log(`Upgraded deps (${lines.length}):`)
-      for (const line of lines) console.log(`  ${line}`)
+      log(`Upgraded deps (${lines.length}):`)
+      for (const line of lines) log(`  ${line}`)
     } else {
-      console.log('Upgraded deps: <none>')
+      log('Upgraded deps: <none>')
     }
     if (noFix.size > 0) {
-      console.log('No fix available:', [...noFix].sort().join(', '))
+      log('No fix available: ' + [...noFix].sort().join(', '))
     }
     if (excluded.size > 0) {
-      console.log('Excluded (per --exclude):', [...excluded].sort().join(', '))
+      log('Excluded (per --exclude): ' + [...excluded].sort().join(', '))
     }
     if (incompatible.size > 0) {
-      console.warn(
+      warn(
         'Skipped (fix breaks a consumer\'s declared range; re-run with --force to apply):',
       )
       for (const [spec, consumers] of [...incompatible].sort()) {
-        console.warn(`  ${spec}`)
-        for (const c of [...consumers].sort()) console.warn(`    - ${c}`)
+        warn(`  ${spec}`)
+        for (const c of [...consumers].sort()) warn(`    - ${c}`)
       }
     }
     // info-level COMPLETION_NODE_ADDED is success noise — only surface real gaps.
     reportDiagnostics(
       completionDiagnostics.filter((d) => d.severity !== 'info'),
       flags.verbose,
+      warn,
     )
   }
 
@@ -263,13 +270,18 @@ export const _refurbish = async (
   if (!lockfileType.startsWith('yarn-berry')) return lockfile
 
   const source = buildTarballSource(ctx)
-  const result = await lfRefurbish(
-    lockfile as Graph,
-    lockfileType as FormatId,
-    source,
-  )
+  // Live count of recomputed checksums — the tarball fetches are the slowest
+  // phase, so surface progress as each one lands.
+  let filled = 0
+  const result = await lfRefurbish(lockfile as Graph, lockfileType as FormatId, source, {
+    onDiagnostic: (d: { code?: string }) => {
+      if (d.code === 'ENRICH_FIELD_FILLED')
+        ctx.progress?.label(`Recomputing checksums… ${++filled}`)
+    },
+  })
 
   if (!ctx.flags.silent) {
+    const warn = ctx.progress ? ctx.progress.log : console.warn
     // `unresolved` carries *every* diagnostic, including successful fills — so
     // surface only genuine gaps: a node whose checksum couldn't be recomputed
     // (git / private / workspace deps with no fetchable tarball). Those still
@@ -278,10 +290,10 @@ export const _refurbish = async (
       (d) => d.code === 'ENRICH_CHECKSUM_DEFERRED',
     )
     if (deferred.length > 0) {
-      console.warn(
+      warn(
         `Could not compute checksums for ${deferred.length} package(s) with no fetchable tarball — run \`yarn install\` to finish the lockfile:`,
       )
-      reportDiagnostics(deferred, ctx.flags.verbose)
+      reportDiagnostics(deferred, ctx.flags.verbose, warn)
     }
   }
 
@@ -295,12 +307,13 @@ export const _refurbish = async (
 const reportDiagnostics = (
   diagnostics: readonly { severity: string; code: string; message: string }[],
   verbose?: boolean,
+  log: (line: string) => void = console.warn,
 ): void => {
   if (diagnostics.length === 0) return
 
   if (verbose) {
     for (const d of diagnostics) {
-      console.warn(`  [${d.severity}] ${d.code}: ${d.message}`)
+      log(`  [${d.severity}] ${d.code}: ${d.message}`)
     }
     return
   }
@@ -310,7 +323,7 @@ const reportDiagnostics = (
     counts.set(d.code, (counts.get(d.code) ?? 0) + 1)
   }
   for (const [code, n] of counts) {
-    console.warn(`  ${n}× ${code}${n > 1 ? ' (run with --verbose for details)' : ''}`)
+    log(`  ${n}× ${code}${n > 1 ? ' (run with --verbose for details)' : ''}`)
   }
 }
 

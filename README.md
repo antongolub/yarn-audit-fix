@@ -102,15 +102,14 @@ $ yarn-audit-fix [--opts]
 
 <b>Verifying package structure...</b>
 <b>Patching yarn.lock with audit data...</b>
-<b>Installing deps update...</b>
-<b>invoke</b> yarn install --update-checksums
-[1/4] 🔍  Resolving packages...
-[2/4] 🚚  Fetching packages...
-[3/4] 🔗  Linking dependencies...
-[4/4] 🔨  Rebuilding all packages...
-success Saved lockfile.
+Upgraded deps (1):
+  minimist@1.2.5 → 1.2.6  [critical, CVSS 9.8] GHSA-xvch-5gv4-984h
 <b>Done</b>
 </pre>
+
+The lockfile is patched **in place** — the fix versions, their new transitive
+dependencies, and (for yarn berry) the package checksums are all resolved
+straight from the registry, so there's no reconcile `yarn install` step.
 | Option                | Description                                                                                                                                                             | Default                                    |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
 | `--audit-level`       | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical                                                              | `low`                                      |
@@ -151,7 +150,9 @@ Individual stages (`resolveBins`, `patchLockfile`, `yarnInstall`, …) are expor
 
 With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` / `TStage` types, and the optional custom-flow argument to `run` are removed. Call `run(flags)` — the patch pipeline is inlined. The individual stages are still exported if you want to assemble your own.
 
-Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Entries are patched via graph edge-redirect instead of in-place rewrite; merged descriptor keys (e.g. `"lodash@npm:4.17.21, lodash@npm:4.17.20":`) are reconciled by the following `yarn install`.
+Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Each vulnerable package is upgraded graph-natively to the lowest published version that clears its advisory, and the fix version's **new transitive dependencies are pulled into the lockfile** (resolved from the registry) — so an upgrade that changes a package's dependency set no longer leaves the lockfile incomplete.
+
+**BREAKING:** `yarn-audit-fix` no longer runs a reconcile `yarn install`. The lockfile is patched and completed entirely in place — fix versions, their new transitive closure, and (for yarn berry) the recomputed package checksums all come straight from the registry. yaf no longer shells out to yarn, and a `node_modules` directory is no longer required to run it.
 
 **BREAKING:** advisories are now fetched **straight from the registry** (the npm bulk advisory endpoint) instead of spawning `yarn audit` / `npm audit`. This fixes audit against custom/in-house registries ([yarn#7012](https://github.com/yarnpkg/yarn/issues/7012)) and is faster (the lockfile graph is already parsed). The registry, per-scope registries and auth are inherited from `.npmrc` / `.yarnrc.yml` / `.yarnrc` (project then global) + env, or overridden with `--registry`. Auth tokens are bound to the host that declared them and only sent over HTTPS.
 
@@ -159,9 +160,7 @@ Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audi
 
 **Node floor / `engines`:** v11 no longer declares `engines.node`, so installing yarn-audit-fix never warns `EBADENGINE` on its own behalf. The effective runtime floor is **Node ≥ 14.18**, inherited from [`@antongolub/lockfile`](https://github.com/antongolub/lockfile). The CLI argument parser also moved off `commander` (which had been ratcheting its own Node floor up) to a tiny `minimist`-based parser — flags, env vars and `--help` are unchanged.
 
-The reconcile `yarn install` (yarn classic) now always runs with `--ignore-engines`, so a project's own transitive engine constraints — a dependency demanding a newer Node than the one running yarn-audit-fix — no longer abort the fix.
-
-**CLI flags:** both `--exclude` and `--ignore` are applied client-side now (they used to be forwarded to `yarn npm audit`). `--exclude` takes comma-separated **package** rules — `glob[@range]`, e.g. `--exclude="lodash,@scope/*@>=2 <3"` — and skips updating any package whose name matches the glob (and, if a range is given, whose installed version satisfies it); handy for a manually pinned transitive you don't want bumped. `--ignore` keeps its advisory scope but now matches **advisory ids** — comma-separated globs against the GHSA id or the npm advisory id (e.g. `--ignore="GHSA-*"`), dropping matching advisories before the fix. (The npm bulk-advisory endpoint doesn't expose CVE numbers, so — like zx's audit script — matching is by GHSA / npm id.) The standalone `--ignore-engines` flag is removed (the reconcile install ignores engines unconditionally).
+**CLI flags:** both `--exclude` and `--ignore` are applied client-side now (they used to be forwarded to `yarn npm audit`). `--exclude` takes comma-separated **package** rules — `glob[@range]`, e.g. `--exclude="lodash,@scope/*@>=2 <3"` — and skips updating any package whose name matches the glob (and, if a range is given, whose installed version satisfies it); handy for a manually pinned transitive you don't want bumped. `--ignore` keeps its advisory scope but now matches **advisory ids** — comma-separated globs against the GHSA id or the npm advisory id (e.g. `--ignore="GHSA-*"`), dropping matching advisories before the fix. (The npm bulk-advisory endpoint doesn't expose CVE numbers, so — like zx's audit script — matching is by GHSA / npm id.) The standalone `--ignore-engines` flag is removed — there is no longer a reconcile `yarn install` for it to apply to.
 
 ### ^10.0.0
 v10 bumps the pkg deps and requires NodeJS v14.
@@ -210,13 +209,9 @@ npm_config_yes=true npx yarn-audit-fix --audit-level=moderate
 ```
 ```shell
 Patching yarn.lock with audit data...
-invoke yarn audit --json --level moderate
-Can't find patched version that satisfies postcss@^7.0.0 in >=8.2.10
-Can't find patched version that satisfies postcss@^7.0.1 in >=8.2.10
-Can't find patched version that satisfies postcss@^7.0.27 in >=8.2.10
-Can't find patched version that satisfies ws@^7.2.3 in >=6.2.2 <7.0.0 || >=7.4.6
 Upgraded deps: <none>
-invoke yarn install --update-checksums
+No fix available: postcss@7.0.27, ws@7.2.3
+Done
 ```
 Not everything can be repaired.
 
@@ -226,7 +221,7 @@ yarn-audit-fix is compatible with any NodeJS version which supports ESM, but nes
 node-releases@2.0.48: The engine "node" is incompatible with this module. Expected version ">=18". Got "16.20.1"
 ```
 
-The reconcile `yarn install` that yarn-audit-fix runs already passes `--ignore-engines`, so a vulnerable project's own transitive constraints won't abort the fix. If you hit this while **installing yarn-audit-fix itself**, update the runtime — or pass the flag:
+yarn-audit-fix no longer runs a `yarn install`, so a vulnerable project's own transitive engine constraints can't abort the fix. If you hit this while **installing yarn-audit-fix itself** (or on a later `yarn install` of your own), update the runtime — or pass the flag:
 ```shell
 yarn add yarn-audit-fix -D --ignore-engines
 ```
