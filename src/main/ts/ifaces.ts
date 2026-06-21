@@ -23,6 +23,10 @@ export type TContext = {
   // Optional progress reporter (spinner) for the network-bound patch phases;
   // set by `patchLockfile`. Absent in direct/test calls. See `ui.createProgress`.
   progress?: any
+  // Optional AbortSignal — set by `run` so Ctrl+C/SIGTERM cancel in-flight
+  // registry HTTP cooperatively (advisory POST, tarball GET). Absent in
+  // direct/test calls.
+  signal?: any
 }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>

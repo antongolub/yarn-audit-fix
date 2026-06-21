@@ -44,12 +44,14 @@ export const collectPackages = (graph: Graph): Record<string, string[]> => {
 /**
  * POST JSON to a registry. SECURITY: the bearer token is attached only over
  * https; redirects are NOT followed (so the token can't be forwarded to another
- * host); the token never appears in thrown errors.
+ * host); the token never appears in thrown errors. `signal` cancels the in-flight
+ * request on Ctrl+C (the socket is destroyed and the call rejects).
  */
 const post = (
   urlStr: string,
   payload: unknown,
   token?: string,
+  signal?: AbortSignal,
 ): Promise<any> =>
   new Promise((resolve, reject) => {
     let u: URL
@@ -78,6 +80,7 @@ const post = (
         const chunks: Buffer[] = []
         res.on('data', (c) => chunks.push(c))
         res.on('end', () => {
+          cleanup()
           const text = Buffer.concat(chunks).toString('utf8')
           if (status >= 300) {
             return reject(new Error(`registry ${u.host} responded ${status}`))
@@ -90,9 +93,14 @@ const post = (
         })
       },
     )
-    req.on('error', (e) =>
-      reject(new Error(`registry ${u.host}: ${scrub(String(e.message), token)}`)),
-    )
+    const abortReq = () => req.destroy(new Error(`registry ${u.host}: aborted`))
+    const cleanup = () => signal?.removeEventListener?.('abort', abortReq)
+    if (signal?.aborted) abortReq()
+    else signal?.addEventListener?.('abort', abortReq, { once: true })
+    req.on('error', (e) => {
+      cleanup()
+      reject(new Error(`registry ${u.host}: ${scrub(String(e.message), token)}`))
+    })
     req.on('timeout', () => req.destroy(new Error(`registry ${u.host}: timeout`)))
     req.end(data)
   })
@@ -109,8 +117,10 @@ export const getTarball = (
   tarballUrl: string,
   registryUrl: string,
   token?: string,
+  signal?: AbortSignal,
 ): Promise<Uint8Array | undefined> =>
   new Promise((resolve) => {
+    if (signal?.aborted) return resolve(undefined) // cancelling — skip the fetch
     let u: URL
     try {
       u = new URL(tarballUrl)
@@ -137,14 +147,24 @@ export const getTarball = (
         const status = res.statusCode ?? 0
         if (status < 200 || status >= 300) {
           res.resume() // drain; redirects (3xx) included — deliberately not followed
+          cleanup()
           return resolve(undefined)
         }
         const chunks: Buffer[] = []
         res.on('data', (c) => chunks.push(c))
-        res.on('end', () => resolve(new Uint8Array(Buffer.concat(chunks))))
+        res.on('end', () => {
+          cleanup()
+          resolve(new Uint8Array(Buffer.concat(chunks)))
+        })
       },
     )
-    req.on('error', () => resolve(undefined))
+    const onAbort = () => req.destroy()
+    const cleanup = () => signal?.removeEventListener?.('abort', onAbort)
+    signal?.addEventListener?.('abort', onAbort, { once: true })
+    req.on('error', () => {
+      cleanup()
+      resolve(undefined)
+    })
     req.on('timeout', () => req.destroy())
     req.end()
   })
@@ -157,6 +177,7 @@ const fetchAdvisories = async (
   packages: Record<string, string[]>,
   cfg: TRegistryConfig,
   onProgress?: (done: number, total: number) => void,
+  signal?: AbortSignal,
 ): Promise<Record<string, any[]>> => {
   // Group by the registry each package routes to (scope-aware), then chunk.
   const byRegistry = new Map<string, string[]>()
@@ -177,7 +198,7 @@ const fetchAdvisories = async (
       const slice = names.slice(i, i + CHUNK)
       const body: Record<string, string[]> = {}
       for (const name of slice) body[name] = packages[name]
-      const res = await post(endpoint, body, token)
+      const res = await post(endpoint, body, token, signal)
       if (res && typeof res === 'object') {
         for (const [name, advs] of Object.entries(res)) {
           if (Array.isArray(advs)) (raw[name] ??= []).push(...advs)
@@ -258,8 +279,11 @@ export const auditViaRegistry = async (
   const cfg = resolveRegistryConfig(cwd, ctx.flags)
   const packages = collectPackages(graph)
   if (Object.keys(packages).length === 0) return {}
-  const raw = await fetchAdvisories(packages, cfg, (done, total) =>
-    ctx.progress?.label(`Fetching advisories… ${done}/${total}`),
+  const raw = await fetchAdvisories(
+    packages,
+    cfg,
+    (done, total) => ctx.progress?.label(`Fetching advisories… ${done}/${total}`),
+    ctx.signal,
   )
   return toReport(
     raw,

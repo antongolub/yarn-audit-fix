@@ -68,17 +68,31 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
   const ctx = getContext(flags)
   const log = (note: string) => !flags.silent && console.log(bold(note))
 
-  // Graceful Ctrl+C / kill: exit 128+signal with a clean message instead of a
-  // raw stack. Registering the listener stops Node's abrupt default-terminate;
-  // an interrupt during the registry HTTP work then unwinds through the catch
-  // below (a SIGINT received inside the short version-probe spawnSync is
-  // swallowed, so this callback simply won't fire there).
+  // Cooperative Ctrl+C / kill. An AbortSignal is threaded into the registry HTTP
+  // (advisory POST, tarball GET — see `audit/registry`) so the first interrupt
+  // *cancels the in-flight request* and lets the run unwind cleanly with exit
+  // 128+signal. A second interrupt, or a 1s stall (e.g. blocked in a sync phase
+  // a signal can't preempt), force-exits — so it can never hang. AbortController
+  // is feature-detected to keep the Node ≥14.18 floor.
+  const controller =
+    typeof AbortController !== 'undefined' ? new AbortController() : undefined
+  ctx.signal = controller?.signal
+
+  let aborting = false
   const onAbort = (signal: NodeJS.Signals): void => {
+    if (aborting) process.exit(process.exitCode || 130) // impatient 2nd Ctrl+C
+    aborting = true
     ctx.err = { signal }
-    ctx.progress?.stop() // clear the spinner line before the abort message
-    !flags.silent && console.error(bold(`\nAborted (${signal})`))
-    exit(ctx)
-    process.exit(process.exitCode || 130)
+    ctx.progress?.stop() // clear the spinner line before the message
+    !flags.silent && console.error(bold(`\nAborted (${signal}) — cancelling…`))
+    exit(ctx) // set exit code 130 now (the unwind error won't carry the signal)
+    controller?.abort() // cancel in-flight registry requests → pipeline rejects
+    // Guaranteed exit if cancellation can't unwind in time. unref'd so a clean
+    // cooperative unwind exits first.
+    setTimeout(
+      () => process.exit(process.exitCode || 130),
+      1000,
+    ).unref?.()
   }
   process.on('SIGINT', onAbort)
   process.on('SIGTERM', onAbort)
@@ -94,12 +108,12 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
     await patchLockfile(ctx)
     log('Done')
   } catch (err: any) {
+    // On abort, onAbort already printed + set the exit code; just unwind quietly.
+    if (aborting) throw err
     ctx.err = err
-
     !flags.silent && console.error(formatError(err))
-    log(err?.signal ? 'Aborted!' : 'Failure!')
+    log('Failure!')
     exit(ctx)
-
     throw err
   } finally {
     process.removeListener('SIGINT', onAbort)

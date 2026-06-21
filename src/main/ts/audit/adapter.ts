@@ -65,7 +65,7 @@ export const buildTarballSource = (ctx: TContext): TarballSource => {
       // `resolve` with an exact version behaves like an exact range → that node.
       const pv = await reg.resolve(name, version)
       if (!pv?.tarball) return undefined
-      return getTarball(pv.tarball, url, cfg.tokenFor(url))
+      return getTarball(pv.tarball, url, cfg.tokenFor(url), ctx.signal)
     },
   }
 }

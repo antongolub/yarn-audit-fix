@@ -115,6 +115,10 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     progress.label('Recomputing checksums…')
     const refurbished = await lf.refurbish(patched, lockfileType, ctx)
 
+    // If the run was aborted (Ctrl+C) during a phase that degrades to a value
+    // rather than throwing (e.g. refurbish, whose tarball fetches resolve empty
+    // on abort), don't persist a half-finished lockfile.
+    if (ctx.signal?.aborted) throw new Error('aborted')
     // The single write lands only after a successful in-memory patch, so a
     // failure leaves the original lockfile untouched. `--dry-run` skips it.
     if (!flags['dry-run']) {
