@@ -125,5 +125,18 @@ describe('util', () => {
 
       expect(files).toEqual(expected)
     })
+
+    it('resolves a recursive `packages/**` glob with nested members', () => {
+      const cwd = path.resolve(__dirname, '../fixtures/nested-monorepo')
+      const manifest = readJson(path.join(cwd, 'package.json'))
+      const files = getWorkspaces(cwd, manifest)
+      const expected = [
+        ['stores', 'auth'],
+        ['stores', 'auth', 'email'],
+        ['stores', 'auth', 'phone'],
+      ].map((p) => path.join(cwd, 'packages', ...p, 'package.json'))
+
+      expect(files.sort()).toEqual(expected.sort())
+    })
   })
 })

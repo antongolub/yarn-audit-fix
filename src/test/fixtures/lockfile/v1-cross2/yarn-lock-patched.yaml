@@ -43,7 +43,7 @@ glob@11.0.0:
   dependencies:
     foreground-child "^3.1.0"
     jackspeak "^4.0.1"
-    minimatch "^9.0.4"
+    minimatch "^10.0.0"
     minipass "^7.1.2"
     package-json-from-dist "^1.0.0"
     path-scurry "^2.0.0"
@@ -65,7 +65,7 @@ lru-cache@^11.0.0:
   resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-11.5.1.tgz"
   integrity sha512-RPimw/7aMdv2oqRrxKwvZXcPfwBrn/JZ2xYcY9Hus/6LaS3VOAKVWKWgNLCFSiOm1ESXinjsDlidVU7JlnCN2A==
 
-minimatch@^9.0.4:
+minimatch@^10.0.0:
   version "10.0.0"
   resolved "https://registry.npmjs.org/minimatch/-/minimatch-10.0.0.tgz"
   integrity sha512-S4phymWe5NHWbTV8sAlyNQfkmdhvaoHX43x4yLtJBjw2zJtEuzkihDjV5uKq+D/EoMkjbG6msw3ubbSd1pGkyg==

@@ -1,7 +1,19 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import sv from 'semver'
 
 import { TAuditReport, TContext } from '../../main/ts/ifaces'
-import { format, getLockfileType, parse, patch } from '../../main/ts/lockfile'
+import {
+  format,
+  getLockfileType,
+  parse,
+  patch,
+  refurbish,
+} from '../../main/ts/lockfile'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // ---- helpers ----------------------------------------------------------------
 
@@ -168,5 +180,66 @@ describe('patch', () => {
     )
     expect(out).toContain('version "1.0.0"') // no published fix → left as-is
     expect(out).not.toContain('version "2.0.0"')
+  })
+})
+
+// `refurbish` fills install-required fields a patched graph still lacks — today
+// the yarn-berry zip `checksum`, recomputed from the npm tarball. Tarball bytes
+// come from committed `.tgz` fixtures (no network), so the recompute is asserted
+// byte-for-byte against the value yarn itself wrote.
+describe('refurbish', () => {
+  const tarballsDir = path.resolve(__dirname, '../fixtures/tarballs')
+  // Disk-backed TarballSource → hermetic, deterministic checksum recompute.
+  const diskTarballs = {
+    tarball: async (name: string, version: string) => {
+      try {
+        return new Uint8Array(
+          readFileSync(path.join(tarballsDir, `${name}-${version}.tgz`)),
+        )
+      } catch {
+        return undefined
+      }
+    },
+  }
+  const rctx = (tarballSource?: any): TContext =>
+    ({ flags: { silent: true }, tarballSource, cwd: process.cwd() }) as unknown as TContext
+
+  const grabChecksum = (text: string, name: string): string | undefined =>
+    new RegExp(`"${name}@npm:[^"]*":[\\s\\S]*?\\n  checksum: (10c0/[0-9a-f]+)`)
+      .exec(text)?.[1]
+
+  it('recomputes the yarn-berry checksum byte-for-byte from the tarball', async () => {
+    const v4 = path.resolve(__dirname, '../fixtures/lockfile/v4/yarn.lock')
+    const input = readFileSync(v4, 'utf-8')
+    const expected = {
+      'color-name': grabChecksum(input, 'color-name'),
+      'has-flag': grabChecksum(input, 'has-flag'),
+    }
+    expect(expected['color-name']).toBeTruthy()
+
+    // Strip the two checksums to mimic freshly-added nodes lacking them.
+    let stripped = input
+    for (const cks of Object.values(expected))
+      stripped = stripped.replace(`\n  checksum: ${cks}`, '')
+    expect(stripped).not.toEqual(input)
+
+    const fmt = getLockfileType(stripped)
+    const out = format(
+      await refurbish(parse(stripped, fmt), fmt, rctx(diskTarballs)),
+      fmt,
+    )
+
+    for (const [name, cks] of Object.entries(expected))
+      expect(grabChecksum(out, name)).toBe(cks)
+    // Restoring exactly the two stripped fields round-trips to the original.
+    expect(out).toBe(input)
+  })
+
+  it('is a no-op for yarn-classic (nodes already complete)', async () => {
+    const input = lock([{ id: 'lodash@^4.17.0', version: '4.17.20' }])
+    const fmt = getLockfileType(input)
+    // No tarballSource needed: classic is skipped entirely.
+    const out = format(await refurbish(parse(input, fmt), fmt, rctx()), fmt)
+    expect(out).toBe(format(parse(input, fmt), fmt))
   })
 })

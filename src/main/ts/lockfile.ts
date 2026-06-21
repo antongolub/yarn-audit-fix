@@ -1,10 +1,11 @@
 import { detect, parse as lfParse, stringify as lfStringify } from '@antongolub/lockfile'
 import type { Graph, FormatId } from '@antongolub/lockfile'
 import { completeTransitives } from '@antongolub/lockfile/complete'
+import { refurbish as lfRefurbish } from '@antongolub/lockfile/enrich'
 import { replaceVersion } from '@antongolub/lockfile/modify'
 import sv from 'semver'
 
-import { buildRegistry } from './audit/adapter'
+import { buildRegistry, buildTarballSource } from './audit/adapter'
 import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
 import { auditViaRegistry } from './audit/registry'
@@ -191,9 +192,13 @@ export const _patch = async (
     })
     graph = completion.graph
     completionDiagnostics = completion.unresolved
-    // NB: no reachability `optimize` here — yarn-classic lockfiles carry no root
-    // workspace node, so it would prune the whole graph. Orphaned old-version
-    // deps linger harmlessly (yarn install reconciles them), as before.
+    // NB: completeTransitives is additive, so a dep-changing upgrade leaves the
+    // *old* closure behind as orphans. We do NOT prune them with `optimize`: it
+    // is a production-reachability sweep (it drops dev / optional / peer-only
+    // nodes — e.g. fsevents, @types/* — that a valid lockfile must keep), so it
+    // over-prunes real locks. A safe orphan-GC (retire only the now-unreferenced
+    // old closure, all edge kinds) is pending in lockgraph; until then the
+    // reconcile `yarn install` does the pruning, as before.
   }
 
   if (!flags.silent) {
@@ -239,6 +244,51 @@ export const _patch = async (
 }
 
 /**
+ * Fill install-required fields the patched graph still lacks, so the written
+ * lockfile needs no reconcile `yarn install`. Today that's only the yarn-berry
+ * zip `checksum`: `completeTransitives` resolves new nodes' `integrity` from the
+ * packument, but the berry `checksum` is a hash of yarn's *own* zip, derivable
+ * only from the tarball bytes — so `refurbish` fetches them and recomputes
+ * (byte-identical to what `yarn install` would write). yarn-classic nodes are
+ * already complete (resolved + integrity), so it's a no-op there. Async (HTTP).
+ */
+export const _refurbish = async (
+  lockfile: TLockfileObject,
+  lockfileType: TLockfileType,
+  ctx: TContext,
+): Promise<TLockfileObject> => {
+  if (lockfileType === undefined) {
+    throw new Error('Unsupported lockfile format')
+  }
+  if (!lockfileType.startsWith('yarn-berry')) return lockfile
+
+  const source = buildTarballSource(ctx)
+  const result = await lfRefurbish(
+    lockfile as Graph,
+    lockfileType as FormatId,
+    source,
+  )
+
+  if (!ctx.flags.silent) {
+    // `unresolved` carries *every* diagnostic, including successful fills — so
+    // surface only genuine gaps: a node whose checksum couldn't be recomputed
+    // (git / private / workspace deps with no fetchable tarball). Those still
+    // need a real `yarn install` to finish the lockfile.
+    const deferred = result.unresolved.filter(
+      (d) => d.code === 'ENRICH_CHECKSUM_DEFERRED',
+    )
+    if (deferred.length > 0) {
+      console.warn(
+        `Could not compute checksums for ${deferred.length} package(s) with no fetchable tarball — run \`yarn install\` to finish the lockfile:`,
+      )
+      reportDiagnostics(deferred, ctx.flags.verbose)
+    }
+  }
+
+  return result.graph as TLockfileObject
+}
+
+/**
  * Print graph diagnostics: one count per code, or per-entry on verbose. mutate()
  * re-emits parse-time noise (hundreds of lines), so collapse it unless asked.
  */
@@ -278,10 +328,13 @@ export const _internal = {
   _parse,
   _audit,
   _patch,
+  _refurbish,
   _format,
 }
 
 export const parse: typeof _parse = (...args) => _internal._parse(...args)
 export const audit: typeof _audit = (...args) => _internal._audit(...args)
 export const patch: typeof _patch = (...args) => _internal._patch(...args)
+export const refurbish: typeof _refurbish = (...args) =>
+  _internal._refurbish(...args)
 export const format: typeof _format = (...args) => _internal._format(...args)

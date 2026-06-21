@@ -17,6 +17,9 @@ export type TContext = {
   // Optional `@antongolub/lockfile` RegistryAdapter override — tests inject a
   // mock here; production builds a live, scope-aware one via `buildRegistry`.
   registry?: any
+  // Optional `refurbish` TarballSource override — tests inject canned tarball
+  // bytes here; production builds a live one via `buildTarballSource`.
+  tarballSource?: any
 }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>

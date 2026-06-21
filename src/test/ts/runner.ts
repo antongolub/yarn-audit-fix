@@ -7,7 +7,6 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 
 const lf = (await import('../../main/ts/lockfile'))._internal
 const { getContext, run } = await import('../../main/ts')
-const { getYarn } = await import('../../main/ts/util')
 const { parseAuditReport: parseAuditV1 } = await import('../../main/ts/audit/v1')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -45,12 +44,11 @@ const yarnLockBefore = readFixture('lockfile/legacy/yarn.lock.before')
 const auditReport = parseAuditV1(String((audit as any).stdout ?? ''))
 
 const cwd = process.cwd()
-const shell = true
-const stdio = ['inherit', 'inherit', 'inherit']
 
 const lfAudit = vi.spyOn(lf, '_audit')
 const lfParse = vi.spyOn(lf, '_parse')
 const lfPatch = vi.spyOn(lf, '_patch')
+const lfRefurbish = vi.spyOn(lf, '_refurbish')
 const lfFormat = vi.spyOn(lf, '_format')
 
 describe('yarn-audit-fix', () => {
@@ -80,11 +78,13 @@ describe('yarn-audit-fix', () => {
 
     lfAudit.mockResolvedValue(auditReport)
     lfPatch.mockImplementation(async (graph: any) => graph)
+    lfRefurbish.mockImplementation(async (graph: any) => graph)
   })
   afterEach(() => {
     vi.clearAllMocks()
     lfAudit.mockResolvedValue(auditReport)
     lfPatch.mockImplementation(async (graph: any) => graph)
+    lfRefurbish.mockImplementation(async (graph: any) => graph)
   })
   afterAll(() => vi.restoreAllMocks())
 
@@ -101,11 +101,11 @@ describe('yarn-audit-fix', () => {
     })
 
     describe('`patch` flow', () => {
-      it('patches the real lockfile in place, then installs', async () => {
+      it('patches + refurbishes the lockfile in place — no yarn install', async () => {
         await run({})
 
-        // parse → audit → patch → format, all once; the lockfile is read and
-        // (re)written in place under cwd — no temp copy / symlink dance.
+        // parse → audit → patch → refurbish → format, each once; the lockfile is
+        // read and (re)written in place under cwd, with no reconcile install.
         expect(lfParse).toHaveBeenCalledWith(
           expect.any(String),
           'yarn-classic',
@@ -113,21 +113,23 @@ describe('yarn-audit-fix', () => {
         )
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(lfPatch).toHaveBeenCalledTimes(1)
+        expect(lfRefurbish).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
         expect(fs.writeFileSync).toHaveBeenCalledWith(
           path.join(cwd, 'yarn.lock'),
           expect.any(String),
         )
-        expect(cp.spawnSync).toHaveBeenCalledWith(
-          getYarn(),
-          ['install', '--update-checksums', '--ignore-engines'],
-          { cwd, stdio, shell },
+        // yaf never shells out to `yarn install` any more.
+        expect(cp.spawnSync).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining(['install']),
+          expect.anything(),
         )
       })
     })
 
     describe('cli', () => {
-      it('invokes the flow with flag-derived install args', async () => {
+      it('parses argv and drives the full patch flow', async () => {
         process.argv.push(
           '--verbose',
           `--registry=${registryUrl}`,
@@ -140,19 +142,8 @@ describe('yarn-audit-fix', () => {
 
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(lfPatch).toHaveBeenCalledTimes(1)
+        expect(lfRefurbish).toHaveBeenCalledTimes(1)
         expect(lfFormat).toHaveBeenCalledTimes(1)
-        expect(cp.spawnSync).toHaveBeenCalledWith(
-          getYarn(),
-          [
-            'install',
-            '--update-checksums',
-            '--verbose',
-            '--registry',
-            registryUrl,
-            '--ignore-engines',
-          ],
-          { cwd, stdio, shell },
-        )
       })
 
       describe('on error', () => {

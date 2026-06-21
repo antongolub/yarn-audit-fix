@@ -1369,14 +1369,13 @@ __metadata:
   version: 2.0.8
   resolution: "@npmcli/git@npm:2.0.8"
   dependencies:
-    "@npmcli/promise-spawn": ^1.1.0
+    "@npmcli/promise-spawn": ^1.3.2
     lru-cache: ^6.0.0
-    mkdirp: ^1.0.3
-    npm-pick-manifest: ^6.0.0
+    mkdirp: ^1.0.4
+    npm-pick-manifest: ^6.1.1
     promise-inflight: ^1.0.1
     promise-retry: ^2.0.1
-    semver: ^7.3.2
-    unique-filename: ^1.1.1
+    semver: ^7.3.5
     which: ^2.0.2
   languageName: node
   linkType: hard
@@ -2905,11 +2904,11 @@ __metadata:
   version: 4.16.5
   resolution: "browserslist@npm:4.16.5"
   dependencies:
-    caniuse-lite: ^1.0.30001125
+    caniuse-lite: ^1.0.30001214
     colorette: ^1.2.2
-    electron-to-chromium: ^1.3.564
-    escalade: ^3.0.2
-    node-releases: ^1.1.61
+    electron-to-chromium: ^1.3.719
+    escalade: ^3.1.1
+    node-releases: ^1.1.71
   bin:
     browserslist: cli.js
   languageName: node
@@ -3196,6 +3195,12 @@ __metadata:
   version: 1.0.30001198
   resolution: "caniuse-lite@npm:1.0.30001198"
   checksum: bbd5ac75e02e8cc3491bf40ad65247569b256288541c9eee12d57dcb4b3781fd137f4588c678bb55532ffded18278d858dd39749c24376feb7ad5373a69e1622
+  languageName: node
+  linkType: hard
+
+"caniuse-lite@npm:^1.0.30001214":
+  version: 1.0.30001799
+  resolution: "caniuse-lite@npm:1.0.30001799"
   languageName: node
   linkType: hard
 
@@ -3537,12 +3542,6 @@ __metadata:
   version: 1.2.2
   resolution: "colorette@npm:1.2.2"
   checksum: 69fec14ddaedd0f5b00e4bae40dc4bc61f7050ebdc82983a595d6fd64e650b9dc3c033fff378775683138e992e0ddd8717ac7c7cec4d089679dcfbe3cd921b04
-  languageName: node
-  linkType: hard
-
-"colorette@npm:^1.2.2":
-  version: 1.4.0
-  resolution: "colorette@npm:1.4.0"
   languageName: node
   linkType: hard
 
@@ -4607,6 +4606,12 @@ __metadata:
   version: 1.3.684
   resolution: "electron-to-chromium@npm:1.3.684"
   checksum: aadda6020deab138477f32122898ce5c866e4c2de5592add2a3278394e108d5fcf256fd1b9c121e1e9a2e434f870be19d9991e5d743686ba29f5b7325561fe67
+  languageName: node
+  linkType: hard
+
+"electron-to-chromium@npm:^1.3.719":
+  version: 1.5.376
+  resolution: "electron-to-chromium@npm:1.5.376"
   languageName: node
   linkType: hard
 
@@ -6140,6 +6145,14 @@ __metadata:
   dependencies:
     lru-cache: ^6.0.0
   checksum: 98aecd095006d276b23cc3449eecbeb4f2126fa4150597aa308f2ccb9bb2c1c7cc3a9a294e3cf63c471cc8485912562219494da326abc366034c3c2372e1519b
+  languageName: node
+  linkType: hard
+
+"hosted-git-info@npm:^4.0.1":
+  version: 4.1.0
+  resolution: "hosted-git-info@npm:4.1.0"
+  dependencies:
+    lru-cache: ^6.0.0
   languageName: node
   linkType: hard
 
@@ -8701,6 +8714,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"npm-package-arg@npm:^8.1.2":
+  version: 8.1.5
+  resolution: "npm-package-arg@npm:8.1.5"
+  dependencies:
+    hosted-git-info: ^4.0.1
+    semver: ^7.3.4
+    validate-npm-package-name: ^3.0.0
+  languageName: node
+  linkType: hard
+
 "npm-packlist@npm:^2.1.4":
   version: 2.1.4
   resolution: "npm-packlist@npm:2.1.4"
@@ -8723,6 +8746,17 @@ __metadata:
     npm-package-arg: ^8.0.0
     semver: ^7.0.0
   checksum: 5eb9e5eb667e0693f4499eb89fc7a1217fa76e756924c5298167157fc507eb28fbee66700ee8769cd9c2b95d3426f2f8a4ccc304515cfbe861048f41af322765
+  languageName: node
+  linkType: hard
+
+"npm-pick-manifest@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "npm-pick-manifest@npm:6.1.1"
+  dependencies:
+    npm-install-checks: ^4.0.0
+    npm-normalize-package-bin: ^1.0.1
+    npm-package-arg: ^8.1.2
+    semver: ^7.3.4
   languageName: node
   linkType: hard
 

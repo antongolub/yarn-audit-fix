@@ -7,7 +7,6 @@ import {
   printRuntimeDigest,
   resolveBins,
   verify,
-  yarnInstall,
 } from './stages'
 import { bold, getSelfManifest, normalizeFlags, readJson } from './util'
 
@@ -54,10 +53,10 @@ export const getContext = (flags: TFlags = {}): TContext => {
 }
 
 /**
- * Patch yarn.lock with registry advisory data, then reconcile via `yarn install`.
- *
- * Async since v11: advisories are fetched straight from the registry over HTTP
- * (see `audit/registry`), so there is no synchronous `runSync` any more.
+ * Patch yarn.lock with registry advisory data and complete it in-memory — no
+ * reconcile `yarn install`. Advisories, fix resolution and the berry checksum
+ * fill all run straight against the registry over HTTP (see `audit/registry`,
+ * `lockfile.refurbish`), so the run is async and never spawns yarn.
  */
 export const run = async (_flags: TFlags = {}): Promise<void> => {
   if (_flags.V) {
@@ -70,10 +69,10 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
   const log = (note: string) => !flags.silent && console.log(bold(note))
 
   // Graceful Ctrl+C / kill: exit 128+signal with a clean message instead of a
-  // raw stack. A SIGINT received *inside* a sync spawnSync is swallowed (so this
-  // callback won't fire mid-`yarn install`), but registering the listener stops
-  // Node's abrupt default-terminate — the interrupted install then surfaces on
-  // the spawnSync result and flows through the catch below.
+  // raw stack. Registering the listener stops Node's abrupt default-terminate;
+  // an interrupt during the registry HTTP work then unwinds through the catch
+  // below (a SIGINT received inside the short version-probe spawnSync is
+  // swallowed, so this callback simply won't fire there).
   const onAbort = (signal: NodeJS.Signals): void => {
     ctx.err = { signal }
     !flags.silent && console.error(bold(`\nAborted (${signal})`))
@@ -92,8 +91,6 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
     verify(ctx)
     log('Patching yarn.lock with audit data...')
     await patchLockfile(ctx)
-    log('Installing deps update...')
-    yarnInstall(ctx)
     log('Done')
   } catch (err: any) {
     ctx.err = err

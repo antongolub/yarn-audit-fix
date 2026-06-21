@@ -97,6 +97,58 @@ const post = (
     req.end(data)
   })
 
+/**
+ * GET a package tarball as raw bytes (for `refurbish` checksum recompute).
+ * SECURITY: mirrors `post` — the bearer token is attached only over https and
+ * only when the tarball is same-origin as the registry that declared it (a
+ * CDN-hosted tarball on another host gets no credential); redirects are NOT
+ * followed (a 3xx resolves to `undefined`, so the token can't be forwarded);
+ * any failure degrades to `undefined` (caller defers to a real `yarn install`).
+ */
+export const getTarball = (
+  tarballUrl: string,
+  registryUrl: string,
+  token?: string,
+): Promise<Uint8Array | undefined> =>
+  new Promise((resolve) => {
+    let u: URL
+    try {
+      u = new URL(tarballUrl)
+    } catch {
+      return resolve(undefined)
+    }
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return resolve(undefined)
+    const mod = u.protocol === 'https:' ? https : http
+
+    let sameOrigin = false
+    try {
+      sameOrigin = new URL(registryUrl).host === u.host
+    } catch {
+      sameOrigin = false
+    }
+    const headers: Record<string, string> = { accept: 'application/octet-stream' }
+    if (token && u.protocol === 'https:' && sameOrigin)
+      headers.authorization = `Bearer ${token}`
+
+    const req = mod.request(
+      u,
+      { method: 'GET', headers, timeout: TIMEOUT_MS },
+      (res) => {
+        const status = res.statusCode ?? 0
+        if (status < 200 || status >= 300) {
+          res.resume() // drain; redirects (3xx) included — deliberately not followed
+          return resolve(undefined)
+        }
+        const chunks: Buffer[] = []
+        res.on('data', (c) => chunks.push(c))
+        res.on('end', () => resolve(new Uint8Array(Buffer.concat(chunks))))
+      },
+    )
+    req.on('error', () => resolve(undefined))
+    req.on('timeout', () => req.destroy())
+    req.end()
+  })
+
 /** Intersect two patched ranges (AND); `<0.0.0` "no fix" sentinel wins. */
 const joinAnd = (a: string, b: string): string =>
   a === '<0.0.0' || b === '<0.0.0' ? '<0.0.0' : `${a} ${b}`

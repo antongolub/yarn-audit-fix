@@ -8,7 +8,6 @@ import { TCallback } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType } from './lockfile'
 import {
-  formatFlags,
   getBinVersion,
   getNpm,
   getSelfManifest,
@@ -82,36 +81,6 @@ export const printRuntimeDigest: TCallback = ({
   )
 }
 
-/** Run yarn install to refresh packages after the lockfile update. */
-export const yarnInstall: TCallback = ({ cwd, flags, versions, bins }) => {
-  if (flags['dry-run']) {
-    return
-  }
-
-  semver.gte(versions.yarn, '2.0.0')
-    ? invoke(
-        bins.yarn,
-        ['install', '--mode=update-lockfile'],
-        cwd,
-        flags.silent,
-      )
-    : invoke(
-        bins.yarn,
-        [
-          'install',
-          '--update-checksums',
-          ...formatFlags(flags, 'verbose', 'silent', 'registry'),
-          // audit-fix only reconciles the lockfile, so the project's own engine
-          // constraints — a transitive demanding a newer Node than the one
-          // running yaf (e.g. node-releases@>=18 on Node 16) — must never abort
-          // the run. Classic-only flag; berry doesn't enforce engines here.
-          '--ignore-engines',
-        ],
-        cwd,
-        flags.silent,
-      )
-}
-
 /** Set the process exit code from the error (printing is handled by `run`). */
 export const exit: TCallback = ({ err }) => {
   // POSIX convention: a signal-terminated run exits 128 + signal number.
@@ -131,26 +100,25 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
   // advisories, patch resolves fixes + completes the new transitive closure.
   const report = await lf.audit(lockfile, ctx)
   const patched = await lf.patch(lockfile, report, ctx, lockfileType)
+  // Then fill any install-required field the edit left missing (the yarn-berry
+  // zip checksum) straight from the registry, so the result is a complete
+  // lockfile needing no reconcile `yarn install` (no-op for yarn-classic).
+  const refurbished = await lf.refurbish(patched, lockfileType, ctx)
 
   // The single write lands only after a successful in-memory patch, so a failure
   // leaves the original lockfile untouched. `--dry-run` skips it entirely.
   if (!flags['dry-run']) {
-    fs.writeFileSync(lockfilePath, format(patched, lockfileType))
+    fs.writeFileSync(lockfilePath, format(refurbished, lockfileType))
   }
 }
 
-/** Verify the working dir has the required files. */
-export const verify: TCallback = ({ cwd, versions }) => {
-  const required = ['yarn.lock', 'package.json']
-
-  // NOTE yarn 2+ in PnP mode does not create `node_modules` dir
-  if (semver.lt(versions.yarn, '2.0.0')) {
-    required.push('node_modules')
-  }
-
-  required.forEach((resource) => {
+/** Verify the working dir has the files we patch. */
+export const verify: TCallback = ({ cwd }) => {
+  // yaf only rewrites the lockfile now (no install), so `node_modules` need not
+  // be present — just the two files we read.
+  for (const resource of ['yarn.lock', 'package.json']) {
     if (!fs.existsSync(path.join(cwd, resource))) {
       throw new Error(`not found: ${resource}`)
     }
-  })
+  }
 }

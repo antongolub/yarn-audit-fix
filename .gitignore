@@ -103,6 +103,8 @@ buildcache
 
 # Output of 'npm pack'
 *.tgz
+# …but the refurbish test ships real tarball fixtures (checksum recompute).
+!src/test/fixtures/tarballs/*.tgz
 
 # Yarn Integrity file
 .yarn-integrity
