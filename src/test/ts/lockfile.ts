@@ -242,4 +242,31 @@ describe('refurbish', () => {
     const out = format(await refurbish(parse(input, fmt), fmt, rctx()), fmt)
     expect(out).toBe(format(parse(input, fmt), fmt))
   })
+
+  it('defers bare-era (yarn-3 / berry-v6) checksums — never fills or fetches', async () => {
+    const v3 = path.resolve(__dirname, '../fixtures/lockfile/v3/yarn.lock')
+    const input = readFileSync(v3, 'utf-8')
+    // strip the checksum to mimic a freshly-added node refurbish would fill
+    const stripped = input.replace(/\n {2}checksum: [0-9a-f]+/, '')
+    expect(stripped).not.toEqual(input)
+    const fmt = getLockfileType(stripped)
+    expect(fmt).toBe('yarn-berry-v6')
+
+    let fetched = 0
+    const source = {
+      tarball: async () => {
+        fetched += 1
+        return undefined
+      },
+    }
+    const out = format(await refurbish(parse(stripped, fmt), fmt, rctx(source)), fmt)
+
+    // yarn 2.x/3.x checksums are bare (no cacheKey prefix) + DEFLATE, not
+    // reproducible from the npm tarball — so refurbish must defer (never fetch,
+    // never fill) and let `yarn install` self-heal. Guards the snapshot.73
+    // "fill with 10c0/<hex> STORE form" lock-corruption regression.
+    expect(fetched).toBe(0)
+    expect(out).not.toMatch(/10c0\//)
+    expect(out).toBe(stripped)
+  })
 })
