@@ -113,9 +113,6 @@ export const isWindows = (): boolean =>
   process.platform === 'win32' ||
   /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
 
-// https://github.com/facebook/jest/issues/2993
-export const getYarn = (): string => (isWindows() ? 'yarn.cmd' : 'yarn')
-
 export const getClosestBin = (cmd: string): string => findClosest(`./node_modules/.bin/${cmd}`) as string
 
 export const getNpm = (npmPath = 'system', isWin = isWindows()): string => {

@@ -8,26 +8,18 @@ import { TCallback } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType } from './lockfile'
 import { createProgress } from './ui'
-import {
-  getBinVersion,
-  getNpm,
-  getSelfManifest,
-  getYarn,
-  invoke,
-} from './util'
+import { getBinVersion, getNpm, getSelfManifest, invoke } from './util'
 
 
-/** Resolve bin paths and tool versions. */
+/** Resolve the runtime + yaf versions. */
 export const resolveBins: TCallback = ({ ctx, flags }) => {
   const yafManifest = getSelfManifest()
-  ctx.bins = {
-    yarn: getYarn(),
-    npm: getNpm(flags['npm-path']),
-  }
+  // npm is resolved solely to look up the latest published yaf below — yaf no
+  // longer shells out to yarn/npm for the fix itself (it's all registry HTTP +
+  // an in-memory lockfile patch), so their bin paths/versions aren't reported.
+  ctx.bins = { npm: getNpm(flags['npm-path']) }
   ctx.versions = {
     node: getBinVersion('node'),
-    npm: getBinVersion(ctx.bins.npm),
-    yarn: getBinVersion(ctx.bins.yarn),
     yaf: yafManifest.version,
     yafLatest: invoke(
       ctx.bins.npm,
@@ -43,7 +35,6 @@ export const resolveBins: TCallback = ({ ctx, flags }) => {
 export const printRuntimeDigest: TCallback = ({
   cwd,
   flags,
-  bins,
   versions,
   manifest,
 }) => {
@@ -51,15 +42,6 @@ export const printRuntimeDigest: TCallback = ({
     return
   }
   const isMonorepo = !!manifest.workspaces
-  // NOTE npm > 7.0.0 provides monorepo support
-  if (
-    isMonorepo &&
-    (semver.parse(versions.npm as string)?.major as number) < 7
-  ) {
-    console.warn(
-      "This project looks like monorepo, so it's recommended to use `npm v7+` to process workspaces",
-    )
-  }
 
   if (semver.gt(versions.yafLatest, versions.yaf)) {
     console.warn(
@@ -71,7 +53,6 @@ export const printRuntimeDigest: TCallback = ({
     JSON.stringify(
       {
         isMonorepo,
-        bins,
         versions,
         cwd,
         flags,
