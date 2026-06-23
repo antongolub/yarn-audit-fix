@@ -45,7 +45,6 @@ export const getContext = (flags: TFlags = {}): TContext => {
     flags,
     manifest,
     versions: {},
-    bins: {},
   } as TContext
   ctx.ctx = ctx
 
@@ -99,7 +98,7 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
 
   try {
     log('Resolve bins')
-    resolveBins(ctx)
+    await resolveBins(ctx)
     log('Runtime digest')
     printRuntimeDigest(ctx)
     log('Verifying package structure...')

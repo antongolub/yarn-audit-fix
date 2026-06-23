@@ -62,6 +62,31 @@ const cannedRegistry = ({ packuments, resolves }: Canned) => ({
   resolve: async (n: string, r: string) => resolves[`${n}\t${r}`] ?? undefined,
 })
 
+// A descriptor (`name@range`) must resolve to exactly ONE entry — yarn dedups it
+// project-wide, so the same range string in two entry headers is a malformed lock
+// that `yarn install --immutable` rejects. This guards the completion
+// double-binding class of regression (caught in @antongolub/lockfile snapshot.77:
+// `'highest'` minted a 2nd entry for an already-bound range → e.g. semver@^7.3.5
+// in two entries). Works for berry (quoted) + classic (bare) entry headers.
+const duplicateDescriptors = (lock: string): string[] => {
+  const seen = new Set<string>()
+  const dups = new Set<string>()
+  for (const line of lock.split('\n')) {
+    // entry header = unindented line ending in ':' (skip comments + __metadata)
+    if (/^\s/.test(line) || line.startsWith('#') || !line.trimEnd().endsWith(':'))
+      continue
+    const header = line.trimEnd().slice(0, -1)
+    if (header === '__metadata') continue
+    for (const raw of header.split(',')) {
+      const d = raw.trim().replace(/^"|"$/g, '')
+      if (!d) continue
+      if (seen.has(d)) dups.add(d)
+      seen.add(d)
+    }
+  }
+  return [...dups]
+}
+
 describe('patch golden (record/replay registry)', () => {
   const cases = [
     // three schemas, full upgrade set
@@ -100,6 +125,10 @@ describe('patch golden (record/replay registry)', () => {
         fmt,
       )
       const out = format(result, fmt)
+
+      // No descriptor may be double-bound (malformed → `yarn install --immutable`
+      // rejects). Runs in both record + replay so a bad regen can't be committed.
+      expect(duplicateDescriptors(out)).toEqual([])
 
       if (rec) {
         fs.writeFileSync(cannedPath, JSON.stringify(rec.dump(result)))

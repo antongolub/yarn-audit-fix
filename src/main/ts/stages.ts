@@ -4,30 +4,41 @@ import fs from 'node:fs'
 
 import semver from 'semver'
 
-import { TCallback } from './ifaces'
+import { buildRegistry } from './audit/adapter'
+import { TCallback, TContext } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType } from './lockfile'
 import { createProgress } from './ui'
-import { getBinVersion, getNpm, getSelfManifest, invoke } from './util'
+import { getSelfManifest } from './util'
 
 
-/** Resolve the runtime + yaf versions. */
-export const resolveBins: TCallback = ({ ctx, flags }) => {
-  const yafManifest = getSelfManifest()
-  // npm is resolved solely to look up the latest published yaf below — yaf no
-  // longer shells out to yarn/npm for the fix itself (it's all registry HTTP +
-  // an in-memory lockfile patch), so their bin paths/versions aren't reported.
-  ctx.bins = { npm: getNpm(flags['npm-path']) }
+/** Resolve the runtime + yaf versions (latest yaf straight from the registry). */
+export const resolveBins: TCallback = async ({ ctx }) => {
+  const { name, version } = getSelfManifest()
   ctx.versions = {
-    node: getBinVersion('node'),
-    yaf: yafManifest.version,
-    yafLatest: invoke(
-      ctx.bins.npm,
-      ['view', yafManifest.name, 'version'],
-      process.cwd(),
-      true,
-      false,
-    ) as string,
+    node: process.version,
+    yaf: version,
+    yafLatest: await latestPublished(ctx, name, version),
+  }
+}
+
+/**
+ * Latest published version of `name`, read straight from the configured registry
+ * (the same scope-aware, host-bound-auth routing as the audit/patch HTTP) — no
+ * `npm view` spawn. Best-effort: any failure (offline, 404, throttle) falls back
+ * to `fallback`, so the out-of-date nudge just stays quiet instead of breaking
+ * the run.
+ */
+const latestPublished = async (
+  ctx: TContext,
+  name: string,
+  fallback: string,
+): Promise<string> => {
+  try {
+    const packument = await buildRegistry(ctx).packument(name)
+    return packument?.distTags?.latest ?? fallback
+  } catch {
+    return fallback
   }
 }
 

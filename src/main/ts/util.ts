@@ -1,5 +1,3 @@
-import cp from 'node:child_process'
-import type { StdioOptions } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -18,31 +16,6 @@ const colorize =
 
 export const bold = (s: string): string =>
   colorize ? `\u001B[1m${s}\u001B[22m` : s
-
-export const invoke = (
-  cmd: string,
-  args: string[],
-  cwd: string,
-  silent = false,
-  inherit = true,
-  skipError = false,
-): string => {
-  !silent && console.log(bold('invoke'), cmd, ...args)
-
-  const stdio: StdioOptions = inherit
-    ? ['inherit', 'inherit', 'inherit']
-    : [null, null, null] // eslint-disable-line
-  const result = cp.spawnSync(cmd, args, { cwd, stdio, shell: true })
-
-  // `status` is null when the child was killed by a signal (e.g. Ctrl+C →
-  // SIGINT), so check `signal` too — otherwise an interrupted command would be
-  // mistaken for success and the run would carry on to "Done".
-  if (!skipError && (result.error || result.status || result.signal)) {
-    throw result
-  }
-
-  return String(result.stdout?.toString().trim())
-}
 
 const checkValue = (
   key: string,
@@ -109,26 +82,6 @@ export const mapFlags = (flags: TFlags, mapping: TFlagsMapping): TFlags =>
     return memo
   }, {})
 
-export const isWindows = (): boolean =>
-  process.platform === 'win32' ||
-  /^(msys|cygwin)$/.test(process.env.OSTYPE as string)
-
-export const getClosestBin = (cmd: string): string => findClosest(`./node_modules/.bin/${cmd}`) as string
-
-export const getNpm = (npmPath = 'system', isWin = isWindows()): string => {
-  const cmd = isWin ? 'npm.cmd' : 'npm'
-
-  if (npmPath === 'system') {
-    return cmd
-  }
-
-  if (npmPath === 'local') {
-    return getClosestBin(cmd)
-  }
-
-  return npmPath
-}
-
 export const getWorkspaces = (
   cwd: string,
   manifest: Record<string, any>,
@@ -164,9 +117,6 @@ export const attempt = <T>(f: () => T): T | null => {
     return null // eslint-disable-line
   }
 }
-
-export const getBinVersion = (bin: string, cwd = process.cwd()): string =>
-  invoke(bin, ['--version'], cwd, true, false)
 
 export const getSelfManifest = () => readJson(findClosest('package.json') as string)
 

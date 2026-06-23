@@ -15,13 +15,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.76":
-  version: 0.0.0-snapshot.76
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.76"
+"@antongolub/lockfile@npm:0.0.0-snapshot.78":
+  version: 0.0.0-snapshot.78
+  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.78"
   dependencies:
     node-fetch-native: "npm:^1.6.7"
-    semver: "npm:^7.6.0"
-  checksum: 10c0/f34d8e20d7ed60762a698d759b5eaec646f593ff86119b4c43513b8d0556f00c738e8df968e294eda217336ec8d6c52c5a634b9db67a43abd6e3c711d5b0e11b
+    semver: "npm:^7.8.5"
+  checksum: 10c0/ab6c4d7a8f32fd638a26c2a1623b416b63dec40da5c5d77d79f835dbf32d834994bbb8fa9ef3b8c5323a0bd1546d3018bc0456ccf8deb20b18fbd511d73cbea1
   languageName: node
   linkType: hard
 
@@ -4138,12 +4138,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.1.1, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.7.1, semver@npm:^7.7.4":
+"semver@npm:^7.1.1, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.7.1, semver@npm:^7.7.4":
   version: 7.8.4
   resolution: "semver@npm:7.8.4"
   bin:
     semver: bin/semver.js
   checksum: 10c0/81b7c296fd7927b80f67fa516b75fa1017caac8167795320de28e76ccbc6f7f01763c30ecd10d6a0d8fd089708ab0548a5aebb94b0870e99c2a2b4600a46389b
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.8.5":
+  version: 7.8.5
+  resolution: "semver@npm:7.8.5"
+  bin:
+    semver: bin/semver.js
+  checksum: 10c0/b1f3127a5be8125a94f37188b361c212466c292c6910adce3ec106cff5dc211ccaedc4739c11bb70fda59d6fc1f040a9bca289f4e093451521a2372e5231fe0c
   languageName: node
   linkType: hard
 
@@ -4972,7 +4981,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.76"
+    "@antongolub/lockfile": "npm:0.0.0-snapshot.78"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.0"

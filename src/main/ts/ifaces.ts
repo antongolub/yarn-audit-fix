@@ -12,7 +12,6 @@ export type TContext = {
   flags: TFlags
   manifest: Record<string, any>
   versions: Record<string, string>
-  bins: Record<string, string>
   err?: any
   // Optional `@antongolub/lockfile` RegistryAdapter override — tests inject a
   // mock here; production builds a live, scope-aware one via `buildRegistry`.

@@ -17,7 +17,6 @@ const STRING = [
   'cwd',
   'exclude',
   'ignore',
-  'npm-path',
   'registry',
 ]
 const ENV: Record<string, string> = {
@@ -27,14 +26,12 @@ const ENV: Record<string, string> = {
   exclude: 'YAF_EXCLUDE',
   force: 'YAF_FORCE',
   ignore: 'YAF_IGNORE',
-  'npm-path': 'YAF_NPM_PATH',
   registry: 'YAF_REGISTRY',
   silent: 'YAF_SILENT',
   verbose: 'YAF_VERBOSE',
 }
 const CHOICES: Record<string, string[]> = {
   'audit-level': ['low', 'moderate', 'high', 'critical'],
-  'npm-path': ['system', 'local'],
 }
 
 const HELP = `Usage: yarn-audit-fix [options]
@@ -47,7 +44,6 @@ Options:
                           (e.g. lodash,@scope/*@>=2 <3)
   --force                 Apply semver-major upgrades, not just compatible ones
   --ignore <ids>          Advisory ids to ignore: comma-sep globs (GHSA or npm id)
-  --npm-path <path>       npm to use: system | local
   --registry <url>        Custom registry url
   --silent                Disable log output
   --verbose               Verbose/debug logging
@@ -88,7 +84,6 @@ export const parse = (
     const name = ENV[key]
     if (name && !(key in flags) && env[name] !== undefined) flags[key] = env[name]
   }
-  flags['npm-path'] ??= 'system'
 
   for (const [key, allowed] of Object.entries(CHOICES)) {
     const value = flags[key]

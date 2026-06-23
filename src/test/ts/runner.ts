@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 const lf = (await import('../../main/ts/lockfile'))._internal
 const { getContext, run } = await import('../../main/ts')
 const { parseAuditReport: parseAuditV1 } = await import('../../main/ts/audit/v1')
+const adapter = await import('../../main/ts/audit/adapter')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // Captured before the fs spies are installed; vitest lazily reads module
@@ -68,13 +69,15 @@ describe('yarn-audit-fix', () => {
       // @ts-ignore
       return realReadFileSync(name, ...rest)
     })
+    // yaf is spawn-free now; keep a benign spawnSync spy purely so the "never
+    // shells out to `yarn install`" assertion below has something to inspect.
     // @ts-ignore
-    vi.spyOn(cp, 'spawnSync').mockImplementation((cmd: string, [$0]: string[]) => {
-      if ($0 === '--version' || (cmd === 'npm' && $0 === 'view')) {
-        return { status: 0, stdout: '1.0.1' }
-      }
-      return { status: 0, stdout: 'foobar' }
-    })
+    vi.spyOn(cp, 'spawnSync').mockReturnValue({ status: 0, stdout: '' })
+    // The out-of-date nudge reads the latest published version straight from the
+    // registry (no `npm view`); stub it so this flow test stays offline.
+    vi.spyOn(adapter, 'buildRegistry').mockReturnValue({
+      packument: async () => ({ distTags: { latest: '1.0.1' } }),
+    } as any)
 
     lfAudit.mockResolvedValue(auditReport)
     lfPatch.mockImplementation(async (graph: any) => graph)
@@ -147,11 +150,12 @@ describe('yarn-audit-fix', () => {
       })
 
       describe('on error', () => {
-        // Drive run() with a failing spawn (resolveBins fails first) so the
-        // error/exit path is exercised.
+        // resolveBins no longer spawns, so inject the failure at the audit
+        // stage; run()'s catch maps the thrown reason to the exit code.
         const checkExit = async (reason: any): Promise<void> => {
-          // @ts-ignore
-          vi.mocked(cp.spawnSync).mockImplementation(() => reason)
+          lfAudit.mockImplementationOnce(async () => {
+            throw reason
+          })
           await run({}).catch(() => {
             /* expected */
           })

@@ -3507,10 +3507,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colorette@npm:^1.2.1":
-  version: 1.2.2
-  resolution: "colorette@npm:1.2.2"
-  checksum: 69fec14ddaedd0f5b00e4bae40dc4bc61f7050ebdc82983a595d6fd64e650b9dc3c033fff378775683138e992e0ddd8717ac7c7cec4d089679dcfbe3cd921b04
+"colorette@npm:^1.2.2":
+  version: 1.4.0
+  resolution: "colorette@npm:1.4.0"
   languageName: node
   linkType: hard
 
@@ -4565,8 +4564,8 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.3.719":
-  version: 1.5.376
-  resolution: "electron-to-chromium@npm:1.5.376"
+  version: 1.5.377
+  resolution: "electron-to-chromium@npm:1.5.377"
   languageName: node
   linkType: hard
 
@@ -8520,10 +8519,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-releases@npm:^1.1.61, node-releases@npm:^1.1.70":
-  version: 1.1.71
-  resolution: "node-releases@npm:1.1.71"
-  checksum: a6ab18069e43d70b811fa7f12b397619f2003f78ac2ed0affa30876880ca3036a191d33679d93baac166afa12a7b1b1716e13f3c82c0f0fa09e2c83db3f91faf
+"node-releases@npm:^1.1.71":
+  version: 1.1.77
+  resolution: "node-releases@npm:1.1.77"
   languageName: node
   linkType: hard
 

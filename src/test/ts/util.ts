@@ -4,9 +4,7 @@ import { fileURLToPath } from 'node:url'
 import type { TFlags, TFlagsMapping } from '../../main/ts'
 import {
   formatFlags,
-  getNpm,
   getWorkspaces,
-  isWindows,
   mapFlags,
   normalizeFlags,
   readJson,
@@ -89,27 +87,6 @@ describe('util', () => {
 
       cases.forEach(([input, picklist, output]) => {
         expect(formatFlags(normalizeFlags(input), ...picklist)).toEqual(output)
-      })
-    })
-  })
-
-  describe('#getNpm', () => {
-    const isWin = isWindows()
-    const cmd = isWin ? 'npm.cmd' : 'npm'
-    const localNpm = path.resolve(__dirname, '../../../node_modules/.bin', cmd)
-    const cases: [any, string?, string?][] = [
-      ['local', localNpm],
-      ['system', cmd],
-      [cmd, cmd],
-      [localNpm, localNpm],
-    ]
-    cases.forEach(([npmPath, result, err]) => {
-      it(`resolves npm ref: npmPath=${npmPath},  isWin=${isWin}`, () => {
-        if (err) {
-          expect(() => getNpm(npmPath)).toThrowError()
-        } else {
-          expect(getNpm(npmPath)).toBe(result)
-        }
       })
     })
   })

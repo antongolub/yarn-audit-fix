@@ -12,12 +12,24 @@ balanced-match@^3.0.0:
   resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-3.0.1.tgz"
   integrity sha512-vjtV3hiLqYDNRoiAv0zC4QaGAMPomEoq83PRmYIofPswwZurCeWR5LByXm7SyoL0Zh5+2z0+HC7jG8gSZJUh0w==
 
+balanced-match@^4.0.2:
+  version "4.0.4"
+  resolved "https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz"
+  integrity sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==
+
 brace-expansion@^4.0.0:
   version "4.0.1"
   resolved "https://registry.npmjs.org/brace-expansion/-/brace-expansion-4.0.1.tgz"
   integrity sha512-YClrbvTCXGe70pU2JiEiPLYXO9gQkyxYeKpJIQHVS/gOs6EWMQP2RYBwjFLNT322Ji8TOC3IMPfsYCedNpzKfA==
   dependencies:
     balanced-match "^3.0.0"
+
+brace-expansion@^5.0.5:
+  version "5.0.6"
+  resolved "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.6.tgz"
+  integrity sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==
+  dependencies:
+    balanced-match "^4.0.2"
 
 cross-spawn@^7.0.6:
   version "7.0.6"
@@ -65,12 +77,19 @@ lru-cache@^11.0.0:
   resolved "https://registry.npmjs.org/lru-cache/-/lru-cache-11.5.1.tgz"
   integrity sha512-RPimw/7aMdv2oqRrxKwvZXcPfwBrn/JZ2xYcY9Hus/6LaS3VOAKVWKWgNLCFSiOm1ESXinjsDlidVU7JlnCN2A==
 
-minimatch@^10.0.0:
+minimatch@10.0.0:
   version "10.0.0"
   resolved "https://registry.npmjs.org/minimatch/-/minimatch-10.0.0.tgz"
   integrity sha512-S4phymWe5NHWbTV8sAlyNQfkmdhvaoHX43x4yLtJBjw2zJtEuzkihDjV5uKq+D/EoMkjbG6msw3ubbSd1pGkyg==
   dependencies:
     brace-expansion "^4.0.0"
+
+minimatch@^10.0.0:
+  version "10.2.5"
+  resolved "https://registry.npmjs.org/minimatch/-/minimatch-10.2.5.tgz"
+  integrity sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==
+  dependencies:
+    brace-expansion "^5.0.5"
 
 minipass@^7.1.2:
   version "7.1.3"
