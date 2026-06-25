@@ -1,0 +1,92 @@
+{
+  "ansi-regex": {
+    "module_name": "ansi-regex",
+    "vulnerable_versions": ">2.1.1 <5.0.1",
+    "patched_versions": ">=5.0.1",
+    "severity": "moderate",
+    "refs": [
+      "CVE-2021-3807",
+      "GHSA-93q8-gq69-wqmw"
+    ],
+    "url": "https://github.com/advisories/GHSA-93q8-gq69-wqmw"
+  },
+  "immer": {
+    "module_name": "immer",
+    "vulnerable_versions": "<9.0.6",
+    "patched_versions": ">=9.0.6",
+    "severity": "critical",
+    "refs": [
+      "CVE-2021-3757",
+      "GHSA-c36v-fmgq-m8hx",
+      "CVE-2021-23436",
+      "GHSA-33f9-j839-rf8h"
+    ],
+    "url": "https://github.com/advisories/GHSA-c36v-fmgq-m8hx"
+  },
+  "trim-off-newlines": {
+    "module_name": "trim-off-newlines",
+    "vulnerable_versions": "<=1.0.1",
+    "patched_versions": "<0.0.0",
+    "severity": "moderate",
+    "refs": [
+      "CVE-2021-23425",
+      "GHSA-38fc-wpqx-33j7"
+    ],
+    "url": "https://github.com/advisories/GHSA-38fc-wpqx-33j7"
+  },
+  "ansi-html": {
+    "module_name": "ansi-html",
+    "vulnerable_versions": "<=0.0.7",
+    "patched_versions": "<0.0.0",
+    "severity": "high",
+    "refs": [
+      "CVE-2021-23424",
+      "GHSA-whgm-jr23-g3j9",
+      "GHSA-4fjc-8q3h-8r69"
+    ],
+    "url": "https://github.com/advisories/GHSA-whgm-jr23-g3j9"
+  },
+  "@npmcli/git": {
+    "module_name": "@npmcli/git",
+    "vulnerable_versions": "<2.0.8",
+    "patched_versions": ">=2.0.8",
+    "severity": "moderate",
+    "refs": [
+      "GHSA-hxwm-x553-x359"
+    ],
+    "url": "https://github.com/advisories/GHSA-hxwm-x553-x359"
+  },
+  "glob-parent": {
+    "module_name": "glob-parent",
+    "vulnerable_versions": "<5.1.2",
+    "patched_versions": ">=5.1.2",
+    "severity": "high",
+    "refs": [
+      "CVE-2020-28469",
+      "GHSA-ww39-953v-wcq6"
+    ],
+    "url": "https://github.com/advisories/GHSA-ww39-953v-wcq6"
+  },
+  "browserslist": {
+    "module_name": "browserslist",
+    "vulnerable_versions": ">=4.0.0 <4.16.5",
+    "patched_versions": ">=4.16.5",
+    "severity": "moderate",
+    "refs": [
+      "CVE-2021-23364",
+      "GHSA-w8qv-6jwh-64r5"
+    ],
+    "url": "https://github.com/advisories/GHSA-w8qv-6jwh-64r5"
+  },
+  "trim-newlines": {
+    "module_name": "trim-newlines",
+    "vulnerable_versions": "<3.0.1",
+    "patched_versions": ">=3.0.1",
+    "severity": "high",
+    "refs": [
+      "CVE-2021-33623",
+      "GHSA-7p7h-4mm5-852v"
+    ],
+    "url": "https://github.com/advisories/GHSA-7p7h-4mm5-852v"
+  }
+}

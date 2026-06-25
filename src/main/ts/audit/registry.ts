@@ -7,8 +7,7 @@ import sv from 'semver'
 import { TAuditReport, TContext } from '../ifaces'
 import { resolveRegistryConfig, TRegistryConfig } from './config'
 import { matchesId, parseIdGlobs } from './filter'
-import { extractRefs, mergeMeta } from './meta'
-import { derivePatchedVersions } from './v4'
+import { derivePatchedVersions, extractRefs, mergeMeta } from './meta'
 
 const BULK_PATH = '/-/npm/v1/security/advisories/bulk'
 const CHUNK = 250 // packages per bulk request — large graphs go in several requests

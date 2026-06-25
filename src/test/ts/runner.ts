@@ -7,7 +7,6 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 
 const lf = (await import('../../main/ts/lockfile'))._internal
 const { getContext, run } = await import('../../main/ts')
-const { parseAuditReport: parseAuditV1 } = await import('../../main/ts/audit/v1')
 const adapter = await import('../../main/ts/audit/adapter')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -23,26 +22,11 @@ const dependency = 'example-package'
 const scopedDependency = '@scope/package'
 const readFixture = (name: string): string =>
   fs.readFileSync(path.resolve(fixtures, name), { encoding: 'utf-8' })
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse#using_the_reviver_parameter
-const revive = <T = any>(data: string): T =>
-  JSON.parse(data, (k, v) => {
-    if (
-      v !== null &&
-      typeof v === 'object' &&
-      'type' in v &&
-      v.type === 'Buffer' &&
-      'data' in v &&
-      Array.isArray(v.data)
-    ) {
-      return Buffer.from(v.data)
-    }
-    return v
-  })
-const audit = revive(readFixture('lockfile/legacy/yarn-audit-report.json'))
 const yarnLockBefore = readFixture('lockfile/legacy/yarn.lock.before')
 // `_audit` / `_patch` hit the registry over HTTP now; stub them so this flow
 // test stays offline + deterministic. Patch correctness lives in lockfile.ts.
-const auditReport = parseAuditV1(String((audit as any).stdout ?? ''))
+// The report is the normalized TAuditReport yaf consumes from the registry.
+const auditReport = JSON.parse(readFixture('lockfile/legacy/audit-report.json'))
 
 const cwd = process.cwd()
 

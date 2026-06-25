@@ -1,0 +1,9 @@
+{
+  "uuid": {
+    "module_name": "uuid",
+    "vulnerable_versions": "<11.0.0",
+    "patched_versions": ">=11.0.0",
+    "severity": "moderate",
+    "refs": []
+  }
+}

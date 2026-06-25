@@ -59,8 +59,8 @@ The missing `yarn audit fix`
 2. `yarn audit` does not support custom (in-house) registries — see this [issue](https://github.com/yarnpkg/yarn/issues/7012) & [PR](https://github.com/yarnpkg/yarn/pull/6484), still unmerged.
 
 ### Solution
-yarn-audit-fix fetches `yarn/npm audit --json` advisories and patches the
-lockfile graph directly via [`@antongolub/lockfile`](https://github.com/antongolub/lockfile)
+yarn-audit-fix fetches advisories straight from the registry (the npm bulk
+advisory endpoint) and patches the lockfile graph directly via [`@antongolub/lockfile`](https://github.com/antongolub/lockfile)
 (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)).
 Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antongolub/the-missing-yarn-audit-fix-for-yarn-2-berry-1p8)
 

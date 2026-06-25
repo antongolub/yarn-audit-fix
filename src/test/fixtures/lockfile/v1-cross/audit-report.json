@@ -1,0 +1,16 @@
+{
+  "glob": {
+    "module_name": "glob",
+    "vulnerable_versions": "<11.0.0",
+    "patched_versions": ">=11.0.0",
+    "severity": "moderate",
+    "refs": []
+  },
+  "minimatch": {
+    "module_name": "minimatch",
+    "vulnerable_versions": "<10.0.0",
+    "patched_versions": ">=10.0.0",
+    "severity": "moderate",
+    "refs": []
+  }
+}

@@ -1,4 +1,7 @@
+import sv from 'semver'
+
 import { TAuditAdvisory } from '../ifaces'
+import { attempt } from '../util'
 
 const SEVERITY_RANK: Record<string, number> = {
   info: 0,
@@ -63,4 +66,33 @@ export const formatAdvisoryMeta = (a?: TAuditAdvisory): string => {
   if (a.refs && a.refs.length > 0) parts.push(a.refs.join(', '))
 
   return parts.length > 0 ? `  ${parts.join(' ')}` : ''
+}
+
+/**
+ * Flip a vulnerable range into a patched one: each upper bound becomes a lower
+ * bound (`<X`→`>=X`, `<=X`→`>X`), tightest per AND-set, OR-clauses preserved.
+ * Returns the `<0.0.0` "no fix" sentinel when a clause has no upper bound.
+ * The registry advisory feed gives vulnerable ranges only; this derives the fix.
+ */
+export const derivePatchedVersions = (vulnerableVersions: string): string => {
+  const range = attempt(() => new sv.Range(vulnerableVersions))
+  if (!range) return '<0.0.0'
+
+  const orClauses: string[] = []
+  for (const comparatorSet of range.set) {
+    const upperBounds: sv.Comparator[] = comparatorSet.filter(
+      (c) => c.operator === '<' || c.operator === '<=',
+    )
+    if (upperBounds.length === 0) return '<0.0.0' // unbounded
+    const tightest = upperBounds.reduce((acc, c) =>
+      sv.gt(c.semver.version, acc.semver.version) ? c : acc,
+    )
+    orClauses.push(
+      tightest.operator === '<'
+        ? `>=${tightest.semver.version}`
+        : `>${tightest.semver.version}`,
+    )
+  }
+
+  return orClauses.join(' || ')
 }

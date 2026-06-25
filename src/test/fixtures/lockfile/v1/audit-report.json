@@ -1,0 +1,75 @@
+{
+  "ansi-regex": {
+    "module_name": "ansi-regex",
+    "vulnerable_versions": ">2.1.1 <5.0.1",
+    "patched_versions": ">=5.0.1",
+    "severity": "moderate",
+    "refs": [
+      "CVE-2021-3807",
+      "GHSA-93q8-gq69-wqmw"
+    ],
+    "url": "https://github.com/advisories/GHSA-93q8-gq69-wqmw"
+  },
+  "tar": {
+    "module_name": "tar",
+    "vulnerable_versions": ">=6.0.0 <6.1.2",
+    "patched_versions": ">=6.1.2",
+    "severity": "high",
+    "refs": [
+      "CVE-2021-37713",
+      "GHSA-5955-9wpr-37jh",
+      "CVE-2021-37712",
+      "GHSA-qq89-hq3f-393p",
+      "CVE-2021-37701",
+      "GHSA-9r2w-394v-53qc",
+      "CVE-2021-32804",
+      "GHSA-3jfq-g458-7qm9",
+      "CVE-2021-32803",
+      "GHSA-r628-mhmh-qjhw"
+    ],
+    "url": "https://github.com/advisories/GHSA-5955-9wpr-37jh"
+  },
+  "@npmcli/git": {
+    "module_name": "@npmcli/git",
+    "vulnerable_versions": "<2.0.8",
+    "patched_versions": ">=2.0.8",
+    "severity": "moderate",
+    "refs": [
+      "GHSA-hxwm-x553-x359"
+    ],
+    "url": "https://github.com/advisories/GHSA-hxwm-x553-x359"
+  },
+  "json-schema": {
+    "module_name": "json-schema",
+    "vulnerable_versions": "<0.4.0",
+    "patched_versions": ">=0.4.0",
+    "severity": "moderate",
+    "refs": [
+      "CVE-2021-3918",
+      "GHSA-896r-f27r-55mw"
+    ],
+    "url": "https://github.com/advisories/GHSA-896r-f27r-55mw"
+  },
+  "trim-newlines": {
+    "module_name": "trim-newlines",
+    "vulnerable_versions": "<3.0.1",
+    "patched_versions": ">=3.0.1",
+    "severity": "high",
+    "refs": [
+      "CVE-2021-33623",
+      "GHSA-7p7h-4mm5-852v"
+    ],
+    "url": "https://github.com/advisories/GHSA-7p7h-4mm5-852v"
+  },
+  "trim-off-newlines": {
+    "module_name": "trim-off-newlines",
+    "vulnerable_versions": "<=1.0.1",
+    "patched_versions": "<0.0.0",
+    "severity": "moderate",
+    "refs": [
+      "CVE-2021-23425",
+      "GHSA-38fc-wpqx-33j7"
+    ],
+    "url": "https://github.com/advisories/GHSA-38fc-wpqx-33j7"
+  }
+}

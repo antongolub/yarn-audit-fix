@@ -1,4 +1,5 @@
 import {
+  derivePatchedVersions,
   extractRefs,
   formatAdvisoryMeta,
   maxSeverity,
@@ -83,5 +84,20 @@ describe('formatAdvisoryMeta', () => {
         refs: ['CVE-2025-7783'],
       } as TAuditAdvisory),
     ).toBe('  [critical] CVE-2025-7783')
+  })
+})
+
+describe('derivePatchedVersions', () => {
+  it.each([
+    ['<4.17.21', '>=4.17.21'],
+    ['>=4.0.0 <4.17.21', '>=4.17.21'],
+    ['>=4.0.0 <=4.17.22', '>4.17.22'],
+    ['<=4.17.23', '>4.17.23'],
+    ['>=1.0.0 <1.2.6', '>=1.2.6'],
+    // Unbounded → no patched version expressible → "no fix" sentinel.
+    ['>=1.0.0', '<0.0.0'],
+    ['*', '<0.0.0'],
+  ])('%s → %s', (vuln, expected) => {
+    expect(derivePatchedVersions(vuln)).toBe(expected)
   })
 })

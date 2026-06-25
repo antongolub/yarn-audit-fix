@@ -44,25 +44,6 @@ export type TAuditAdvisory = {
   url?: string
 }
 
-// Raw npm/yarn advisory as emitted by `(yarn|npm) audit --json` (v1/v2).
-export type TRawAdvisory = {
-  module_name: string // eslint-disable-line camelcase
-  vulnerable_versions: string // eslint-disable-line camelcase
-  patched_versions: string // eslint-disable-line camelcase
-  severity?: string
-  cves?: string[]
-  cvss?: { score?: number } | null
-  url?: string
-  references?: string
-  title?: string
-}
-
-export type TAuditEntry = {
-  data: {
-    advisory: TRawAdvisory
-  }
-}
-
 export type TAuditReport = {
   [versionInfo: string]: TAuditAdvisory
 }

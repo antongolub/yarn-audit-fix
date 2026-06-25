@@ -5,10 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { liveRegistry } from '@antongolub/lockfile/registry'
 
 import { format, getLockfileType, parse, patch } from '../../main/ts/lockfile'
-import { parseAuditReport as parseAuditV1 } from '../../main/ts/audit/v1'
-import { parseAuditReport as parseAuditV2 } from '../../main/ts/audit/v2'
-import { parseAuditReport as parseAuditV4 } from '../../main/ts/audit/v4'
-import type { TContext } from '../../main/ts/ifaces'
+import type { TAuditReport, TContext } from '../../main/ts/ifaces'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const fixtures = path.resolve(__dirname, '../fixtures')
@@ -90,22 +87,24 @@ const duplicateDescriptors = (lock: string): string[] => {
 describe('patch golden (record/replay registry)', () => {
   const cases = [
     // three schemas, full upgrade set
-    { name: 'yarn-classic', dir: 'v1', parseAudit: parseAuditV1, ext: 'json', force: true },
-    { name: 'yarn-berry-v5', dir: 'v2', parseAudit: parseAuditV2, ext: 'json', force: true },
-    { name: 'yarn-berry-v8', dir: 'v4', parseAudit: parseAuditV4, ext: 'ndjson', force: true },
+    { name: 'yarn-classic', dir: 'v1', force: true },
+    { name: 'yarn-berry-v5', dir: 'v2', force: true },
+    { name: 'yarn-berry-v8', dir: 'v4', force: true },
     // vulnerable parent + child (and declaration order) on a real classic lock
-    { name: 'yarn-classic', dir: 'v1-cross', parseAudit: parseAuditV1, ext: 'json', force: true },
-    { name: 'yarn-classic', dir: 'v1-cross2', parseAudit: parseAuditV1, ext: 'json', force: true },
+    { name: 'yarn-classic', dir: 'v1-cross', force: true },
+    { name: 'yarn-classic', dir: 'v1-cross2', force: true },
     // compat gate ON (default): a fix breaking a surviving consumer is skipped
-    { name: 'yarn-classic', dir: 'v1-compat', parseAudit: parseAuditV1, ext: 'json', force: false },
+    { name: 'yarn-classic', dir: 'v1-compat', force: false },
   ] as const
 
-  for (const { name, dir, parseAudit, ext, force } of cases) {
+  for (const { name, dir, force } of cases) {
     it(`patches ${dir} (${name}) byte-for-byte`, async () => {
       const base = path.join(fixtures, `lockfile/${dir}`)
       const input = fs.readFileSync(path.join(base, 'yarn.lock'), 'utf-8')
-      const report = parseAudit(
-        fs.readFileSync(path.join(base, `yarn-audit-report.${ext}`), 'utf-8'),
+      // Normalized TAuditReport — the shape yaf gets from the registry audit
+      // (the PM-CLI audit parsers are gone; production never sees that format).
+      const report: TAuditReport = JSON.parse(
+        fs.readFileSync(path.join(base, 'audit-report.json'), 'utf-8'),
       )
       const fmt = getLockfileType(input)
       expect(fmt).toBe(name)

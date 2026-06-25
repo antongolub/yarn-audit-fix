@@ -1,5 +1,4 @@
-import type { RegistryAdapter } from '@antongolub/lockfile/registry'
-import { liveRegistry } from '@antongolub/lockfile/registry'
+import { type RegistryAdapter, liveRegistry } from '@antongolub/lockfile/registry'
 
 import { TContext } from '../ifaces'
 import { resolveRegistryConfig } from './config'
