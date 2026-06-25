@@ -89,6 +89,27 @@ const mockRegistry = {
 const ctxForce = { flags: { silent: true, force: true }, registry: mockRegistry } as unknown as TContext
 const ctxDefault = { flags: { silent: true }, registry: mockRegistry } as unknown as TContext
 
+// No descriptor (range string) may bind more than one entry — a malformed lock
+// that `yarn install --immutable` rejects. Mirrors the golden guard, applied here
+// across the broad real-world + vulnerable corpus (catches mutation-side
+// double-binding / stale-key regressions on every @antongolub/lockfile bump).
+const duplicateDescriptors = (lock: string): string[] => {
+  const seen = new Set<string>()
+  const dups = new Set<string>()
+  for (const line of lock.split('\n')) {
+    if (/^\s/.test(line) || line.startsWith('#') || !line.trimEnd().endsWith(':')) continue
+    const header = line.trimEnd().slice(0, -1)
+    if (header === '__metadata') continue
+    for (const raw of header.split(',')) {
+      const d = raw.trim().replace(/^"|"$/g, '')
+      if (!d) continue
+      if (seen.has(d)) dups.add(d)
+      seen.add(d)
+    }
+  }
+  return [...dups]
+}
+
 describe('real-world yarn fixtures', () => {
   it('the corpus is present', () => {
     expect(lockfiles.length).toBeGreaterThan(0)
@@ -112,6 +133,14 @@ describe('real-world yarn fixtures', () => {
         if (targets.length === 0) return
         exercised++
 
+        // Pre-existing danglers (in-degree 0 at parse) that aren't themselves a
+        // bump target must SURVIVE the patch: yarn / `--immutable` keep base
+        // danglers, so `pruneOrphans` must `preserve` them. Guards the redwood-class
+        // prune over-aggressiveness.
+        const baseDanglers = [...before.nodes()]
+          .filter((n) => before.in(n.id).length === 0 && !targets.includes(n.name))
+          .map((n) => `${n.name}@${n.version}`)
+
         const after = await patch(before, report, ctxForce, fmt)
         const nodes = [...after.nodes()]
 
@@ -130,7 +159,16 @@ describe('real-world yarn fixtures', () => {
           cleared++
         }
 
-        expect([...parse(format(after, fmt), fmt, dir).nodes()].length).toBeGreaterThan(0)
+        const out = format(after, fmt)
+        expect([...parse(out, fmt, dir).nodes()].length).toBeGreaterThan(0)
+        // descriptor integrity: no range string may bind >1 entry.
+        expect(duplicateDescriptors(out), `${handle}: duplicate descriptor(s)`).toEqual([])
+        // dangler preservation: no pre-existing base dangler may be GC'd by prune.
+        const afterKeys = new Set(nodes.map((n) => `${n.name}@${n.version}`))
+        expect(
+          baseDanglers.filter((k) => !afterKeys.has(k)),
+          `${handle}: pre-existing danglers dropped by prune`,
+        ).toEqual([])
       })
     }
 
@@ -145,6 +183,7 @@ describe('real-world yarn fixtures', () => {
   // this must make real progress (in-major bumps) while leaving cross-major
   // fixes for --force. Asserted on the vulnerable snapshots.
   describe('patch applies compat-safe fixes (default)', () => {
+    let progressed = 0
     for (const { handle, dir } of lockfiles.filter((f) => f.vulnerable)) {
       it(handle, async () => {
         const raw = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf-8')
@@ -158,12 +197,19 @@ describe('real-world yarn fixtures', () => {
         const after = await patch(before, report, ctxDefault, fmt)
         const vAfter = countVuln(after, report)
 
-        // real, compat-safe progress (some vulns fixed in-major)
-        expect(vAfter).toBeLessThan(vBefore)
+        // the compat gate must never REGRESS; in-major progress happens where a
+        // compat-safe fix exists — vulns fixable only cross-major are left for
+        // --force (the force suite above proves those clear).
+        expect(vAfter).toBeLessThanOrEqual(vBefore)
+        progressed += vBefore - vAfter
         // result is still a valid lockfile
         expect([...parse(format(after, fmt), fmt, dir).nodes()].length).toBeGreaterThan(0)
       })
     }
+
+    it('makes real in-major progress across the corpus', () => {
+      expect(progressed).toBeGreaterThan(0)
+    })
   })
 
   // The current fixtures keep the full nested package.json tree, so

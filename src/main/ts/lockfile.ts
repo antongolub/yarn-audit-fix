@@ -169,6 +169,17 @@ export const _patch = async (
     upgrades.push(p)
   }
 
+  // Snapshot pre-existing danglers (in-degree 0 in the *parsed* lock) so the final
+  // prune PRESERVES them: yarn's `--immutable` keeps base danglers, but an unseeded
+  // prune would GC them → divergence (YN0028, e.g. redwood's `@types/keyv`). The
+  // bump's own stranded closure is NOT in this set (those nodes had an edge at
+  // parse → in-degree > 0), so it's still pruned. (= `pruneOrphans` mode "b".)
+  const preExistingDanglers = new Set<NodeId>(
+    [...graph.nodes()]
+      .filter((n) => graph.in(n.id as NodeId).length === 0)
+      .map((n) => n.id as NodeId),
+  )
+
   // Apply: rebind each vulnerable range to its fix, then complete the new
   // transitive closure, then drop whatever got orphaned.
   const recentlyAdded = new Set<NodeId>()
@@ -204,12 +215,12 @@ export const _patch = async (
     completionDiagnostics = completion.unresolved
     // completeTransitives is additive, so a dep-changing upgrade leaves the *old*
     // closure behind as orphans → `yarn install --immutable` would reject them.
-    // Sweep them with `pruneOrphans`: ref-counted, so it removes only nodes with
-    // no remaining incoming edge of any kind (+ the closure they strand) and
-    // preserves referenced nodes — incl. berry builtin-patch bases (fsevents) and
-    // `catalog:` targets. A yarn-classic lock has no workspace-root node, so this
-    // NO_ROOTS-noops there; its orphans linger, tolerated as before.
-    graph = pruneOrphans(graph).graph
+    // Sweep them with `pruneOrphans` (ref-counted: removes only nodes with no
+    // remaining incoming edge + the closure they strand), but `preserve` the
+    // pre-existing danglers so we never GC a node yarn keeps (referenced nodes —
+    // incl. fsevents builtin-patch bases + `catalog:` targets — stay either way).
+    // A yarn-classic lock has no workspace-root node, so this NO_ROOTS-noops there.
+    graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
   }
 
   if (!flags.silent) {
