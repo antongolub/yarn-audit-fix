@@ -6,7 +6,7 @@ const glob = require('fast-glob')
 const minimist = require('minimist')
 const path = require('node:path')
 
-const {entry, external} = minimist(process.argv.slice(2), {
+const {entry} = minimist(process.argv.slice(2), {
   default: {
     entry: './src/main/ts/index.ts'
   }

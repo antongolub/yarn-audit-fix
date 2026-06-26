@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import fg, { Options as GlobOptions } from 'fast-glob'
 
-import { TFlags, TFlagsMapping } from './ifaces'
+import { TFlags } from './ifaces'
 
 const glob = fg.sync
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -17,19 +17,6 @@ const colorize =
 export const bold = (s: string): string =>
   colorize ? `\u001B[1m${s}\u001B[22m` : s
 
-const checkValue = (
-  key: string,
-  value: any,
-  omitlist: any[],
-  picklist: any[],
-): boolean =>
-  value !== 'false' &&
-  !omitlist.includes(key) &&
-  (picklist.length === 0 || picklist.includes(key))
-
-const formatFlag = (key: string): string =>
-  (key.length === 1 ? '-' : '--') + key
-
 // https://gist.github.com/nblackburn/875e6ff75bc8ce171c758bf75f304707
 const camelToKebab = (string: string): string =>
   string.replace(/([\da-z]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
@@ -38,48 +25,6 @@ export const normalizeFlags = (flags: TFlags): TFlags =>
   Object.keys(flags).reduce<TFlags>((m, key) => {
     m[camelToKebab(key)] = flags[key]
     return m
-  }, {})
-
-export const formatFlags = (flags: TFlags, ...picklist: string[]): string[] =>
-  Object.keys(flags).reduce<string[]>((memo, key: string) => {
-    const omitlist = ['_', '--']
-    const value = flags[key]
-    const flag = formatFlag(key)
-
-    if (checkValue(key, value, omitlist, picklist)) {
-      if (Array.isArray(value)) {
-        value.forEach((val) => {
-          memo.push(flag, String(val))
-        })
-      } else {
-        memo.push(flag)
-        if (value !== true) {
-          memo.push(String(value))
-        }
-      }
-    }
-
-    return memo
-  }, [])
-
-export const mapFlags = (flags: TFlags, mapping: TFlagsMapping): TFlags =>
-  Object.entries(flags).reduce<TFlags>((memo, [key, value]) => {
-    const repl = mapping[key]
-    let k = key
-    let v = value
-
-    if (repl) {
-      if (typeof repl === 'string') {
-        k = repl
-      } else {
-        k = repl?.key ?? k
-        v = repl?.value ?? repl?.values?.[value] ?? v
-      }
-    }
-
-    memo[k] = v
-
-    return memo
   }, {})
 
 export const getWorkspaces = (
@@ -120,34 +65,17 @@ export const attempt = <T>(f: () => T): T | null => {
 
 export const getSelfManifest = () => readJson(findClosest('package.json') as string)
 
-export const addHiddenProp = (obj: Record<string, any>, prop: string, value: any) =>
-  Object.defineProperty(obj, prop, {
-    value,
-    enumerable: false
-  })
-
-
 const findParent = (dir: string, target: string): string | null => {
   if (fs.existsSync(path.join(dir, target))) {
     return dir
   }
   const parentDir = path.resolve(dir, '..')
 
-  return dir === parentDir
-    ? null
-    : findParent(parentDir, target)
+  return dir === parentDir ? null : findParent(parentDir, target)
 }
 
 const findClosest = (target: string, cwd = __dirname): string | null => {
   const found = findParent(cwd, target)
 
-  return found
-    ? path.join(found, target)
-    : null
+  return found ? path.join(found, target) : null
 }
-
-export const sortObject = <T extends Record<any, any>>(obj: T): T =>
-  obj ? Object.keys(obj).sort((a: string, b: string) => a.localeCompare(b)).reduce((result, key) => {
-    result[key] = obj[key]
-    return result
-  }, Object.create(null)) : obj

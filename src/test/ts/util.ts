@@ -1,96 +1,11 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import type { TFlags, TFlagsMapping } from '../../main/ts'
-import {
-  formatFlags,
-  getWorkspaces,
-  mapFlags,
-  normalizeFlags,
-  readJson,
-} from '../../main/ts/util'
+import { getWorkspaces, readJson } from '../../main/ts/util'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe('util', () => {
-  describe('#mapFlags', () => {
-    it('provides cross-util flags conversion', () => {
-      const cases: [[TFlags, TFlagsMapping, TFlags]] = [
-        [
-          {
-            only: 'prod',
-            'audit-level': 'low',
-          },
-          {
-            'audit-level': 'level',
-            only: {
-              key: 'groups',
-              values: {
-                prod: 'dependencies',
-                dev: 'devDependencies',
-              },
-            },
-          },
-          {
-            groups: 'dependencies',
-            level: 'low',
-          },
-        ],
-      ]
-
-      cases.forEach(([flags, mapping, result]) => {
-        expect(mapFlags(flags, mapping)).toEqual(result)
-      })
-    })
-  })
-
-  describe('#formatArgs', () => {
-    it('return proper values', () => {
-      const cases: [Record<string, any>, string[], string[]][] = [
-        [{ _: [], '--': [] }, [], []],
-        [{ foo: 'bar' }, [], ['--foo', 'bar']],
-        [{ f: true }, [], ['-f']],
-        [{ verbose: true }, [], ['--verbose']],
-        [
-          { f: true, foo: 'bar', b: true, baz: 'qux' },
-          ['f', 'baz'],
-          ['-f', '--baz', 'qux'],
-        ],
-        [
-          // The shape a real arg parser yields (minimist): `_` and `--` are
-          // present so the omitlist is exercised; everything after `--` (bar, b)
-          // is passthrough and must not be re-emitted.
-          {
-            w: true,
-            force: true,
-            'audit-level': 'moderate',
-            only: 'dev',
-            _: [],
-            '--': ['--bar', '-b', '2'],
-          },
-          ['force', 'audit-level', 'only', 'bar', 'b'],
-          ['--force', '--audit-level', 'moderate', '--only', 'dev'],
-        ],
-        [{ exclude: [] }, ['exclude'], []],
-        [
-          { exclude: ['@scope/package'] },
-          ['exclude'],
-          ['--exclude', '@scope/package'],
-        ],
-        [
-          { exclude: ['@scope/package1', 'package2'] },
-          ['exclude'],
-          ['--exclude', '@scope/package1', '--exclude', 'package2'],
-        ],
-        [{ verbose: true, exclude: [] }, [], ['--verbose']],
-      ]
-
-      cases.forEach(([input, picklist, output]) => {
-        expect(formatFlags(normalizeFlags(input), ...picklist)).toEqual(output)
-      })
-    })
-  })
-
   describe('getWorkspaces', () => {
     it('returns paths of found package.json files', () => {
       const cwd = path.resolve(__dirname, '../fixtures/regular-monorepo')

@@ -1,11 +1,5 @@
 export type TFlags = Record<string, any>
 
-export type TFlagsMapping = {
-  [flag: string]:
-    | string
-    | { key?: string; value?: string; values?: { [val: string]: string } }
-}
-
 export type TContext = {
   ctx: TContext
   cwd: string
@@ -30,8 +24,6 @@ export type TContext = {
 
 export type TCallback = (cxt: TContext) => void | Promise<void>
 
-export type ICallable<A extends any[] = any[], R = any> = (...args: A) => R
-
 // Normalized advisory used across the patch pipeline. Metadata fields are
 // optional — yarn 4's NDJSON carries no CVE/CVSS, only severity + a GHSA url.
 export type TAuditAdvisory = {
@@ -49,17 +41,6 @@ export type TAuditReport = {
 }
 
 import type { FormatId, Graph } from '@antongolub/lockfile'
-
-export type TLockfileEntry = {
-  version: string
-  resolved: string
-  integrity: string
-  dependencies?: Record<string, string>
-
-  // v2
-  resolution: string
-  [rest: string]: any
-}
 
 // Graph from @antongolub/lockfile; all operations go through ./lockfile.
 export type TLockfileObject = Graph
