@@ -129,7 +129,13 @@ const parseYarnrcYml = (
         if (n) safeSet(reg.scopes, subKey.startsWith('@') ? subKey : `@${subKey}`, n)
       }
       if (block === 'npmRegistries' && key === 'npmAuthToken' && val) {
-        tokens.push({ prefix: subKey.replace(/^https?:/, '').replace(/\/+$/, ''), token: val })
+        // Yarn keys registries as `//host` (or `https://host`); strip the
+        // protocol AND the `//` so the prefix matches `hostPathKey` (host/path,
+        // no protocol) — otherwise the token never matches and is silently lost.
+        tokens.push({
+          prefix: subKey.replace(/^(https?:)?\/\//, '').replace(/\/+$/, ''),
+          token: val,
+        })
       }
     }
   }
