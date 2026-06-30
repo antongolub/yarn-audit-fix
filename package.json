@@ -93,5 +93,5 @@
     "type": "git",
     "url": "git+https://github.com/antongolub/yarn-audit-fix.git"
   },
-  "packageManager": "yarn@4.16.0"
+  "packageManager": "yarn@4.17.0"
 }
