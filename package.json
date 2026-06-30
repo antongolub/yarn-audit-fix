@@ -75,7 +75,7 @@
     "@types/minimist": "^1.2.5",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^3.0.0",
-    "concurrently": "^9.1.2",
+    "concurrently": "^10.0.0",
     "cpy-cli": "^5.0.0",
     "depcheck": "^1.4.7",
     "esbuild": "^0.27.0",
