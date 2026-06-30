@@ -20,6 +20,9 @@ export type TContext = {
   // registry HTTP cooperatively (advisory POST, tarball GET). Absent in
   // direct/test calls.
   signal?: any
+  // Optional `fetch` override — tests inject a stub so the registry audit stays
+  // offline; production wires the AbortSignal through the global fetch.
+  fetch?: any
 }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>

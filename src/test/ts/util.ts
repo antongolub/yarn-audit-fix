@@ -1,12 +1,28 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { getWorkspaces, readJson } from '../../main/ts/util'
+import { attempt, getWorkspaces, readJson } from '../../main/ts/util'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe('util', () => {
+  describe('attempt', () => {
+    it('returns the value, or null when the fn throws', () => {
+      expect(attempt(() => 42)).toBe(42)
+      expect(
+        attempt(() => {
+          throw new Error('boom')
+        }),
+      ).toBeNull()
+    })
+  })
+
   describe('getWorkspaces', () => {
+    it('returns [] when no workspaces are declared', () => {
+      expect(getWorkspaces('/x', {})).toEqual([])
+      expect(getWorkspaces('/x', { workspaces: [] })).toEqual([])
+    })
+
     it('returns paths of found package.json files', () => {
       const cwd = path.resolve(__dirname, '../fixtures/regular-monorepo')
       const manifest = readJson(path.join(cwd, 'package.json'))

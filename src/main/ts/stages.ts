@@ -35,7 +35,8 @@ const latestPublished = async (
   fallback: string,
 ): Promise<string> => {
   try {
-    const packument = await buildRegistry(ctx).packument(name)
+    // yaf publishes to npm, so resolve its own latest via the npm ecosystem.
+    const packument = await buildRegistry(ctx, 'npm').packument(name)
     return packument?.distTags?.latest ?? fallback
   } catch {
     return fallback
@@ -98,7 +99,7 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // audit fetches advisories; patch resolves fixes + completes the new
     // transitive closure + prunes the stranded old one.
     progress.label('Fetching advisories…')
-    const report = await lf.audit(lockfile, ctx)
+    const report = await lf.audit(lockfile, ctx, lockfileType)
     // _patch refines this with live sub-phase counts (Resolving fixes X/Y →
     // Completing the tree N).
     progress.label('Resolving fixes…')

@@ -6,7 +6,7 @@ import { replaceVersion } from '@antongolub/lockfile/modify'
 import { pruneOrphans } from '@antongolub/lockfile/optimize'
 import sv from 'semver'
 
-import { buildRegistry, buildTarballSource } from './audit/adapter'
+import { buildRegistry, buildTarballSource, ecosystemFor } from './audit/adapter'
 import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
 import { auditViaRegistry } from './audit/registry'
@@ -65,7 +65,7 @@ export const _patch = async (
   lockfile: TLockfileObject,
   report: TAuditReport,
   ctx: TContext,
-  _lockfileType: TLockfileType, // eslint-disable-line @typescript-eslint/no-unused-vars
+  lockfileType: TLockfileType,
 ): Promise<TLockfileObject> => {
   const { flags } = ctx
   if (Object.keys(report).length === 0) {
@@ -74,7 +74,7 @@ export const _patch = async (
   }
 
   let graph = lockfile as Graph
-  const registry = buildRegistry(ctx)
+  const registry = buildRegistry(ctx, ecosystemFor(lockfileType))
   const excludeRules = parsePackageRules(flags.exclude)
   const excluded = new Set<string>()
   const noFix = new Set<string>()
@@ -289,7 +289,7 @@ export const _refurbish = async (
   }
   if (!lockfileType.startsWith('yarn-berry')) return lockfile
 
-  const source = buildTarballSource(ctx)
+  const source = buildTarballSource(ctx, ecosystemFor(lockfileType))
   // Live count of recomputed checksums — the tarball fetches are the slowest
   // phase, so surface progress as each one lands.
   let filled = 0
@@ -353,8 +353,12 @@ const reportDiagnostics = (
  * from `.npmrc` / `.yarnrc.yml` / `.yarnrc` + env. Async: HTTP can't be done
  * synchronously without spawning, which is exactly what we're moving away from.
  */
-export const _audit = (graph: Graph, ctx: TContext): Promise<TAuditReport> =>
-  auditViaRegistry(graph, ctx)
+export const _audit = (
+  graph: Graph,
+  ctx: TContext,
+  lockfileType: TLockfileType,
+): Promise<TAuditReport> =>
+  auditViaRegistry(graph, ctx, ecosystemFor(lockfileType))
 
 // Exposed for test spies.
 export const _internal = {

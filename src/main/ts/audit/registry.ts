@@ -2,15 +2,14 @@ import http from 'node:http'
 import https from 'node:https'
 
 import type { Graph } from '@antongolub/lockfile'
-import sv from 'semver'
+import type { Ecosystem } from '@antongolub/lockfile/registry'
+import { liveRegistry, resolveRegistry } from '@antongolub/lockfile/registry'
+import { registryPackages } from '@antongolub/lockfile/optimize'
 
 import { TAuditReport, TContext } from '../ifaces'
-import { resolveRegistryConfig, TRegistryConfig } from './config'
 import { matchesId, parseIdGlobs } from './filter'
 import { derivePatchedVersions, extractRefs, mergeMeta } from './meta'
 
-const BULK_PATH = '/-/npm/v1/security/advisories/bulk'
-const CHUNK = 250 // packages per bulk request — large graphs go in several requests
 const TIMEOUT_MS = 30_000
 
 const SEVERITY_RANK: Record<string, number> = {
@@ -22,100 +21,18 @@ const SEVERITY_RANK: Record<string, number> = {
 }
 const rank = (s?: string): number => SEVERITY_RANK[String(s ?? 'info')] ?? 0
 
-const scrub = (msg: string, token?: string): string =>
-  token ? msg.split(token).join('***') : msg
-
-/** `{ name: [versions] }` for real npm packages — skips workspaces and any node
- *  whose version isn't plain semver (workspace/link/portal/exec locators). */
-export const collectPackages = (graph: Graph): Record<string, string[]> => {
-  const acc: Record<string, Set<string>> = Object.create(null)
-  for (const node of graph.nodes()) {
-    if (node.workspacePath) continue
-    if (!node.name || node.name === '__proto__') continue
-    if (!sv.valid(node.version)) continue
-    ;(acc[node.name] ??= new Set<string>()).add(node.version)
-  }
-  const out: Record<string, string[]> = {}
-  for (const name of Object.keys(acc)) out[name] = [...acc[name]]
-  return out
-}
-
 /**
- * POST JSON to a registry. SECURITY: the bearer token is attached only over
- * https; redirects are NOT followed (so the token can't be forwarded to another
- * host); the token never appears in thrown errors. `signal` cancels the in-flight
- * request on Ctrl+C (the socket is destroyed and the call rejects).
- */
-const post = (
-  urlStr: string,
-  payload: unknown,
-  token?: string,
-  signal?: AbortSignal,
-): Promise<any> =>
-  new Promise((resolve, reject) => {
-    let u: URL
-    try {
-      u = new URL(urlStr)
-    } catch {
-      return reject(new Error(`invalid registry url`))
-    }
-    if (u.protocol !== 'https:' && u.protocol !== 'http:') {
-      return reject(new Error(`unsupported registry protocol: ${u.protocol}`))
-    }
-    const mod = u.protocol === 'https:' ? https : http
-    const data = Buffer.from(JSON.stringify(payload))
-    const headers: Record<string, string | number> = {
-      'content-type': 'application/json',
-      'content-length': data.length,
-      accept: 'application/json',
-    }
-    if (token && u.protocol === 'https:') headers.authorization = `Bearer ${token}`
-
-    const req = mod.request(
-      u,
-      { method: 'POST', headers, timeout: TIMEOUT_MS },
-      (res) => {
-        const status = res.statusCode ?? 0
-        const chunks: Buffer[] = []
-        res.on('data', (c) => chunks.push(c))
-        res.on('end', () => {
-          cleanup()
-          const text = Buffer.concat(chunks).toString('utf8')
-          if (status >= 300) {
-            return reject(new Error(`registry ${u.host} responded ${status}`))
-          }
-          try {
-            resolve(JSON.parse(text))
-          } catch {
-            reject(new Error(`registry ${u.host}: invalid JSON response`))
-          }
-        })
-      },
-    )
-    const abortReq = () => req.destroy(new Error(`registry ${u.host}: aborted`))
-    const cleanup = () => signal?.removeEventListener?.('abort', abortReq)
-    if (signal?.aborted) abortReq()
-    else signal?.addEventListener?.('abort', abortReq, { once: true })
-    req.on('error', (e) => {
-      cleanup()
-      reject(new Error(`registry ${u.host}: ${scrub(String(e.message), token)}`))
-    })
-    req.on('timeout', () => req.destroy(new Error(`registry ${u.host}: timeout`)))
-    req.end(data)
-  })
-
-/**
- * GET a package tarball as raw bytes (for `refurbish` checksum recompute).
- * SECURITY: mirrors `post` — the bearer token is attached only over https and
- * only when the tarball is same-origin as the registry that declared it (a
- * CDN-hosted tarball on another host gets no credential); redirects are NOT
- * followed (a 3xx resolves to `undefined`, so the token can't be forwarded);
- * any failure degrades to `undefined` (caller defers to a real `yarn install`).
+ * GET a package tarball as raw bytes (for `refurbish` checksum recompute) — the
+ * one registry fetch the lib's adapter doesn't do (it returns urls, not bytes).
+ * SECURITY: `authHeader` is host-bound by the caller (`authHeaderFor(tarballUrl)`
+ * returns nothing for an un-declared host, so a CDN tarball on another host gets no
+ * credential — that IS the same-origin guard) and only sent over https; redirects
+ * are NOT followed (a 3xx resolves to `undefined`); any failure degrades to
+ * `undefined` (caller defers to `yarn install`).
  */
 export const getTarball = (
   tarballUrl: string,
-  registryUrl: string,
-  token?: string,
+  authHeader?: string,
   signal?: AbortSignal,
 ): Promise<Uint8Array | undefined> =>
   new Promise((resolve) => {
@@ -129,15 +46,9 @@ export const getTarball = (
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return resolve(undefined)
     const mod = u.protocol === 'https:' ? https : http
 
-    let sameOrigin = false
-    try {
-      sameOrigin = new URL(registryUrl).host === u.host
-    } catch {
-      sameOrigin = false
-    }
     const headers: Record<string, string> = { accept: 'application/octet-stream' }
-    if (token && u.protocol === 'https:' && sameOrigin)
-      headers.authorization = `Bearer ${token}`
+    // Host-binding is the caller's job; here just never send auth over http.
+    if (authHeader && u.protocol === 'https:') headers.authorization = authHeader
 
     const req = mod.request(
       u,
@@ -172,44 +83,6 @@ export const getTarball = (
 const joinAnd = (a: string, b: string): string =>
   a === '<0.0.0' || b === '<0.0.0' ? '<0.0.0' : `${a} ${b}`
 
-const fetchAdvisories = async (
-  packages: Record<string, string[]>,
-  cfg: TRegistryConfig,
-  onProgress?: (done: number, total: number) => void,
-  signal?: AbortSignal,
-): Promise<Record<string, any[]>> => {
-  // Group by the registry each package routes to (scope-aware), then chunk.
-  const byRegistry = new Map<string, string[]>()
-  for (const name of Object.keys(packages)) {
-    const reg = cfg.registryFor(name)
-    const list = byRegistry.get(reg) ?? []
-    list.push(name)
-    byRegistry.set(reg, list)
-  }
-
-  const total = Object.keys(packages).length
-  let done = 0
-  const raw: Record<string, any[]> = {}
-  for (const [registry, names] of byRegistry) {
-    const token = cfg.tokenFor(registry)
-    const endpoint = registry.replace(/\/+$/, '') + BULK_PATH
-    for (let i = 0; i < names.length; i += CHUNK) {
-      const slice = names.slice(i, i + CHUNK)
-      const body: Record<string, string[]> = {}
-      for (const name of slice) body[name] = packages[name]
-      const res = await post(endpoint, body, token, signal)
-      if (res && typeof res === 'object') {
-        for (const [name, advs] of Object.entries(res)) {
-          if (Array.isArray(advs)) (raw[name] ??= []).push(...advs)
-        }
-      }
-      done += slice.length
-      onProgress?.(done, total)
-    }
-  }
-  return raw
-}
-
 /**
  * The ids a `--ignore` glob can target for one raw advisory. The npm bulk
  * endpoint exposes the numeric `id` and a GHSA `url` (no `cves` field), so —
@@ -224,9 +97,10 @@ const advisoryIds = (a: any): string[] => {
 }
 
 /**
- * Map the bulk-advisory payload into the same TAuditReport `_patch` consumes.
- * `--ignore` globs drop matching advisories (by npm id / CVE / GHSA) before the
- * per-package merge, so ignoring one advisory leaves a package's others intact.
+ * Map the raw bulk-advisory payload into the TAuditReport `_patch` consumes (the
+ * lib's `audit()` does zero normalization). `--ignore` globs drop matching
+ * advisories (npm id / GHSA) before the per-package merge; below-`--audit-level`
+ * severities are filtered.
  */
 export const toReport = (
   raw: Record<string, any[]>,
@@ -267,23 +141,52 @@ export const toReport = (
 
 /**
  * Fetch advisories straight from the registry (npm bulk endpoint) for every
- * package@version in the graph — no `(yarn|npm) audit` spawn. Honours the
- * registry/scope/auth resolved from `.npmrc` / `.yarnrc.yml` / `.yarnrc` + env.
+ * package@version in the graph — no `(yarn|npm) audit` spawn. The lib owns the
+ * package list (`registryPackages`, locator-aware), the registry/scope/auth
+ * resolution + the bulk POST (`liveRegistry.audit`, host-bound https auth);
+ * advisory→report normalisation stays here. Packages are grouped by their routed
+ * registry so a scoped graph audits each registry with its own credential.
  */
 export const auditViaRegistry = async (
   graph: Graph,
   ctx: TContext,
+  ecosystem: Ecosystem,
 ): Promise<TAuditReport> => {
-  const cwd = (ctx as any).cwd ?? process.cwd()
-  const cfg = resolveRegistryConfig(cwd, ctx.flags)
-  const packages = collectPackages(graph)
+  const packages = registryPackages(graph)
   if (Object.keys(packages).length === 0) return {}
-  const raw = await fetchAdvisories(
-    packages,
-    cfg,
-    (done, total) => ctx.progress?.label(`Fetching advisories… ${done}/${total}`),
-    ctx.signal,
-  )
+
+  const cfg = resolveRegistry(ctx.cwd ?? process.cwd(), {
+    ecosystem,
+    registry: ctx.flags?.registry,
+  })
+  const byUrl = new Map<string, string[]>()
+  for (const name of Object.keys(packages)) {
+    const url = cfg.registryFor(name)
+    const list = byUrl.get(url) ?? []
+    list.push(name)
+    byUrl.set(url, list)
+  }
+
+  ctx.progress?.label('Fetching advisories…')
+  // The lib's `liveRegistry` fetches via node-fetch-native — so audit works below
+  // Node 18, no global-`fetch` dependency. `ctx.fetch` is the test seam only (the
+  // lib uses `opts.fetch ?? fetch`); a Ctrl+C unwinds via the run's force-exit,
+  // since neither the lib's audit POST nor completion threads an AbortSignal.
+  const fetchImpl = ctx.fetch
+
+  const raw: Record<string, any[]> = {}
+  for (const [url, names] of byUrl) {
+    const reg = liveRegistry({
+      url,
+      authHeader: cfg.authHeaderFor(url),
+      fetch: fetchImpl,
+    })
+    const slice: Record<string, string[]> = {}
+    for (const name of names) slice[name] = packages[name]
+    const res = await reg.audit(slice)
+    for (const [name, advs] of Object.entries(res)) (raw[name] ??= []).push(...advs)
+  }
+
   return toReport(
     raw,
     rank(ctx.flags?.['audit-level']),

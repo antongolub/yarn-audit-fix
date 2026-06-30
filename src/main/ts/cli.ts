@@ -98,6 +98,9 @@ export const parse = (
 
 // Async IIFE rather than top-level await: the bundle targets ES2020 (the Node
 // 14 floor) where TLA isn't available. Failures are handled here, not by a caller.
+// Entry-point glue — `parse()` is unit-tested and `run()` via the runner suite —
+// so exclude the bootstrap from coverage rather than chase its import-time branch.
+/* c8 ignore start */
 // eslint-disable-next-line unicorn/prefer-top-level-await
 void (async () => {
   try {
@@ -114,3 +117,4 @@ void (async () => {
     process.exitCode ||= 1
   }
 })()
+/* c8 ignore stop */

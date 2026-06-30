@@ -181,6 +181,61 @@ describe('patch', () => {
     expect(out).toContain('version "1.0.0"') // no published fix → left as-is
     expect(out).not.toContain('version "2.0.0"')
   })
+
+  // Capture stdout+stderr around a non-silent patch.
+  const capture = async (fn: () => Promise<unknown>): Promise<string> => {
+    const out: string[] = []
+    const orig = { log: console.log, warn: console.warn }
+    console.log = (...a: any[]) => void out.push(a.join(' '))
+    console.warn = (...a: any[]) => void out.push(a.join(' '))
+    try {
+      await fn()
+    } finally {
+      console.log = orig.log
+      console.warn = orig.warn
+    }
+    return out.join('\n')
+  }
+
+  it('prints the non-silent summary (upgraded / excluded / no-fix / skipped)', async () => {
+    const out = await capture(() =>
+      run(
+        lock([
+          { id: 'consumer@^1.0.0', version: '1.0.0', deps: { skipme: '^1.0.0' } },
+          { id: 'skipme@^1.0.0', version: '1.0.0' }, // cross-major fix → gate skips
+          { id: 'up@^1.0.0', version: '1.0.0' }, // in-range fix → upgraded
+          { id: 'exme@^1.0.0', version: '1.0.0' }, // --exclude
+          { id: 'nofixme@^1.0.0', version: '1.0.0' }, // no published fix
+        ]),
+        {
+          skipme: advisory('<2.0.0', '>=2.0.0'),
+          up: advisory('<1.5.0', '>=1.5.0'),
+          exme: advisory('<2.0.0', '>=2.0.0'),
+          nofixme: advisory('<99.0.0', '>=99.0.0'),
+        },
+        { silent: false, exclude: 'exme' },
+        {
+          consumer: { '1.0.0': {} },
+          skipme: { '1.0.0': {}, '2.0.0': {} },
+          up: { '1.0.0': {}, '1.5.0': {} },
+          exme: { '1.0.0': {}, '2.0.0': {} },
+          nofixme: { '1.0.0': {} },
+        },
+      ),
+    )
+    expect(out).toMatch(/Upgraded deps \(1\):/)
+    expect(out).toMatch(/up@1\.0\.0 → 1\.5\.0/)
+    expect(out).toMatch(/Excluded \(per --exclude\): exme@1\.0\.0/)
+    expect(out).toMatch(/No fix available: nofixme/)
+    expect(out).toMatch(/Skipped \(fix breaks/)
+    expect(out).toMatch(/skipme@1\.0\.0 → 2\.0\.0/)
+  })
+
+  it('reports "no issues" + leaves the lockfile alone for an empty report', async () => {
+    const input = lock([{ id: 'lodash@^4.17.0', version: '4.17.20' }])
+    const out = await capture(() => run(input, {}, { silent: false }, {}))
+    expect(out).toMatch(/Audit check found no issues/)
+  })
 })
 
 // `refurbish` fills install-required fields a patched graph still lacks — today
@@ -243,6 +298,12 @@ describe('refurbish', () => {
     expect(out).toBe(format(parse(input, fmt), fmt))
   })
 
+  it('throws on an unrecognised lockfile format', async () => {
+    await expect(refurbish({} as any, undefined, rctx())).rejects.toThrow(
+      'Unsupported lockfile format',
+    )
+  })
+
   it('defers bare-era (yarn-3 / berry-v6) checksums — never fills or fetches', async () => {
     const v3 = path.resolve(__dirname, '../fixtures/lockfile/v3/yarn.lock')
     const input = readFileSync(v3, 'utf-8')
@@ -268,5 +329,37 @@ describe('refurbish', () => {
     expect(fetched).toBe(0)
     expect(out).not.toMatch(/10c0\//)
     expect(out).toBe(stripped)
+  })
+
+  // Capture console.warn (no ctx.progress ⇒ refurbish warns through it).
+  const captureWarn = async (flags: Record<string, any>): Promise<string> => {
+    const v3 = path.resolve(__dirname, '../fixtures/lockfile/v3/yarn.lock')
+    const stripped = readFileSync(v3, 'utf-8').replace(/\n {2}checksum: [0-9a-f]+/, '')
+    const fmt = getLockfileType(stripped)
+    const lines: string[] = []
+    const orig = console.warn
+    console.warn = (...a: any[]) => void lines.push(a.map(String).join(' '))
+    try {
+      const ctx = {
+        flags,
+        cwd: process.cwd(),
+        tarballSource: { tarball: async () => undefined },
+      } as unknown as TContext
+      await refurbish(parse(stripped, fmt), fmt, ctx)
+    } finally {
+      console.warn = orig
+    }
+    return lines.join('\n')
+  }
+
+  it('warns about deferred checksums when not silent (collapsed count)', async () => {
+    const out = await captureWarn({ silent: false })
+    expect(out).toMatch(/Could not compute checksums for 1 package/)
+    expect(out).toMatch(/1× ENRICH_CHECKSUM_DEFERRED/)
+  })
+
+  it('lists each deferred checksum under --verbose', async () => {
+    const out = await captureWarn({ silent: false, verbose: true })
+    expect(out).toMatch(/\[\w+\] ENRICH_CHECKSUM_DEFERRED:/)
   })
 })

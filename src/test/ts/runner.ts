@@ -160,6 +160,67 @@ describe('yarn-audit-fix', () => {
     })
   })
 
+  describe('signals & error reporting', () => {
+    it('-V prints the version and skips the patch flow', async () => {
+      const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+      try {
+        await run({ V: true })
+        expect(log).toHaveBeenCalledWith('1.0.0') // mocked package.json version
+        expect(lfAudit).not.toHaveBeenCalled()
+      } finally {
+        log.mockRestore()
+      }
+    })
+
+    it('formatError surfaces signal / captured-output / message / primitive', async () => {
+      const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const prev = process.exitCode
+      const drive = async (reason: any): Promise<string> => {
+        err.mockClear()
+        lfAudit.mockImplementationOnce(async () => {
+          throw reason
+        })
+        await run({}).catch(() => {})
+        return err.mock.calls.map((c) => String(c[0])).join('\n')
+      }
+      try {
+        expect(await drive({ signal: 'SIGINT' })).toMatch(/interrupted \(SIGINT\)/)
+        expect(await drive({ stderr: Buffer.from('boom from stderr') })).toMatch(/boom from stderr/)
+        expect(await drive({ message: 'just a message' })).toMatch(/just a message/)
+        expect(await drive('plain string error')).toMatch(/plain string error/)
+      } finally {
+        err.mockRestore()
+        process.exitCode = prev
+      }
+    })
+
+    it('the first interrupt cancels the run and sets exit 130', async () => {
+      const handlers: Record<string, any> = {}
+      const onSpy = vi
+        .spyOn(process, 'on')
+        .mockImplementation((ev: any, fn: any) => ((handlers[ev] = fn), process))
+      const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const prev = process.exitCode
+      try {
+        await run({})
+        onSpy.mockRestore() // stop intercepting before invoking the captured handler
+        expect(typeof handlers.SIGINT).toBe('function')
+        vi.useFakeTimers() // the abort fallback schedules setTimeout(process.exit) — keep it fake
+        try {
+          handlers.SIGINT('SIGINT')
+        } finally {
+          vi.useRealTimers() // discards the pending fake timer (process.exit never fires)
+        }
+        expect(err).toHaveBeenCalledWith(expect.stringContaining('Aborted (SIGINT)'))
+        expect(process.exitCode).toBe(130)
+      } finally {
+        onSpy.mockRestore()
+        err.mockRestore()
+        process.exitCode = prev
+      }
+    })
+  })
+
   describe('#getContext', () => {
     it('parses flags, returns ctx entry', () => {
       const cwd = '/foo/bar'

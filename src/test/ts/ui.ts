@@ -26,4 +26,37 @@ describe('createProgress', () => {
     expect(spy).toHaveBeenCalledWith('Upgraded deps (1):')
     spy.mockRestore()
   })
+
+  it('animates a spinner on an interactive stderr', () => {
+    const origTTY = Object.getOwnPropertyDescriptor(process.stderr, 'isTTY')
+    const origCI = process.env.CI
+    Object.defineProperty(process.stderr, 'isTTY', { value: true, configurable: true })
+    delete process.env.CI
+    vi.useFakeTimers()
+    const write = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    try {
+      const p = createProgress(true)
+      p.label('fetching advisories')
+      vi.advanceTimersByTime(80) // one tick → a frame is drawn with the caption
+      expect(write.mock.calls.some((c) => String(c[0]).includes('fetching advisories'))).toBe(true)
+
+      write.mockClear()
+      p.log('a line above the spinner')
+      expect(log).toHaveBeenCalledWith('a line above the spinner')
+      expect(write).toHaveBeenCalled() // clear + redraw around the log
+
+      p.stop()
+      write.mockClear()
+      vi.advanceTimersByTime(240) // interval cleared → no further frames
+      expect(write).not.toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+      write.mockRestore()
+      log.mockRestore()
+      if (origTTY) Object.defineProperty(process.stderr, 'isTTY', origTTY)
+      else delete (process.stderr as any).isTTY
+      if (origCI !== undefined) process.env.CI = origCI
+    }
+  })
 })
