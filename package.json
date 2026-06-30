@@ -86,7 +86,7 @@
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.1",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "^3.0.0"
   },
   "repository": {
