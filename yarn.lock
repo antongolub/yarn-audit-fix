@@ -15,19 +15,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.84":
-  version: 0.0.0-snapshot.84
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.84"
+"@antongolub/lockfile@npm:0.0.0-snapshot.85":
+  version: 0.0.0-snapshot.85
+  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.85"
   dependencies:
     node-fetch-native: "npm:^1.6.7"
-    pako: "npm:^2.2.0"
+    pako: "npm:^3.0.0"
     semver: "npm:^7.8.5"
   peerDependencies:
     "@yarnpkg/libzip": ">=2.0.0"
   peerDependenciesMeta:
     "@yarnpkg/libzip":
       optional: true
-  checksum: 10c0/9ec6f1fbf8ef2b19c7fde591b0fea463f31606fed7765216cce1efd24c54a837cfd3646d6672c8ca7a83091707b8600ba7087e06da648f7f3505796e02e78287
+  checksum: 10c0/c19c1c2668d11afddcea1e4919b64d6b4ddb9c53007d74cb698a222fd2855061f031896b9b927528bd1ff21f8f2eba0bd45f3a00236524e33d7d74475db42427
   languageName: node
   linkType: hard
 
@@ -3686,10 +3686,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pako@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "pako@npm:2.2.0"
-  checksum: 10c0/e5d31de1940fdd13cc4014296b0026112483d0834bce4856ca29c8af8438d030c6416986a0f6df7d5372cae18d6dd6c57f48b24a49d6c207c0a4cc66af15c07d
+"pako@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "pako@npm:3.0.0"
+  checksum: 10c0/2e6ee401325262659b8b11a8badac142b8be3804675355969d9120756819a88e6ce2c46e4f4083ec944ac0304b5dc8e2b61ebc89d0e2e4ed24892ca5f3be56d3
   languageName: node
   linkType: hard
 
@@ -4994,7 +4994,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.84"
+    "@antongolub/lockfile": "npm:0.0.0-snapshot.85"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.0"
