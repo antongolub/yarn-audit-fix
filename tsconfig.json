@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "rootDir": "./src/main/ts/",
-    "baseUrl": "./src/main/ts/",
     "esModuleInterop": true,
     "moduleResolution": "Bundler",
     "module": "esnext",
