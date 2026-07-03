@@ -7,7 +7,7 @@ import semver from 'semver'
 import { buildRegistry } from './audit/adapter'
 import { TCallback, TContext } from './ifaces'
 import * as lf from './lockfile'
-import { format, getLockfileType } from './lockfile'
+import { format, getLockfileType, overridesOf } from './lockfile'
 import { createProgress } from './ui'
 import { getSelfManifest } from './util'
 
@@ -88,8 +88,12 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
   const lockfilePath = path.join(cwd, 'yarn.lock')
   const raw = fs.readFileSync(lockfilePath, 'utf-8')
   const lockfileType = getLockfileType(raw)
-  // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes.
-  const lockfile = lf.parse(raw, lockfileType, cwd)
+  // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes,
+  // and the project manifest so the graph carries its declared overrides/resolutions.
+  const lockfile = lf.parse(raw, lockfileType, cwd, ctx.manifest)
+  // Capture the declared pins off the fresh parse (they drop after the patch's
+  // mutate); thread them into completion (honor) + stringify (re-emit pnpm's block).
+  const overrides = overridesOf(lockfile)
   // audit / patch / refurbish are all silent registry HTTP, so drive a spinner
   // to show what's happening (no-op off a TTY or under --silent). The pipeline
   // reports through ctx.progress (advisory count, checksum count, summary lines).
@@ -103,7 +107,7 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // _patch refines this with live sub-phase counts (Resolving fixes X/Y →
     // Completing the tree N).
     progress.label('Resolving fixes…')
-    const patched = await lf.patch(lockfile, report, ctx, lockfileType)
+    const patched = await lf.patch(lockfile, report, ctx, lockfileType, overrides)
     // Then fill any install-required field the edit left missing (the yarn-berry
     // zip checksum) straight from the registry, so the result is a complete
     // lockfile needing no reconcile `yarn install` (no-op for yarn-classic).
@@ -117,7 +121,7 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // The single write lands only after a successful in-memory patch, so a
     // failure leaves the original lockfile untouched. `--dry-run` skips it.
     if (!flags['dry-run']) {
-      fs.writeFileSync(lockfilePath, format(refurbished, lockfileType))
+      fs.writeFileSync(lockfilePath, format(refurbished, lockfileType, overrides))
     }
   } finally {
     progress.stop()

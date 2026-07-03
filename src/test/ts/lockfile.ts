@@ -8,6 +8,7 @@ import { TAuditReport, TContext } from '../../main/ts/ifaces'
 import {
   format,
   getLockfileType,
+  overridesOf,
   parse,
   patch,
   refurbish,
@@ -130,6 +131,86 @@ describe('patch', () => {
     expect(out).toContain('deep-dep@') // transitive new dep pulled in
   })
 
+  it('honors a declared resolutions pin when completing a new transitive (verbatim, even out of range)', async () => {
+    const spec = {
+      vuln: { '1.0.0': {}, '2.0.0': { 'new-dep': '^1.0.0' } },
+      'new-dep': { '1.0.0': {}, '1.5.0': {}, '2.0.0': {} },
+    }
+    const report = { vuln: advisory('<2.0.0', '>=2.0.0') }
+    const lf = lock([{ id: 'vuln@^1.0.0', version: '1.0.0' }])
+    const fmt = getLockfileType(lf)
+
+    // Control — no override: the newly-pulled transitive resolves to the highest
+    // version IN its declared range (`new-dep@^1.0.0` → 1.5.0), never 2.0.0.
+    const bare = format(
+      await patch(parse(lf, fmt), report, ctx({ silent: true }, mockRegistry(spec)), fmt),
+      fmt,
+    )
+    expect(bare).toContain('version "1.5.0"')
+
+    // With a `resolutions` pin: `new-dep` is forced to 2.0.0 — OUTSIDE `^1.0.0`
+    // (override replaces the range, not constrains it). Capture mirrors the runtime
+    // wiring: parse(manifest) → overridesOf → patch(overrides).
+    const graph = parse(lf, fmt, undefined, { resolutions: { 'new-dep': '2.0.0' } })
+    const overrides = overridesOf(graph)
+    expect(overrides.map((o) => `${o.package}@${o.to}`)).toEqual(['new-dep@2.0.0'])
+
+    const pinned = format(
+      await patch(graph, report, ctx({ silent: true }, mockRegistry(spec)), fmt, overrides),
+      fmt,
+    )
+    expect(pinned).toContain('new-dep@')
+    expect(pinned).toMatch(/new-dep@[\s\S]*?version "2\.0\.0"/) // pinned target won
+    expect(pinned).not.toContain('version "1.5.0"') // in-range highest overridden
+  })
+
+  // `npm audit fix --force` parity: a user's override is authoritative — npm leaves
+  // a pin holding a vulnerable version in place (never rewrites it), so yaf does too.
+  describe('override authority (npm audit fix --force parity)', () => {
+    const report = { vuln: advisory('<2.0.0', '>=2.0.0') }
+    const spec = { vuln: { '1.0.0': {}, '2.0.0': {} } }
+    const lf = lock([{ id: 'vuln@^1.0.0', version: '1.0.0' }])
+    const fmt = getLockfileType(lf)
+    const runOvr = async (
+      resolutions: Record<string, string>,
+      flags: Record<string, any> = {},
+    ): Promise<string> => {
+      const g = parse(lf, fmt, undefined, { resolutions })
+      const out = await patch(
+        g,
+        report,
+        ctx({ silent: true, ...flags }, mockRegistry(spec)),
+        fmt,
+        overridesOf(g),
+      )
+      return format(out, fmt)
+    }
+
+    it('leaves a package pinned to a vulnerable version — even with --force', async () => {
+      const out = await runOvr({ vuln: '1.0.0' }, { force: true })
+      expect(out).toContain('version "1.0.0"') // left at the pinned (vuln) version
+      expect(out).not.toContain('version "2.0.0"') // NOT bumped, NOT rewritten
+    })
+
+    it('still fixes when the pin is a range that admits the fix', async () => {
+      const out = await runOvr({ vuln: '>=1.0.0' })
+      expect(out).toContain('version "2.0.0"') // bump stays within the pin
+    })
+
+    it('leaves a package under a DEEP-scope override untouched (v1 under-match guard)', async () => {
+      const g = parse(lf, fmt, undefined, { resolutions: { 'a/b/vuln': '2.0.0' } })
+      // ≥2 ancestors → the lib's single-level matcher under-matches, so we can't
+      // prove which subtree it governs → leave the package be (conservative).
+      expect(overridesOf(g).some((o) => (o.parentPath?.length ?? 0) >= 2)).toBe(true)
+      const out = format(
+        await patch(g, report, ctx({ silent: true }, mockRegistry(spec)), fmt, overridesOf(g)),
+        fmt,
+      )
+      expect(out).toContain('version "1.0.0"') // untouched
+      expect(out).not.toContain('version "2.0.0"') // not bumped
+    })
+  })
+
   it('leaves a package matched by --exclude untouched', async () => {
     const spec = { vuln: { '1.0.0': {}, '2.0.0': {} } }
     const report = { vuln: advisory('<2.0.0', '>=2.0.0') }
@@ -235,6 +316,26 @@ describe('patch', () => {
     const input = lock([{ id: 'lodash@^4.17.0', version: '4.17.20' }])
     const out = await capture(() => run(input, {}, { silent: false }, {}))
     expect(out).toMatch(/Audit check found no issues/)
+  })
+
+  it('reports a package left pinned by an override (no rewrite)', async () => {
+    const g = parse(
+      lock([{ id: 'vuln@^1.0.0', version: '1.0.0' }]),
+      'yarn-classic',
+      undefined,
+      { resolutions: { vuln: '1.0.0' } }, // exact pin on the vulnerable version
+    )
+    const out = await capture(() =>
+      patch(
+        g,
+        { vuln: advisory('<2.0.0', '>=2.0.0') },
+        ctx({ silent: false }, mockRegistry({ vuln: { '1.0.0': {}, '2.0.0': {} } })),
+        'yarn-classic',
+        overridesOf(g),
+      ),
+    )
+    expect(out).toMatch(/Skipped \(pinned by an override/)
+    expect(out).toContain('vuln@1.0.0 (pinned → 1.0.0)')
   })
 })
 

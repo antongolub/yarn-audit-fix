@@ -97,6 +97,7 @@ describe('yarn-audit-fix', () => {
           expect.any(String),
           'yarn-classic',
           expect.any(String),
+          expect.anything(), // the project manifest (for override capture)
         )
         expect(lfAudit).toHaveBeenCalledTimes(1)
         expect(lfPatch).toHaveBeenCalledTimes(1)

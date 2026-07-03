@@ -1,5 +1,5 @@
-import { detect, parse as lfParse, stringify as lfStringify } from '@antongolub/lockfile'
-import type { Graph, FormatId } from '@antongolub/lockfile'
+import { detect, governingOverrideFor, overridesOf, parse as lfParse, stringify as lfStringify } from '@antongolub/lockfile'
+import type { Graph, FormatId, Manifest, OverrideConstraint } from '@antongolub/lockfile'
 import { completeTransitives } from '@antongolub/lockfile/complete'
 import { refurbish as lfRefurbish } from '@antongolub/lockfile/enrich'
 import { replaceVersion } from '@antongolub/lockfile/modify'
@@ -23,27 +23,64 @@ type NodeId = Awaited<ReturnType<typeof replaceVersion>>['added'][number]
 export const getLockfileType = (lockfile: string): TLockfileType =>
   detect(lockfile)
 
+/**
+ * Wrap the project's raw `package.json` override block into the lib `Manifest`
+ * shape (`native.*`) keyed by workspace root, so `parse` can F6-capture the
+ * project's declared pins per ecosystem — npm `overrides`, yarn/bun `resolutions`,
+ * pnpm `pnpm.overrides`. Absent block → `undefined` (parse runs override-free,
+ * identical to before). This is what makes `overridesOf(graph)` carry the pins.
+ */
+const toManifests = (
+  manifest: Record<string, any> | undefined,
+  ecosystem: ReturnType<typeof ecosystemFor>,
+): Record<string, Manifest> | undefined => {
+  if (!manifest) return undefined
+  const native: NonNullable<Manifest['native']> = {}
+  if (ecosystem === 'yarn-classic' || ecosystem === 'yarn-berry') {
+    if (manifest.resolutions) native.yarnResolutions = manifest.resolutions
+  } else if (ecosystem === 'pnpm') {
+    if (manifest.pnpm?.overrides) native.pnpmOverrides = manifest.pnpm.overrides
+  } else if (manifest.overrides) {
+    native.npmOverrides = manifest.overrides // npm (+ bun, npm-shaped)
+  }
+  return Object.keys(native).length > 0 ? { '.': { native } } : undefined
+}
+
 export const _parse = (
   lockfile: string,
   lockfileType: TLockfileType,
   workspaceRoot?: string,
+  manifest?: Record<string, any>,
 ): TLockfileObject => {
   if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
   }
   // workspaceRoot lets the berry adapter resolve builtin patch hashes; without
-  // it, re-serialised patch entries break `yarn install`.
-  return lfParse(lockfileType as FormatId, lockfile, { workspaceRoot })
+  // it, re-serialised patch entries break `yarn install`. `manifests` supplies the
+  // project's declared overrides/resolutions so the graph carries them (Bug #99:
+  // the yarn family also needs them at parse to bind a `resolutions`-pinned edge).
+  return lfParse(lockfileType as FormatId, lockfile, {
+    workspaceRoot,
+    manifests: toManifests(manifest, ecosystemFor(lockfileType)),
+  })
 }
 
 export const _format = (
   lockfile: TLockfileObject,
   lockfileType: TLockfileType,
+  overrides: readonly OverrideConstraint[] = [],
 ): string => {
   if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
   }
-  return lfStringify(lockfileType as FormatId, lockfile as Graph)
+  // Re-emit the project's declared overrides so a PM that stores them in the lock
+  // (pnpm's `overrides:`) round-trips clean — else `--frozen-lockfile` rejects the
+  // rewritten lock (CONFIG_MISMATCH). Empty → omit the option (unchanged output).
+  return lfStringify(
+    lockfileType as FormatId,
+    lockfile as Graph,
+    overrides.length > 0 ? { overrides: [...overrides] } : undefined,
+  )
 }
 
 /** Strip yarn's `npm:` protocol; return a usable semver range or undefined. */
@@ -66,6 +103,7 @@ export const _patch = async (
   report: TAuditReport,
   ctx: TContext,
   lockfileType: TLockfileType,
+  overrides: readonly OverrideConstraint[] = [],
 ): Promise<TLockfileObject> => {
   const { flags } = ctx
   if (Object.keys(report).length === 0) {
@@ -79,6 +117,10 @@ export const _patch = async (
   const excluded = new Set<string>()
   const noFix = new Set<string>()
   const incompatible = new Map<string, Set<string>>()
+  // A root override/resolution the fix can't satisfy is authoritative: mirror
+  // `npm audit fix --force`, which leaves such a pin untouched (never rewrites it)
+  // and leaves the package flagged. spec → the pinned target (for the report).
+  const pinned = new Map<string, string>()
 
   // Lowest published version that clears the advisory (minimal bump), read from
   // the registry packument.
@@ -131,6 +173,54 @@ export const _patch = async (
       kept.forEach((n) => noFix.add(`${n.name}@${n.version}`))
       continue
     }
+
+    // Override authority (`npm audit fix --force` parity): a root override /
+    // resolution is the user's deliberate pin. If it governs this package and the
+    // fix can't satisfy its target (an exact vuln pin, or a non-semver target),
+    // leave it untouched — npm does NOT rewrite an override, even with --force — and
+    // report it. A range pin that ADMITS the fix falls through: the bump stays
+    // within the pin, so it's safe to apply.
+    if (overrides.length > 0) {
+      let pinTo = governingOverrideFor(name, [], overrides)?.to // bare / tree-wide
+      if (pinTo === undefined) {
+        // single-parent-scoped (matches the lib's consumerPath = [immediate parent])
+        pinScan: for (const n of kept) {
+          for (const e of graph.in(n.id as NodeId)) {
+            const consumer = graph.getNode(e.src)
+            const g = consumer && governingOverrideFor(name, [consumer.name], overrides)
+            if (g) {
+              pinTo = g.to
+              break pinScan
+            }
+          }
+        }
+      }
+      // v1 safety: the lib's matcher only sees one consumer level, so a DEEP scope
+      // (≥2 ancestors, e.g. npm `a>b>foo`) under-matches. We can't prove which
+      // subtree it governs → treat it as authoritative-but-unverifiable and leave
+      // the package be, rather than emit a bump a deep override could revert on
+      // install. (Drop this once the lib threads a full consumer path.)
+      const deep =
+        pinTo === undefined
+          ? overrides.find(
+              (c) => c.package === name && (c.parentPath?.length ?? 0) >= 2,
+            )
+          : undefined
+      if (deep !== undefined) {
+        kept.forEach((n) => pinned.set(`${n.name}@${n.version}`, deep.to))
+        continue
+      }
+      if (pinTo !== undefined) {
+        // A range pin that ADMITS the fix falls through (bump stays within it);
+        // an exact / non-semver pin the fix can't satisfy is left as-is.
+        const pinRange = normalizeRange(pinTo)
+        if (pinRange === undefined || !sv.satisfies(fix, pinRange)) {
+          kept.forEach((n) => pinned.set(`${n.name}@${n.version}`, pinTo!))
+          continue
+        }
+      }
+    }
+
     // skip versions already at/above the fix — keeps re-runs idempotent
     const froms = kept.filter((n) => sv.lt(n.version, fix))
     if (froms.length === 0) continue
@@ -206,6 +296,10 @@ export const _patch = async (
     let completed = 0
     const completion = await completeTransitives(graph, registry, {
       seed: { recentlyAdded, recentlyOrphaned },
+      // Honor the project's declared pins: a NEW closure edge governed by an
+      // override binds the pinned target verbatim (before the registry rung), so
+      // the completed tree never contradicts `overrides`/`resolutions`.
+      overrides: [...overrides],
       onDiagnostic: (d: { code?: string }) => {
         if (d.code === 'COMPLETION_NODE_ADDED')
           ctx.progress?.label(`Completing the tree… ${++completed}`)
@@ -257,6 +351,14 @@ export const _patch = async (
       for (const [spec, consumers] of [...incompatible].sort()) {
         warn(`  ${spec}`)
         for (const c of [...consumers].sort()) warn(`    - ${c}`)
+      }
+    }
+    if (pinned.size > 0) {
+      warn(
+        'Skipped (pinned by an override/resolution the fix can\'t satisfy; update the override to remediate):',
+      )
+      for (const [spec, to] of [...pinned].sort()) {
+        warn(`  ${spec} (pinned → ${to})`)
       }
     }
     // info-level COMPLETION_NODE_ADDED is success noise — only surface real gaps.
@@ -375,3 +477,8 @@ export const patch: typeof _patch = (...args) => _internal._patch(...args)
 export const refurbish: typeof _refurbish = (...args) =>
   _internal._refurbish(...args)
 export const format: typeof _format = (...args) => _internal._format(...args)
+
+// The project's declared overrides/resolutions, captured off the freshly-parsed
+// graph (drops after any mutate — read it right after `parse`, thread into
+// `patch`/`format`). Re-exported so the pipeline stays on this lib boundary.
+export { overridesOf }
