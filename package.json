@@ -64,7 +64,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@antongolub/lockfile": "0.0.0-snapshot.86",
+    "@antongolub/lockfile": "0.0.0-snapshot.87",
     "@types/semver": "^7.7.1",
     "fast-glob": "^3.3.3",
     "minimist": "^1.2.8",

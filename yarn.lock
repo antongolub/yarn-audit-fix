@@ -5,9 +5,9 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.86":
-  version: 0.0.0-snapshot.86
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.86"
+"@antongolub/lockfile@npm:0.0.0-snapshot.87":
+  version: 0.0.0-snapshot.87
+  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.87"
   dependencies:
     node-fetch-native: "npm:^1.6.7"
     pako: "npm:^3.0.0"
@@ -17,7 +17,7 @@ __metadata:
   peerDependenciesMeta:
     "@yarnpkg/libzip":
       optional: true
-  checksum: 10c0/121774116a3520006ab256f45c1475fd19083bbc7c727f4643cb98cc4545a1243a1a40436e215958722435f554f62f500c6ef2a79e90bef09e558bfafad98f40
+  checksum: 10c0/29920f5b658a1010b066234cacf8b20431ea1860e04c1e007e4b1d997ae320ca2fb331df73122df64502719dafc4df6a261935bfa7d5dd357a48c03283615df4
   languageName: node
   linkType: hard
 
@@ -3701,7 +3701,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.86"
+    "@antongolub/lockfile": "npm:0.0.0-snapshot.87"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.1"
