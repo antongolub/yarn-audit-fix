@@ -5,19 +5,19 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.88":
-  version: 0.0.0-snapshot.88
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.88"
+"@antongolub/lockfile@npm:0.0.0-snapshot.89":
+  version: 0.0.0-snapshot.89
+  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.89"
   dependencies:
     node-fetch-native: "npm:^1.6.7"
     pako: "npm:^3.0.0"
     semver: "npm:^7.8.5"
   peerDependencies:
-    "@yarnpkg/libzip": ">=2.0.0"
+    "@yarnpkg/libzip": ">=3.0.0"
   peerDependenciesMeta:
     "@yarnpkg/libzip":
       optional: true
-  checksum: 10c0/f1c628a15950a8643e01bbebaf9ff9a1aa8ab7575fffb15442b8d33c18dd16091e691f7f4013943a48127ac8d5d420791a54e6107e88334bc95259655aaf1236
+  checksum: 10c0/144ab7e7079350ba6fa868cc6b7bf3a0fb205fc09c8c4e5d2bd035f3d1d01118d6ecd551567bda8001124fb4b580f05fa3646f01d89a658b8d9b77b15cde2594
   languageName: node
   linkType: hard
 
@@ -988,6 +988,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/emscripten@npm:^1.39.6":
+  version: 1.41.5
+  resolution: "@types/emscripten@npm:1.41.5"
+  checksum: 10c0/ae816da716f896434e59df7a71b67c71ae7e85ca067a32aef1616572fc4757459515d42ade6f5b8fd8d69733a9dbd0cf23010fec5b2f41ce52c09501aa350e45
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:1.0.9, @types/estree@npm:^1.0.0":
   version: 1.0.9
   resolution: "@types/estree@npm:1.0.9"
@@ -1208,6 +1215,28 @@ __metadata:
   version: 3.5.38
   resolution: "@vue/shared@npm:3.5.38"
   checksum: 10c0/42c6b2118d5632920d97f06c4883ac611f300e5158cbdef6c2b87962c4b8b89121c726cc2ff6fe1894a2266370c91c1664d0956026d27874491b2c4a213af8e8
+  languageName: node
+  linkType: hard
+
+"@yarnpkg/fslib@npm:^3.1.3":
+  version: 3.1.5
+  resolution: "@yarnpkg/fslib@npm:3.1.5"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 10c0/e360209a31d60cc8452417cdd750d9d7c5face37eb3508de2947477509f3a93c6c5d0737bf1a3a270bce5ef16dd4f5a562fb9489c7d9b80aa10cc787c45485d3
+  languageName: node
+  linkType: hard
+
+"@yarnpkg/libzip@npm:^3.2.2":
+  version: 3.2.2
+  resolution: "@yarnpkg/libzip@npm:3.2.2"
+  dependencies:
+    "@types/emscripten": "npm:^1.39.6"
+    "@yarnpkg/fslib": "npm:^3.1.3"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@yarnpkg/fslib": ^3.1.3
+  checksum: 10c0/40f5c63520477c9d5ed98e0ad888a5aa48f5641df883664b6892be2b4068b5489ac030123fe3569599269adc3e773a6ca890c41e033c71daf37a9fa51011784a
   languageName: node
   linkType: hard
 
@@ -3701,11 +3730,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.88"
+    "@antongolub/lockfile": "npm:0.0.0-snapshot.89"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.1"
     "@vitest/coverage-v8": "npm:^4.0.0"
+    "@yarnpkg/libzip": "npm:^3.2.2"
     concurrently: "npm:^10.0.0"
     cpy-cli: "npm:^7.0.0"
     depcheck: "npm:^1.4.7"
