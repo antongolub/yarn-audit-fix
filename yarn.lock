@@ -5,9 +5,9 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.89":
-  version: 0.0.0-snapshot.89
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.89"
+"@antongolub/lockfile@npm:0.0.0-snapshot.91":
+  version: 0.0.0-snapshot.91
+  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.91"
   dependencies:
     node-fetch-native: "npm:^1.6.7"
     pako: "npm:^3.0.0"
@@ -17,7 +17,7 @@ __metadata:
   peerDependenciesMeta:
     "@yarnpkg/libzip":
       optional: true
-  checksum: 10c0/144ab7e7079350ba6fa868cc6b7bf3a0fb205fc09c8c4e5d2bd035f3d1d01118d6ecd551567bda8001124fb4b580f05fa3646f01d89a658b8d9b77b15cde2594
+  checksum: 10c0/38f72ff3d4af7051ffe900c44df1a5c4f36b1ad293c6ee024e41477295482ab2f06c2cea5788917ab14d8252e0e2dae7e6c27ac548716db00cda4e8b7b22eaa8
   languageName: node
   linkType: hard
 
@@ -2749,9 +2749,9 @@ __metadata:
   linkType: hard
 
 "pako@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "pako@npm:3.0.0"
-  checksum: 10c0/2e6ee401325262659b8b11a8badac142b8be3804675355969d9120756819a88e6ce2c46e4f4083ec944ac0304b5dc8e2b61ebc89d0e2e4ed24892ca5f3be56d3
+  version: 3.0.1
+  resolution: "pako@npm:3.0.1"
+  checksum: 10c0/1292b2ffcbdf42f95be5519ffc11c4cb8daf065f7681936a5b0fe2028753396fbaea0c22cb22e54a4f12bb0c3217513f6b2261fa77e4dbf8c9bd76efe3eca2cc
   languageName: node
   linkType: hard
 
@@ -3730,7 +3730,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.89"
+    "@antongolub/lockfile": "npm:0.0.0-snapshot.91"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.1"
