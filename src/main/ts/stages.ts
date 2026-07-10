@@ -97,7 +97,7 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
   // audit / patch / refurbish are all silent registry HTTP, so drive a spinner
   // to show what's happening (no-op off a TTY or under --silent). The pipeline
   // reports through ctx.progress (advisory count, checksum count, summary lines).
-  const progress = createProgress(!flags.silent)
+  const progress = createProgress(!flags.silent && !flags.json)
   ctx.progress = progress
   try {
     // audit fetches advisories; patch resolves fixes + completes the new
@@ -140,6 +140,10 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
           )
       }
     }
+    // `--json`: emit the machine-readable outcome as the only stdout (human logs
+    // and the spinner are suppressed above). `--dry-run --json` = the preview form.
+    if (flags.json)
+      console.log(JSON.stringify(ctx.summary ?? { dryRun: !!flags['dry-run'] }, null, 2))
   } finally {
     progress.stop()
     ctx.progress = undefined

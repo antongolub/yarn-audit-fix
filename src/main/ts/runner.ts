@@ -65,7 +65,7 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
 
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
-  const log = (note: string) => !flags.silent && console.log(bold(note))
+  const log = (note: string) => !flags.silent && !flags.json && console.log(bold(note))
 
   // Cooperative Ctrl+C / kill. An AbortSignal is threaded into the registry HTTP
   // (advisory POST, tarball GET — see `audit/registry`) so the first interrupt

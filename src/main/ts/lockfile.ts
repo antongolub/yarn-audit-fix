@@ -227,7 +227,8 @@ export const _patch = async (
   const onConflict: 'skip' | 'stop' =
     flags['on-conflict'] === 'stop' ? 'stop' : 'skip'
   if (Object.keys(report).length === 0) {
-    !flags.silent && console.log('Audit check found no issues')
+    ctx.summary = { dryRun: !!flags['dry-run'], upgraded: [], skipped: [], excluded: [], noFix: [] }
+    !flags.silent && !flags.json && console.log('Audit check found no issues')
     return lockfile
   }
 
@@ -593,7 +594,32 @@ export const _patch = async (
       graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
   }
 
-  if (!flags.silent) {
+  // Machine-readable outcome (`--json`): what was (or, under `--dry-run`, would be)
+  // upgraded, and what was skipped and why. Built from the same sets the human
+  // report below reads, so the two never diverge.
+  const upSeen = new Set<string>()
+  ctx.summary = {
+    dryRun: !!flags['dry-run'],
+    upgraded: applied.flatMap((u) => {
+      const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
+      if (upSeen.has(head)) return []
+      upSeen.add(head)
+      return [
+        { name: u.name, from: u.froms[0].version, to: u.fix, severity: report[u.name]?.severity },
+      ]
+    }),
+    skipped: [
+      ...[...incompatible.keys()].map((p) => ({ package: p, reason: 'consumer-range' })),
+      ...[...pinned.keys()].map((p) => ({ package: p, reason: 'override-pin' })),
+      ...[...manifestPinned.keys()].map((p) => ({ package: p, reason: 'manifest-pin' })),
+      ...[...constraintSkipped.keys()].map((p) => ({ package: p, reason: 'constraint' })),
+      ...[...scopeSkipped].map((p) => ({ package: p, reason: 'out-of-scope' })),
+    ].sort((a, b) => a.package.localeCompare(b.package)),
+    excluded: [...excluded].sort(),
+    noFix: [...noFix].sort(),
+  }
+
+  if (!flags.silent && !flags.json) {
     // Route through the spinner when one is active (clears → prints → redraws);
     // plain console otherwise (direct/test calls).
     const log = ctx.progress ? ctx.progress.log : console.log

@@ -79,4 +79,10 @@ describe('cli parse', () => {
     })
     expect(parse(['--force'])).not.toHaveProperty('workspace')
   })
+
+  it('parses --json as a boolean', () => {
+    expect(parse(['--json'])).toMatchObject({ json: true })
+    expect(parse([], { YAF_JSON: 'true' })).toMatchObject({ json: 'true' })
+    expect(parse(['--force'])).not.toHaveProperty('json')
+  })
 })

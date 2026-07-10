@@ -114,6 +114,21 @@ describe('yarn-audit-fix', () => {
           expect.anything(),
         )
       })
+
+      it('under --json --dry-run: emits JSON to stdout and skips the write', async () => {
+        const log = vi.spyOn(console, 'log').mockImplementation(noop)
+        try {
+          await run({ json: true, 'dry-run': true })
+          const printed = log.mock.calls
+            .map((c) => String(c[0]))
+            .find((s) => s.trim().startsWith('{'))
+          expect(printed).toBeDefined()
+          expect(() => JSON.parse(printed as string)).not.toThrow()
+          expect(fs.writeFileSync).not.toHaveBeenCalled() // --dry-run → no write
+        } finally {
+          log.mockRestore()
+        }
+      })
     })
 
     describe('cli', () => {

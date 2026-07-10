@@ -11,7 +11,7 @@ import { getSelfManifest } from './util'
 // Declarative option spec (keeps `parse` small and the Node floor low — see the
 // v11 migration note): value-taking vs boolean flags, their `YAF_*` env-var
 // fallbacks, and the allowed values for the enum-like ones.
-const BOOLEAN = ['dry-run', 'force', 'production', 'safe', 'silent', 'verbose']
+const BOOLEAN = ['dry-run', 'force', 'json', 'production', 'safe', 'silent', 'verbose']
 const STRING = [
   'audit-level',
   'cwd',
@@ -29,6 +29,7 @@ const ENV: Record<string, string> = {
   exclude: 'YAF_EXCLUDE',
   force: 'YAF_FORCE',
   ignore: 'YAF_IGNORE',
+  json: 'YAF_JSON',
   'on-conflict': 'YAF_ON_CONFLICT',
   'package-type': 'YAF_PACKAGE_TYPE',
   production: 'YAF_PRODUCTION',
@@ -58,6 +59,8 @@ Options:
                           (e.g. lodash,@scope/*@>=2 <3)
   --force                 Apply semver-major upgrades, not just compatible ones
   --ignore <ids>          Advisory ids to ignore: comma-sep globs (GHSA or npm id)
+  --json                  Print the outcome as JSON (upgraded / skipped / excluded /
+                          no-fix) instead of the human summary; pairs with --dry-run
   --license.allow <spdx>  Only accept fixes whose closure has these SPDX licenses
                           (comma-sep). --license.deny <spdx> flags forbidden ones.
                           A bare --license=<spdx,...> is an allow list

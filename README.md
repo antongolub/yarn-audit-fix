@@ -113,9 +113,10 @@ dependencies, and (for yarn berry) the package checksums are all resolved
 straight from the registry, so there's no reconcile `yarn install` step.
 | Option                | Description                                                                                                                                                             | Default                                    |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------|
-| `--audit-level`       | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical                                                              | `low`                                      |
+| `--audit-level`       | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical                                                              | all                                      |
 | `--cwd`               | Current working dir                                                                                                                                                     | `process.cwd()`                            |
 | `--dry-run`           | Get an idea of what audit fix will do                                                                                                                                   |                                            |
+| `--json`              | Print the outcome as JSON — `{ dryRun, upgraded, skipped, excluded, noFix }` — instead of the human summary; pairs with `--dry-run` for a machine-readable preview.       | `false`                                    |
 | `--force`             | Apply cross-major fixes: bump past a consumer's declared range, and rewrite a direct-dep range in `package.json` (root or a workspace) that the fix falls outside. See [Direct-dependency pins](#direct-dependency-pins) | `false`             |
 | `--help/-h`           | Print help message                                                                                                                                                      |                                            |
 | `--npm-path`          | Switch to project's local **npm** version instead of system default. Or provide a custom path. `system / local / <custom path>`                                         | `system`                                   |
@@ -223,6 +224,28 @@ Scope: production
 Skipped 12 package(s) outside production scope (--verbose to list)
 ```
 
+#### Machine-readable output (`--json`)
+
+`--json` prints the outcome as a single JSON object instead of the human summary —
+pair it with `--dry-run` for a preview a CI step can gate on (no lockfile is
+written). Human logs and the spinner are suppressed, so stdout is pure JSON:
+
+```bash
+yarn-audit-fix --dry-run --json
+```
+```json
+{
+  "dryRun": true,
+  "upgraded": [{ "name": "lodash", "from": "4.17.20", "to": "4.17.21", "severity": "high" }],
+  "skipped": [{ "package": "some-tool@1.4.0 → 2.0.0", "reason": "constraint" }],
+  "excluded": [],
+  "noFix": []
+}
+```
+
+`reason` is one of `consumer-range`, `override-pin`, `manifest-pin`, `constraint`,
+or `out-of-scope`.
+
 ### ENV
 Any CLI option can be set via a `YAF`-prefixed env var (the dot-nested
 `--engines.*` / `--license.*` are flag-only). For example:
@@ -231,6 +254,7 @@ Any CLI option can be set via a `YAF`-prefixed env var (the dot-nested
 * `YAF_ON_CONFLICT=stop` — `--on-conflict=stop`
 * `YAF_PRODUCTION=true` — `--production`
 * `YAF_WORKSPACE='packages/*'` — `--workspace=packages/*`
+* `YAF_JSON=true` — `--json`
 
 ### JS API
 **yarn-audit-fix** exposes its internals, so you can tweak the steps or build your own flow.

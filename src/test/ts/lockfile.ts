@@ -397,6 +397,59 @@ describe('patch', () => {
     })
   })
 
+  describe('--json summary (ctx.summary)', () => {
+    const spec = {
+      consumer: { '1.0.0': {} },
+      skipme: { '1.0.0': {}, '2.0.0': {} }, // cross-major → consumer-range skip
+      up: { '1.0.0': {}, '1.5.0': {} }, // in-range → upgraded
+      exme: { '1.0.0': {}, '2.0.0': {} }, // --exclude
+      nofixme: { '1.0.0': {} }, // no published fix
+    }
+    const report = {
+      skipme: advisory('<2.0.0', '>=2.0.0'),
+      up: advisory('<1.5.0', '>=1.5.0'),
+      exme: advisory('<2.0.0', '>=2.0.0'),
+      nofixme: advisory('<99.0.0', '>=99.0.0'),
+    }
+    const lf = lock([
+      { id: 'consumer@^1.0.0', version: '1.0.0', deps: { skipme: '^1.0.0' } },
+      { id: 'skipme@^1.0.0', version: '1.0.0' },
+      { id: 'up@^1.0.0', version: '1.0.0' },
+      { id: 'exme@^1.0.0', version: '1.0.0' },
+      { id: 'nofixme@^1.0.0', version: '1.0.0' },
+    ])
+
+    it('records upgraded / skipped / excluded / no-fix on ctx.summary', async () => {
+      const c = ctx({ silent: true, exclude: 'exme' }, mockRegistry(spec))
+      await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic')
+      const s = c.summary!
+      expect(s.dryRun).toBe(false)
+      expect(s.upgraded).toEqual([{ name: 'up', from: '1.0.0', to: '1.5.0' }])
+      expect(s.excluded).toEqual(['exme@1.0.0'])
+      expect(s.noFix).toEqual(['nofixme@1.0.0'])
+      expect(s.skipped).toContainEqual({
+        package: 'skipme@1.0.0 → 2.0.0',
+        reason: 'consumer-range',
+      })
+    })
+
+    it('flags dryRun and prints nothing human under --json', async () => {
+      const c = ctx({ json: true, 'dry-run': true, exclude: 'exme' }, mockRegistry(spec))
+      const out = await capture(() =>
+        patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'),
+      )
+      expect(out).toBe('') // --json suppresses the human summary in _patch
+      expect(c.summary!.dryRun).toBe(true)
+      expect(c.summary!.upgraded).toEqual([{ name: 'up', from: '1.0.0', to: '1.5.0' }])
+    })
+
+    it('emits an empty-but-shaped summary when the audit finds nothing', async () => {
+      const c = ctx({ silent: true }, mockRegistry({}))
+      await patch(parse(lock([{ id: 'x@^1.0.0', version: '1.0.0' }]), 'yarn-classic'), {}, c, 'yarn-classic')
+      expect(c.summary).toEqual({ dryRun: false, upgraded: [], skipped: [], excluded: [], noFix: [] })
+    })
+  })
+
   describe('manifest gate (direct-dep whose declared range the fix falls outside)', () => {
     const report = { lodash: advisory('<4.18.0', '>=4.18.0') }
     const spec = { lodash: { '4.17.11': {}, '4.18.0': {} } }
