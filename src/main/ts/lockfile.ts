@@ -1,3 +1,5 @@
+import path from 'node:path'
+
 import { detect, governingOverrideFor, overridesOf, parse as lfParse, stringify as lfStringify } from '@antongolub/lockfile'
 import type { Graph, FormatId, Manifest, OverrideConstraint } from '@antongolub/lockfile'
 import { completeTransitives, selectConstrained } from '@antongolub/lockfile/complete'
@@ -23,6 +25,7 @@ import {
   TLockfileType,
   TManifestEdit,
 } from './ifaces'
+import { attempt, getWorkspaces, readJson } from './util'
 
 // NodeId isn't re-exported from the package root — derive it from a primitive.
 type NodeId = Awaited<ReturnType<typeof replaceVersion>>['added'][number]
@@ -97,28 +100,63 @@ const normalizeRange = (raw?: string): string | undefined => {
   return sv.validRange(r) ? r : undefined
 }
 
+/** A manifest file whose direct-dep ranges the gate consults, paired with its
+ *  parsed content. `file` is where a --force rewrite lands. */
+type TManifestFile = { file: string; manifest: Record<string, any> }
+
 /**
- * Direct-dep declared ranges from the root package.json, keyed by name (first of
- * dependencies → devDependencies → optionalDependencies → peerDependencies wins).
- * The manifest gate consults these: a DIRECT dep whose range can't admit the fix is
- * flagged (default) or its range rewritten (--force). Non-semver ranges
- * (`workspace:`, `npm:` alias, git/file, `*`) are left alone by the caller's
- * `sv.validRange` guard.
+ * The manifest files the gate consults: the root package.json + every workspace
+ * package.json (monorepo, discovered from the root `workspaces` globs). The root
+ * reuses the already-parsed `ctx.manifest`; each workspace is read best-effort (an
+ * unreadable one is skipped). Absent cwd (direct/test calls) → the root alone.
+ */
+const collectManifestFiles = (
+  cwd: string | undefined,
+  rootManifest: Record<string, any> | undefined,
+): TManifestFile[] => {
+  const root = rootManifest ?? {}
+  if (!cwd) return [{ file: 'package.json', manifest: root }]
+  const files: TManifestFile[] = [
+    { file: path.join(cwd, 'package.json'), manifest: root },
+  ]
+  for (const wf of getWorkspaces(cwd, root)) {
+    const manifest = attempt(() => readJson(wf))
+    if (manifest && typeof manifest === 'object') files.push({ file: wf, manifest })
+  }
+  return files
+}
+
+/**
+ * Direct-dep declared ranges across the root + workspace manifests, keyed by name
+ * → every `{ range, file }` that declares it (first of dependencies →
+ * devDependencies → optionalDependencies → peerDependencies wins *within* one
+ * manifest; separate entries *across* manifests). The gate consults these: a DIRECT
+ * dep whose declared range can't admit the fix is flagged (default) or rewritten in
+ * that file (--force). Non-semver ranges (`workspace:`, `npm:` alias, git/file, `*`)
+ * are left alone by the caller's `sv.validRange` guard.
  */
 const manifestDirectRanges = (
-  manifest: Record<string, any> | undefined,
-): Map<string, string> => {
-  const out = new Map<string, string>()
-  for (const field of [
-    'dependencies',
-    'devDependencies',
-    'optionalDependencies',
-    'peerDependencies',
-  ]) {
-    const deps = manifest?.[field]
-    if (deps && typeof deps === 'object')
-      for (const [name, range] of Object.entries(deps))
-        if (typeof range === 'string' && !out.has(name)) out.set(name, range)
+  files: TManifestFile[],
+): Map<string, { range: string; file: string }[]> => {
+  const out = new Map<string, { range: string; file: string }[]>()
+  for (const { file, manifest } of files) {
+    const seen = new Set<string>() // first-field-wins within this manifest
+    for (const field of [
+      'dependencies',
+      'devDependencies',
+      'optionalDependencies',
+      'peerDependencies',
+    ]) {
+      const deps = manifest?.[field]
+      if (deps && typeof deps === 'object')
+        for (const [name, range] of Object.entries(deps))
+          if (typeof range === 'string' && !seen.has(name)) {
+            seen.add(name)
+            const list = out.get(name) ?? []
+            list.push({ range, file })
+            out.set(name, list)
+          }
+    }
   }
   return out
 }
@@ -129,6 +167,14 @@ const widenRange = (declared: string, fix: string): string => {
   const t = declared.trim()
   const op = t.startsWith('^') ? '^' : t.startsWith('~') ? '~' : /^\d/.test(t) ? '' : '^'
   return op + fix
+}
+
+/** Report suffix naming the manifest file — empty for the root, `in <rel>` for a
+ *  workspace, so a monorepo skip/rewrite says which package.json it means. */
+const manifestWhere = (file: string, cwd?: string): string => {
+  if (!cwd) return ''
+  const rel = path.relative(cwd, file)
+  return rel === 'package.json' || rel === '' ? '' : ` in ${rel}`
 }
 
 /**
@@ -171,11 +217,14 @@ export const _patch = async (
   // `npm audit fix --force`, which leaves such a pin untouched (never rewrites it)
   // and leaves the package flagged. spec → the pinned target (for the report).
   const pinned = new Map<string, string>()
-  // A DIRECT dep (declared in the root package.json) whose range can't admit the
-  // fix. Default → flag it (`manifestPinned`, spec → declared range). --force →
-  // rewrite the range in package.json (`manifestEdits`, applied by patchLockfile).
-  const directRanges = manifestDirectRanges(ctx.manifest)
-  const manifestPinned = new Map<string, string>()
+  // A DIRECT dep (declared in the root OR a workspace package.json) whose range
+  // can't admit the fix. Default → flag it (`manifestPinned`: name → the blocking
+  // declarations). --force → rewrite the range in each declaring file
+  // (`manifestEdits`, applied per-file by patchLockfile).
+  const directRanges = manifestDirectRanges(
+    collectManifestFiles(ctx.cwd, ctx.manifest),
+  )
+  const manifestPinned = new Map<string, { range: string; file: string }[]>()
   const manifestEdits: TManifestEdit[] = []
   // A fix skipped because its completed closure can't satisfy an active constraint
   // (engines or license) for some new transitive (COMPLETION_NO_CANDIDATE). Keyed
@@ -310,13 +359,23 @@ export const _patch = async (
   // validRange guard; `*` admits every fix so it never trips.
   const gatedPlans: Plan[] = []
   for (const p of plans) {
-    const declared = directRanges.get(p.name)
-    if (declared && sv.validRange(declared) && !sv.satisfies(p.fix, declared)) {
+    // Every declaration (root + workspaces) whose declared range can't admit the
+    // fix — a semver-major bump outside a `^`/exact pin, in any manifest.
+    const blocking = (directRanges.get(p.name) ?? []).filter(
+      (d) => sv.validRange(d.range) && !sv.satisfies(p.fix, d.range),
+    )
+    if (blocking.length > 0) {
       if (!flags.force) {
-        p.froms.forEach((f) => manifestPinned.set(`${p.name}@${f.version}`, declared))
+        manifestPinned.set(p.name, blocking)
         continue
       }
-      manifestEdits.push({ name: p.name, from: declared, to: widenRange(declared, p.fix) })
+      for (const d of blocking)
+        manifestEdits.push({
+          name: p.name,
+          from: d.range,
+          to: widenRange(d.range, p.fix),
+          file: d.file,
+        })
     }
     gatedPlans.push(p)
   }
@@ -574,8 +633,9 @@ export const _patch = async (
       warn(
         'Skipped (package.json pins these to a range the fix can\'t satisfy; re-run with --force to update package.json, or widen the range yourself):',
       )
-      for (const [spec, range] of [...manifestPinned].sort()) {
-        warn(`  ${spec} (pinned → "${range}")`)
+      for (const [name, decls] of [...manifestPinned].sort()) {
+        for (const d of decls)
+          warn(`  ${name} (pinned → "${d.range}"${manifestWhere(d.file, ctx.cwd)})`)
       }
     }
     if (constraintSkipped.size > 0) {
@@ -598,7 +658,7 @@ export const _patch = async (
     if (manifestEdits.length > 0) {
       log('Updated package.json ranges (--force):')
       for (const e of [...manifestEdits].sort((a, b) => a.name.localeCompare(b.name))) {
-        log(`  ${e.name}: "${e.from}" → "${e.to}"`)
+        log(`  ${e.name}: "${e.from}" → "${e.to}"${manifestWhere(e.file, ctx.cwd)}`)
       }
     }
     // info-level COMPLETION_NODE_ADDED is success noise — only surface real gaps.

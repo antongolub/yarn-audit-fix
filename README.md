@@ -116,7 +116,7 @@ straight from the registry, so there's no reconcile `yarn install` step.
 | `--audit-level`       | Include a vulnerability with a level as defined or higher. Supported values: low, moderate, high, critical                                                              | `low`                                      |
 | `--cwd`               | Current working dir                                                                                                                                                     | `process.cwd()`                            |
 | `--dry-run`           | Get an idea of what audit fix will do                                                                                                                                   |                                            |
-| `--force`             | Have audit fix install semver-major updates to toplevel dependencies, not just semver-compatible ones                                                                   | `false`                                    |
+| `--force`             | Apply cross-major fixes: bump past a consumer's declared range, and rewrite a direct-dep range in `package.json` (root or a workspace) that the fix falls outside. See [Direct-dependency pins](#direct-dependency-pins) | `false`             |
 | `--help/-h`           | Print help message                                                                                                                                                      |                                            |
 | `--npm-path`          | Switch to project's local **npm** version instead of system default. Or provide a custom path. `system / local / <custom path>`                                         | `system`                                   |
 | `--registry`          | Custom registry url                                                                                                                                                     |                                            |
@@ -124,7 +124,7 @@ straight from the registry, so there's no reconcile `yarn install` step.
 | `--verbose`           | Switch log level to verbose/debug                                                                                                                                       | `false`                                    |
 | `--exclude`           | Packages to skip updating — comma-separated `glob[@range]` rules (e.g. `lodash,@scope/*@>=2 <3`); the range is matched against the installed version. Repeatable.        |                                            |
 | `--ignore`            | Advisory ids to ignore — comma-separated globs matched against the GHSA id (from the advisory url) or the npm advisory id (e.g. `GHSA-*,1106913`). Repeatable.            |                                            |
-| `--engines.<engine>`  | Only apply a fix whose completed dependency closure runs on the given engine — e.g. `--engines.node='>=18'` (bare `--engines.node` = the Node running the CLI). Repeatable per engine. See [Constraints](#constraints-engines--licenses). |                                            |
+| `--engines.<engine>`  | Only apply a fix whose completed dependency closure runs on the given engine — `--engines.node='>=18'`, `=floor` (infer from the installed tree), or bare `--engines.node` (the Node running the CLI). Repeatable per engine. See [Constraints](#constraints-engines--licenses). |                                            |
 | `--license.allow` / `--license.deny` | Only apply a fix whose closure's SPDX licenses pass the policy — `--license.allow=MIT,ISC` (or bare `--license=MIT,ISC`) / `--license.deny=GPL-3.0`. See [Constraints](#constraints-engines--licenses).                          |                                            |
 | `--on-conflict`       | What to do when a fix can't satisfy the engine/license constraints: `skip` (leave it, report) or `stop` (error).                                                        | `skip`                                     |
 
@@ -140,9 +140,11 @@ in place and reported (or, with `--on-conflict=stop`, the run errors).
   drags in a transitive that needs a newer runtime than your project targets — the
   install passes, but CI/production on the old Node breaks. A bare `--engines.node`
   uses the Node running the CLI (printed in the report, since that may differ from
-  your project's target); pass an explicit range to be sure. Any engine works
-  (`--engines.npm='>=9'`), lenient by npm parity — a package that declares no
-  `engines` is accepted.
+  your project's target); pass an explicit range to be sure, or `--engines.node=floor`
+  to infer it from what your tree already requires (the highest `engines` floor
+  across the root `package.json` + installed `node_modules`) — a fix is then rejected
+  only if it would *raise* that floor. Any engine works (`--engines.npm='>=9'`),
+  lenient by npm parity — a package that declares no `engines` is accepted.
 - **Licenses** — `--license.allow=MIT,ISC,Apache-2.0` (or `--license.deny=GPL-3.0`)
   accepts a fix only if the SPDX license of every new package it pulls in passes
   the allow/deny policy. A bare `--license=MIT,ISC` is an allow list. An
@@ -160,6 +162,21 @@ Skipped (constraints — no fix keeps the closure within the policy [node >=18];
 
 > Constraints gate a fix's dependency **closure** (the transitives it pulls in),
 > not the fixed package's own `engines`/`license`.
+
+#### Direct-dependency pins
+
+If a fix falls outside a direct dependency's declared range in `package.json` (an
+exact pin like `"lodash": "4.17.11"`, or a range that can't reach the fix), the
+package is **flagged and skipped** by default — the fix is never silently applied
+behind a manifest that forbids it. Re-run with `--force` to rewrite that range in
+place (preserving the `^` / `~` / exact operator) and apply the bump, matching
+`npm audit fix --force`. In a monorepo the pin is found and rewritten in the
+workspace `package.json` that declares it — the report names the file:
+
+```
+Skipped (package.json pins these to a range the fix can't satisfy; re-run with --force …):
+  lodash (pinned → "4.17.11" in packages/foo/package.json)
+```
 
 ### ENV
 Any CLI option can be set via a `YAF`-prefixed env var (the dot-nested

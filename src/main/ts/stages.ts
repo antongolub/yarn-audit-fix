@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import semver from 'semver'
 
 import { buildRegistry } from './audit/adapter'
-import { TCallback, TContext } from './ifaces'
+import { TCallback, TContext, TManifestEdit } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType, overridesOf } from './lockfile'
 import { createProgress } from './ui'
@@ -124,14 +124,20 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
       fs.writeFileSync(lockfilePath, format(refurbished, lockfileType, overrides))
       // --force may have rewritten direct-dep ranges the fix fell outside of
       // (npm audit fix --force parity, recorded on ctx by `_patch`) — apply them
-      // to package.json with a surgical, format-preserving string edit.
+      // with a surgical, format-preserving string edit, grouped by the manifest
+      // file they target (the root or a workspace package.json in a monorepo).
       if (ctx.manifestEdits?.length) {
-        const pkgPath = path.join(cwd, 'package.json')
-        const pkg = ctx.manifestEdits.reduce(
-          applyManifestEdit,
-          fs.readFileSync(pkgPath, 'utf-8'),
-        )
-        fs.writeFileSync(pkgPath, pkg)
+        const byFile = new Map<string, TManifestEdit[]>()
+        for (const edit of ctx.manifestEdits) {
+          const list = byFile.get(edit.file) ?? []
+          list.push(edit)
+          byFile.set(edit.file, list)
+        }
+        for (const [file, edits] of byFile)
+          fs.writeFileSync(
+            file,
+            edits.reduce(applyManifestEdit, fs.readFileSync(file, 'utf-8')),
+          )
       }
     }
   } finally {

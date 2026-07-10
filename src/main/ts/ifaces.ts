@@ -29,8 +29,9 @@ export type TContext = {
   manifestEdits?: TManifestEdit[]
 }
 
-// A package.json direct-dep range rewrite: `"<name>": "<from>"` → `"<name>": "<to>"`.
-export type TManifestEdit = { name: string; from: string; to: string }
+// A package.json direct-dep range rewrite: `"<name>": "<from>"` → `"<name>": "<to>"`,
+// in the manifest `file` that declared it (the root or a workspace package.json).
+export type TManifestEdit = { name: string; from: string; to: string; file: string }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>
 

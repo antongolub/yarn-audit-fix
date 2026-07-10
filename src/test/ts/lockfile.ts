@@ -355,7 +355,7 @@ describe('patch', () => {
         patch(parse(lf, 'yarn-classic'), report, ctxM({ silent: false }, manifest), 'yarn-classic'),
       )
       expect(out).toMatch(/Skipped \(package\.json pins/)
-      expect(out).toContain('lodash@4.17.11 (pinned → "4.17.11")')
+      expect(out).toContain('lodash (pinned → "4.17.11")')
       const c = ctxM({ silent: true }, manifest)
       const patched = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
       expect(patched).toContain('version "4.17.11"') // left at the vulnerable version
@@ -368,14 +368,14 @@ describe('patch', () => {
       const c = ctxM({ silent: true, force: true }, { dependencies: { lodash: '4.17.11' } })
       const out = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
       expect(out).toContain('version "4.18.0"') // bumped
-      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '4.17.11', to: '4.18.0' }])
+      expect(c.manifestEdits).toEqual([expect.objectContaining({ name: 'lodash', from: '4.17.11', to: '4.18.0' })])
     })
 
     it('preserves the pin operator in the rewrite (~4.17.0 → ~4.18.0)', async () => {
       const lf = lock([{ id: 'lodash@~4.17.0', version: '4.17.11' }])
       const c = ctxM({ silent: true, force: true }, { dependencies: { lodash: '~4.17.0' } })
       await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic')
-      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '~4.17.0', to: '~4.18.0' }])
+      expect(c.manifestEdits).toEqual([expect.objectContaining({ name: 'lodash', from: '~4.17.0', to: '~4.18.0' })])
     })
 
     it('does NOT trip when the declared range already admits the fix (caret)', async () => {
@@ -416,7 +416,7 @@ describe('patch', () => {
       const out = format(await patch(parse(lf, 'yarn-classic'), report2, c, 'yarn-classic'), 'yarn-classic')
       expect(out).toContain('version "4.18.0"') // lodash: --force rewrote the pin → bumped
       expect(out).toContain('version "1.2.6"') // minimist: ^1.2.0 admits it → bumped, no rewrite
-      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '4.17.11', to: '4.18.0' }])
+      expect(c.manifestEdits).toEqual([expect.objectContaining({ name: 'lodash', from: '4.17.11', to: '4.18.0' })])
     })
 
     it('leaves a non-semver range (workspace:) alone — the validRange guard skips the gate', async () => {
@@ -439,7 +439,7 @@ describe('patch', () => {
       const lf = lock([{ id: 'lodash@>=4.0.0 <4.17.12', version: '4.17.11' }])
       const c = ctxM({ silent: true, force: true }, { dependencies: { lodash: '>=4.0.0 <4.17.12' } })
       await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic')
-      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '>=4.0.0 <4.17.12', to: '^4.18.0' }])
+      expect(c.manifestEdits).toEqual([expect.objectContaining({ name: 'lodash', from: '>=4.0.0 <4.17.12', to: '^4.18.0' })])
     })
 
     it('applyManifestEdit rewrites the range surgically, preserving formatting', () => {

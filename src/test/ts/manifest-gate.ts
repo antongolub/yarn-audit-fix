@@ -163,7 +163,49 @@ describe('manifest gate — integration (patchLockfile on a real project dir)', 
     }
     context.ctx = context
     const out = format(await patch(parse(berryLock, fmt), report, context, fmt), fmt)
-    expect(context.manifestEdits).toEqual([{ name: 'lodash', from: '4.17.11', to: '4.18.0' }])
+    expect(context.manifestEdits).toEqual([
+      expect.objectContaining({ name: 'lodash', from: '4.17.11', to: '4.18.0' }),
+    ])
     expect(out).toContain('lodash@npm:4.18.0') // bumped resolution in the berry lock
+  })
+
+  // Monorepo: the pin lives in a WORKSPACE package.json, not the root. The gate
+  // must find it (root `workspaces` → glob) and rewrite that file, not the root.
+  const monorepo = (flags: Record<string, any>) => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'yaf-ws-'))
+    const root = { name: 'root', private: true, workspaces: ['packages/*'] }
+    fs.writeFileSync(path.join(cwd, 'package.json'), JSON.stringify(root, null, 2) + '\n')
+    const wsDir = path.join(cwd, 'packages', 'foo')
+    fs.mkdirSync(wsDir, { recursive: true })
+    fs.writeFileSync(
+      path.join(wsDir, 'package.json'),
+      JSON.stringify({ name: 'foo', dependencies: { lodash: '4.17.11' } }, null, 2) + '\n',
+    )
+    fs.writeFileSync(path.join(cwd, 'yarn.lock'), lock('lodash@4.17.11'))
+    const context: any = { cwd, flags: { silent: true, ...flags }, manifest: root, registry }
+    context.ctx = context
+    const wsRange = () =>
+      JSON.parse(fs.readFileSync(path.join(wsDir, 'package.json'), 'utf-8')).dependencies.lodash
+    return { cwd, wsDir, context, wsRange }
+  }
+
+  it('monorepo default: a workspace pin the fix falls outside is flagged, not bumped', async () => {
+    audit.mockResolvedValue(report)
+    const { cwd, context, wsRange } = monorepo({})
+    await patchLockfile(context)
+    expect(wsRange()).toBe('4.17.11') // workspace pin untouched
+    expect(readLock(cwd)).toContain('version "4.17.11"') // lock not bumped
+  })
+
+  it('monorepo --force: rewrites the WORKSPACE package.json (not the root) + bumps', async () => {
+    audit.mockResolvedValue(report)
+    const { cwd, context, wsRange } = monorepo({ force: true })
+    await patchLockfile(context)
+    expect(wsRange()).toBe('4.18.0') // the workspace's pin was rewritten
+    // root package.json is untouched (it never declared lodash)
+    expect(JSON.parse(fs.readFileSync(path.join(cwd, 'package.json'), 'utf-8'))).not.toHaveProperty(
+      'dependencies',
+    )
+    expect(readLock(cwd)).toContain('lodash@4.18.0:') // bumped in the lock
   })
 })
