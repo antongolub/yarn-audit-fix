@@ -13,6 +13,7 @@ import {
   patch,
   refurbish,
 } from '../../main/ts/lockfile'
+import { applyManifestEdit } from '../../main/ts/util'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -336,6 +337,129 @@ describe('patch', () => {
     )
     expect(out).toMatch(/Skipped \(pinned by an override/)
     expect(out).toContain('vuln@1.0.0 (pinned → 1.0.0)')
+  })
+
+  describe('manifest gate (direct-dep whose declared range the fix falls outside)', () => {
+    const report = { lodash: advisory('<4.18.0', '>=4.18.0') }
+    const spec = { lodash: { '4.17.11': {}, '4.18.0': {} } }
+    const ctxM = (
+      flags: Record<string, any>,
+      manifest: Record<string, any>,
+    ): TContext =>
+      ({ flags, registry: mockRegistry(spec), manifest, cwd: process.cwd() }) as unknown as TContext
+
+    it('flags + skips a non-admitting direct-dep pin by default (no bump, no rewrite)', async () => {
+      const lf = lock([{ id: 'lodash@4.17.11', version: '4.17.11' }]) // exact pin
+      const manifest = { dependencies: { lodash: '4.17.11' } }
+      const out = await capture(() =>
+        patch(parse(lf, 'yarn-classic'), report, ctxM({ silent: false }, manifest), 'yarn-classic'),
+      )
+      expect(out).toMatch(/Skipped \(package\.json pins/)
+      expect(out).toContain('lodash@4.17.11 (pinned → "4.17.11")')
+      const c = ctxM({ silent: true }, manifest)
+      const patched = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
+      expect(patched).toContain('version "4.17.11"') // left at the vulnerable version
+      expect(patched).not.toContain('version "4.18.0"')
+      expect(c.manifestEdits).toBeUndefined()
+    })
+
+    it('records the range rewrite + applies the bump under --force', async () => {
+      const lf = lock([{ id: 'lodash@4.17.11', version: '4.17.11' }])
+      const c = ctxM({ silent: true, force: true }, { dependencies: { lodash: '4.17.11' } })
+      const out = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
+      expect(out).toContain('version "4.18.0"') // bumped
+      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '4.17.11', to: '4.18.0' }])
+    })
+
+    it('preserves the pin operator in the rewrite (~4.17.0 → ~4.18.0)', async () => {
+      const lf = lock([{ id: 'lodash@~4.17.0', version: '4.17.11' }])
+      const c = ctxM({ silent: true, force: true }, { dependencies: { lodash: '~4.17.0' } })
+      await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic')
+      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '~4.17.0', to: '~4.18.0' }])
+    })
+
+    it('does NOT trip when the declared range already admits the fix (caret)', async () => {
+      const lf = lock([{ id: 'lodash@^4.17.0', version: '4.17.11' }])
+      const c = ctxM({ silent: true }, { dependencies: { lodash: '^4.17.0' } })
+      const out = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
+      expect(out).toContain('version "4.18.0"') // ^4.17.0 admits 4.18.0 → bumped
+      expect(c.manifestEdits).toBeUndefined() // no manifest change
+    })
+
+    it('flags a pin declared in devDependencies (not just dependencies)', async () => {
+      const lf = lock([{ id: 'lodash@4.17.11', version: '4.17.11' }])
+      const c = ctxM({ silent: true }, { devDependencies: { lodash: '4.17.11' } })
+      const out = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
+      expect(out).toContain('version "4.17.11"') // skipped
+      expect(c.manifestEdits).toBeUndefined()
+    })
+
+    it('mixes: a non-admitting pin is flagged while an admitting sibling still bumps (--force)', async () => {
+      const spec2 = {
+        lodash: { '4.17.11': {}, '4.18.0': {} },
+        minimist: { '1.2.5': {}, '1.2.6': {} },
+      }
+      const lf = lock([
+        { id: 'lodash@4.17.11', version: '4.17.11' },
+        { id: 'minimist@^1.2.0', version: '1.2.5' },
+      ])
+      const report2 = {
+        lodash: advisory('<4.18.0', '>=4.18.0'),
+        minimist: advisory('<1.2.6', '>=1.2.6'),
+      }
+      const c = {
+        flags: { silent: true, force: true },
+        registry: mockRegistry(spec2),
+        manifest: { dependencies: { lodash: '4.17.11', minimist: '^1.2.0' } },
+        cwd: process.cwd(),
+      } as unknown as TContext
+      const out = format(await patch(parse(lf, 'yarn-classic'), report2, c, 'yarn-classic'), 'yarn-classic')
+      expect(out).toContain('version "4.18.0"') // lodash: --force rewrote the pin → bumped
+      expect(out).toContain('version "1.2.6"') // minimist: ^1.2.0 admits it → bumped, no rewrite
+      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '4.17.11', to: '4.18.0' }])
+    })
+
+    it('leaves a non-semver range (workspace:) alone — the validRange guard skips the gate', async () => {
+      const lf = lock([{ id: 'lodash@4.17.11', version: '4.17.11' }])
+      const c = ctxM({ silent: true, force: true }, { dependencies: { lodash: 'workspace:*' } })
+      const out = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
+      expect(out).toContain('version "4.18.0"') // not gated → bumped via the normal path
+      expect(c.manifestEdits).toBeUndefined() // never rewritten
+    })
+
+    it('a `*` range admits every fix — no trip', async () => {
+      const lf = lock([{ id: 'lodash@*', version: '4.17.11' }])
+      const c = ctxM({ silent: true }, { dependencies: { lodash: '*' } })
+      const out = format(await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic'), 'yarn-classic')
+      expect(out).toContain('version "4.18.0"') // bumped
+      expect(c.manifestEdits).toBeUndefined()
+    })
+
+    it('widens a complex range the fix falls outside → caret of the fix', async () => {
+      const lf = lock([{ id: 'lodash@>=4.0.0 <4.17.12', version: '4.17.11' }])
+      const c = ctxM({ silent: true, force: true }, { dependencies: { lodash: '>=4.0.0 <4.17.12' } })
+      await patch(parse(lf, 'yarn-classic'), report, c, 'yarn-classic')
+      expect(c.manifestEdits).toEqual([{ name: 'lodash', from: '>=4.0.0 <4.17.12', to: '^4.18.0' }])
+    })
+
+    it('applyManifestEdit rewrites the range surgically, preserving formatting', () => {
+      const pkg = '{\n  "dependencies": {\n    "@scope/x": "1.2.3",\n    "y": "^2.0.0"\n  }\n}\n'
+      expect(applyManifestEdit(pkg, { name: '@scope/x', from: '1.2.3', to: '2.0.0' })).toBe(
+        '{\n  "dependencies": {\n    "@scope/x": "2.0.0",\n    "y": "^2.0.0"\n  }\n}\n',
+      )
+    })
+
+    it('applyManifestEdit updates every field the exact pin appears in', () => {
+      const pkg = '{"dependencies":{"x":"1.0.0"},"devDependencies":{"x":"1.0.0"}}'
+      expect(applyManifestEdit(pkg, { name: 'x', from: '1.0.0', to: '2.0.0' })).toBe(
+        '{"dependencies":{"x":"2.0.0"},"devDependencies":{"x":"2.0.0"}}',
+      )
+    })
+
+    it('applyManifestEdit is a no-op when the exact pin is absent (never touches ^1.0.0)', () => {
+      const pkg = '{"dependencies":{"x":"^1.0.0","x-extra":"1.0.0"}}'
+      expect(applyManifestEdit(pkg, { name: 'x', from: '1.0.0', to: '2.0.0' })).toBe(pkg)
+    })
   })
 })
 

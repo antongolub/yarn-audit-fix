@@ -23,7 +23,14 @@ export type TContext = {
   // Optional `fetch` override — tests inject a stub so the registry audit stays
   // offline; production wires the AbortSignal through the global fetch.
   fetch?: any
+  // Direct-dep range rewrites for package.json, recorded by `_patch` under --force
+  // when a declared range can't admit the fix (`npm audit fix --force` parity);
+  // applied to the manifest by `patchLockfile`. Absent = no manifest change.
+  manifestEdits?: TManifestEdit[]
 }
+
+// A package.json direct-dep range rewrite: `"<name>": "<from>"` → `"<name>": "<to>"`.
+export type TManifestEdit = { name: string; from: string; to: string }
 
 export type TCallback = (cxt: TContext) => void | Promise<void>
 

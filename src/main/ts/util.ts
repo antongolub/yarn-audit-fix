@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import fg, { Options as GlobOptions } from 'fast-glob'
 
-import { TFlags } from './ifaces'
+import { TFlags, TManifestEdit } from './ifaces'
 
 const glob = fg.sync
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -54,6 +54,22 @@ export const getWorkspaces = (
 
 export const readJson = (path: string): any =>
   JSON.parse(fs.readFileSync(path).toString('utf-8').trim())
+
+/**
+ * Rewrite one direct-dep range in raw package.json TEXT, preserving the file's
+ * formatting (a surgical string edit, not a JSON round-trip that would reflow the
+ * whole file). Matches the exact `"<name>": "<from>"` pair — both escaped — so it
+ * can't touch an unrelated key; replaces every field it appears in (a dep pinned
+ * the same in `dependencies` + `devDependencies` → both updated, which is correct).
+ */
+export const applyManifestEdit = (
+  pkgJson: string,
+  { name, from, to }: TManifestEdit,
+): string => {
+  const esc = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const re = new RegExp(`("${esc(name)}"\\s*:\\s*")${esc(from)}(")`, 'g')
+  return pkgJson.replace(re, `$1${to}$2`)
+}
 
 export const attempt = <T>(f: () => T): T | null => {
   try {

@@ -9,7 +9,7 @@ import { TCallback, TContext } from './ifaces'
 import * as lf from './lockfile'
 import { format, getLockfileType, overridesOf } from './lockfile'
 import { createProgress } from './ui'
-import { getSelfManifest } from './util'
+import { applyManifestEdit, getSelfManifest } from './util'
 
 
 /** Resolve the runtime + yaf versions (latest yaf straight from the registry). */
@@ -122,6 +122,17 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // failure leaves the original lockfile untouched. `--dry-run` skips it.
     if (!flags['dry-run']) {
       fs.writeFileSync(lockfilePath, format(refurbished, lockfileType, overrides))
+      // --force may have rewritten direct-dep ranges the fix fell outside of
+      // (npm audit fix --force parity, recorded on ctx by `_patch`) — apply them
+      // to package.json with a surgical, format-preserving string edit.
+      if (ctx.manifestEdits?.length) {
+        const pkgPath = path.join(cwd, 'package.json')
+        const pkg = ctx.manifestEdits.reduce(
+          applyManifestEdit,
+          fs.readFileSync(pkgPath, 'utf-8'),
+        )
+        fs.writeFileSync(pkgPath, pkg)
+      }
     }
   } finally {
     progress.stop()

@@ -25,4 +25,22 @@ describe('cli parse', () => {
   it('throws on an out-of-range choice', () => {
     expect(() => parse(['--audit-level=bogus'])).toThrow(/Invalid value for --audit-level/)
   })
+
+  it('lifts the minimist-nested --engines.<engine> object across the allowlist', () => {
+    expect(parse(['--engines.node=>=18'])).toMatchObject({ engines: { node: '>=18' } })
+    // bare engine → true (→ runtime, resolved later); a second engine with a range
+    expect(parse(['--engines.node', '--engines.npm=>=9'])).toMatchObject({
+      engines: { node: true, npm: '>=9' },
+    })
+  })
+
+  it('omits `engines` when no --engines.<engine> is passed', () => {
+    expect(parse(['--force'])).not.toHaveProperty('engines')
+  })
+
+  it('parses --on-conflict and enforces its choices', () => {
+    expect(parse(['--on-conflict=stop'])).toMatchObject({ 'on-conflict': 'stop' })
+    expect(parse(['--on-conflict=skip'])).toMatchObject({ 'on-conflict': 'skip' })
+    expect(() => parse(['--on-conflict=bogus'])).toThrow(/Invalid value for --on-conflict/)
+  })
 })

@@ -7,6 +7,11 @@ import { pruneOrphans } from '@antongolub/lockfile/optimize'
 import sv from 'semver'
 
 import { buildRegistry, buildTarballSource, ecosystemFor } from './audit/adapter'
+import {
+  buildConstraints,
+  describeEngineTargets,
+  resolveEngineTargets,
+} from './audit/constraints'
 import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
 import { auditViaRegistry } from './audit/registry'
@@ -15,6 +20,7 @@ import {
   TContext,
   TLockfileObject,
   TLockfileType,
+  TManifestEdit,
 } from './ifaces'
 
 // NodeId isn't re-exported from the package root — derive it from a primitive.
@@ -91,6 +97,40 @@ const normalizeRange = (raw?: string): string | undefined => {
 }
 
 /**
+ * Direct-dep declared ranges from the root package.json, keyed by name (first of
+ * dependencies → devDependencies → optionalDependencies → peerDependencies wins).
+ * The manifest gate consults these: a DIRECT dep whose range can't admit the fix is
+ * flagged (default) or its range rewritten (--force). Non-semver ranges
+ * (`workspace:`, `npm:` alias, git/file, `*`) are left alone by the caller's
+ * `sv.validRange` guard.
+ */
+const manifestDirectRanges = (
+  manifest: Record<string, any> | undefined,
+): Map<string, string> => {
+  const out = new Map<string, string>()
+  for (const field of [
+    'dependencies',
+    'devDependencies',
+    'optionalDependencies',
+    'peerDependencies',
+  ]) {
+    const deps = manifest?.[field]
+    if (deps && typeof deps === 'object')
+      for (const [name, range] of Object.entries(deps))
+        if (typeof range === 'string' && !out.has(name)) out.set(name, range)
+  }
+  return out
+}
+
+/** Widen a declared range to admit `fix`, preserving the pin operator
+ * (`^`/`~`/exact; anything else → caret): `4.17.11`→`4.18.0`, `~4.1`→`~4.18.0`. */
+const widenRange = (declared: string, fix: string): string => {
+  const t = declared.trim()
+  const op = t.startsWith('^') ? '^' : t.startsWith('~') ? '~' : /^\d/.test(t) ? '' : '^'
+  return op + fix
+}
+
+/**
  * Upgrade every vulnerable node to the lowest published version that clears its
  * advisory — then pull in that version's *new* transitive dependency closure so
  * the lockfile stays complete. Versions resolve from the registry packument
@@ -106,6 +146,14 @@ export const _patch = async (
   overrides: readonly OverrideConstraint[] = [],
 ): Promise<TLockfileObject> => {
   const { flags } = ctx
+  // Opt-in engine constraints: resolve the `--engines.<engine>` targets up front
+  // (a bad range / unsupported keyword throws here, before any network work).
+  // `constraints` empty ⇒ the completion runs exactly as before.
+  const engineTargets = resolveEngineTargets(flags.engines)
+  const constraints = buildConstraints(engineTargets)
+  const engineSummary = engineTargets ? describeEngineTargets(engineTargets) : ''
+  const onConflict: 'skip' | 'stop' =
+    flags['on-conflict'] === 'stop' ? 'stop' : 'skip'
   if (Object.keys(report).length === 0) {
     !flags.silent && console.log('Audit check found no issues')
     return lockfile
@@ -121,6 +169,23 @@ export const _patch = async (
   // `npm audit fix --force`, which leaves such a pin untouched (never rewrites it)
   // and leaves the package flagged. spec → the pinned target (for the report).
   const pinned = new Map<string, string>()
+  // A DIRECT dep (declared in the root package.json) whose range can't admit the
+  // fix. Default → flag it (`manifestPinned`, spec → declared range). --force →
+  // rewrite the range in package.json (`manifestEdits`, applied by patchLockfile).
+  const directRanges = manifestDirectRanges(ctx.manifest)
+  const manifestPinned = new Map<string, string>()
+  const manifestEdits: TManifestEdit[] = []
+  // A fix skipped because its completed closure has no engine-compatible version
+  // for some new transitive (COMPLETION_NO_CANDIDATE). Keyed by "name@ver → fix",
+  // value = the diagnostic payload (depName / range / rejected) for the report.
+  const engineSkipped = new Map<
+    string,
+    {
+      depName?: string
+      range?: string
+      rejected?: readonly { version: string; by: string; reason?: string }[]
+    }
+  >()
 
   // Lowest published version that clears the advisory (minimal bump), read from
   // the registry packument.
@@ -233,12 +298,33 @@ export const _patch = async (
     })
   }
 
+  // Manifest gate: a DIRECT dep whose declared package.json range can't admit the
+  // fix. Default → flag + skip (like `npm audit fix` without --force: surface it,
+  // the engineer widens the range). --force → rewrite the range in package.json
+  // (npm audit fix --force parity) + let the bump proceed. Works for EVERY format:
+  // a yarn-classic lock has no root edge, so Pass 2's edge gate can't see direct
+  // deps — this can. Non-semver ranges (workspace:/npm:alias/git/file) skip via the
+  // validRange guard; `*` admits every fix so it never trips.
+  const gatedPlans: Plan[] = []
+  for (const p of plans) {
+    const declared = directRanges.get(p.name)
+    if (declared && sv.validRange(declared) && !sv.satisfies(p.fix, declared)) {
+      if (!flags.force) {
+        p.froms.forEach((f) => manifestPinned.set(`${p.name}@${f.version}`, declared))
+        continue
+      }
+      manifestEdits.push({ name: p.name, from: declared, to: widenRange(declared, p.fix) })
+    }
+    gatedPlans.push(p)
+  }
+  if (manifestEdits.length > 0) ctx.manifestEdits = manifestEdits
+
   // Pass 2: compat gate. Skip a fix outside a *surviving* consumer's declared
   // range (unless --force); a consumer that is itself being bumped is exempt —
   // replaceVersion + completeTransitives re-derive its deps from the registry.
-  const planNames = new Set(plans.map((p) => p.name))
+  const planNames = new Set(gatedPlans.map((p) => p.name))
   const upgrades: Plan[] = []
-  for (const p of plans) {
+  for (const p of gatedPlans) {
     let breaks: Set<string> | undefined
     if (!flags.force) {
       for (const from of p.froms) {
@@ -270,51 +356,123 @@ export const _patch = async (
       .map((n) => n.id as NodeId),
   )
 
-  // Apply: rebind each vulnerable range to its fix, then complete the new
-  // transitive closure, then drop whatever got orphaned.
-  const recentlyAdded = new Set<NodeId>()
-  const recentlyOrphaned = new Set<NodeId>()
-  for (const u of upgrades) {
-    const res = await replaceVersion(
-      graph,
-      { name: u.name, fromRange: u.fromRange },
-      u.fix,
-      { registry },
-    )
-    graph = res.graph
-    res.added.forEach((id) => recentlyAdded.add(id))
-    res.removed.forEach((id) => recentlyOrphaned.add(id))
-  }
-
-  let completionDiagnostics: readonly {
+  // Apply: rebind each vulnerable range to its fix, complete the new transitive
+  // closure, then drop whatever got orphaned. `applied` is the set that actually
+  // lands — identical to `upgrades` unless the engine gate below drops one.
+  const applied: Plan[] = []
+  const completionDiagnostics: {
     severity: string
     code: string
     message: string
   }[] = []
-  if (recentlyAdded.size > 0 || recentlyOrphaned.size > 0) {
-    // Live count of nodes pulled in (the slow part — a packument fetch each).
-    let completed = 0
-    const completion = await completeTransitives(graph, registry, {
-      seed: { recentlyAdded, recentlyOrphaned },
-      // Honor the project's declared pins: a NEW closure edge governed by an
-      // override binds the pinned target verbatim (before the registry rung), so
-      // the completed tree never contradicts `overrides`/`resolutions`.
-      overrides: [...overrides],
-      onDiagnostic: (d: { code?: string }) => {
-        if (d.code === 'COMPLETION_NODE_ADDED')
-          ctx.progress?.label(`Completing the tree… ${++completed}`)
-      },
-    })
-    graph = completion.graph
-    completionDiagnostics = completion.unresolved
-    // completeTransitives is additive, so a dep-changing upgrade leaves the *old*
-    // closure behind as orphans → `yarn install --immutable` would reject them.
-    // Sweep them with `pruneOrphans` (ref-counted: removes only nodes with no
-    // remaining incoming edge + the closure they strand), but `preserve` the
-    // pre-existing danglers so we never GC a node yarn keeps (referenced nodes —
-    // incl. fsevents builtin-patch bases + `catalog:` targets — stay either way).
-    // A yarn-classic lock has no workspace-root node, so this NO_ROOTS-noops there.
-    graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
+  // Live count of nodes pulled in (the slow part — a packument fetch each).
+  let completed = 0
+  const onCompletionDiag = (d: { code?: string }): void => {
+    if (d.code === 'COMPLETION_NODE_ADDED')
+      ctx.progress?.label(`Completing the tree… ${++completed}`)
+  }
+  // Honor the project's declared pins: a NEW closure edge governed by an override
+  // binds the pinned target verbatim (before the registry rung), so the completed
+  // tree never contradicts `overrides`/`resolutions`.
+  const overrideList = [...overrides]
+
+  if (constraints.length === 0) {
+    // Default path: rebind every fix, then ONE batch completion — fast, and the
+    // parallel packument prefetch batches across all upgrades.
+    const recentlyAdded = new Set<NodeId>()
+    const recentlyOrphaned = new Set<NodeId>()
+    for (const u of upgrades) {
+      const res = await replaceVersion(
+        graph,
+        { name: u.name, fromRange: u.fromRange },
+        u.fix,
+        { registry },
+      )
+      graph = res.graph
+      res.added.forEach((id) => recentlyAdded.add(id))
+      res.removed.forEach((id) => recentlyOrphaned.add(id))
+      applied.push(u)
+    }
+    if (recentlyAdded.size > 0 || recentlyOrphaned.size > 0) {
+      const completion = await completeTransitives(graph, registry, {
+        seed: { recentlyAdded, recentlyOrphaned },
+        overrides: overrideList,
+        onDiagnostic: onCompletionDiag,
+      })
+      graph = completion.graph
+      completionDiagnostics.push(...completion.unresolved)
+      // completeTransitives is additive, so a dep-changing upgrade leaves the
+      // *old* closure behind as orphans → `yarn install --immutable` would reject
+      // them. Sweep with `pruneOrphans` (ref-counted), but `preserve` pre-existing
+      // danglers so we never GC a node yarn keeps (fsevents patch bases, catalog:
+      // targets). A yarn-classic lock has no workspace root, so this noops there.
+      graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
+    }
+  } else {
+    // Engine-constrained path (opt-in). Apply + complete each upgrade tentatively
+    // and commit it only if its closure resolves under the constraints. A
+    // COMPLETION_NO_CANDIDATE means a new transitive has no engine-compatible
+    // version in range → the fix's closure can't be completed → skip the whole fix
+    // (leave the vuln, report it) or error under --on-conflict=stop.
+    // replaceVersion/completeTransitives are immutable, so a rejected upgrade's
+    // tentative graphs are simply dropped and `graph` is left as it was.
+    let touched = false
+    for (const u of upgrades) {
+      const res = await replaceVersion(
+        graph,
+        { name: u.name, fromRange: u.fromRange },
+        u.fix,
+        { registry },
+      )
+      if (res.added.length === 0 && res.removed.length === 0) {
+        applied.push(u) // no-op bump (already at the fix); nothing to complete
+        continue
+      }
+      const completion = await completeTransitives(res.graph, registry, {
+        seed: {
+          recentlyAdded: new Set(res.added),
+          recentlyOrphaned: new Set(res.removed),
+        },
+        overrides: overrideList,
+        constraints,
+        onDiagnostic: onCompletionDiag,
+      })
+      // An override forces a version a constraint vetoes — a user-config
+      // contradiction (npm parity holds the pin verbatim, but it breaks the
+      // target). Nothing to skip: always hard-fail.
+      const conflict = completion.unresolved.find(
+        (d: { code?: string }) =>
+          d.code === 'COMPLETION_OVERRIDE_CONSTRAINT_CONFLICT',
+      ) as { data?: { depName?: string; forced?: string } } | undefined
+      if (conflict)
+        throw new Error(
+          `An override pins ${conflict.data?.depName ?? '?'}@${conflict.data?.forced ?? '?'}, which violates --engines (${engineSummary}). Reconcile the override or drop the engine constraint.`,
+        )
+      const noCandidate = completion.unresolved.filter(
+        (d: { code?: string }) => d.code === 'COMPLETION_NO_CANDIDATE',
+      ) as {
+        data?: {
+          depName?: string
+          range?: string
+          rejected?: readonly { version: string; by: string; reason?: string }[]
+        }
+      }[]
+      if (noCandidate.length > 0) {
+        const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
+        if (onConflict === 'stop')
+          throw new Error(
+            `--engines (${engineSummary}): no in-range version of ${noCandidate[0].data?.depName ?? '?'} satisfies the target for ${head}. Re-run with --on-conflict=skip to leave it, or widen the target.`,
+          )
+        engineSkipped.set(head, noCandidate[0].data ?? {})
+        continue // drop u: keep the pre-u graph, leave the vuln in place
+      }
+      graph = completion.graph
+      completionDiagnostics.push(...completion.unresolved)
+      touched = true
+      applied.push(u)
+    }
+    if (touched)
+      graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
   }
 
   if (!flags.silent) {
@@ -322,10 +480,23 @@ export const _patch = async (
     // plain console otherwise (direct/test calls).
     const log = ctx.progress ? ctx.progress.log : console.log
     const warn = ctx.progress ? ctx.progress.log : console.warn
+    // Surface the active engine target(s) first — and when a target was inferred
+    // from the running process, flag that it may differ from the project's target.
+    if (engineTargets) {
+      log(`Engine constraints: ${engineSummary}`)
+      const runtimeEngines = Object.keys(engineTargets).filter((e) => {
+        const v = (flags.engines as Record<string, unknown> | undefined)?.[e]
+        return v === true || v === 'runtime'
+      })
+      if (runtimeEngines.length > 0)
+        log(
+          `  (${runtimeEngines.join(', ')} = the running process — may differ from your project's target; pass --engines.${runtimeEngines[0]}='<range>' to pin it)`,
+        )
+    }
     // Dedupe by from→to; annotate with severity / CVSS / CVE refs.
     const seen = new Set<string>()
     const lines: string[] = []
-    for (const u of upgrades) {
+    for (const u of applied) {
       const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
       if (seen.has(head)) continue
       seen.add(head)
@@ -359,6 +530,35 @@ export const _patch = async (
       )
       for (const [spec, to] of [...pinned].sort()) {
         warn(`  ${spec} (pinned → ${to})`)
+      }
+    }
+    if (manifestPinned.size > 0) {
+      warn(
+        'Skipped (package.json pins these to a range the fix can\'t satisfy; re-run with --force to update package.json, or widen the range yourself):',
+      )
+      for (const [spec, range] of [...manifestPinned].sort()) {
+        warn(`  ${spec} (pinned → "${range}")`)
+      }
+    }
+    if (engineSkipped.size > 0) {
+      warn(
+        `Skipped (engine constraints — no fix keeps the closure within ${engineSummary}; widen the target, --exclude the package, or accept the newer engine):`,
+      )
+      for (const [head, data] of [...engineSkipped].sort()) {
+        const need = data.depName
+          ? ` — needs ${data.depName}${data.range ? `@${data.range}` : ''}`
+          : ''
+        warn(`  ${head}${need}`)
+        if (flags.verbose && data.rejected?.length) {
+          for (const r of data.rejected)
+            warn(`    - ${data.depName}@${r.version}: ${r.reason ?? r.by}`)
+        }
+      }
+    }
+    if (manifestEdits.length > 0) {
+      log('Updated package.json ranges (--force):')
+      for (const e of [...manifestEdits].sort((a, b) => a.name.localeCompare(b.name))) {
+        log(`  ${e.name}: "${e.from}" → "${e.to}"`)
       }
     }
     // info-level COMPLETION_NODE_ADDED is success noise — only surface real gaps.

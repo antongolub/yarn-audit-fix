@@ -17,6 +17,7 @@ const STRING = [
   'cwd',
   'exclude',
   'ignore',
+  'on-conflict',
   'registry',
 ]
 const ENV: Record<string, string> = {
@@ -26,12 +27,14 @@ const ENV: Record<string, string> = {
   exclude: 'YAF_EXCLUDE',
   force: 'YAF_FORCE',
   ignore: 'YAF_IGNORE',
+  'on-conflict': 'YAF_ON_CONFLICT',
   registry: 'YAF_REGISTRY',
   silent: 'YAF_SILENT',
   verbose: 'YAF_VERBOSE',
 }
 const CHOICES: Record<string, string[]> = {
   'audit-level': ['low', 'moderate', 'high', 'critical'],
+  'on-conflict': ['skip', 'stop'],
 }
 
 const HELP = `Usage: yarn-audit-fix [options]
@@ -40,10 +43,16 @@ Options:
   --audit-level <level>   Min severity to fix: low | moderate | high | critical
   --cwd <path>            Working directory (defaults to process.cwd())
   --dry-run               Print what would change without writing
+  --engines.<engine>      Only accept fixes whose completed dependency closure
+                          runs on the given engine: --engines.node='>=18'
+                          (bare → the Node running the CLI). Repeatable per
+                          engine (--engines.node --engines.npm='>=9')
   --exclude <rules>       Packages to skip updating: comma-sep glob[@range]
                           (e.g. lodash,@scope/*@>=2 <3)
   --force                 Apply semver-major upgrades, not just compatible ones
   --ignore <ids>          Advisory ids to ignore: comma-sep globs (GHSA or npm id)
+  --on-conflict <policy>  When a fix can't satisfy the engine constraints:
+                          skip (default, leave it + report) | stop (error)
   --registry <url>        Custom registry url
   --silent                Disable log output
   --verbose               Verbose/debug logging
@@ -84,6 +93,14 @@ export const parse = (
     const name = ENV[key]
     if (name && !(key in flags) && env[name] !== undefined) flags[key] = env[name]
   }
+
+  // Engine constraints (opt-in): `--engines.<engine>[=<range>|runtime|floor]`.
+  // minimist nests the dot natively (`--engines.node` → raw.engines.node), so the
+  // allowlist loop above (which keys off the literal token) can't see it — lift
+  // the object across here. Values are resolved + validated later in
+  // `resolveEngineTargets`, which also guards the keys against proto-pollution.
+  if (raw.engines && typeof raw.engines === 'object' && !Array.isArray(raw.engines))
+    flags.engines = raw.engines
 
   for (const [key, allowed] of Object.entries(CHOICES)) {
     const value = flags[key]
