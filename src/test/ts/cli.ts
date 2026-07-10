@@ -61,4 +61,22 @@ describe('cli parse', () => {
     expect(parse(['--safe'])).toMatchObject({ safe: true })
     expect(parse(['--force'])).not.toHaveProperty('safe')
   })
+
+  it('parses --production (and the --prod alias)', () => {
+    expect(parse(['--production'])).toMatchObject({ production: true })
+    expect(parse(['--prod'])).toMatchObject({ production: true })
+    expect(parse([], { YAF_PRODUCTION: 'true' })).toMatchObject({ production: 'true' })
+    expect(parse(['--force'])).not.toHaveProperty('production')
+  })
+
+  it('parses --workspace (value + env)', () => {
+    expect(parse(['--workspace=packages/*'])).toMatchObject({
+      workspace: 'packages/*',
+    })
+    expect(parse(['--workspace=core,cli'])).toMatchObject({ workspace: 'core,cli' })
+    expect(parse([], { YAF_WORKSPACE: '@scope/a' })).toMatchObject({
+      workspace: '@scope/a',
+    })
+    expect(parse(['--force'])).not.toHaveProperty('workspace')
+  })
 })

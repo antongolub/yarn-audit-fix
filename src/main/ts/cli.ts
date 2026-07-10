@@ -11,7 +11,7 @@ import { getSelfManifest } from './util'
 // Declarative option spec (keeps `parse` small and the Node floor low — see the
 // v11 migration note): value-taking vs boolean flags, their `YAF_*` env-var
 // fallbacks, and the allowed values for the enum-like ones.
-const BOOLEAN = ['dry-run', 'force', 'safe', 'silent', 'verbose']
+const BOOLEAN = ['dry-run', 'force', 'production', 'safe', 'silent', 'verbose']
 const STRING = [
   'audit-level',
   'cwd',
@@ -20,6 +20,7 @@ const STRING = [
   'on-conflict',
   'package-type',
   'registry',
+  'workspace',
 ]
 const ENV: Record<string, string> = {
   'audit-level': 'YAF_AUDIT_LEVEL',
@@ -30,10 +31,12 @@ const ENV: Record<string, string> = {
   ignore: 'YAF_IGNORE',
   'on-conflict': 'YAF_ON_CONFLICT',
   'package-type': 'YAF_PACKAGE_TYPE',
+  production: 'YAF_PRODUCTION',
   registry: 'YAF_REGISTRY',
   safe: 'YAF_SAFE',
   silent: 'YAF_SILENT',
   verbose: 'YAF_VERBOSE',
+  workspace: 'YAF_WORKSPACE',
 }
 const CHOICES: Record<string, string[]> = {
   'audit-level': ['low', 'moderate', 'high', 'critical'],
@@ -62,6 +65,8 @@ Options:
                           skip (default, leave it + report) | stop (error)
   --package-type <t>      Only accept fixes whose closure stays require-able:
                           cjs (reject an ESM-only dep a CommonJS tree can't require)
+  --production, --prod    Fix only advisories reachable from production deps
+                          (dependencies/optional/peer); leave dev-only ones
   --registry <url>        Custom registry url
   --safe                  Fix only what's safe on every automatable axis (the
                           opposite of --force): don't raise the tree's engine floor,
@@ -69,6 +74,9 @@ Options:
                           Bundles --engines.node=floor + --package-type=cjs
   --silent                Disable log output
   --verbose               Verbose/debug logging
+  --workspace <globs>     Monorepo: fix only these workspaces' closures — comma-sep
+                          globs on workspace name / path / basename (e.g.
+                          @scope/core, packages/*, core,cli)
   -v, --version           Print version
   -h, --help              Print this help
 
@@ -87,7 +95,7 @@ export const parse = (
   const raw = minimist(argv, {
     boolean: BOOLEAN,
     string: STRING,
-    alias: { v: 'version', h: 'help' },
+    alias: { v: 'version', h: 'help', prod: 'production' },
   })
   if (raw.version) return { version: true }
   if (raw.help) return { help: true }
@@ -119,6 +127,10 @@ export const parse = (
   // bare `--license=MIT,ISC` allow list). Same minimist-nesting caveat as engines;
   // resolveLicensePolicy validates + splits the lists.
   if (raw.license !== undefined && raw.license !== false) flags.license = raw.license
+
+  // `--prod` is an alias for `--production`; minimist maps it via `alias`, but the
+  // token-keyed allowlist above only recognizes the literal `--production`.
+  if (raw.production === true && !('production' in flags)) flags.production = true
 
   for (const [key, allowed] of Object.entries(CHOICES)) {
     const value = flags[key]

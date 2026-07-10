@@ -129,6 +129,8 @@ straight from the registry, so there's no reconcile `yarn install` step.
 | `--package-type`      | Only apply a fix whose closure stays require-able — `cjs` rejects an ESM-only dependency a CommonJS tree can't `require()`. See [Constraints](#constraints-engines--licenses).                                                    |                                            |
 | `--on-conflict`       | What to do when a fix can't satisfy the engine / license / package-type constraints: `skip` (leave it, report) or `stop` (error).                                       | `skip`                                     |
 | `--safe`              | Fix only what's safe on every automatable axis (the opposite of `--force`): bundles `--engines.node=floor` + `--package-type=cjs` (the latter only in a CommonJS project). See [Constraints](#constraints-engines--licenses).      |                                            |
+| `--production` / `--prod` | Fix only advisories reachable from **production** dependencies (`dependencies` / `optionalDependencies` / `peerDependencies`); dev-only ones are left and reported. See [Scope](#scope-production--workspaces).             | `false`                                    |
+| `--workspace`         | Monorepo: fix only the selected workspaces' closures — comma-separated globs on a workspace's name / path / path-basename (e.g. `@scope/core`, `packages/*`, `core,cli`). See [Scope](#scope-production--workspaces).             |                                            |
 
 #### Constraints (engines & licenses)
 
@@ -193,12 +195,42 @@ Skipped (package.json pins these to a range the fix can't satisfy; re-run with -
   lodash (pinned → "4.17.11" in packages/foo/package.json)
 ```
 
+#### Scope (production & workspaces)
+
+By default every advisory in the lockfile is fixed. Two opt-in flags narrow the
+fix to a subgraph — they gate *which* advisories are fixed, not *how* (the patch
+and its `--immutable` reproducibility are unchanged):
+
+- **`--production`** (`--prod`) fixes only advisories reachable from your
+  **production** dependencies. `yarn.lock` carries no dev/prod marker — every edge
+  is a plain dependency — so the split is read from each `package.json`: a package
+  reachable only through `devDependencies` is left in place (and reported), while
+  `dependencies` / `optionalDependencies` / `peerDependencies` and their closures
+  are fixed. This mirrors what a `--omit=dev` production install actually ships.
+- **`--workspace=<globs>`** (monorepo) fixes only the selected workspaces'
+  closures. Comma-separated globs match a workspace's **name**, its **path**, or
+  the path **basename** (`@scope/core`, `packages/*`, `core,cli`). A workspace
+  reached as a dependency of a selected one contributes only its *production*
+  deps, so one package's dev tree never leaks into another's closure. A pattern
+  that matches no workspace is an error, not a silent empty run.
+
+Combine them — `--production --workspace=packages/api` is the production closure
+of `packages/api`. Out-of-scope advisories are reported (a count by default, the
+full list under `--verbose`), so a reduced fix set is never a silent surprise:
+
+```
+Scope: production
+Skipped 12 package(s) outside production scope (--verbose to list)
+```
+
 ### ENV
 Any CLI option can be set via a `YAF`-prefixed env var (the dot-nested
 `--engines.*` / `--license.*` are flag-only). For example:
 * `YAF_FORCE` — `--force`
 * `YAF_AUDIT_LEVEL=high` — `--audit-level=high`
 * `YAF_ON_CONFLICT=stop` — `--on-conflict=stop`
+* `YAF_PRODUCTION=true` — `--production`
+* `YAF_WORKSPACE='packages/*'` — `--workspace=packages/*`
 
 ### JS API
 **yarn-audit-fix** exposes its internals, so you can tweak the steps or build your own flow.

@@ -1,13 +1,16 @@
 import sv from 'semver'
 
-// Minimal glob → RegExp. Package names and advisory ids use a small charset, so
-// escape the regex metachars and turn `*` into a wildcard run.
-const globToRegExp = (glob: string): RegExp =>
+// Minimal glob → RegExp. Package names, advisory ids, and workspace names/paths
+// use a small charset, so escape the regex metachars and turn `*` into a wildcard
+// run. Exported so `--workspace` matching (audit/scope.ts) reuses the same globs.
+export const globToRegExp = (glob: string): RegExp =>
   new RegExp(
     `^${glob.replace(/[.+^${}()|[\]\\?]/g, '\\$&').replace(/\*/g, '.*')}$`,
   )
 
-const split = (raw?: string | string[]): string[] =>
+/** Split a comma-separated (or repeated) flag value into trimmed, non-empty
+ *  tokens. Shared by `--exclude`/`--ignore` (here) and `--workspace` (scope). */
+export const split = (raw?: string | string[]): string[] =>
   (Array.isArray(raw) ? raw : [raw ?? ''])
     .flatMap((s) => String(s).split(','))
     .map((s) => s.trim())

@@ -51,6 +51,39 @@ describe('createLimiter', () => {
     const limit = createLimiter(0)
     expect(await limit(async () => 42)).toBe(42)
   })
+
+  // [stress/property] many tasks, a low cap, deterministic rejections — assert the
+  // invariants that matter for a registry pool: the cap is never exceeded, every
+  // task settles, a rejection doesn't leak an active slot or stall the queue, and
+  // admission stays FIFO. (Deterministic, no RNG: every 5th task rejects.)
+  it('holds the cap across many tasks, rejections and all, without leaking or reordering', async () => {
+    const cap = 3
+    const N = 40
+    const limit = createLimiter(cap)
+    let active = 0
+    let maxActive = 0
+    const startOrder: number[] = []
+    const tasks = Array.from({ length: N }, (_, i) =>
+      limit(async () => {
+        active++
+        maxActive = Math.max(maxActive, active)
+        startOrder.push(i)
+        await tick() // yield so admitted tasks genuinely overlap and the pump churns
+        await tick()
+        active--
+        if (i % 5 === 4) throw new Error(`boom ${i}`)
+        return i
+      }).catch((e) => e as Error),
+    )
+    const results = await Promise.all(tasks)
+    expect(maxActive).toBe(cap) // reached the cap…
+    expect(active).toBe(0) // …and never leaked a slot (all decremented)
+    expect(startOrder).toEqual([...Array(N).keys()]) // FIFO admission
+    expect(results.filter((r) => r instanceof Error)).toHaveLength(N / 5) // rejections surfaced
+    expect(results.filter((r) => typeof r === 'number')).toHaveLength(N - N / 5)
+    // the pool still works after the churn — no permanently-held slots
+    expect(await limit(async () => 'ok')).toBe('ok')
+  })
 })
 
 describe('cachingFetch', () => {

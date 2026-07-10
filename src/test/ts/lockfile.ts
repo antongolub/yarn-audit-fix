@@ -339,6 +339,64 @@ describe('patch', () => {
     expect(out).toContain('vuln@1.0.0 (pinned → 1.0.0)')
   })
 
+  describe('scope (--production / --workspace)', () => {
+    // In-range fixes (1.0.0 → 1.5.0, admitted by the declared ^1.0.0) so the ONLY
+    // filter under test is scope — not the compat/manifest gate.
+    const spec = {
+      prodvuln: { '1.0.0': {}, '1.5.0': {} },
+      devvuln: { '1.0.0': {}, '1.5.0': {} },
+    }
+    const report = {
+      prodvuln: advisory('<1.5.0', '>=1.5.0'),
+      devvuln: advisory('<1.5.0', '>=1.5.0'),
+    }
+    const lf = lock([
+      { id: 'prodvuln@^1.0.0', version: '1.0.0' },
+      { id: 'devvuln@^1.0.0', version: '1.0.0' },
+    ])
+    const manifest = {
+      dependencies: { prodvuln: '^1.0.0' },
+      devDependencies: { devvuln: '^1.0.0' },
+    }
+    const scopeCtx = (flags: Record<string, any>): TContext =>
+      ({ flags, registry: mockRegistry(spec), manifest, cwd: process.cwd() }) as unknown as TContext
+    // Resolved version of a package in a yarn-classic lock (order-independent;
+    // the reformatted key is unquoted, e.g. `prodvuln@^1.0.0:`).
+    const ver = (text: string, name: string): string | undefined =>
+      new RegExp(`${name}@[^\\n]*:\\n  version "([^"]+)"`).exec(text)?.[1]
+
+    it('--production fixes prod-reachable vulns and leaves dev-only ones', async () => {
+      const out = format(
+        await patch(parse(lf, 'yarn-classic'), report, scopeCtx({ silent: true, production: true }), 'yarn-classic'),
+        'yarn-classic',
+      )
+      expect(ver(out, 'prodvuln')).toBe('1.5.0') // prod-reachable → bumped
+      expect(ver(out, 'devvuln')).toBe('1.0.0') // dev-only → left for an unscoped run
+    })
+
+    it('without a scope flag, both are fixed (scope is opt-in, unchanged default)', async () => {
+      const out = format(
+        await patch(parse(lf, 'yarn-classic'), report, scopeCtx({ silent: true }), 'yarn-classic'),
+        'yarn-classic',
+      )
+      expect(ver(out, 'prodvuln')).toBe('1.5.0')
+      expect(ver(out, 'devvuln')).toBe('1.5.0')
+    })
+
+    it('reports the scope + out-of-scope skips (count by default, list under --verbose)', async () => {
+      const summary = await capture(() =>
+        patch(parse(lf, 'yarn-classic'), report, scopeCtx({ silent: false, production: true }), 'yarn-classic'),
+      )
+      expect(summary).toMatch(/Scope: production/)
+      expect(summary).toMatch(/Skipped 1 package\(s\) outside production scope \(--verbose to list\)/)
+
+      const verbose = await capture(() =>
+        patch(parse(lf, 'yarn-classic'), report, scopeCtx({ silent: false, production: true, verbose: true }), 'yarn-classic'),
+      )
+      expect(verbose).toMatch(/Skipped \(outside production scope\): devvuln@1\.0\.0/)
+    })
+  })
+
   describe('manifest gate (direct-dep whose declared range the fix falls outside)', () => {
     const report = { lodash: advisory('<4.18.0', '>=4.18.0') }
     const spec = { lodash: { '4.17.11': {}, '4.18.0': {} } }

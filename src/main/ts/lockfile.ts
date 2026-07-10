@@ -18,6 +18,7 @@ import {
 } from './audit/constraints'
 import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
+import { describeScope, resolveScope } from './audit/scope'
 import { auditViaRegistry } from './audit/registry'
 import {
   TAuditReport,
@@ -244,9 +245,13 @@ export const _patch = async (
   // can't admit the fix. Default → flag it (`manifestPinned`: name → the blocking
   // declarations). --force → rewrite the range in each declaring file
   // (`manifestEdits`, applied per-file by patchLockfile).
-  const directRanges = manifestDirectRanges(
-    collectManifestFiles(ctx.cwd, ctx.manifest),
-  )
+  const manifestFiles = collectManifestFiles(ctx.cwd, ctx.manifest)
+  const directRanges = manifestDirectRanges(manifestFiles)
+  // Fix scope (`--production` / `--workspace`): the set of node ids reachable from
+  // the scoped roots. `undefined` ⇒ no scope flag ⇒ no filtering (unchanged). A
+  // vulnerable node outside it is left for a deliberate, unscoped run and reported.
+  const inScope = resolveScope(flags, graph, manifestFiles, ctx.cwd)
+  const scopeSkipped = new Set<string>()
   const manifestPinned = new Map<string, { range: string; file: string }[]>()
   const manifestEdits: TManifestEdit[] = []
   // A fix skipped because its completed closure can't satisfy an active constraint
@@ -302,6 +307,10 @@ export const _patch = async (
         matchesPackage(n.name, n.version, excludeRules)
       ) {
         excluded.add(`${n.name}@${n.version}`)
+        return false
+      }
+      if (inScope && !inScope.has(n.id)) {
+        scopeSkipped.add(`${n.name}@${n.version}`)
         return false
       }
       return true
@@ -613,6 +622,8 @@ export const _patch = async (
       if (floorEngines.length > 0)
         log(`  (${floorEngines.join(', ')} = inferred from the installed tree)`)
     }
+    // Surface the active fix scope so a reduced fix set is never a silent surprise.
+    if (inScope) log(`Scope: ${describeScope(flags)}`)
     // Dedupe by from→to; annotate with severity / CVSS / CVE refs.
     const seen = new Set<string>()
     const lines: string[] = []
@@ -634,6 +645,19 @@ export const _patch = async (
     }
     if (excluded.size > 0) {
       log('Excluded (per --exclude): ' + [...excluded].sort().join(', '))
+    }
+    // Out-of-scope advisories can be a whole dev tree — a count by default, the
+    // full list only under --verbose.
+    if (scopeSkipped.size > 0) {
+      if (flags.verbose)
+        log(
+          `Skipped (outside ${describeScope(flags)} scope): ` +
+            [...scopeSkipped].sort().join(', '),
+        )
+      else
+        log(
+          `Skipped ${scopeSkipped.size} package(s) outside ${describeScope(flags)} scope (--verbose to list)`,
+        )
     }
     if (incompatible.size > 0) {
       warn(
