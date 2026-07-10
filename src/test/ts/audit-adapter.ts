@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // Stub the lib's registry layer so routing is exercised without network/fs.
 vi.mock('@antongolub/lockfile/registry', () => ({
+  // Base fetch the transport wraps; never invoked here (liveRegistry is mocked).
+  defaultFetch: vi.fn(),
   resolveRegistry: vi.fn(() => ({
     registryFor: () => 'https://reg.example.com',
     authHeaderFor: () => 'Bearer T',
@@ -19,6 +21,8 @@ vi.mock('@antongolub/lockfile/registry', () => ({
     }),
   })),
 }))
+
+import { liveRegistry } from '@antongolub/lockfile/registry'
 
 import { buildRegistry, buildTarballSource, ecosystemFor } from '../../main/ts/audit/adapter'
 
@@ -46,6 +50,17 @@ describe('buildRegistry', () => {
     const reg = buildRegistry(ctx(), 'yarn-berry')
     expect((await reg.packument('lodash'))?.name).toBe('lodash')
     expect((await reg.resolve('lodash', '^1.0.0'))?.version).toBe('1.0.0')
+  })
+
+  it('passes a shared transport (fetch + limit) to each liveRegistry', async () => {
+    const reg = buildRegistry(ctx(), 'yarn-berry')
+    await reg.packument('lodash')
+    expect(liveRegistry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fetch: expect.any(Function),
+        limit: expect.any(Function),
+      }),
+    )
   })
 })
 

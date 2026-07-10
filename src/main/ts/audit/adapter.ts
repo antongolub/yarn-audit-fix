@@ -1,5 +1,6 @@
 import type {
   Ecosystem,
+  Limiter,
   RegistryAdapter,
   RegistryConfig,
 } from '@antongolub/lockfile/registry'
@@ -7,6 +8,11 @@ import { liveRegistry, resolveRegistry } from '@antongolub/lockfile/registry'
 
 import { TContext, TLockfileType } from '../ifaces'
 import { getTarball } from './registry'
+import { buildTransport } from './transport'
+
+/** Shared transport passed to each per-registry adapter: bounded concurrency
+ *  pool + GET response cache. */
+type Transport = { fetch: typeof fetch; limit: Limiter }
 
 /** What `refurbish` needs to recompute a missing checksum: raw tarball bytes. */
 export type TarballSource = {
@@ -38,14 +44,21 @@ const registryConfig = (ctx: TContext, ecosystem: Ecosystem): RegistryConfig =>
 
 // Per-package router: one `liveRegistry` per registry URL (memoized) so a scoped
 // graph still resolves each package against its own registry+auth. (The lib's
-// `fromConfig` wires a single registry, not enough for a multi-scope graph.)
-const pickFor = (cfg: RegistryConfig) => {
+// `fromConfig` wires a single registry, not enough for a multi-scope graph.) Every
+// adapter shares one `transport` (bounded pool + GET cache) so concurrency is
+// capped globally and repeat packument GETs collapse across scopes.
+const pickFor = (cfg: RegistryConfig, transport: Transport) => {
   const byUrl = new Map<string, RegistryAdapter>()
   return (name: string): { reg: RegistryAdapter; url: string } => {
     const url = cfg.registryFor(name)
     let reg = byUrl.get(url)
     if (!reg) {
-      reg = liveRegistry({ url, authHeader: cfg.authHeaderFor(url) })
+      reg = liveRegistry({
+        url,
+        authHeader: cfg.authHeaderFor(url),
+        fetch: transport.fetch,
+        limit: transport.limit,
+      })
       byUrl.set(url, reg)
     }
     return { reg, url }
@@ -61,7 +74,7 @@ export const buildRegistry = (
   ecosystem: Ecosystem,
 ): RegistryAdapter => {
   if (ctx.registry) return ctx.registry as RegistryAdapter
-  const pick = pickFor(registryConfig(ctx, ecosystem))
+  const pick = pickFor(registryConfig(ctx, ecosystem), buildTransport())
   return {
     packument: (name) => pick(name).reg.packument(name),
     resolve: (name, range) => pick(name).reg.resolve(name, range),
@@ -80,7 +93,7 @@ export const buildTarballSource = (
 ): TarballSource => {
   if (ctx.tarballSource) return ctx.tarballSource as TarballSource
   const cfg = registryConfig(ctx, ecosystem)
-  const pick = pickFor(cfg)
+  const pick = pickFor(cfg, buildTransport())
   return {
     async tarball(name, version) {
       const { reg } = pick(name)
