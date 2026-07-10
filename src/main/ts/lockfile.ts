@@ -183,6 +183,7 @@ export const _patch = async (
   const constraintSkipped = new Map<
     string,
     {
+      seed?: boolean // true = the fix version itself was rejected (not a transitive)
       depName?: string
       range?: string
       rejected?: readonly { version: string; by: string; reason?: string }[]
@@ -420,6 +421,31 @@ export const _patch = async (
     // rejected upgrade's tentative graphs are simply dropped and `graph` is unchanged.
     let touched = false
     for (const u of upgrades) {
+      const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
+      // Seed gate: the fix VERSION itself must pass the constraints. Completion
+      // only gates the transitives it resolves, never the replaceVersion target, so
+      // without this a fix that bumps a package TO an engine-/license-violating
+      // version would slip through (only its deps would be checked).
+      const seedSel = await selectConstrained(
+        registry,
+        u.name,
+        u.fix,
+        constraints,
+        'reject',
+      )
+      if (!seedSel.selected) {
+        if (onConflict === 'stop')
+          throw new Error(
+            `Constraints (${constraintSummary}): the fix ${head} itself doesn't satisfy the policy. Re-run with --on-conflict=skip to leave it, or relax the constraint.`,
+          )
+        constraintSkipped.set(head, {
+          seed: true,
+          depName: u.name,
+          range: u.fix,
+          rejected: seedSel.rejected,
+        })
+        continue
+      }
       const res = await replaceVersion(
         graph,
         { name: u.name, fromRange: u.fromRange },
@@ -460,7 +486,6 @@ export const _patch = async (
         }
       }[]
       if (noCandidate.length > 0) {
-        const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
         if (onConflict === 'stop')
           throw new Error(
             `Constraints (${constraintSummary}): no in-range version of ${noCandidate[0].data?.depName ?? '?'} satisfies the policy for ${head}. Re-run with --on-conflict=skip to leave it, or relax the constraint.`,
@@ -549,9 +574,11 @@ export const _patch = async (
         `Skipped (constraints — no fix keeps the closure within the policy [${constraintSummary}]; relax it, --exclude the package, or accept the newer dep):`,
       )
       for (const [head, data] of [...constraintSkipped].sort()) {
-        const need = data.depName
-          ? ` — needs ${data.depName}${data.range ? `@${data.range}` : ''}`
-          : ''
+        const need = data.seed
+          ? ' — the fix version itself is not permitted'
+          : data.depName
+            ? ` — needs ${data.depName}${data.range ? `@${data.range}` : ''}`
+            : ''
         warn(`  ${head}${need}`)
         if (flags.verbose && data.rejected?.length) {
           for (const r of data.rejected)

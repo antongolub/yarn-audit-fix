@@ -130,6 +130,8 @@ const spec: Record<string, Record<string, any>> = {
   goodv: { '1.0.0': {}, '2.0.0': {} },
   badv: { '1.0.0': {}, '2.0.0': { deps: { newdep: '^1.0.0' } } },
   newdep: { '1.0.0': { engines: { node: '>=20' } } },
+  // a fix whose OWN engines exceed the target (no bad transitive) — seed gate
+  engselfv: { '1.0.0': {}, '2.0.0': { engines: { node: '>=20' } } },
 }
 const versionOf = (name: string, v: string) => ({
   name,
@@ -260,6 +262,28 @@ describe('engine constraints — patch integration', () => {
     expect(text).toContain('needs newdep@^1.0.0') // attributed to the transitive
     expect(text).toMatch(/newdep@1\.0\.0:.*(>=20|engines)/) // verbose why-rejected
   })
+
+  // seed gate: the fix VERSION's own engines are checked, not only its closure
+  it('seed gate: skips a fix whose own engines exceed the target', async () => {
+    const fmt = 'yarn-classic' as const
+    const seedLock =
+      '# yarn lockfile v1\n\n\nengselfv@^1.0.0:\n  version "1.0.0"\n' +
+      '  resolved "https://registry.yarnpkg.com/engselfv/-/engselfv-1.0.0.tgz#' +
+      '4444444444444444444444444444444444444444"\n  integrity sha512-AA==\n'
+    const seedReport = {
+      engselfv: {
+        module_name: 'engselfv', // eslint-disable-line camelcase
+        vulnerable_versions: '<2.0.0', // eslint-disable-line camelcase
+        patched_versions: '>=2.0.0', // eslint-disable-line camelcase
+      },
+    }
+    const out = format(
+      await patch(parse(seedLock, fmt), seedReport, ctxWith({ engines: { node: '>=18' } }), fmt),
+      fmt,
+    )
+    expect(out).toContain('version "1.0.0"') // NOT bumped — fix itself needs node>=20
+    expect(out).not.toMatch(/engselfv@2\.0\.0/)
+  })
 })
 
 // ─── integration: the license gate in patch() ───────────────────────────────
@@ -273,6 +297,8 @@ const licSpec: Record<string, Record<string, any>> = {
     '2.0.0': { license: 'MIT', deps: { gpldep: '^1.0.0' } },
   },
   gpldep: { '1.0.0': { license: 'GPL-3.0' } },
+  // a fix whose OWN license is forbidden (no bad transitive) — for the seed gate
+  gplself: { '1.0.0': { license: 'MIT' }, '2.0.0': { license: 'GPL-3.0' } },
 }
 const licVersion = (name: string, v: string, withLicense: boolean) => ({
   name,
@@ -355,5 +381,45 @@ describe('license constraints — patch integration', () => {
         fmt,
       ),
     ).rejects.toThrow(/no in-range version of gpldep/)
+  })
+
+  // seed gate: the fix VERSION's own license is checked, not only its closure
+  it('seed gate: skips a fix whose own license is denied', async () => {
+    const fmt = 'yarn-classic' as const
+    const seedLock =
+      '# yarn lockfile v1\n\n\ngplself@^1.0.0:\n  version "1.0.0"\n' +
+      '  resolved "https://registry.yarnpkg.com/gplself/-/gplself-1.0.0.tgz#' +
+      '3333333333333333333333333333333333333333"\n  integrity sha512-AA==\n'
+    const seedReport = {
+      gplself: {
+        module_name: 'gplself', // eslint-disable-line camelcase
+        vulnerable_versions: '<2.0.0', // eslint-disable-line camelcase
+        patched_versions: '>=2.0.0', // eslint-disable-line camelcase
+      },
+    }
+    const lines: string[] = []
+    const sink = (...a: unknown[]) => void lines.push(a.join(' '))
+    const log = vi.spyOn(console, 'log').mockImplementation(sink)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(sink)
+    let out = ''
+    try {
+      out = format(
+        await patch(
+          parse(seedLock, fmt),
+          seedReport,
+          ctxLic({ license: { deny: ['GPL-3.0'] }, silent: false, verbose: true }),
+          fmt,
+        ),
+        fmt,
+      )
+    } finally {
+      log.mockRestore()
+      warn.mockRestore()
+    }
+    expect(out).toContain('version "1.0.0"') // NOT bumped — the fix itself is GPL
+    expect(out).not.toMatch(/gplself@2\.0\.0/)
+    const text = lines.join('\n')
+    expect(text).toContain('the fix version itself is not permitted')
+    expect(text).toMatch(/gplself@2\.0\.0: license GPL-3\.0/)
   })
 })
