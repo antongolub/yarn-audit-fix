@@ -5,6 +5,8 @@ import process from 'node:process'
 import { engines, license, type Condition } from '@antongolub/lockfile/complete'
 import sv from 'semver'
 
+import { attempt, getWorkspaces, readJson } from '../util'
+
 // Engine keys are simple identifiers (`node`, `npm`, `yarn`, `vscode`…). Guard the
 // minimist-nested `--engines.<engine>` object against prototype-pollution keys
 // (`__proto__`, `constructor`, `prototype`) and anything not identifier-shaped
@@ -81,33 +83,30 @@ const listPackageDirs = (nodeModules: string): string[] => {
 
 /**
  * Infer an engine target from what the project already requires: the HIGHEST
- * lower-bound of `engines[engine]` across the root `package.json` + every
- * (hoisted) package in `node_modules`. `node_modules` is optional — the root
- * alone suffices; it's read only when present (local, no network). So a fix is
- * accepted only if its closure runs on the Node the tree already needs — it must
- * not RAISE that floor.
+ * lower-bound of `engines[engine]` across the root `package.json`, every workspace
+ * `package.json` (monorepo), and every (hoisted) package in `node_modules`. All
+ * sources are optional/best-effort — the root alone suffices, and files are read
+ * only when present (local, no network). So a fix is accepted only if its closure
+ * runs on the Node the tree already needs — it must not RAISE that floor.
  */
 const computeEngineFloor = (engine: string, cwd?: string): string => {
   if (!cwd)
     throw new Error(
       `--engines.${engine}=floor needs the project dir; pass an explicit range (e.g. --engines.${engine}='>=18')`,
     )
-  const dirs = [cwd]
+  const rootFile = path.join(cwd, 'package.json')
+  const root = attempt(() => readJson(rootFile)) ?? {}
+  // root + workspace manifests (globbed from root `workspaces`) + hoisted deps
+  const files = [rootFile, ...getWorkspaces(cwd, root)]
   try {
-    dirs.push(...listPackageDirs(path.join(cwd, 'node_modules')))
+    for (const dir of listPackageDirs(path.join(cwd, 'node_modules')))
+      files.push(path.join(dir, 'package.json'))
   } catch {
-    /* node_modules absent → fall back to the root manifest alone */
+    /* node_modules absent → root + workspaces alone */
   }
   let floor: string | undefined
-  for (const dir of dirs) {
-    let declared: unknown
-    try {
-      declared = JSON.parse(
-        fs.readFileSync(path.join(dir, 'package.json'), 'utf-8'),
-      )?.engines?.[engine]
-    } catch {
-      continue // no/unreadable package.json
-    }
+  for (const file of files) {
+    const declared = attempt(() => readJson(file))?.engines?.[engine]
     if (typeof declared !== 'string') continue
     const lo = sv.minVersion(declared)
     if (lo && (!floor || sv.gt(lo.version, floor))) floor = lo.version

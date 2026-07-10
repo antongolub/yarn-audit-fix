@@ -105,6 +105,19 @@ describe('resolveEngineTargets — floor (infer from the tree)', () => {
     expect(resolveEngineTargets({ node: 'floor' }, dir)).toEqual({ node: '>=19.0.0' })
   })
 
+  it('includes workspace manifests (monorepo), no node_modules needed', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'yaf-floor-'))
+    fs.writeFileSync(
+      path.join(dir, 'package.json'),
+      JSON.stringify({ name: 'root', workspaces: ['packages/*'], engines: { node: '>=16' } }),
+    )
+    const ws = path.join(dir, 'packages', 'foo')
+    fs.mkdirSync(ws, { recursive: true })
+    fs.writeFileSync(path.join(ws, 'package.json'), JSON.stringify({ engines: { node: '>=22' } }))
+    // the workspace's >=22 raises the floor above the root's >=16
+    expect(resolveEngineTargets({ node: 'floor' }, dir)).toEqual({ node: '>=22.0.0' })
+  })
+
   it('throws when nothing declares the engine', () => {
     const dir = mkTree(undefined, { a: undefined })
     expect(() => resolveEngineTargets({ node: 'floor' }, dir)).toThrow(
