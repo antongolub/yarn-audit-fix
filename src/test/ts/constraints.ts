@@ -1,3 +1,7 @@
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+
 import sv from 'semver'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -40,12 +44,6 @@ describe('resolveEngineTargets', () => {
     )
   })
 
-  it('throws on the not-yet-supported "floor" keyword', () => {
-    expect(() => resolveEngineTargets({ node: 'floor' })).toThrow(
-      /floor is not supported yet/,
-    )
-  })
-
   it('throws when a runtime version cannot be inferred (e.g. npm bare)', () => {
     expect(() => resolveEngineTargets({ npm: true })).toThrow(
       /no runtime version to infer/,
@@ -61,6 +59,61 @@ describe('resolveEngineTargets', () => {
     expect(resolveEngineTargets({ 'has space': '>=1', node: '>=18' })).toEqual({
       node: '>=18',
     })
+  })
+})
+
+describe('resolveEngineTargets — floor (infer from the tree)', () => {
+  // Build a throwaway project: root engines + node_modules/<dep>/package.json each.
+  const mkTree = (
+    rootEngines: Record<string, string> | undefined,
+    deps: Record<string, Record<string, string> | undefined>,
+  ): string => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'yaf-floor-'))
+    fs.writeFileSync(
+      path.join(dir, 'package.json'),
+      JSON.stringify({ name: 'root', ...(rootEngines ? { engines: rootEngines } : {}) }),
+    )
+    const nm = path.join(dir, 'node_modules')
+    fs.mkdirSync(nm)
+    for (const [name, engines] of Object.entries(deps)) {
+      const pd = path.join(nm, name)
+      fs.mkdirSync(pd, { recursive: true })
+      fs.writeFileSync(
+        path.join(pd, 'package.json'),
+        JSON.stringify({ name, ...(engines ? { engines } : {}) }),
+      )
+    }
+    return dir
+  }
+
+  it('takes the highest engine lower-bound across root + node_modules', () => {
+    const dir = mkTree({ node: '>=14' }, { a: { node: '>=16' }, b: { node: '^18.0.0' }, c: undefined })
+    expect(resolveEngineTargets({ node: 'floor' }, dir)).toEqual({ node: '>=18.0.0' })
+  })
+
+  it('works from the root manifest alone when node_modules is absent', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'yaf-floor-'))
+    fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ engines: { node: '>=20' } }))
+    expect(resolveEngineTargets({ node: 'floor' }, dir)).toEqual({ node: '>=20.0.0' })
+  })
+
+  it('reads a scoped dependency', () => {
+    const dir = mkTree(undefined, {})
+    const scoped = path.join(dir, 'node_modules', '@scope', 'x')
+    fs.mkdirSync(scoped, { recursive: true })
+    fs.writeFileSync(path.join(scoped, 'package.json'), JSON.stringify({ engines: { node: '>=19' } }))
+    expect(resolveEngineTargets({ node: 'floor' }, dir)).toEqual({ node: '>=19.0.0' })
+  })
+
+  it('throws when nothing declares the engine', () => {
+    const dir = mkTree(undefined, { a: undefined })
+    expect(() => resolveEngineTargets({ node: 'floor' }, dir)).toThrow(
+      /nothing in the project declares engines.node/,
+    )
+  })
+
+  it('throws without a project dir', () => {
+    expect(() => resolveEngineTargets({ node: 'floor' })).toThrow(/needs the project dir/)
   })
 })
 

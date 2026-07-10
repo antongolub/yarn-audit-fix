@@ -150,7 +150,7 @@ export const _patch = async (
   // Opt-in remediation constraints (engines + license): resolve them up front (a
   // bad range / unsupported keyword throws here, before any network work).
   // `constraints` empty ⇒ the completion runs exactly as before.
-  const engineTargets = resolveEngineTargets(flags.engines)
+  const engineTargets = resolveEngineTargets(flags.engines, ctx.cwd)
   const licensePolicy = resolveLicensePolicy(flags.license)
   const constraints = buildConstraints(engineTargets, licensePolicy)
   const constraintSummary = describeConstraints(engineTargets, licensePolicy)
@@ -521,6 +521,15 @@ export const _patch = async (
         log(
           `  (${runtimeEngines.join(', ')} = the running process — may differ from your project's target; pass --engines.${runtimeEngines[0]}='<range>' to pin it)`,
         )
+      const floorEngines = engineTargets
+        ? Object.keys(engineTargets).filter(
+            (e) =>
+              (flags.engines as Record<string, unknown> | undefined)?.[e] ===
+              'floor',
+          )
+        : []
+      if (floorEngines.length > 0)
+        log(`  (${floorEngines.join(', ')} = inferred from the installed tree)`)
     }
     // Dedupe by from→to; annotate with severity / CVSS / CVE refs.
     const seen = new Set<string>()

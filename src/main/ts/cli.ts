@@ -44,9 +44,9 @@ Options:
   --cwd <path>            Working directory (defaults to process.cwd())
   --dry-run               Print what would change without writing
   --engines.<engine>      Only accept fixes whose completed dependency closure
-                          runs on the given engine: --engines.node='>=18'
-                          (bare → the Node running the CLI). Repeatable per
-                          engine (--engines.node --engines.npm='>=9')
+                          runs on the given engine: --engines.node='>=18',
+                          =floor (infer from the installed tree), or bare
+                          (the Node running the CLI). Repeatable per engine
   --exclude <rules>       Packages to skip updating: comma-sep glob[@range]
                           (e.g. lodash,@scope/*@>=2 <3)
   --force                 Apply semver-major upgrades, not just compatible ones
