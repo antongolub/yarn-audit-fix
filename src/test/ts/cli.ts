@@ -38,6 +38,14 @@ describe('cli parse', () => {
     expect(parse(['--force'])).not.toHaveProperty('engines')
   })
 
+  it('lifts --license (bare allow list or the dot form)', () => {
+    expect(parse(['--license=MIT,ISC'])).toMatchObject({ license: 'MIT,ISC' })
+    expect(parse(['--license.allow=MIT', '--license.deny=GPL-3.0'])).toMatchObject({
+      license: { allow: 'MIT', deny: 'GPL-3.0' },
+    })
+    expect(parse(['--force'])).not.toHaveProperty('license')
+  })
+
   it('parses --on-conflict and enforces its choices', () => {
     expect(parse(['--on-conflict=stop'])).toMatchObject({ 'on-conflict': 'stop' })
     expect(parse(['--on-conflict=skip'])).toMatchObject({ 'on-conflict': 'skip' })

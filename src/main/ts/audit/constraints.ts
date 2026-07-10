@@ -1,6 +1,6 @@
 import process from 'node:process'
 
-import { engines, type Condition } from '@antongolub/lockfile/complete'
+import { engines, license, type Condition } from '@antongolub/lockfile/complete'
 import sv from 'semver'
 
 // Engine keys are simple identifiers (`node`, `npm`, `yarn`, `vscode`…). Guard the
@@ -64,12 +64,73 @@ export const describeEngineTargets = (targets: TEngineTargets): string =>
     .map(([engine, range]) => `${engine} ${range}`)
     .join(', ')
 
+/** An SPDX allow/deny policy for the license axis. */
+export type TLicensePolicy = { allow?: string[]; deny?: string[] }
+
+const splitList = (raw: unknown): string[] =>
+  typeof raw === 'string'
+    ? raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : Array.isArray(raw)
+      ? raw.flatMap(splitList)
+      : []
+
+/**
+ * Resolve `--license` into an SPDX allow/deny policy. Accepts the dot form
+ * (`--license.allow=MIT,ISC --license.deny=GPL-3.0`) or a bare allow list
+ * (`--license=MIT,ISC`). Returns undefined when nothing is set → no license gate.
+ * v1 compares single SPDX ids; an SPDX expression (`(MIT OR Apache-2.0)`) is
+ * unevaluable and, under the lib's default `onUnevaluable:'reject'`, is flagged
+ * rather than silently accepted (opt-in ⇒ guarantee-or-flag).
+ */
+export const resolveLicensePolicy = (
+  raw: unknown,
+): TLicensePolicy | undefined => {
+  if (raw === undefined || raw === null || raw === false) return undefined
+  const obj = typeof raw === 'object' ? (raw as Record<string, unknown>) : undefined
+  const allow = splitList(obj ? obj.allow : raw)
+  const deny = splitList(obj ? obj.deny : undefined)
+  if (allow.length === 0 && deny.length === 0) return undefined
+  const policy: TLicensePolicy = {}
+  if (allow.length > 0) policy.allow = allow
+  if (deny.length > 0) policy.deny = deny
+  return policy
+}
+
+/** Readable license-policy summary: `allow MIT, ISC / deny GPL-3.0`. */
+export const describeLicensePolicy = (p: TLicensePolicy): string =>
+  [
+    p.allow?.length ? `allow ${p.allow.join(', ')}` : '',
+    p.deny?.length ? `deny ${p.deny.join(', ')}` : '',
+  ]
+    .filter(Boolean)
+    .join(' / ')
+
 /**
  * Build the `@antongolub/lockfile` `constraints` array threaded into
  * `completeTransitives`. Engine gates are lenient (npm parity: a package that
  * declares no `engines` is accepted — a missing declaration is not a claim of
- * incompatibility). Empty when no targets are set → the completion is unchanged.
+ * incompatibility). License gates need a `manifest()`-capable registry (liveRegistry).
+ * Empty when nothing is set → the completion is unchanged.
  */
 export const buildConstraints = (
-  targets: TEngineTargets | undefined,
-): Condition[] => (targets ? [engines(targets, { mode: 'lenient' })] : [])
+  engineTargets: TEngineTargets | undefined,
+  licensePolicy?: TLicensePolicy,
+): Condition[] => [
+  ...(engineTargets ? [engines(engineTargets, { mode: 'lenient' })] : []),
+  ...(licensePolicy ? [license(licensePolicy)] : []),
+]
+
+/** Combined one-line summary of every active axis, for the report header. */
+export const describeConstraints = (
+  engineTargets: TEngineTargets | undefined,
+  licensePolicy: TLicensePolicy | undefined,
+): string =>
+  [
+    engineTargets ? describeEngineTargets(engineTargets) : '',
+    licensePolicy ? `license ${describeLicensePolicy(licensePolicy)}` : '',
+  ]
+    .filter(Boolean)
+    .join('; ')

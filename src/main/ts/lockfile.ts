@@ -1,6 +1,6 @@
 import { detect, governingOverrideFor, overridesOf, parse as lfParse, stringify as lfStringify } from '@antongolub/lockfile'
 import type { Graph, FormatId, Manifest, OverrideConstraint } from '@antongolub/lockfile'
-import { completeTransitives } from '@antongolub/lockfile/complete'
+import { completeTransitives, selectConstrained } from '@antongolub/lockfile/complete'
 import { refurbish as lfRefurbish } from '@antongolub/lockfile/enrich'
 import { replaceVersion } from '@antongolub/lockfile/modify'
 import { pruneOrphans } from '@antongolub/lockfile/optimize'
@@ -9,8 +9,9 @@ import sv from 'semver'
 import { buildRegistry, buildTarballSource, ecosystemFor } from './audit/adapter'
 import {
   buildConstraints,
-  describeEngineTargets,
+  describeConstraints,
   resolveEngineTargets,
+  resolveLicensePolicy,
 } from './audit/constraints'
 import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
@@ -146,12 +147,13 @@ export const _patch = async (
   overrides: readonly OverrideConstraint[] = [],
 ): Promise<TLockfileObject> => {
   const { flags } = ctx
-  // Opt-in engine constraints: resolve the `--engines.<engine>` targets up front
-  // (a bad range / unsupported keyword throws here, before any network work).
+  // Opt-in remediation constraints (engines + license): resolve them up front (a
+  // bad range / unsupported keyword throws here, before any network work).
   // `constraints` empty ⇒ the completion runs exactly as before.
   const engineTargets = resolveEngineTargets(flags.engines)
-  const constraints = buildConstraints(engineTargets)
-  const engineSummary = engineTargets ? describeEngineTargets(engineTargets) : ''
+  const licensePolicy = resolveLicensePolicy(flags.license)
+  const constraints = buildConstraints(engineTargets, licensePolicy)
+  const constraintSummary = describeConstraints(engineTargets, licensePolicy)
   const onConflict: 'skip' | 'stop' =
     flags['on-conflict'] === 'stop' ? 'stop' : 'skip'
   if (Object.keys(report).length === 0) {
@@ -175,10 +177,10 @@ export const _patch = async (
   const directRanges = manifestDirectRanges(ctx.manifest)
   const manifestPinned = new Map<string, string>()
   const manifestEdits: TManifestEdit[] = []
-  // A fix skipped because its completed closure has no engine-compatible version
-  // for some new transitive (COMPLETION_NO_CANDIDATE). Keyed by "name@ver → fix",
-  // value = the diagnostic payload (depName / range / rejected) for the report.
-  const engineSkipped = new Map<
+  // A fix skipped because its completed closure can't satisfy an active constraint
+  // (engines or license) for some new transitive (COMPLETION_NO_CANDIDATE). Keyed
+  // by "name@ver → fix", value = the diagnostic payload (depName / range / rejected).
+  const constraintSkipped = new Map<
     string,
     {
       depName?: string
@@ -409,13 +411,13 @@ export const _patch = async (
       graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
     }
   } else {
-    // Engine-constrained path (opt-in). Apply + complete each upgrade tentatively
-    // and commit it only if its closure resolves under the constraints. A
-    // COMPLETION_NO_CANDIDATE means a new transitive has no engine-compatible
-    // version in range → the fix's closure can't be completed → skip the whole fix
-    // (leave the vuln, report it) or error under --on-conflict=stop.
-    // replaceVersion/completeTransitives are immutable, so a rejected upgrade's
-    // tentative graphs are simply dropped and `graph` is left as it was.
+    // Constrained path (opt-in: engines and/or license). Apply + complete each
+    // upgrade tentatively and commit it only if its closure resolves under the
+    // constraints. A COMPLETION_NO_CANDIDATE means a new transitive has no
+    // constraint-satisfying version in range → the fix's closure can't be completed
+    // → skip the whole fix (leave the vuln, report it) or error under
+    // --on-conflict=stop. replaceVersion/completeTransitives are immutable, so a
+    // rejected upgrade's tentative graphs are simply dropped and `graph` is unchanged.
     let touched = false
     for (const u of upgrades) {
       const res = await replaceVersion(
@@ -446,7 +448,7 @@ export const _patch = async (
       ) as { data?: { depName?: string; forced?: string } } | undefined
       if (conflict)
         throw new Error(
-          `An override pins ${conflict.data?.depName ?? '?'}@${conflict.data?.forced ?? '?'}, which violates --engines (${engineSummary}). Reconcile the override or drop the engine constraint.`,
+          `An override pins ${conflict.data?.depName ?? '?'}@${conflict.data?.forced ?? '?'}, which violates the active constraints (${constraintSummary}). Reconcile the override or drop the constraint.`,
         )
       const noCandidate = completion.unresolved.filter(
         (d: { code?: string }) => d.code === 'COMPLETION_NO_CANDIDATE',
@@ -461,9 +463,9 @@ export const _patch = async (
         const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
         if (onConflict === 'stop')
           throw new Error(
-            `--engines (${engineSummary}): no in-range version of ${noCandidate[0].data?.depName ?? '?'} satisfies the target for ${head}. Re-run with --on-conflict=skip to leave it, or widen the target.`,
+            `Constraints (${constraintSummary}): no in-range version of ${noCandidate[0].data?.depName ?? '?'} satisfies the policy for ${head}. Re-run with --on-conflict=skip to leave it, or relax the constraint.`,
           )
-        engineSkipped.set(head, noCandidate[0].data ?? {})
+        constraintSkipped.set(head, noCandidate[0].data ?? {})
         continue // drop u: keep the pre-u graph, leave the vuln in place
       }
       graph = completion.graph
@@ -480,14 +482,16 @@ export const _patch = async (
     // plain console otherwise (direct/test calls).
     const log = ctx.progress ? ctx.progress.log : console.log
     const warn = ctx.progress ? ctx.progress.log : console.warn
-    // Surface the active engine target(s) first — and when a target was inferred
+    // Surface the active constraints first — and when an engine target was inferred
     // from the running process, flag that it may differ from the project's target.
-    if (engineTargets) {
-      log(`Engine constraints: ${engineSummary}`)
-      const runtimeEngines = Object.keys(engineTargets).filter((e) => {
-        const v = (flags.engines as Record<string, unknown> | undefined)?.[e]
-        return v === true || v === 'runtime'
-      })
+    if (constraintSummary) {
+      log(`Constraints: ${constraintSummary}`)
+      const runtimeEngines = engineTargets
+        ? Object.keys(engineTargets).filter((e) => {
+            const v = (flags.engines as Record<string, unknown> | undefined)?.[e]
+            return v === true || v === 'runtime'
+          })
+        : []
       if (runtimeEngines.length > 0)
         log(
           `  (${runtimeEngines.join(', ')} = the running process — may differ from your project's target; pass --engines.${runtimeEngines[0]}='<range>' to pin it)`,
@@ -540,11 +544,11 @@ export const _patch = async (
         warn(`  ${spec} (pinned → "${range}")`)
       }
     }
-    if (engineSkipped.size > 0) {
+    if (constraintSkipped.size > 0) {
       warn(
-        `Skipped (engine constraints — no fix keeps the closure within ${engineSummary}; widen the target, --exclude the package, or accept the newer engine):`,
+        `Skipped (constraints — no fix keeps the closure within the policy [${constraintSummary}]; relax it, --exclude the package, or accept the newer dep):`,
       )
-      for (const [head, data] of [...engineSkipped].sort()) {
+      for (const [head, data] of [...constraintSkipped].sort()) {
         const need = data.depName
           ? ` — needs ${data.depName}${data.range ? `@${data.range}` : ''}`
           : ''

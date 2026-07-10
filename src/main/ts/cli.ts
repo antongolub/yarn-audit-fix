@@ -51,7 +51,10 @@ Options:
                           (e.g. lodash,@scope/*@>=2 <3)
   --force                 Apply semver-major upgrades, not just compatible ones
   --ignore <ids>          Advisory ids to ignore: comma-sep globs (GHSA or npm id)
-  --on-conflict <policy>  When a fix can't satisfy the engine constraints:
+  --license.allow <spdx>  Only accept fixes whose closure has these SPDX licenses
+                          (comma-sep). --license.deny <spdx> flags forbidden ones.
+                          A bare --license=<spdx,...> is an allow list
+  --on-conflict <policy>  When a fix can't satisfy the engine/license constraints:
                           skip (default, leave it + report) | stop (error)
   --registry <url>        Custom registry url
   --silent                Disable log output
@@ -101,6 +104,11 @@ export const parse = (
   // `resolveEngineTargets`, which also guards the keys against proto-pollution.
   if (raw.engines && typeof raw.engines === 'object' && !Array.isArray(raw.engines))
     flags.engines = raw.engines
+
+  // License policy (opt-in): `--license.allow=MIT,ISC --license.deny=GPL-3.0` (or a
+  // bare `--license=MIT,ISC` allow list). Same minimist-nesting caveat as engines;
+  // resolveLicensePolicy validates + splits the lists.
+  if (raw.license !== undefined && raw.license !== false) flags.license = raw.license
 
   for (const [key, allowed] of Object.entries(CHOICES)) {
     const value = flags[key]

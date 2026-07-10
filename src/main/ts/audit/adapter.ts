@@ -78,6 +78,12 @@ export const buildRegistry = (
   return {
     packument: (name) => pick(name).reg.packument(name),
     resolve: (name, range) => pick(name).reg.resolve(name, range),
+    // Forward the full-manifest fetch so a `license` constraint can read the
+    // `license` field (corgi omits it). liveRegistry implements it; the scoped
+    // router picks the right one per package. Coalesce the absent-method case to a
+    // resolved undefined so the adapter always returns a Promise.
+    manifest: (name, version) =>
+      pick(name).reg.manifest?.(name, version) ?? Promise.resolve(undefined),
   }
 }
 

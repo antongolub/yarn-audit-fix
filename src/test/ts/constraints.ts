@@ -3,8 +3,11 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   buildConstraints,
+  describeConstraints,
   describeEngineTargets,
+  describeLicensePolicy,
   resolveEngineTargets,
+  resolveLicensePolicy,
 } from '../../main/ts/audit/constraints'
 import { format, parse, patch } from '../../main/ts/lockfile'
 
@@ -68,11 +71,53 @@ describe('describeEngineTargets / buildConstraints', () => {
     )
   })
 
-  it('builds an engines condition, or nothing when unset', () => {
-    expect(buildConstraints(undefined)).toEqual([])
-    const c = buildConstraints({ node: '>=18' })
-    expect(c).toHaveLength(1)
-    expect(c[0].kind).toBe('engines')
+  it('builds engines + license conditions, or nothing when unset', () => {
+    expect(buildConstraints(undefined, undefined)).toEqual([])
+    expect(buildConstraints({ node: '>=18' }).map((c) => c.kind)).toEqual([
+      'engines',
+    ])
+    expect(
+      buildConstraints({ node: '>=18' }, { allow: ['MIT'] }).map((c) => c.kind),
+    ).toEqual(['engines', 'license'])
+    expect(
+      buildConstraints(undefined, { deny: ['GPL-3.0'] }).map((c) => c.kind),
+    ).toEqual(['license'])
+  })
+})
+
+describe('resolveLicensePolicy / describeLicensePolicy / describeConstraints', () => {
+  it('returns undefined when nothing is set', () => {
+    expect(resolveLicensePolicy(undefined)).toBeUndefined()
+    expect(resolveLicensePolicy(false)).toBeUndefined()
+    expect(resolveLicensePolicy('')).toBeUndefined()
+    expect(resolveLicensePolicy({})).toBeUndefined()
+  })
+
+  it('parses a bare allow list and the dot form', () => {
+    expect(resolveLicensePolicy('MIT, ISC ,Apache-2.0')).toEqual({
+      allow: ['MIT', 'ISC', 'Apache-2.0'],
+    })
+    expect(resolveLicensePolicy({ allow: 'MIT,ISC', deny: 'GPL-3.0' })).toEqual({
+      allow: ['MIT', 'ISC'],
+      deny: ['GPL-3.0'],
+    })
+    // minimist collects a repeated flag into an array
+    expect(resolveLicensePolicy({ allow: ['MIT', 'ISC'] })).toEqual({
+      allow: ['MIT', 'ISC'],
+    })
+  })
+
+  it('renders policy + combined summaries', () => {
+    expect(
+      describeLicensePolicy({ allow: ['MIT', 'ISC'], deny: ['GPL-3.0'] }),
+    ).toBe('allow MIT, ISC / deny GPL-3.0')
+    expect(describeConstraints({ node: '>=18' }, { allow: ['MIT'] })).toBe(
+      'node >=18; license allow MIT',
+    )
+    expect(describeConstraints(undefined, { deny: ['GPL-3.0'] })).toBe(
+      'license deny GPL-3.0',
+    )
+    expect(describeConstraints({ node: '>=18' }, undefined)).toBe('node >=18')
   })
 })
 
@@ -209,10 +254,106 @@ describe('engine constraints — patch integration', () => {
       warn.mockRestore()
     }
     const text = lines.join('\n')
-    expect(text).toContain('Engine constraints: node >=18')
-    expect(text).toMatch(/Skipped \(engine constraints/)
+    expect(text).toContain('Constraints: node >=18')
+    expect(text).toMatch(/Skipped \(constraints/)
     expect(text).toContain('badv@1.0.0 → 2.0.0') // the skipped fix
     expect(text).toContain('needs newdep@^1.0.0') // attributed to the transitive
     expect(text).toMatch(/newdep@1\.0\.0:.*(>=20|engines)/) // verbose why-rejected
+  })
+})
+
+// ─── integration: the license gate in patch() ───────────────────────────────
+// Same goodv/badv lock, but badv's fix pulls a GPL transitive. corgi (packument/
+// resolve) omits `license`; only the full manifest() carries it — exactly the
+// split the license gate relies on (and the reason buildRegistry forwards it).
+const licSpec: Record<string, Record<string, any>> = {
+  goodv: { '1.0.0': { license: 'MIT' }, '2.0.0': { license: 'MIT' } },
+  badv: {
+    '1.0.0': { license: 'MIT' },
+    '2.0.0': { license: 'MIT', deps: { gpldep: '^1.0.0' } },
+  },
+  gpldep: { '1.0.0': { license: 'GPL-3.0' } },
+}
+const licVersion = (name: string, v: string, withLicense: boolean) => ({
+  name,
+  version: v,
+  dependencies: licSpec[name][v].deps ?? {},
+  ...(withLicense ? { license: licSpec[name][v].license } : {}),
+  dist: {
+    tarball: `https://registry.npmjs.org/${name}/-/${name}-${v}.tgz`,
+    shasum: '0'.repeat(40),
+    integrity: 'sha512-AA==',
+  },
+})
+const licRegistry = {
+  packument: async (name: string) =>
+    licSpec[name]
+      ? {
+          name,
+          distTags: { latest: Object.keys(licSpec[name]).sort().at(-1) },
+          // corgi carries NO license field
+          versions: Object.fromEntries(
+            Object.keys(licSpec[name]).map((v) => [v, licVersion(name, v, false)]),
+          ),
+        }
+      : undefined,
+  resolve: async (name: string, range: string) => {
+    const v = Object.keys(licSpec[name] ?? {})
+      .reverse()
+      .find((x) => sv.satisfies(x, range))
+    return v ? licVersion(name, v, false) : undefined
+  },
+  // full manifest DOES carry license — the field corgi omits
+  manifest: async (name: string, version: string) =>
+    licSpec[name]?.[version] ? licVersion(name, version, true) : undefined,
+} as any
+
+const ctxLic = (flags: Record<string, any>): any => ({
+  flags: { silent: true, ...flags },
+  registry: licRegistry,
+  cwd: process.cwd(),
+  manifest: {},
+})
+
+describe('license constraints — patch integration', () => {
+  it('no policy: both fixed, the GPL transitive pulled without a gate', async () => {
+    const fmt = 'yarn-classic' as const
+    const out = format(await patch(parse(lock, fmt), report, ctxLic({}), fmt), fmt)
+    expect(out).toMatch(/badv@2\.0\.0/)
+    expect(out).toContain('gpldep') // closure completed (no gate)
+  })
+
+  it('--license.allow: skips the fix whose closure pulls a non-allowed license', async () => {
+    const fmt = 'yarn-classic' as const
+    const out = format(
+      await patch(parse(lock, fmt), report, ctxLic({ license: { allow: ['MIT', 'ISC'] } }), fmt),
+      fmt,
+    )
+    expect(out).toContain('goodv@2.0.0') // MIT closure — applied
+    expect(out).toMatch(/badv@1\.0\.0|badv@\^1\.0\.0/) // GPL closure — skipped
+    expect(out).not.toMatch(/badv@2\.0\.0/)
+    expect(out).not.toContain('gpldep') // denied transitive never wired
+  })
+
+  it('--license.deny: same skip via a deny list', async () => {
+    const fmt = 'yarn-classic' as const
+    const out = format(
+      await patch(parse(lock, fmt), report, ctxLic({ license: { deny: ['GPL-3.0'] } }), fmt),
+      fmt,
+    )
+    expect(out).not.toMatch(/badv@2\.0\.0/) // GPL denied → skipped
+    expect(out).toContain('goodv@2.0.0')
+  })
+
+  it('--on-conflict=stop: a denied license throws', async () => {
+    const fmt = 'yarn-classic' as const
+    await expect(
+      patch(
+        parse(lock, fmt),
+        report,
+        ctxLic({ license: { deny: ['GPL-3.0'] }, 'on-conflict': 'stop' }),
+        fmt,
+      ),
+    ).rejects.toThrow(/no in-range version of gpldep/)
   })
 })
