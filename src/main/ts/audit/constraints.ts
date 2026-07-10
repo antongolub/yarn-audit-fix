@@ -2,7 +2,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { engines, license, type Condition } from '@antongolub/lockfile/complete'
+import {
+  engines,
+  license,
+  type Condition,
+  type ConditionContext,
+} from '@antongolub/lockfile/complete'
 import sv from 'semver'
 
 import { attempt, getWorkspaces, readJson } from '../util'
@@ -168,29 +173,76 @@ export const describeLicensePolicy = (p: TLicensePolicy): string =>
     .filter(Boolean)
     .join(' / ')
 
+/** The package-format axis, e.g. `cjs`. */
+export type TPackageType = 'cjs'
+
+/** Resolve `--package-type`. v1 accepts `cjs` (keep the closure require-able);
+ *  anything else is an explicit error rather than a silent no-op. */
+export const resolvePackageType = (raw: unknown): TPackageType | undefined => {
+  if (raw === undefined || raw === null || raw === false || raw === '') return undefined
+  if (raw === 'cjs') return 'cjs'
+  throw new Error(
+    `--package-type: "${String(raw)}" is not supported (only "cjs" for now)`,
+  )
+}
+
+/**
+ * A custom Condition (the lib deliberately ships no module-format built-in — true
+ * `require(ESM)` compatibility is per-edge and Node-gated, so this is a node-local
+ * *approximation*): reject an **ESM-only** package for a CommonJS consumer. A
+ * package with `type !== 'module'` is CJS by default (requireable); an ESM one
+ * passes only if it still exposes a CJS entry — a `main`, or a `require`/`default`
+ * export condition. Reads the full manifest (corgi omits `type`/`exports`) → cost 10,
+ * so cheaper axes (engines) reject first. It checks *consistency of entry points*,
+ * not runtime behaviour, which yaf can't verify — but a fix that flips a dep
+ * ESM-only breaks every `require()` of it, and that we can catch.
+ */
+const commonjsCompatible = (): Condition => ({
+  kind: 'commonjs',
+  cost: 10,
+  async evaluate(ctx: ConditionContext) {
+    const m = (await ctx.manifest()) as
+      | { type?: unknown; main?: unknown; exports?: unknown }
+      | undefined
+    if (m === undefined)
+      return { ok: 'unevaluable', reason: 'no manifest()-capable registry' }
+    if (m.type !== 'module') return { ok: true } // CJS by default → requireable
+    const hasCjsEntry =
+      typeof m.main === 'string' ||
+      /"(require|default)"\s*:/.test(JSON.stringify(m.exports ?? null))
+    return hasCjsEntry
+      ? { ok: true }
+      : { ok: false, reason: `${ctx.name}@${ctx.version} is ESM-only` }
+  },
+})
+
 /**
  * Build the `@antongolub/lockfile` `constraints` array threaded into
  * `completeTransitives`. Engine gates are lenient (npm parity: a package that
  * declares no `engines` is accepted — a missing declaration is not a claim of
- * incompatibility). License gates need a `manifest()`-capable registry (liveRegistry).
- * Empty when nothing is set → the completion is unchanged.
+ * incompatibility). License + package-type gates need a `manifest()`-capable
+ * registry (liveRegistry). Empty when nothing is set → the completion is unchanged.
  */
 export const buildConstraints = (
   engineTargets: TEngineTargets | undefined,
   licensePolicy?: TLicensePolicy,
+  packageType?: TPackageType,
 ): Condition[] => [
   ...(engineTargets ? [engines(engineTargets, { mode: 'lenient' })] : []),
   ...(licensePolicy ? [license(licensePolicy)] : []),
+  ...(packageType === 'cjs' ? [commonjsCompatible()] : []),
 ]
 
 /** Combined one-line summary of every active axis, for the report header. */
 export const describeConstraints = (
   engineTargets: TEngineTargets | undefined,
   licensePolicy: TLicensePolicy | undefined,
+  packageType?: TPackageType,
 ): string =>
   [
     engineTargets ? describeEngineTargets(engineTargets) : '',
     licensePolicy ? `license ${describeLicensePolicy(licensePolicy)}` : '',
+    packageType === 'cjs' ? 'commonjs-compatible' : '',
   ]
     .filter(Boolean)
     .join('; ')

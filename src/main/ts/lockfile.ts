@@ -14,6 +14,7 @@ import {
   describeConstraints,
   resolveEngineTargets,
   resolveLicensePolicy,
+  resolvePackageType,
 } from './audit/constraints'
 import { matchesPackage, parsePackageRules } from './audit/filter'
 import { formatAdvisoryMeta } from './audit/meta'
@@ -193,13 +194,35 @@ export const _patch = async (
   overrides: readonly OverrideConstraint[] = [],
 ): Promise<TLockfileObject> => {
   const { flags } = ctx
-  // Opt-in remediation constraints (engines + license): resolve them up front (a
-  // bad range / unsupported keyword throws here, before any network work).
-  // `constraints` empty ⇒ the completion runs exactly as before.
-  const engineTargets = resolveEngineTargets(flags.engines, ctx.cwd)
+  // Opt-in remediation constraints: resolve them up front (a bad range / unsupported
+  // keyword throws here, before any network work). `constraints` empty ⇒ the
+  // completion runs exactly as before.
+  if (flags.safe && flags.force)
+    throw new Error('--safe and --force are opposites; pass one, not both')
+  let engineTargets = resolveEngineTargets(flags.engines, ctx.cwd)
+  let packageType = resolvePackageType(flags['package-type'])
+  // --safe: fix only what's safe on every automatable axis (the opposite of
+  // --force). It FILLS the axes you didn't set — hold the tree's engine floor (if it
+  // declares one) and keep the closure require-able in a CommonJS project — but never
+  // overrides an axis you set explicitly. License stays a policy you set yourself.
+  if (flags.safe) {
+    if (!engineTargets) {
+      try {
+        engineTargets = resolveEngineTargets({ node: 'floor' }, ctx.cwd)
+      } catch {
+        /* nothing declares engines.node → no floor to hold, best-effort */
+      }
+    }
+    if (!packageType && (ctx.manifest as { type?: unknown })?.type !== 'module')
+      packageType = 'cjs'
+  }
   const licensePolicy = resolveLicensePolicy(flags.license)
-  const constraints = buildConstraints(engineTargets, licensePolicy)
-  const constraintSummary = describeConstraints(engineTargets, licensePolicy)
+  const constraints = buildConstraints(engineTargets, licensePolicy, packageType)
+  const constraintSummary = describeConstraints(
+    engineTargets,
+    licensePolicy,
+    packageType,
+  )
   const onConflict: 'skip' | 'stop' =
     flags['on-conflict'] === 'stop' ? 'stop' : 'skip'
   if (Object.keys(report).length === 0) {
@@ -569,7 +592,7 @@ export const _patch = async (
     // Surface the active constraints first — and when an engine target was inferred
     // from the running process, flag that it may differ from the project's target.
     if (constraintSummary) {
-      log(`Constraints: ${constraintSummary}`)
+      log(`Constraints${flags.safe ? ' (--safe)' : ''}: ${constraintSummary}`)
       const runtimeEngines = engineTargets
         ? Object.keys(engineTargets).filter((e) => {
             const v = (flags.engines as Record<string, unknown> | undefined)?.[e]

@@ -51,4 +51,14 @@ describe('cli parse', () => {
     expect(parse(['--on-conflict=skip'])).toMatchObject({ 'on-conflict': 'skip' })
     expect(() => parse(['--on-conflict=bogus'])).toThrow(/Invalid value for --on-conflict/)
   })
+
+  it('parses --package-type and enforces its choices', () => {
+    expect(parse(['--package-type=cjs'])).toMatchObject({ 'package-type': 'cjs' })
+    expect(() => parse(['--package-type=esm'])).toThrow(/Invalid value for --package-type/)
+  })
+
+  it('parses --safe as a boolean', () => {
+    expect(parse(['--safe'])).toMatchObject({ safe: true })
+    expect(parse(['--force'])).not.toHaveProperty('safe')
+  })
 })

@@ -11,13 +11,14 @@ import { getSelfManifest } from './util'
 // Declarative option spec (keeps `parse` small and the Node floor low — see the
 // v11 migration note): value-taking vs boolean flags, their `YAF_*` env-var
 // fallbacks, and the allowed values for the enum-like ones.
-const BOOLEAN = ['dry-run', 'force', 'silent', 'verbose']
+const BOOLEAN = ['dry-run', 'force', 'safe', 'silent', 'verbose']
 const STRING = [
   'audit-level',
   'cwd',
   'exclude',
   'ignore',
   'on-conflict',
+  'package-type',
   'registry',
 ]
 const ENV: Record<string, string> = {
@@ -28,13 +29,16 @@ const ENV: Record<string, string> = {
   force: 'YAF_FORCE',
   ignore: 'YAF_IGNORE',
   'on-conflict': 'YAF_ON_CONFLICT',
+  'package-type': 'YAF_PACKAGE_TYPE',
   registry: 'YAF_REGISTRY',
+  safe: 'YAF_SAFE',
   silent: 'YAF_SILENT',
   verbose: 'YAF_VERBOSE',
 }
 const CHOICES: Record<string, string[]> = {
   'audit-level': ['low', 'moderate', 'high', 'critical'],
   'on-conflict': ['skip', 'stop'],
+  'package-type': ['cjs'],
 }
 
 const HELP = `Usage: yarn-audit-fix [options]
@@ -56,7 +60,13 @@ Options:
                           A bare --license=<spdx,...> is an allow list
   --on-conflict <policy>  When a fix can't satisfy the engine/license constraints:
                           skip (default, leave it + report) | stop (error)
+  --package-type <t>      Only accept fixes whose closure stays require-able:
+                          cjs (reject an ESM-only dep a CommonJS tree can't require)
   --registry <url>        Custom registry url
+  --safe                  Fix only what's safe on every automatable axis (the
+                          opposite of --force): don't raise the tree's engine floor,
+                          don't introduce an ESM-only dep in a CommonJS project.
+                          Bundles --engines.node=floor + --package-type=cjs
   --silent                Disable log output
   --verbose               Verbose/debug logging
   -v, --version           Print version

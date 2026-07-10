@@ -126,7 +126,9 @@ straight from the registry, so there's no reconcile `yarn install` step.
 | `--ignore`            | Advisory ids to ignore — comma-separated globs matched against the GHSA id (from the advisory url) or the npm advisory id (e.g. `GHSA-*,1106913`). Repeatable.            |                                            |
 | `--engines.<engine>`  | Only apply a fix whose completed dependency closure runs on the given engine — `--engines.node='>=18'`, `=floor` (infer from the installed tree), or bare `--engines.node` (the Node running the CLI). Repeatable per engine. See [Constraints](#constraints-engines--licenses). |                                            |
 | `--license.allow` / `--license.deny` | Only apply a fix whose closure's SPDX licenses pass the policy — `--license.allow=MIT,ISC` (or bare `--license=MIT,ISC`) / `--license.deny=GPL-3.0`. See [Constraints](#constraints-engines--licenses).                          |                                            |
-| `--on-conflict`       | What to do when a fix can't satisfy the engine/license constraints: `skip` (leave it, report) or `stop` (error).                                                        | `skip`                                     |
+| `--package-type`      | Only apply a fix whose closure stays require-able — `cjs` rejects an ESM-only dependency a CommonJS tree can't `require()`. See [Constraints](#constraints-engines--licenses).                                                    |                                            |
+| `--on-conflict`       | What to do when a fix can't satisfy the engine / license / package-type constraints: `skip` (leave it, report) or `stop` (error).                                       | `skip`                                     |
+| `--safe`              | Fix only what's safe on every automatable axis (the opposite of `--force`): bundles `--engines.node=floor` + `--package-type=cjs` (the latter only in a CommonJS project). See [Constraints](#constraints-engines--licenses).      |                                            |
 
 #### Constraints (engines & licenses)
 
@@ -149,6 +151,12 @@ in place and reported (or, with `--on-conflict=stop`, the run errors).
   accepts a fix only if the SPDX license of every new package it pulls in passes
   the allow/deny policy. A bare `--license=MIT,ISC` is an allow list. An
   unresolvable SPDX *expression* (`(MIT OR X)`) is flagged, not silently accepted.
+- **Package format** — `--package-type=cjs` accepts a fix only if every new
+  package it pulls in stays require-able: a dependency that has gone **ESM-only**
+  (`"type": "module"` with no CJS `main`/`exports`) would break every `require()`
+  of it in a CommonJS tree, so the fix is left for you to take deliberately. It's a
+  consistency check on entry points, not a runtime one — yaf can't prove your code
+  runs, but it can catch a fix that flips a dependency's module format.
 
 Every skip is attributed in the report — the axis, the blocking package, and the
 versions tried — so you can widen the target, `--exclude` the package, or accept
@@ -162,6 +170,13 @@ Skipped (constraints — no fix keeps the closure within the policy [node >=18];
 
 > Constraints gate a fix's dependency **closure** (the transitives it pulls in),
 > not the fixed package's own `engines`/`license`.
+
+**`--safe`** rolls the automatable gates into one flag — the opposite of `--force`.
+It's shorthand for `--engines.node=floor` (don't raise the engine floor your tree
+already stands on) plus `--package-type=cjs` in a CommonJS project (don't introduce
+an ESM-only dependency). So `yarn-audit-fix --safe` means *fix everything you can
+without changing what my project runs on or how it loads* — and flags the rest for
+a deliberate follow-up. (License stays an explicit policy; `--safe` doesn't guess it.)
 
 #### Direct-dependency pins
 

@@ -12,6 +12,7 @@ import {
   describeLicensePolicy,
   resolveEngineTargets,
   resolveLicensePolicy,
+  resolvePackageType,
 } from '../../main/ts/audit/constraints'
 import { format, parse, patch } from '../../main/ts/lockfile'
 
@@ -137,7 +138,7 @@ describe('describeEngineTargets / buildConstraints', () => {
     )
   })
 
-  it('builds engines + license conditions, or nothing when unset', () => {
+  it('builds engines + license + package-type conditions, or nothing when unset', () => {
     expect(buildConstraints(undefined, undefined)).toEqual([])
     expect(buildConstraints({ node: '>=18' }).map((c) => c.kind)).toEqual([
       'engines',
@@ -148,6 +149,23 @@ describe('describeEngineTargets / buildConstraints', () => {
     expect(
       buildConstraints(undefined, { deny: ['GPL-3.0'] }).map((c) => c.kind),
     ).toEqual(['license'])
+    // package-type adds a commonjs gate, ordered after the cheaper axes
+    expect(
+      buildConstraints({ node: '>=18' }, { allow: ['MIT'] }, 'cjs').map((c) => c.kind),
+    ).toEqual(['engines', 'license', 'commonjs'])
+    expect(buildConstraints(undefined, undefined, 'cjs').map((c) => c.kind)).toEqual([
+      'commonjs',
+    ])
+  })
+})
+
+describe('resolvePackageType', () => {
+  it('accepts cjs, ignores unset, rejects the unsupported', () => {
+    expect(resolvePackageType('cjs')).toBe('cjs')
+    expect(resolvePackageType(undefined)).toBeUndefined()
+    expect(resolvePackageType(false)).toBeUndefined()
+    expect(resolvePackageType('')).toBeUndefined()
+    expect(() => resolvePackageType('esm')).toThrow(/not supported/)
   })
 })
 
@@ -184,6 +202,10 @@ describe('resolveLicensePolicy / describeLicensePolicy / describeConstraints', (
       'license deny GPL-3.0',
     )
     expect(describeConstraints({ node: '>=18' }, undefined)).toBe('node >=18')
+    expect(describeConstraints({ node: '>=18' }, undefined, 'cjs')).toBe(
+      'node >=18; commonjs-compatible',
+    )
+    expect(describeConstraints(undefined, undefined, 'cjs')).toBe('commonjs-compatible')
   })
 })
 
@@ -365,18 +387,27 @@ const licSpec: Record<string, Record<string, any>> = {
   gpldep: { '1.0.0': { license: 'GPL-3.0' } },
   // a fix whose OWN license is forbidden (no bad transitive) — for the seed gate
   gplself: { '1.0.0': { license: 'MIT' }, '2.0.0': { license: 'GPL-3.0' } },
+  // a fix that pulls an ESM-only transitive — for the package-type gate
+  esmv: { '1.0.0': { license: 'MIT' }, '2.0.0': { license: 'MIT', deps: { esmdep: '^1.0.0' } } },
+  esmdep: { '1.0.0': { license: 'MIT', type: 'module' } }, // ESM-only: type:module, no main/exports
 }
-const licVersion = (name: string, v: string, withLicense: boolean) => ({
-  name,
-  version: v,
-  dependencies: licSpec[name][v].deps ?? {},
-  ...(withLicense ? { license: licSpec[name][v].license } : {}),
-  dist: {
-    tarball: `https://registry.npmjs.org/${name}/-/${name}-${v}.tgz`,
-    shasum: '0'.repeat(40),
-    integrity: 'sha512-AA==',
-  },
-})
+// `full` = the manifest() view: the fields corgi omits (license, type, main, exports).
+const licVersion = (name: string, v: string, full: boolean) => {
+  const s = licSpec[name][v]
+  return {
+    name,
+    version: v,
+    dependencies: s.deps ?? {},
+    ...(full
+      ? { license: s.license, type: s.type, main: s.main, exports: s.exports }
+      : {}),
+    dist: {
+      tarball: `https://registry.npmjs.org/${name}/-/${name}-${v}.tgz`,
+      shasum: '0'.repeat(40),
+      integrity: 'sha512-AA==',
+    },
+  }
+}
 const licRegistry = {
   packument: async (name: string) =>
     licSpec[name]
@@ -487,5 +518,138 @@ describe('license constraints — patch integration', () => {
     const text = lines.join('\n')
     expect(text).toContain('the fix version itself is not permitted')
     expect(text).toMatch(/gplself@2\.0\.0: license GPL-3\.0/)
+  })
+
+  it('seed gate + --on-conflict=stop: a denied fix version throws', async () => {
+    const fmt = 'yarn-classic' as const
+    const seedLock =
+      '# yarn lockfile v1\n\n\ngplself@^1.0.0:\n  version "1.0.0"\n' +
+      '  resolved "https://registry.yarnpkg.com/gplself/-/gplself-1.0.0.tgz#' +
+      '3333333333333333333333333333333333333333"\n  integrity sha512-AA==\n'
+    const seedReport = {
+      gplself: {
+        module_name: 'gplself', // eslint-disable-line camelcase
+        vulnerable_versions: '<2.0.0', // eslint-disable-line camelcase
+        patched_versions: '>=2.0.0', // eslint-disable-line camelcase
+      },
+    }
+    await expect(
+      patch(
+        parse(seedLock, fmt),
+        seedReport,
+        ctxLic({ license: { deny: ['GPL-3.0'] }, 'on-conflict': 'stop' }),
+        fmt,
+      ),
+    ).rejects.toThrow(/the fix gplself.* itself doesn't satisfy the policy/)
+  })
+})
+
+// ─── integration: the package-format gate in patch() ────────────────────────
+// esmv's fix pulls esmdep, which is ESM-only (type: module, no CJS entry). corgi
+// omits `type`; the full manifest() carries it — the split the gate relies on.
+const esmLock =
+  '# yarn lockfile v1\n\n\nesmv@^1.0.0:\n  version "1.0.0"\n' +
+  '  resolved "https://registry.yarnpkg.com/esmv/-/esmv-1.0.0.tgz#' +
+  '5555555555555555555555555555555555555555"\n  integrity sha512-AA==\n'
+const esmReport = {
+  esmv: {
+    module_name: 'esmv', // eslint-disable-line camelcase
+    vulnerable_versions: '<2.0.0', // eslint-disable-line camelcase
+    patched_versions: '>=2.0.0', // eslint-disable-line camelcase
+  },
+}
+
+describe('package-type constraint — patch integration', () => {
+  it('no package-type: the ESM-only dep is pulled without a gate', async () => {
+    const fmt = 'yarn-classic' as const
+    const out = format(await patch(parse(esmLock, fmt), esmReport, ctxLic({}), fmt), fmt)
+    expect(out).toMatch(/esmv@2\.0\.0/) // fixed
+    expect(out).toContain('esmdep') // ESM-only transitive pulled, no gate
+  })
+
+  it('--package-type=cjs: skips a fix whose closure pulls an ESM-only dep', async () => {
+    const fmt = 'yarn-classic' as const
+    const out = format(
+      await patch(parse(esmLock, fmt), esmReport, ctxLic({ 'package-type': 'cjs' }), fmt),
+      fmt,
+    )
+    expect(out).toMatch(/esmv@1\.0\.0|esmv@\^1\.0\.0/) // left vulnerable (skipped)
+    expect(out).not.toMatch(/esmv@2\.0\.0/)
+    expect(out).not.toContain('esmdep') // the ESM-only dep never wired
+  })
+
+  it('--package-type=cjs attributes the skip to the ESM-only dep', async () => {
+    const fmt = 'yarn-classic' as const
+    const lines: string[] = []
+    const sink = (...a: unknown[]) => void lines.push(a.join(' '))
+    const log = vi.spyOn(console, 'log').mockImplementation(sink)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(sink)
+    try {
+      await patch(
+        parse(esmLock, fmt),
+        esmReport,
+        ctxLic({ 'package-type': 'cjs', silent: false, verbose: true }),
+        fmt,
+      )
+    } finally {
+      log.mockRestore()
+      warn.mockRestore()
+    }
+    const text = lines.join('\n')
+    expect(text).toContain('Constraints: commonjs-compatible')
+    expect(text).toMatch(/esmdep@1\.0\.0: esmdep@1\.0\.0 is ESM-only/)
+  })
+})
+
+// ─── integration: the --safe bundle in patch() ──────────────────────────────
+describe('--safe bundle — patch integration', () => {
+  const safeCtx = (root: Record<string, any>, flags: Record<string, any> = {}) => {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'yaf-safe-'))
+    fs.writeFileSync(path.join(cwd, 'package.json'), JSON.stringify(root))
+    return { ...ctxLic({ safe: true, ...flags }), cwd, manifest: root }
+  }
+
+  it('CommonJS project: bundles engine-floor + package-type=cjs, skips an ESM-only fix', async () => {
+    const fmt = 'yarn-classic' as const
+    const lines: string[] = []
+    const sink = (...a: unknown[]) => void lines.push(a.join(' '))
+    const log = vi.spyOn(console, 'log').mockImplementation(sink)
+    const warn = vi.spyOn(console, 'warn').mockImplementation(sink)
+    let out = ''
+    try {
+      out = format(
+        await patch(
+          parse(esmLock, fmt),
+          esmReport,
+          safeCtx({ engines: { node: '>=18' } }, { silent: false }),
+          fmt,
+        ),
+        fmt,
+      )
+    } finally {
+      log.mockRestore()
+      warn.mockRestore()
+    }
+    // --safe filled BOTH axes: the tree's engine floor + commonjs-compatibility
+    expect(lines.join('\n')).toContain(
+      'Constraints (--safe): node >=18.0.0; commonjs-compatible',
+    )
+    expect(out).not.toMatch(/esmv@2\.0\.0/) // ESM-only closure → skipped
+  })
+
+  it('ESM project (type: module): does NOT force package-type=cjs', async () => {
+    const fmt = 'yarn-classic' as const
+    const out = format(
+      await patch(parse(esmLock, fmt), esmReport, safeCtx({ type: 'module' }), fmt),
+      fmt,
+    )
+    expect(out).toMatch(/esmv@2\.0\.0/) // ESM root can consume ESM → fixed
+  })
+
+  it('--safe and --force are mutually exclusive', async () => {
+    const fmt = 'yarn-classic' as const
+    await expect(
+      patch(parse(esmLock, fmt), esmReport, ctxLic({ safe: true, force: true }), fmt),
+    ).rejects.toThrow(/--safe and --force are opposites/)
   })
 })
