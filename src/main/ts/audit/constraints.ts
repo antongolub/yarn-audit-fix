@@ -7,7 +7,7 @@ import {
   license,
   type Condition,
   type ConditionContext,
-} from '@antongolub/lockfile/complete'
+} from 'lockgraph/complete'
 import sv from 'semver'
 
 import { attempt, getWorkspaces, readJson } from '../util'
@@ -217,7 +217,7 @@ const commonjsCompatible = (): Condition => ({
 })
 
 /**
- * Build the `@antongolub/lockfile` `constraints` array threaded into
+ * Build the `lockgraph` `constraints` array threaded into
  * `completeTransitives`. Engine gates are lenient (npm parity: a package that
  * declares no `engines` is accepted — a missing declaration is not a claim of
  * incompatibility). License + package-type gates need a `manifest()`-capable

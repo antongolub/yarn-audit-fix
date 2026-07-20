@@ -2,7 +2,7 @@ import * as fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { liveRegistry } from '@antongolub/lockfile/registry'
+import { liveRegistry } from 'lockgraph/registry'
 
 import { format, getLockfileType, parse, patch } from '../../main/ts/lockfile'
 import type { TAuditReport, TContext } from '../../main/ts/ifaces'
@@ -62,7 +62,7 @@ const cannedRegistry = ({ packuments, resolves }: Canned) => ({
 // A descriptor (`name@range`) must resolve to exactly ONE entry — yarn dedups it
 // project-wide, so the same range string in two entry headers is a malformed lock
 // that `yarn install --immutable` rejects. This guards the completion
-// double-binding class of regression (caught in @antongolub/lockfile snapshot.77:
+// double-binding class of regression (caught in lockgraph snapshot.77:
 // `'highest'` minted a 2nd entry for an already-bound range → e.g. semver@^7.3.5
 // in two entries). Works for berry (quoted) + classic (bare) entry headers.
 const duplicateDescriptors = (lock: string): string[] => {

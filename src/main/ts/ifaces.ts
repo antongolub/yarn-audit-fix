@@ -7,7 +7,7 @@ export type TContext = {
   manifest: Record<string, any>
   versions: Record<string, string>
   err?: any
-  // Optional `@antongolub/lockfile` RegistryAdapter override — tests inject a
+  // Optional `lockgraph` RegistryAdapter override — tests inject a
   // mock here; production builds a live, scope-aware one via `buildRegistry`.
   registry?: any
   // Optional `refurbish` TarballSource override — tests inject canned tarball
@@ -66,11 +66,11 @@ export type TAuditReport = {
   [versionInfo: string]: TAuditAdvisory
 }
 
-import type { FormatId, Graph } from '@antongolub/lockfile'
+import type { FormatId, Graph } from 'lockgraph'
 
-// Graph from @antongolub/lockfile; all operations go through ./lockfile.
+// Graph from lockgraph; all operations go through ./lockfile.
 export type TLockfileObject = Graph
 
-// FormatId from @antongolub/lockfile (e.g. 'yarn-classic', 'yarn-berry-v8').
+// FormatId from lockgraph (e.g. 'yarn-classic', 'yarn-berry-v8').
 // `undefined` retained for the "format not recognised" sentinel.
 export type TLockfileType = FormatId | undefined

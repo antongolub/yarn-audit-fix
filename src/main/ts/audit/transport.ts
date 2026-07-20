@@ -1,5 +1,5 @@
-import { defaultFetch } from '@antongolub/lockfile/registry'
-import type { Limiter } from '@antongolub/lockfile/registry'
+import { defaultFetch } from 'lockgraph/registry'
+import type { Limiter } from 'lockgraph/registry'
 
 // How many registry requests may be in flight at once. The lib's default limiter
 // is unbounded (`task => task()`), so on a large tree the parallel packument

@@ -1,6 +1,6 @@
 import path from 'node:path'
 
-import type { Graph } from '@antongolub/lockfile'
+import type { Graph } from 'lockgraph'
 import sv from 'semver'
 
 import { globToRegExp, split } from './filter'

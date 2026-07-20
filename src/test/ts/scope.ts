@@ -1,8 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { detect, parse } from '@antongolub/lockfile'
-import type { Graph } from '@antongolub/lockfile'
+import { detect, parse } from 'lockgraph'
+import type { Graph } from 'lockgraph'
 import { describe, expect, it } from 'vitest'
 
 import { describeScope, resolveScope } from '../../main/ts/audit/scope'

@@ -1,10 +1,10 @@
 import http from 'node:http'
 import https from 'node:https'
 
-import type { Graph } from '@antongolub/lockfile'
-import type { Ecosystem } from '@antongolub/lockfile/registry'
-import { liveRegistry, resolveRegistry } from '@antongolub/lockfile/registry'
-import { registryPackages } from '@antongolub/lockfile/optimize'
+import type { Graph } from 'lockgraph'
+import type { Ecosystem } from 'lockgraph/registry'
+import { liveRegistry, resolveRegistry } from 'lockgraph/registry'
+import { registryPackages } from 'lockgraph/optimize'
 
 import { TAuditReport, TContext } from '../ifaces'
 import { matchesId, parseIdGlobs } from './filter'

@@ -111,8 +111,10 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // Then fill any install-required field the edit left missing (the yarn-berry
     // zip checksum) straight from the registry, so the result is a complete
     // lockfile needing no reconcile `yarn install` (no-op for yarn-classic).
+    // Pass the pre-patch graph so the fill is scoped to nodes the patch actually
+    // introduced — a checksum the input lock never had is yarn's call, not ours.
     progress.label('Recomputing checksums…')
-    const refurbished = await lf.refurbish(patched, lockfileType, ctx)
+    const refurbished = await lf.refurbish(patched, lockfileType, ctx, lockfile)
 
     // If the run was aborted (Ctrl+C) during a phase that degrades to a value
     // rather than throwing (e.g. refurbish, whose tarball fetches resolve empty

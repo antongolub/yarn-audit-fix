@@ -3,8 +3,8 @@ import type {
   Limiter,
   RegistryAdapter,
   RegistryConfig,
-} from '@antongolub/lockfile/registry'
-import { liveRegistry, resolveRegistry } from '@antongolub/lockfile/registry'
+} from 'lockgraph/registry'
+import { liveRegistry, resolveRegistry } from 'lockgraph/registry'
 
 import { TContext, TLockfileType } from '../ifaces'
 import { getTarball } from './registry'

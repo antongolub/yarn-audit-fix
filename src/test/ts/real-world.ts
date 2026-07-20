@@ -92,7 +92,7 @@ const ctxDefault = { flags: { silent: true }, registry: mockRegistry } as unknow
 // No descriptor (range string) may bind more than one entry — a malformed lock
 // that `yarn install --immutable` rejects. Mirrors the golden guard, applied here
 // across the broad real-world + vulnerable corpus (catches mutation-side
-// double-binding / stale-key regressions on every @antongolub/lockfile bump).
+// double-binding / stale-key regressions on every lockgraph bump).
 const duplicateDescriptors = (lock: string): string[] => {
   const seen = new Set<string>()
   const dups = new Set<string>()

@@ -22,7 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // name -> version -> {dep: range}
 type Spec = Record<string, Record<string, Record<string, string>>>
 
-// A minimal `@antongolub/lockfile` RegistryAdapter backed by a canned spec, so
+// A minimal `lockgraph` RegistryAdapter backed by a canned spec, so
 // the patch flow (replaceVersion + completeTransitives) stays offline + hermetic.
 const mockRegistry = (spec: Spec) =>
   ({
@@ -624,6 +624,66 @@ describe('refurbish', () => {
       expect(grabChecksum(out, name)).toBe(cks)
     // Restoring exactly the two stripped fields round-trips to the original.
     expect(out).toBe(input)
+  })
+
+  // Berry entries are blank-line separated. Scope lookups to a single entry —
+  // `grabChecksum`'s [\s\S]*? happily runs past the entry it was aimed at and
+  // reports the NEXT one's checksum when the target has none.
+  const entryBlock = (text: string, name: string): string =>
+    text.split('\n\n').find((b) => b.startsWith(`"${name}@npm:`)) ?? ''
+  const checksumIn = (text: string, name: string): string | undefined =>
+    /\n {2}checksum: (10c0\/[0-9a-f]+)/.exec(entryBlock(text, name))?.[1]
+  // Drop a whole entry, so the resulting graph lacks that node — i.e. the patch
+  // "added" it.
+  const dropEntry = (text: string, name: string): string =>
+    text
+      .split('\n\n')
+      .filter((b) => !b.startsWith(`"${name}@npm:`))
+      .join('\n\n')
+
+  it('scoped to the patch: fills an added node, leaves an untouched bare one alone', async () => {
+    const v4 = path.resolve(__dirname, '../fixtures/lockfile/v4/yarn.lock')
+    const input = readFileSync(v4, 'utf-8')
+    const added = checksumIn(input, 'color-name')! // stands in for a patch-added node
+    const untouched = checksumIn(input, 'has-flag')! // bare in the input already
+
+    // Both bare; only `color-name` is absent from the base ⇒ only it is in scope.
+    const stripped = input
+      .replace(`\n  checksum: ${added}`, '')
+      .replace(`\n  checksum: ${untouched}`, '')
+    const fmt = getLockfileType(stripped)
+    const base = parse(dropEntry(stripped, 'color-name'), fmt)
+
+    const out = format(
+      await refurbish(parse(stripped, fmt), fmt, rctx(diskTarballs), base),
+      fmt,
+    )
+
+    // The added node gets its checksum recomputed…
+    expect(checksumIn(out, 'color-name')).toBe(added)
+    // …while the one the input lock never had stays bare. Filling it would only
+    // get stripped back out by the next `yarn install` (yarn records checksums
+    // solely for packages it actually fetched — e.g. platform-gated optional deps
+    // carry `conditions:` and no checksum).
+    expect(checksumIn(out, 'has-flag')).toBeUndefined()
+  })
+
+  it('scoped to the patch: an empty diff fills nothing', async () => {
+    const v4 = path.resolve(__dirname, '../fixtures/lockfile/v4/yarn.lock')
+    const input = readFileSync(v4, 'utf-8')
+    const cks = checksumIn(input, 'color-name')!
+    const stripped = input.replace(`\n  checksum: ${cks}`, '')
+    const fmt = getLockfileType(stripped)
+    const graph = parse(stripped, fmt)
+
+    // base === the patched graph ⇒ the patch introduced nothing ⇒ nothing in scope.
+    // (refurbish still fetches a few *anchor* tarballs to calibrate its checksum
+    // recompute against known-good ones — that's reads, not writes, so assert on
+    // the output instead of on fetch count.)
+    const out = format(await refurbish(graph, fmt, rctx(diskTarballs), graph), fmt)
+
+    expect(out).toBe(stripped) // byte-identical: not a single field touched
+    expect(checksumIn(out, 'color-name')).toBeUndefined()
   })
 
   it('is a no-op for yarn-classic (nodes already complete)', async () => {

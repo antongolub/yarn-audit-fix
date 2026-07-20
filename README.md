@@ -25,7 +25,7 @@ The missing `yarn audit fix`
 > yarn add -D yarn-audit-fix@snapshot   # or: npm i -D yarn-audit-fix@snapshot
 > ```
 > **What v11 brings** — see [Migration notes](#1100) for the full breaking-change list:
-> - **New lockfile engine** on [`@antongolub/lockfile`](https://github.com/antongolub/lockfile): patches the lockfile **graph directly**, auto-detecting every yarn schema — Classic + Berry **v4–v10** ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)).
+> - **New lockfile engine** on [`lockgraph`](https://github.com/lockgraph/lockgraph): patches the lockfile **graph directly**, auto-detecting every yarn schema — Classic + Berry **v4–v10** ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)).
 > - **Faithful lockfile handling** — preserves checksums, integrity, `conditions`/`dependenciesMeta`/`peerDependenciesMeta`, and `patch:` / `resolutions` / git / npm-alias entries, with no spurious churn (real-world locks round-trip unchanged).
 > - **Single direct-patch flow** — the legacy `convert` flow and the `--flow` switch (and `synp` conversion) are removed.
 > - **Registry-direct audit** — advisories come from the registry's bulk endpoint instead of spawning `yarn`/`npm audit`: works with custom/in-house registries and inherits auth from `.npmrc` / `.yarnrc`. The run is now async (`runSync` removed).
@@ -60,12 +60,12 @@ The missing `yarn audit fix`
 
 ### Solution
 yarn-audit-fix fetches advisories straight from the registry (the npm bulk
-advisory endpoint) and patches the lockfile graph directly via [`@antongolub/lockfile`](https://github.com/antongolub/lockfile)
+advisory endpoint) and patches the lockfile graph directly via [`lockgraph`](https://github.com/lockgraph/lockgraph)
 (kudos to [G. Kosev](https://github.com/spion), [code reference](https://github.com/hfour/yarn-audit-fix-ng/blob/main/src/index.ts)).
 Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antongolub/the-missing-yarn-audit-fix-for-yarn-2-berry-1p8)
 
 ### Key features
-* Supports every yarn lockfile schema in the wild: Yarn 1 Classic, Yarn 2/3 (berry v4–v6) and **Yarn 4+** (berry v8/v9/v10), auto-detected via [`@antongolub/lockfile`](https://github.com/antongolub/lockfile).
+* Supports every yarn lockfile schema in the wild: Yarn 1 Classic, Yarn 2/3 (berry v4–v6) and **Yarn 4+** (berry v8/v9/v10), auto-detected via [`lockgraph`](https://github.com/lockgraph/lockgraph).
 * Fixes vulnerabilities by patching the lockfile graph directly
 * Opt-in [engine & license constraints](#constraints-engines--licenses) — only apply a fix whose dependency closure runs on your target Node and passes your license policy
 * macOS / Linux / Windows
@@ -86,7 +86,7 @@ Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antong
 
 ## Getting started
 ### Requirements
-Node.js: `>=14.18` — inherited from [`@antongolub/lockfile`](https://github.com/antongolub/lockfile)
+Node.js: `>=14.18` — inherited from [`lockgraph`](https://github.com/lockgraph/lockgraph)
 
 ### Install
 ```sh
@@ -277,7 +277,7 @@ Individual stages (`resolveBins`, `patchLockfile`, `yarnInstall`, …) are expor
 
 With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` / `TStage` types, and the optional custom-flow argument to `run` are removed. Call `run(flags)` — the patch pipeline is inlined. The individual stages are still exported if you want to assemble your own.
 
-Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`@antongolub/lockfile`](https://github.com/antongolub/lockfile), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Each vulnerable package is upgraded graph-natively to the lowest published version that clears its advisory, and the fix version's **new transitive dependencies are pulled into the lockfile** (resolved from the registry) — so an upgrade that changes a package's dependency set no longer leaves the lockfile incomplete.
+Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`lockgraph`](https://github.com/lockgraph/lockgraph), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Each vulnerable package is upgraded graph-natively to the lowest published version that clears its advisory, and the fix version's **new transitive dependencies are pulled into the lockfile** (resolved from the registry) — so an upgrade that changes a package's dependency set no longer leaves the lockfile incomplete.
 
 **BREAKING:** `yarn-audit-fix` no longer runs a reconcile `yarn install`. The lockfile is patched and completed entirely in place — fix versions, their new transitive closure, and (for yarn berry) the recomputed package checksums all come straight from the registry. yaf no longer shells out to yarn, and a `node_modules` directory is no longer required to run it.
 
@@ -285,7 +285,7 @@ Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audi
 
 **BREAKING:** because the fetch is over HTTP, the run is now async — **`runSync` is removed**. Use `await run(flags)` (the CLI is unchanged). The exported stages are still available if you assemble your own pipeline.
 
-**Node floor / `engines`:** v11 no longer declares `engines.node`, so installing yarn-audit-fix never warns `EBADENGINE` on its own behalf. The effective runtime floor is **Node ≥ 14.18**, inherited from [`@antongolub/lockfile`](https://github.com/antongolub/lockfile). The CLI argument parser also moved off `commander` (which had been ratcheting its own Node floor up) to a tiny `minimist`-based parser — flags, env vars and `--help` are unchanged.
+**Node floor / `engines`:** v11 no longer declares `engines.node`, so installing yarn-audit-fix never warns `EBADENGINE` on its own behalf. The effective runtime floor is **Node ≥ 14.18**, inherited from [`lockgraph`](https://github.com/lockgraph/lockgraph). The CLI argument parser also moved off `commander` (which had been ratcheting its own Node floor up) to a tiny `minimist`-based parser — flags, env vars and `--help` are unchanged.
 
 **CLI flags:** both `--exclude` and `--ignore` are applied client-side now (they used to be forwarded to `yarn npm audit`). `--exclude` takes comma-separated **package** rules — `glob[@range]`, e.g. `--exclude="lodash,@scope/*@>=2 <3"` — and skips updating any package whose name matches the glob (and, if a range is given, whose installed version satisfies it); handy for a manually pinned transitive you don't want bumped. `--ignore` keeps its advisory scope but now matches **advisory ids** — comma-separated globs against the GHSA id or the npm advisory id (e.g. `--ignore="GHSA-*"`), dropping matching advisories before the fix. (The npm bulk-advisory endpoint doesn't expose CVE numbers, so — like zx's audit script — matching is by GHSA / npm id.) The standalone `--ignore-engines` flag is removed — there is no longer a reconcile `yarn install` for it to apply to.
 

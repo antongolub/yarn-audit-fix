@@ -5,22 +5,6 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
-"@antongolub/lockfile@npm:0.0.0-snapshot.92":
-  version: 0.0.0-snapshot.92
-  resolution: "@antongolub/lockfile@npm:0.0.0-snapshot.92"
-  dependencies:
-    node-fetch-native: "npm:^1.6.7"
-    pako: "npm:^3.0.0"
-    semver: "npm:^7.8.5"
-  peerDependencies:
-    "@yarnpkg/libzip": ">=3.0.0"
-  peerDependenciesMeta:
-    "@yarnpkg/libzip":
-      optional: true
-  checksum: 10c0/8771c2ae0805eb179ce387bb8d0225555d713f284e3e6d2932861b49617bbab094bbb43b465bcfca99b8a54da3ffc5c4203e181c9a2dbfdba4e0af5bee4055da
-  languageName: node
-  linkType: hard
-
 "@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.29.7":
   version: 7.29.7
   resolution: "@babel/code-frame@npm:7.29.7"
@@ -2389,6 +2373,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lockgraph@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "lockgraph@npm:0.2.0"
+  dependencies:
+    node-fetch-native: "npm:^1.6.7"
+    pako: "npm:^3.0.1"
+    semver: "npm:^7.8.5"
+  peerDependencies:
+    "@yarnpkg/libzip": ">=3.0.0"
+  peerDependenciesMeta:
+    "@yarnpkg/libzip":
+      optional: true
+  checksum: 10c0/a22f3b34b10ceaa2c27262b8899b8c10d360d076992efb02073267319e10e22133787d4621715792af7c3c1123dcb22d2607374f6e96392ca6569fd999b77da8
+  languageName: node
+  linkType: hard
+
 "lodash@npm:^4.17.21":
   version: 4.18.1
   resolution: "lodash@npm:4.18.1"
@@ -2748,7 +2748,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pako@npm:^3.0.0":
+"pako@npm:^3.0.1":
   version: 3.0.1
   resolution: "pako@npm:3.0.1"
   checksum: 10c0/1292b2ffcbdf42f95be5519ffc11c4cb8daf065f7681936a5b0fe2028753396fbaea0c22cb22e54a4f12bb0c3217513f6b2261fa77e4dbf8c9bd76efe3eca2cc
@@ -3730,7 +3730,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-audit-fix@workspace:."
   dependencies:
-    "@antongolub/lockfile": "npm:0.0.0-snapshot.92"
     "@types/minimist": "npm:^1.2.5"
     "@types/node": "npm:^24.0.0"
     "@types/semver": "npm:^7.7.1"
@@ -3742,6 +3741,7 @@ __metadata:
     esbuild: "npm:^0.28.0"
     esbuild-node-externals: "npm:^1.18.0"
     fast-glob: "npm:^3.3.3"
+    lockgraph: "npm:^0.2.0"
     minimist: "npm:^1.2.8"
     mkdirp: "npm:^3.0.1"
     oxlint: "npm:^1.72.0"

@@ -1,11 +1,11 @@
 import path from 'node:path'
 
-import { detect, governingOverrideFor, overridesOf, parse as lfParse, stringify as lfStringify } from '@antongolub/lockfile'
-import type { Graph, FormatId, Manifest, OverrideConstraint } from '@antongolub/lockfile'
-import { completeTransitives, selectConstrained } from '@antongolub/lockfile/complete'
-import { refurbish as lfRefurbish } from '@antongolub/lockfile/enrich'
-import { replaceVersion } from '@antongolub/lockfile/modify'
-import { pruneOrphans } from '@antongolub/lockfile/optimize'
+import { detect, governingOverrideFor, LockfileError, overridesOf, parse as lfParse, stringify as lfStringify } from 'lockgraph'
+import type { Graph, FormatId, Manifest, OverrideConstraint } from 'lockgraph'
+import { completeTransitives, selectConstrained } from 'lockgraph/complete'
+import { refurbish as lfRefurbish } from 'lockgraph/enrich'
+import { replaceVersion } from 'lockgraph/modify'
+import { pruneOrphans } from 'lockgraph/optimize'
 import sv from 'semver'
 
 import { buildRegistry, buildTarballSource, ecosystemFor } from './audit/adapter'
@@ -88,11 +88,24 @@ export const _format = (
   // Re-emit the project's declared overrides so a PM that stores them in the lock
   // (pnpm's `overrides:`) round-trips clean — else `--frozen-lockfile` rejects the
   // rewritten lock (CONFIG_MISMATCH). Empty → omit the option (unchanged output).
-  return lfStringify(
-    lockfileType as FormatId,
-    lockfile as Graph,
-    overrides.length > 0 ? { overrides: [...overrides] } : undefined,
-  )
+  const opts = overrides.length > 0 ? { overrides: [...overrides] } : {}
+  try {
+    // lockgraph 0.1.0's stringify is STRICT by default: a projection loss fails
+    // closed instead of silently emitting a frozen-invalid lock. Keep that net.
+    return lfStringify(lockfileType as FormatId, lockfile as Graph, opts)
+  } catch (e) {
+    // The one loss yaf accepts: `ENRICH_REQUIRED` means every loss is *recoverable*
+    // — a berry-zip `checksum` `refurbish` couldn't fill (no fetchable tarball, or a
+    // bare-era yarn 2/3 lock). That's yaf's documented deferred-checksum model: emit
+    // the lock and let the user finish with `yarn install` (`refurbish` already
+    // reported it). Any other error (e.g. `IRREDUCIBLE_LOSS`) still fails closed.
+    if (e instanceof LockfileError && e.code === 'ENRICH_REQUIRED')
+      return lfStringify(lockfileType as FormatId, lockfile as Graph, {
+        ...opts,
+        strict: false,
+      })
+    throw e
+  }
 }
 
 /** Strip yarn's `npm:` protocol; return a usable semver range or undefined. */
@@ -745,6 +758,15 @@ export const _patch = async (
   return graph
 }
 
+/** Node ids present in `next` but not in `base` — everything the patch introduced. */
+const addedNodes = (base: Graph, next: Graph): ReadonlySet<NodeId> => {
+  const before = new Set<NodeId>()
+  for (const n of base.nodes()) before.add(n.id)
+  const added = new Set<NodeId>()
+  for (const n of next.nodes()) if (!before.has(n.id)) added.add(n.id)
+  return added
+}
+
 /**
  * Fill install-required fields the patched graph still lacks, so the written
  * lockfile needs no reconcile `yarn install`. Today that's only the yarn-berry
@@ -753,11 +775,19 @@ export const _patch = async (
  * only from the tarball bytes — so `refurbish` fetches them and recomputes
  * (byte-identical to what `yarn install` would write). yarn-classic nodes are
  * already complete (resolved + integrity), so it's a no-op there. Async (HTTP).
+ *
+ * Scoped to what the patch introduced (`base` = the pre-patch graph). A checksum
+ * missing from the INPUT lock is yarn's own doing, not a gap to close: yarn only
+ * records checksums for packages it actually fetched, so a platform-gated optional
+ * dep (`conditions: os=… & cpu=…`) is deliberately left bare. Filling those makes
+ * the next `yarn install` strip them right back out — a dirty lockfile for no gain.
+ * Omit `base` to refurbish every node (standalone use).
  */
 export const _refurbish = async (
   lockfile: TLockfileObject,
   lockfileType: TLockfileType,
   ctx: TContext,
+  base?: TLockfileObject,
 ): Promise<TLockfileObject> => {
   if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
@@ -769,6 +799,7 @@ export const _refurbish = async (
   // phase, so surface progress as each one lands.
   let filled = 0
   const result = await lfRefurbish(lockfile as Graph, lockfileType as FormatId, source, {
+    seed: base && addedNodes(base as Graph, lockfile as Graph),
     onDiagnostic: (d: { code?: string }) => {
       if (d.code === 'ENRICH_FIELD_FILLED')
         ctx.progress?.label(`Recomputing checksums… ${++filled}`)
