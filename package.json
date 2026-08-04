@@ -79,7 +79,7 @@
     "cpy-cli": "^7.0.0",
     "depcheck": "^1.4.7",
     "esbuild": "^0.28.0",
-    "esbuild-node-externals": "^1.18.0",
+    "esbuild-node-externals": "^2.0.0",
     "mkdirp": "^3.0.1",
     "oxlint": "^1.72.0",
     "prettier": "^3.9.4",

@@ -1698,14 +1698,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-node-externals@npm:^1.18.0":
-  version: 1.23.1
-  resolution: "esbuild-node-externals@npm:1.23.1"
+"esbuild-node-externals@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "esbuild-node-externals@npm:2.0.0"
   dependencies:
     empathic: "npm:^2.0.0"
   peerDependencies:
     esbuild: 0.12 - 0.28
-  checksum: 10c0/d7bc06e754c4d6a45ce6f8de4a521ff47a7b89f13850d765be3e8c034d1dbfd47d92363ddabc3c64807064058d47154e56e51af25be6190226391b12d77bb479
+  checksum: 10c0/86aa73a676b8aba9070bc94fbe83024484d3926788e3cc588117bd1fc7bc8720a8fdd320cfe7fdc7c6a38982bcb4c155121dd51792cdde4358dc3876a283237b
   languageName: node
   linkType: hard
 
@@ -3739,7 +3739,7 @@ __metadata:
     cpy-cli: "npm:^7.0.0"
     depcheck: "npm:^1.4.7"
     esbuild: "npm:^0.28.0"
-    esbuild-node-externals: "npm:^1.18.0"
+    esbuild-node-externals: "npm:^2.0.0"
     fast-glob: "npm:^3.3.3"
     lockgraph: "npm:^0.2.0"
     minimist: "npm:^1.2.8"
