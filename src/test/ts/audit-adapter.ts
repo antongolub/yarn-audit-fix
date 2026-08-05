@@ -4,7 +4,7 @@ import https from 'node:https'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // Stub the lib's registry layer so routing is exercised without network/fs.
-vi.mock('lockgraph/registry', () => ({
+vi.mock('lockgraph', () => ({
   // Base fetch the transport wraps; never invoked here (liveRegistry is mocked).
   defaultFetch: vi.fn(),
   resolveRegistry: vi.fn(() => ({
@@ -22,7 +22,7 @@ vi.mock('lockgraph/registry', () => ({
   })),
 }))
 
-import { liveRegistry } from 'lockgraph/registry'
+import { liveRegistry } from 'lockgraph'
 
 import { buildRegistry, buildTarballSource, ecosystemFor } from '../../main/ts/audit/adapter'
 

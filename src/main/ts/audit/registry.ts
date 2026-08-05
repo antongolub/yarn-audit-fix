@@ -1,10 +1,8 @@
 import http from 'node:http'
 import https from 'node:https'
 
-import type { Graph } from 'lockgraph'
-import type { Ecosystem } from 'lockgraph/registry'
-import { liveRegistry, resolveRegistry } from 'lockgraph/registry'
-import { registryPackages } from 'lockgraph/optimize'
+import type { Graph, RegistryConfigDialect } from 'lockgraph'
+import { liveRegistry, resolveRegistry } from 'lockgraph'
 
 import { TAuditReport, TContext } from '../ifaces'
 import { matchesId, parseIdGlobs } from './filter'
@@ -150,13 +148,13 @@ export const toReport = (
 export const auditViaRegistry = async (
   graph: Graph,
   ctx: TContext,
-  ecosystem: Ecosystem,
+  ecosystem: RegistryConfigDialect,
 ): Promise<TAuditReport> => {
-  const packages = registryPackages(graph)
+  const packages = graph.registryPackages()
   if (Object.keys(packages).length === 0) return {}
 
   const cfg = resolveRegistry(ctx.cwd ?? process.cwd(), {
-    ecosystem,
+    config: ecosystem,
     registry: ctx.flags?.registry,
   })
   const byUrl = new Map<string, string[]>()
@@ -181,7 +179,7 @@ export const auditViaRegistry = async (
       authHeader: cfg.authHeaderFor(url),
       fetch: fetchImpl,
     })
-    const slice: Record<string, string[]> = {}
+    const slice: Record<string, readonly string[]> = {}
     for (const name of names) slice[name] = packages[name]
     const res = await reg.audit(slice)
     for (const [name, advs] of Object.entries(res)) (raw[name] ??= []).push(...advs)

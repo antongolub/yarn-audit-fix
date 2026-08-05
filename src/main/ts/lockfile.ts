@@ -1,11 +1,22 @@
 import path from 'node:path'
 
-import { detect, governingOverrideFor, LockfileError, overridesOf, parse as lfParse, stringify as lfStringify } from 'lockgraph'
-import type { Graph, FormatId, Manifest, OverrideConstraint } from 'lockgraph'
-import { completeTransitives, selectConstrained } from 'lockgraph/complete'
-import { refurbish as lfRefurbish } from 'lockgraph/enrich'
-import { replaceVersion } from 'lockgraph/modify'
-import { pruneOrphans } from 'lockgraph/optimize'
+import {
+  complete,
+  detect,
+  LockfileError,
+  modify,
+  parse as lfParse,
+  refurbish as lfRefurbish,
+  selectConstrained,
+  stringify as lfStringify,
+} from 'lockgraph'
+import type {
+  FormatId,
+  Graph,
+  NodeId,
+  OverrideConstraint,
+  PmConfigEvidence,
+} from 'lockgraph'
 import sv from 'semver'
 
 import { buildRegistry, buildTarballSource, ecosystemFor } from './audit/adapter'
@@ -29,33 +40,90 @@ import {
 } from './ifaces'
 import { attempt, getWorkspaces, readJson } from './util'
 
-// NodeId isn't re-exported from the package root — derive it from a primitive.
-type NodeId = Awaited<ReturnType<typeof replaceVersion>>['added'][number]
-
 export const getLockfileType = (lockfile: string): TLockfileType =>
   detect(lockfile)
 
+type OverrideOrigin = NonNullable<OverrideConstraint['origin']>
+
+// Split an override key into package segments, re-merging a scope onto the next
+// segment (`@scope/pkg` is one package, not `@scope` then `pkg`), and dropping the
+// `**` wildcard. yarn keys separate on `/`, pnpm on `>`.
+const overrideSegments = (key: string, sep: '/' | '>'): string[] => {
+  const raw = key.split(sep)
+  const segs: string[] = []
+  for (let i = 0; i < raw.length; i++) {
+    if (sep === '/' && raw[i].startsWith('@') && i + 1 < raw.length) {
+      segs.push(`${raw[i]}/${raw[i + 1]}`)
+      i++
+    } else segs.push(raw[i])
+  }
+  return segs.filter((s) => s && s !== '**')
+}
+
+// A flat `{ "a/b": "1", "foo": "2" }` block (yarn `resolutions` `/`, pnpm `>`) — the
+// last segment is the pinned package, the rest its parent path.
+const flatOverrides = (
+  block: Record<string, unknown>,
+  sep: '/' | '>',
+  origin: OverrideOrigin,
+): OverrideConstraint[] =>
+  Object.entries(block).flatMap(([key, to]) => {
+    if (typeof to !== 'string') return []
+    const segs = overrideSegments(key, sep)
+    return segs.length === 0
+      ? []
+      : [{ name: segs[segs.length - 1], parentPath: segs.slice(0, -1), to, origin }]
+  })
+
+// npm's nested `{ foo: { bar: "1" } }` → one constraint per leaf, parents accumulated.
+const nestedOverrides = (
+  block: Record<string, unknown>,
+  parents: string[],
+): OverrideConstraint[] =>
+  Object.entries(block).flatMap(([key, val]) =>
+    typeof val === 'string'
+      ? [{ name: key, parentPath: parents, to: val, origin: 'npm' as const }]
+      : val && typeof val === 'object'
+        ? nestedOverrides(val as Record<string, unknown>, [...parents, key])
+        : [],
+  )
+
 /**
- * Wrap the project's raw `package.json` override block into the lib `Manifest`
- * shape (`native.*`) keyed by workspace root, so `parse` can F6-capture the
- * project's declared pins per ecosystem — npm `overrides`, yarn/bun `resolutions`,
- * pnpm `pnpm.overrides`. Absent block → `undefined` (parse runs override-free,
- * identical to before). This is what makes `overridesOf(graph)` carry the pins.
+ * The project's declared overrides as a `PmConfigEvidence` policy, so `parse` captures
+ * them onto the graph (`graph.overrides()` then carries the pins) per ecosystem — npm
+ * `overrides`, yarn/bun `resolutions`, pnpm `pnpm.overrides`. Absent block → `undefined`
+ * (parse runs override-free, identical to before). 0.6.1's `captureOverrides` is
+ * internal, so we build the `OverrideConstraint[]` here.
  */
-const toManifests = (
+const toPolicy = (
   manifest: Record<string, any> | undefined,
   ecosystem: ReturnType<typeof ecosystemFor>,
-): Record<string, Manifest> | undefined => {
+): PmConfigEvidence | undefined => {
   if (!manifest) return undefined
-  const native: NonNullable<Manifest['native']> = {}
+  let overrides: OverrideConstraint[] = []
+  let manager: PmConfigEvidence['manager']
   if (ecosystem === 'yarn-classic' || ecosystem === 'yarn-berry') {
-    if (manifest.resolutions) native.yarnResolutions = manifest.resolutions
+    manager = 'yarn'
+    if (manifest.resolutions) overrides = flatOverrides(manifest.resolutions, '/', 'yarn')
   } else if (ecosystem === 'pnpm') {
-    if (manifest.pnpm?.overrides) native.pnpmOverrides = manifest.pnpm.overrides
-  } else if (manifest.overrides) {
-    native.npmOverrides = manifest.overrides // npm (+ bun, npm-shaped)
+    manager = 'pnpm'
+    if (manifest.pnpm?.overrides)
+      overrides = flatOverrides(manifest.pnpm.overrides, '>', 'pnpm')
+  } else {
+    manager = 'npm'
+    if (manifest.overrides) overrides = nestedOverrides(manifest.overrides, [])
   }
-  return Object.keys(native).length > 0 ? { '.': { native } } : undefined
+  return overrides.length > 0
+    ? {
+        kind: 'pm-config',
+        manager,
+        version: '0.0.0',
+        source: 'package.json',
+        surface: 'overrides',
+        coverage: 'complete',
+        overrides,
+      }
+    : undefined
 }
 
 export const _parse = (
@@ -67,32 +135,31 @@ export const _parse = (
   if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
   }
-  // workspaceRoot lets the berry adapter resolve builtin patch hashes; without
-  // it, re-serialised patch entries break `yarn install`. `manifests` supplies the
-  // project's declared overrides/resolutions so the graph carries them (Bug #99:
-  // the yarn family also needs them at parse to bind a `resolutions`-pinned edge).
-  return lfParse(lockfileType as FormatId, lockfile, {
-    workspaceRoot,
-    manifests: toManifests(manifest, ecosystemFor(lockfileType)),
+  // cwd lets the berry adapter resolve builtin patch hashes; without it, re-serialised
+  // patch entries break `yarn install`. `sources.policy` supplies the project's declared
+  // overrides/resolutions so the graph carries them (Bug #99: the yarn family also needs
+  // them at parse to bind a `resolutions`-pinned edge before completion runs).
+  const policy = toPolicy(manifest, ecosystemFor(lockfileType))
+  return lfParse(lockfile, lockfileType as FormatId, {
+    cwd: workspaceRoot,
+    sources: policy ? { policy } : undefined,
   })
 }
 
 export const _format = (
   lockfile: TLockfileObject,
   lockfileType: TLockfileType,
-  overrides: readonly OverrideConstraint[] = [],
 ): string => {
   if (lockfileType === undefined) {
     throw new Error('Unsupported lockfile format')
   }
-  // Re-emit the project's declared overrides so a PM that stores them in the lock
-  // (pnpm's `overrides:`) round-trips clean — else `--frozen-lockfile` rejects the
-  // rewritten lock (CONFIG_MISMATCH). Empty → omit the option (unchanged output).
-  const opts = overrides.length > 0 ? { overrides: [...overrides] } : {}
+  // The project's declared overrides re-emit automatically from the graph (0.6.1 carries
+  // them through parse→mutate), so a PM that stores them in the lock (pnpm's `overrides:`)
+  // round-trips clean — no explicit option needed (stringify dropped it).
   try {
-    // lockgraph 0.1.0's stringify is STRICT by default: a projection loss fails
-    // closed instead of silently emitting a frozen-invalid lock. Keep that net.
-    return lfStringify(lockfileType as FormatId, lockfile as Graph, opts)
+    // stringify is STRICT by default: a projection loss fails closed instead of silently
+    // emitting a frozen-invalid lock. Keep that net.
+    return lfStringify(lockfile as Graph, lockfileType as FormatId)
   } catch (e) {
     // The one loss yaf accepts: `ENRICH_REQUIRED` means every loss is *recoverable*
     // — a berry-zip `checksum` `refurbish` couldn't fill (no fetchable tarball, or a
@@ -100,10 +167,7 @@ export const _format = (
     // the lock and let the user finish with `yarn install` (`refurbish` already
     // reported it). Any other error (e.g. `IRREDUCIBLE_LOSS`) still fails closed.
     if (e instanceof LockfileError && e.code === 'ENRICH_REQUIRED')
-      return lfStringify(lockfileType as FormatId, lockfile as Graph, {
-        ...opts,
-        strict: false,
-      })
+      return lfStringify(lockfile as Graph, lockfileType as FormatId, { strict: false })
     throw e
   }
 }
@@ -277,7 +341,12 @@ export const _patch = async (
       seed?: boolean // true = the fix version itself was rejected (not a transitive)
       depName?: string
       range?: string
-      rejected?: readonly { version: string; by: string; reason?: string }[]
+      rejected?: readonly {
+        version: string
+        by?: string
+        condition?: string
+        reason?: string
+      }[]
     }
   >()
 
@@ -344,13 +413,13 @@ export const _patch = async (
     // report it. A range pin that ADMITS the fix falls through: the bump stays
     // within the pin, so it's safe to apply.
     if (overrides.length > 0) {
-      let pinTo = governingOverrideFor(name, [], overrides)?.to // bare / tree-wide
+      let pinTo = graph.governingOverride(name, [])?.to // bare / tree-wide
       if (pinTo === undefined) {
         // single-parent-scoped (matches the lib's consumerPath = [immediate parent])
         pinScan: for (const n of kept) {
           for (const e of graph.in(n.id as NodeId)) {
-            const consumer = graph.getNode(e.src)
-            const g = consumer && governingOverrideFor(name, [consumer.name], overrides)
+            const consumer = graph.getNode(e.source)
+            const g = consumer && graph.governingOverride(name, [consumer.name])
             if (g) {
               pinTo = g.to
               break pinScan
@@ -366,7 +435,7 @@ export const _patch = async (
       const deep =
         pinTo === undefined
           ? overrides.find(
-              (c) => c.package === name && (c.parentPath?.length ?? 0) >= 2,
+              (c) => c.name === name && (c.parentPath?.length ?? 0) >= 2,
             )
           : undefined
       if (deep !== undefined) {
@@ -437,11 +506,11 @@ export const _patch = async (
     if (!flags.force) {
       for (const from of p.froms) {
         for (const edge of graph.in(from.id)) {
-          const consumer = graph.getNode(edge.src)
+          const consumer = graph.getNode(edge.source)
           if (consumer && planNames.has(consumer.name)) continue // bumped too
-          const range = normalizeRange(edge.attrs?.range)
+          const range = normalizeRange(edge.attributes?.range)
           if (range && !sv.satisfies(p.fix, range)) {
-            ;(breaks ??= new Set()).add(`${edge.src} wants "${edge.attrs!.range}"`)
+            ;(breaks ??= new Set()).add(`${edge.source} wants "${edge.attributes!.range}"`)
           }
         }
       }
@@ -452,17 +521,6 @@ export const _patch = async (
     }
     upgrades.push(p)
   }
-
-  // Snapshot pre-existing danglers (in-degree 0 in the *parsed* lock) so the final
-  // prune PRESERVES them: yarn's `--immutable` keeps base danglers, but an unseeded
-  // prune would GC them → divergence (YN0028, e.g. redwood's `@types/keyv`). The
-  // bump's own stranded closure is NOT in this set (those nodes had an edge at
-  // parse → in-degree > 0), so it's still pruned. (= `pruneOrphans` mode "b".)
-  const preExistingDanglers = new Set<NodeId>(
-    [...graph.nodes()]
-      .filter((n) => graph.in(n.id as NodeId).length === 0)
-      .map((n) => n.id as NodeId),
-  )
 
   // Apply: rebind each vulnerable range to its fix, complete the new transitive
   // closure, then drop whatever got orphaned. `applied` is the set that actually
@@ -490,31 +548,37 @@ export const _patch = async (
     const recentlyAdded = new Set<NodeId>()
     const recentlyOrphaned = new Set<NodeId>()
     for (const u of upgrades) {
-      const res = await replaceVersion(
+      const res = await modify(
         graph,
-        { name: u.name, fromRange: u.fromRange },
-        u.fix,
-        { registry },
+        {
+          kind: 'replaceVersion',
+          selector: { name: u.name, fromRange: u.fromRange },
+          to: u.fix,
+        },
+        { target: lockfileType as FormatId, sources: { packuments: [registry] } },
       )
       graph = res.graph
-      res.added.forEach((id) => recentlyAdded.add(id))
-      res.removed.forEach((id) => recentlyOrphaned.add(id))
+      res.frontier.added.forEach((id) => recentlyAdded.add(id))
+      res.frontier.orphaned.forEach((id) => recentlyOrphaned.add(id))
       applied.push(u)
     }
     if (recentlyAdded.size > 0 || recentlyOrphaned.size > 0) {
-      const completion = await completeTransitives(graph, registry, {
-        seed: { recentlyAdded, recentlyOrphaned },
+      // `pruneOrphans` sweeps the old closure a dep-changing bump stranded — a
+      // ref-counted cascade seeded from `seed.orphaned`, so it needs no workspace
+      // anchor (works on rootless yarn-classic locks). `frontier.orphaned` is a set of
+      // LIVE final GC seeds (nodes that had incoming edges before and none after), so a
+      // pre-existing dangler yarn keeps — fsevents patch base, catalog: target — can
+      // never enter it; no preserve set needed on our side.
+      const completion = await complete(graph, {
+        target: lockfileType as FormatId,
+        sources: { packuments: [registry] },
+        seed: { added: recentlyAdded, orphaned: recentlyOrphaned },
         overrides: overrideList,
+        pruneOrphans: true,
         onDiagnostic: onCompletionDiag,
       })
       graph = completion.graph
-      completionDiagnostics.push(...completion.unresolved)
-      // completeTransitives is additive, so a dep-changing upgrade leaves the
-      // *old* closure behind as orphans → `yarn install --immutable` would reject
-      // them. Sweep with `pruneOrphans` (ref-counted), but `preserve` pre-existing
-      // danglers so we never GC a node yarn keeps (fsevents patch bases, catalog:
-      // targets). A yarn-classic lock has no workspace root, so this noops there.
-      graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
+      completionDiagnostics.push(...completion.diagnostics)
     }
   } else {
     // Constrained path (opt-in: engines and/or license). Apply + complete each
@@ -531,13 +595,11 @@ export const _patch = async (
       // only gates the transitives it resolves, never the replaceVersion target, so
       // without this a fix that bumps a package TO an engine-/license-violating
       // version would slip through (only its deps would be checked).
-      const seedSel = await selectConstrained(
+      const seedSel = await selectConstrained(u.name, u.fix, {
         registry,
-        u.name,
-        u.fix,
-        constraints,
-        'reject',
-      )
+        conditions: constraints,
+        onUnevaluable: 'reject',
+      })
       if (!seedSel.selected) {
         if (onConflict === 'stop')
           throw new Error(
@@ -551,29 +613,32 @@ export const _patch = async (
         })
         continue
       }
-      const res = await replaceVersion(
+      const res = await modify(
         graph,
-        { name: u.name, fromRange: u.fromRange },
-        u.fix,
-        { registry },
+        {
+          kind: 'replaceVersion',
+          selector: { name: u.name, fromRange: u.fromRange },
+          to: u.fix,
+        },
+        { target: lockfileType as FormatId, sources: { packuments: [registry] } },
       )
-      if (res.added.length === 0 && res.removed.length === 0) {
+      if (res.frontier.added.size === 0 && res.frontier.orphaned.size === 0) {
         applied.push(u) // no-op bump (already at the fix); nothing to complete
         continue
       }
-      const completion = await completeTransitives(res.graph, registry, {
-        seed: {
-          recentlyAdded: new Set(res.added),
-          recentlyOrphaned: new Set(res.removed),
-        },
+      const completion = await complete(res.graph, {
+        target: lockfileType as FormatId,
+        sources: { packuments: [registry] },
+        seed: res.frontier,
         overrides: overrideList,
         constraints,
+        pruneOrphans: true,
         onDiagnostic: onCompletionDiag,
       })
       // An override forces a version a constraint vetoes — a user-config
       // contradiction (npm parity holds the pin verbatim, but it breaks the
       // target). Nothing to skip: always hard-fail.
-      const conflict = completion.unresolved.find(
+      const conflict = completion.diagnostics.find(
         (d: { code?: string }) =>
           d.code === 'COMPLETION_OVERRIDE_CONSTRAINT_CONFLICT',
       ) as { data?: { depName?: string; forced?: string } } | undefined
@@ -581,13 +646,18 @@ export const _patch = async (
         throw new Error(
           `An override pins ${conflict.data?.depName ?? '?'}@${conflict.data?.forced ?? '?'}, which violates the active constraints (${constraintSummary}). Reconcile the override or drop the constraint.`,
         )
-      const noCandidate = completion.unresolved.filter(
+      const noCandidate = completion.diagnostics.filter(
         (d: { code?: string }) => d.code === 'COMPLETION_NO_CANDIDATE',
       ) as {
         data?: {
           depName?: string
           range?: string
-          rejected?: readonly { version: string; by: string; reason?: string }[]
+          rejected?: readonly {
+            version: string
+            by?: string
+            condition?: string
+            reason?: string
+          }[]
         }
       }[]
       if (noCandidate.length > 0) {
@@ -599,12 +669,11 @@ export const _patch = async (
         continue // drop u: keep the pre-u graph, leave the vuln in place
       }
       graph = completion.graph
-      completionDiagnostics.push(...completion.unresolved)
+      completionDiagnostics.push(...completion.diagnostics)
       touched = true
       applied.push(u)
     }
-    if (touched)
-      graph = pruneOrphans(graph, { preserve: preExistingDanglers }).graph
+    void touched // each per-upgrade completion prunes its own orphans (seed-scoped)
   }
 
   // Machine-readable outcome (`--json`): what was (or, under `--dry-run`, would be)
@@ -737,7 +806,7 @@ export const _patch = async (
         warn(`  ${head}${need}`)
         if (flags.verbose && data.rejected?.length) {
           for (const r of data.rejected)
-            warn(`    - ${data.depName}@${r.version}: ${r.reason ?? r.by}`)
+            warn(`    - ${data.depName}@${r.version}: ${r.reason ?? r.condition ?? r.by}`)
         }
       }
     }
@@ -881,8 +950,3 @@ export const patch: typeof _patch = (...args) => _internal._patch(...args)
 export const refurbish: typeof _refurbish = (...args) =>
   _internal._refurbish(...args)
 export const format: typeof _format = (...args) => _internal._format(...args)
-
-// The project's declared overrides/resolutions, captured off the freshly-parsed
-// graph (drops after any mutate — read it right after `parse`, thread into
-// `patch`/`format`). Re-exported so the pipeline stays on this lib boundary.
-export { overridesOf }

@@ -1,10 +1,10 @@
 import type {
-  Ecosystem,
   Limiter,
   RegistryAdapter,
   RegistryConfig,
-} from 'lockgraph/registry'
-import { liveRegistry, resolveRegistry } from 'lockgraph/registry'
+  RegistryConfigDialect,
+} from 'lockgraph'
+import { liveRegistry, resolveRegistry } from 'lockgraph'
 
 import { TContext, TLockfileType } from '../ifaces'
 import { getTarball } from './registry'
@@ -25,7 +25,7 @@ export type TarballSource = {
  * npm and yarn directives never mix. bun + unknown fall back to npm (it reads
  * `.npmrc`).
  */
-export const ecosystemFor = (fmt: TLockfileType): Ecosystem =>
+export const ecosystemFor = (fmt: TLockfileType): RegistryConfigDialect =>
   fmt === 'yarn-classic'
     ? 'yarn-classic'
     : fmt?.startsWith('yarn-berry')
@@ -36,9 +36,9 @@ export const ecosystemFor = (fmt: TLockfileType): Ecosystem =>
 
 // Registry+auth resolved from the project's PM config — the lib owns the parsing
 // and the host-bound, https-only auth (`.npmrc`/`.yarnrc.yml`/`.yarnrc`+env).
-const registryConfig = (ctx: TContext, ecosystem: Ecosystem): RegistryConfig =>
+const registryConfig = (ctx: TContext, ecosystem: RegistryConfigDialect): RegistryConfig =>
   resolveRegistry(ctx.cwd ?? process.cwd(), {
-    ecosystem,
+    config: ecosystem,
     registry: ctx.flags?.registry,
   })
 
@@ -71,7 +71,7 @@ const pickFor = (cfg: RegistryConfig, transport: Transport) => {
  */
 export const buildRegistry = (
   ctx: TContext,
-  ecosystem: Ecosystem,
+  ecosystem: RegistryConfigDialect,
 ): RegistryAdapter => {
   if (ctx.registry) return ctx.registry as RegistryAdapter
   const pick = pickFor(registryConfig(ctx, ecosystem), buildTransport())
@@ -95,7 +95,7 @@ export const buildRegistry = (
  */
 export const buildTarballSource = (
   ctx: TContext,
-  ecosystem: Ecosystem,
+  ecosystem: RegistryConfigDialect,
 ): TarballSource => {
   if (ctx.tarballSource) return ctx.tarballSource as TarballSource
   const cfg = registryConfig(ctx, ecosystem)
