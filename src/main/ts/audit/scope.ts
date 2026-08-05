@@ -130,8 +130,8 @@ export const resolveScope = (
     if (wsNode) {
       // Precise: this workspace's own out-edges (exact resolved versions).
       for (const e of graph.out(wsNode.id)) {
-        const dst = graph.getNode(e.dst)
-        if (dst && seedNames.has(dst.name)) seeds.add(e.dst)
+        const dst = graph.getNode(e.target)
+        if (dst && seedNames.has(dst.name)) seeds.add(e.target)
       }
     } else {
       // No workspace node (yarn classic v1): resolve declared deps by name + range.
@@ -163,14 +163,14 @@ export const resolveScope = (
       const prod = prodNamesByDir.get(norm(node.workspacePath))
       if (prod)
         edges = edges.filter((e) => {
-          const dst = graph.getNode(e.dst)
+          const dst = graph.getNode(e.target)
           return dst ? prod.has(dst.name) : false
         })
     }
     for (const e of edges)
-      if (!inScope.has(e.dst)) {
-        inScope.add(e.dst)
-        queue.push(e.dst)
+      if (!inScope.has(e.target)) {
+        inScope.add(e.target)
+        queue.push(e.target)
       }
   }
   return inScope

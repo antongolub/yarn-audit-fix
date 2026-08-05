@@ -145,7 +145,7 @@ describe('auditViaRegistry', () => {
   it('returns {} for an empty graph without any request', async () => {
     let called = false
     const fetch: any = async () => ((called = true), { ok: true, json: async () => ({}) })
-    expect(await auditViaRegistry({ nodes: () => [] } as any, ctx({ fetch }), 'yarn-classic')).toEqual({})
+    expect(await auditViaRegistry({ nodes: () => [], registryPackages: () => ({}) } as any, ctx({ fetch }), 'yarn-classic')).toEqual({})
     expect(called).toBe(false)
   })
 

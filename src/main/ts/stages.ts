@@ -7,7 +7,7 @@ import semver from 'semver'
 import { buildRegistry } from './audit/adapter'
 import { TCallback, TContext, TManifestEdit } from './ifaces'
 import * as lf from './lockfile'
-import { format, getLockfileType, overridesOf } from './lockfile'
+import { format, getLockfileType } from './lockfile'
 import { createProgress } from './ui'
 import { applyManifestEdit, getSelfManifest } from './util'
 
@@ -93,7 +93,7 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
   const lockfile = lf.parse(raw, lockfileType, cwd, ctx.manifest)
   // Capture the declared pins off the fresh parse (they drop after the patch's
   // mutate); thread them into completion (honor) + stringify (re-emit pnpm's block).
-  const overrides = overridesOf(lockfile)
+  const overrides = lockfile.overrides()
   // audit / patch / refurbish are all silent registry HTTP, so drive a spinner
   // to show what's happening (no-op off a TTY or under --silent). The pipeline
   // reports through ctx.progress (advisory count, checksum count, summary lines).
@@ -123,7 +123,7 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // The single write lands only after a successful in-memory patch, so a
     // failure leaves the original lockfile untouched. `--dry-run` skips it.
     if (!flags['dry-run']) {
-      fs.writeFileSync(lockfilePath, format(refurbished, lockfileType, overrides))
+      fs.writeFileSync(lockfilePath, format(refurbished, lockfileType))
       // --force may have rewritten direct-dep ranges the fix fell outside of
       // (npm audit fix --force parity, recorded on ctx by `_patch`) — apply them
       // with a surgical, format-preserving string edit, grouped by the manifest

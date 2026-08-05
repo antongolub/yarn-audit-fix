@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,7 +9,6 @@ import { TAuditReport, TContext } from '../../main/ts/ifaces'
 import {
   format,
   getLockfileType,
-  overridesOf,
   parse,
   patch,
   refurbish,
@@ -132,6 +132,89 @@ describe('patch', () => {
     expect(out).toContain('deep-dep@') // transitive new dep pulled in
   })
 
+  // Regression guard: `mockRegistry` above returns a MINIMAL packument version
+  // ({name, version, dependencies}), but a real `liveRegistry` packument carries the
+  // full npm document — `funding`, `license`, `engines`, `deprecated`… A yarn lock
+  // can't store most of those, and the fix's tarball payload inherits them, so strict
+  // `stringify` must not treat that as an irreducible loss. Without this test the
+  // whole suite is blind to it: every canned fixture is trimmed, so the goldens pass
+  // while production hard-fails on the first bump of a package that lists `funding`
+  // (browserslist, chalk, postcss… i.e. most of npm).
+  it('survives registry metadata a yarn lock cannot store (funding, license, …)', async () => {
+    const rich = {
+      packument: async (name: string) =>
+        name === 'vuln'
+          ? {
+              name,
+              distTags: { latest: '2.0.0' },
+              versions: {
+                '1.0.0': { name, version: '1.0.0', dependencies: {} },
+                '2.0.0': {
+                  name,
+                  version: '2.0.0',
+                  dependencies: {},
+                  funding: { type: 'opencollective', url: 'https://opencollective.com/vuln' },
+                  license: 'MIT',
+                  engines: { node: '>=12' },
+                  deprecated: 'use 3.x',
+                  hasInstallScript: false,
+                },
+              },
+            }
+          : undefined,
+      resolve: async (name: string, range: string) =>
+        name === 'vuln' && sv.satisfies('2.0.0', range)
+          ? {
+              name,
+              version: '2.0.0',
+              dependencies: {},
+              funding: { type: 'opencollective', url: 'https://opencollective.com/vuln' },
+              license: 'MIT',
+              engines: { node: '>=12' },
+            }
+          : undefined,
+    } as any
+
+    const lf = lock([{ id: 'vuln@^1.0.0', version: '1.0.0' }])
+    const fmt = getLockfileType(lf)
+    const out = format(
+      await patch(parse(lf, fmt), { vuln: advisory('<2.0.0', '>=2.0.0') }, ctx({ silent: true }, rich), fmt),
+      fmt,
+    )
+    expect(out).toContain('version "2.0.0"')
+    expect(out).not.toContain('funding') // dropped, not emitted into the lock
+  })
+
+  // Regression guard: when the lock ALREADY contains the fix version as its own node,
+  // `replaceVersion` collapses the vulnerable node into it instead of creating one —
+  // and comes back with an empty `frontier.added`. Completion seeds its BFS from that
+  // set, so the whole `complete({seed, pruneOrphans})` stage no-ops: any dep the
+  // surviving node declares but the lock lacks is never pulled in, and we emit a lock
+  // whose `dependencies:` reference an entry that doesn't exist. Silent, exit 0.
+  //
+  // Every other merge-branch case in this suite happens to have its closure already
+  // present, so none of them exercise completion through a merge — hence this one.
+  it('completes the closure when the fix version already exists in the lock', async () => {
+    const out = await run(
+      lock([
+        { id: 'vuln@^1.0.0', version: '1.0.0', deps: { 'old-dep': '^1.0.0' } },
+        { id: 'vuln@^2.0.0', version: '2.0.0', deps: { 'missing-dep': '^1.0.0' } },
+        { id: 'old-dep@^1.0.0', version: '1.0.0' },
+      ]),
+      { vuln: advisory('<2.0.0', '>=2.0.0') },
+      { silent: true },
+      {
+        vuln: { '1.0.0': { 'old-dep': '^1.0.0' }, '2.0.0': { 'missing-dep': '^1.0.0' } },
+        'old-dep': { '1.0.0': {} },
+        'missing-dep': { '1.0.0': { 'missing-deep': '^1.0.0' } },
+        'missing-deep': { '1.0.0': {} },
+      },
+    )
+    expect(out).not.toContain('old-dep@') // stranded old closure pruned (this part works)
+    expect(out).toContain('missing-dep@') // declared by the surviving node — must resolve
+    expect(out).toContain('missing-deep@') // and its own transitive
+  })
+
   it('honors a declared resolutions pin when completing a new transitive (verbatim, even out of range)', async () => {
     const spec = {
       vuln: { '1.0.0': {}, '2.0.0': { 'new-dep': '^1.0.0' } },
@@ -153,8 +236,8 @@ describe('patch', () => {
     // (override replaces the range, not constrains it). Capture mirrors the runtime
     // wiring: parse(manifest) → overridesOf → patch(overrides).
     const graph = parse(lf, fmt, undefined, { resolutions: { 'new-dep': '2.0.0' } })
-    const overrides = overridesOf(graph)
-    expect(overrides.map((o) => `${o.package}@${o.to}`)).toEqual(['new-dep@2.0.0'])
+    const overrides = graph.overrides()
+    expect(overrides.map((o) => `${o.name}@${o.to}`)).toEqual(['new-dep@2.0.0'])
 
     const pinned = format(
       await patch(graph, report, ctx({ silent: true }, mockRegistry(spec)), fmt, overrides),
@@ -182,7 +265,7 @@ describe('patch', () => {
         report,
         ctx({ silent: true, ...flags }, mockRegistry(spec)),
         fmt,
-        overridesOf(g),
+        g.overrides(),
       )
       return format(out, fmt)
     }
@@ -202,9 +285,9 @@ describe('patch', () => {
       const g = parse(lf, fmt, undefined, { resolutions: { 'a/b/vuln': '2.0.0' } })
       // ≥2 ancestors → the lib's single-level matcher under-matches, so we can't
       // prove which subtree it governs → leave the package be (conservative).
-      expect(overridesOf(g).some((o) => (o.parentPath?.length ?? 0) >= 2)).toBe(true)
+      expect(g.overrides().some((o) => (o.parentPath?.length ?? 0) >= 2)).toBe(true)
       const out = format(
-        await patch(g, report, ctx({ silent: true }, mockRegistry(spec)), fmt, overridesOf(g)),
+        await patch(g, report, ctx({ silent: true }, mockRegistry(spec)), fmt, g.overrides()),
         fmt,
       )
       expect(out).toContain('version "1.0.0"') // untouched
@@ -332,7 +415,7 @@ describe('patch', () => {
         { vuln: advisory('<2.0.0', '>=2.0.0') },
         ctx({ silent: false }, mockRegistry({ vuln: { '1.0.0': {}, '2.0.0': {} } })),
         'yarn-classic',
-        overridesOf(g),
+        g.overrides(),
       ),
     )
     expect(out).toMatch(/Skipped \(pinned by an override/)
@@ -666,6 +749,86 @@ describe('refurbish', () => {
     // solely for packages it actually fetched — e.g. platform-gated optional deps
     // carry `conditions:` and no checksum).
     expect(checksumIn(out, 'has-flag')).toBeUndefined()
+  })
+
+  // Every other lockfile fixture we own is PARSE-derived, and a parsed node carries
+  // exactly one integrity origin (`berry-zip`) and one resolution carrier by
+  // construction. A whole defect class needs TWO — it only shows up on a node MINTED
+  // from a packument (which contributes `sri`/`registry` + a `#shasum` url fragment)
+  // and then repaired by `refurbish` (which adds `berry-zip`). That combination shipped
+  // broken twice without a single red here: the projection either mis-classified the
+  // second origin as an irreducible loss, or the still-missing checksum masked it
+  // behind ENRICH_REQUIRED so the real verdict never surfaced.
+  //
+  // So: mint `color-name` from a packument carrying integrity, repair it from the
+  // committed tarball, and require STRICT emit to succeed — no `strict:false` fallback.
+  it('mints a node from a packument, repairs it, and still emits strictly', async () => {
+    const v4 = path.resolve(__dirname, '../fixtures/lockfile/v4/yarn.lock')
+    const known = checksumIn(readFileSync(v4, 'utf-8'), 'color-name')!
+    // A lock holding the OLD version, so the fix (1.1.4) has to be minted from the
+    // packument — the shape a parse-derived fixture can never produce.
+    const lock = `# This file is generated by running "yarn install" inside your project.
+# Manual changes might be lost - proceed with caution!
+
+__metadata:
+  version: 8
+  cacheKey: 10c0
+
+"root@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "root@workspace:."
+  dependencies:
+    color-name: "npm:^1.1.3"
+  languageName: unknown
+  linkType: soft
+
+"color-name@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "color-name@npm:1.1.3"
+  checksum: 10c0/${'a'.repeat(128)}
+  languageName: node
+  linkType: hard
+`
+    const fmt = getLockfileType(lock)
+
+    const tgz = readFileSync(path.join(tarballsDir, 'color-name-1.1.4.tgz'))
+    const SHASUM = createHash('sha1').update(tgz).digest('hex')
+    const version = {
+      name: 'color-name',
+      version: '1.1.4',
+      dependencies: {},
+      // Both non-berry hash carriers a real packument has: a registry SRI and a
+      // `#shasum` fragment on the tarball url.
+      integrity: `sha512-${createHash('sha512').update(tgz).digest('base64')}`,
+      dist: {
+        integrity: `sha512-${createHash('sha512').update(tgz).digest('base64')}`,
+        shasum: SHASUM,
+        tarball: `https://registry.npmjs.org/color-name/-/color-name-1.1.4.tgz#${SHASUM}`,
+      },
+      tarball: `https://registry.npmjs.org/color-name/-/color-name-1.1.4.tgz#${SHASUM}`,
+    }
+    const registry = {
+      packument: async (n: string) =>
+        n === 'color-name'
+          ? { name: n, distTags: { latest: '1.1.4' }, versions: { '1.1.4': version } }
+          : undefined,
+      resolve: async (n: string) => (n === 'color-name' ? version : undefined),
+    }
+
+    const patched = await patch(
+      parse(lock, fmt),
+      { 'color-name': advisory('<1.1.4', '>=1.1.4') },
+      { flags: { silent: true, force: true }, registry, cwd: process.cwd() } as unknown as TContext,
+      fmt,
+    )
+    const repaired = await refurbish(patched, fmt, rctx(diskTarballs))
+
+    // The minted node now carries a berry-zip checksum AND the packument's own
+    // origins. `format` is strict-by-default and only tolerates ENRICH_REQUIRED, so
+    // if the extra origins are misjudged as an irreducible loss this throws.
+    const out = format(repaired, fmt)
+    expect(out).toContain('color-name@npm:1.1.4')
+    expect(checksumIn(out, 'color-name')).toBe(known)
   })
 
   it('scoped to the patch: an empty diff fills nothing', async () => {

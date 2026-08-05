@@ -7,7 +7,7 @@ import {
   license,
   type Condition,
   type ConditionContext,
-} from 'lockgraph/complete'
+} from 'lockgraph'
 import sv from 'semver'
 
 import { attempt, getWorkspaces, readJson } from '../util'

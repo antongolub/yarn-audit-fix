@@ -17,7 +17,10 @@ const graphOf = (nodes: N[], edges: E[]): Graph =>
   ({
     nodes: () => nodes.values(),
     getNode: (id: string) => nodes.find((n) => n.id === id),
-    out: (id: string) => edges.filter((e) => e.src === id),
+    out: (id: string) =>
+      edges
+        .filter((e) => e.src === id)
+        .map((e) => ({ source: e.src, target: e.dst })),
     byName: (name: string) => nodes.filter((n) => n.name === name).map((n) => n.id),
   }) as unknown as Graph
 
@@ -190,7 +193,7 @@ describe('resolveScope on a real monorepo lockfile (sequelize)', () => {
   const hasFixture = fs.existsSync(path.join(dir, 'yarn.lock'))
   const load = () => {
     const text = fs.readFileSync(path.join(dir, 'yarn.lock'), 'utf8')
-    const graph = parse(detect(text), text, { workspaceRoot: dir })
+    const graph = parse(text, detect(text), { cwd: dir })
     const root = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'))
     const files = [
       { file: path.join(dir, 'package.json'), manifest: root },
