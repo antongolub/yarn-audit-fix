@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://yarnpkg.com/">
-    <img alt="Yarn audit fix" src="https://github.com/antongolub/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true" width="546">
+    <img alt="Yarn audit fix" src="https://github.com/lockgraph/yarn-audit-fix/blob/master/img/yarn-audit-fix.png?raw=true" width="546">
   </a>
 </p>
 
@@ -8,11 +8,10 @@
   yarn-audit-fix
 </h1>
 
-[![CI](https://github.com/antongolub/yarn-audit-fix/actions/workflows/ci.yaml/badge.svg?event=push)](https://github.com/antongolub/yarn-audit-fix/actions/workflows/ci.yaml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/maintainability)](https://codeclimate.com/github/antongolub/yarn-audit-fix/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/1ace18434c46fe1a47fe/test_coverage)](https://codeclimate.com/github/antongolub/yarn-audit-fix/test_coverage)
-[![Sonar](https://sonarcloud.io/api/project_badges/measure?project=antongolub_yarn-audit-fix&metric=alert_status)](https://sonarcloud.io/dashboard?id=antongolub_yarn-audit-fix)
-[![Known Vulnerabilities](https://snyk.io/test/github/antongolub/yarn-audit-fix/badge.svg)](https://snyk.io/test/github/antongolub/yarn-audit-fix)
+[![CI](https://github.com/lockgraph/yarn-audit-fix/actions/workflows/ci.yaml/badge.svg?event=push)](https://github.com/lockgraph/yarn-audit-fix/actions/workflows/ci.yaml)
+[![Maintainability](https://qlty.sh/gh/lockgraph/projects/yarn-audit-fix/maintainability.svg)](https://qlty.sh/gh/lockgraph/projects/yarn-audit-fix)
+[![Code Coverage](https://qlty.sh/gh/lockgraph/projects/yarn-audit-fix/coverage.svg)](https://qlty.sh/gh/lockgraph/projects/yarn-audit-fix)
+[![Known Vulnerabilities](https://snyk.io/test/github/lockgraph/yarn-audit-fix/badge.svg)](https://snyk.io/test/github/lockgraph/yarn-audit-fix)
 [![Downloads](https://img.shields.io/npm/dt/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 [![npm (tag)](https://img.shields.io/npm/v/yarn-audit-fix)](https://www.npmjs.com/package/yarn-audit-fix)
 
@@ -25,7 +24,7 @@ The missing `yarn audit fix`
 > yarn add -D yarn-audit-fix@snapshot   # or: npm i -D yarn-audit-fix@snapshot
 > ```
 > **What v11 brings** — see [Migration notes](#1100) for the full breaking-change list:
-> - **New lockfile engine** on [`lockgraph`](https://github.com/lockgraph/lockgraph): patches the lockfile **graph directly**, auto-detecting every yarn schema — Classic + Berry **v4–v10** ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)).
+> - **New lockfile engine** on [`lockgraph`](https://github.com/lockgraph/lockgraph): patches the lockfile **graph directly**, auto-detecting every yarn schema — Classic + Berry **v4–v10** ([#248](https://github.com/lockgraph/yarn-audit-fix/issues/248)).
 > - **Faithful lockfile handling** — preserves checksums, integrity, `conditions`/`dependenciesMeta`/`peerDependenciesMeta`, and `patch:` / `resolutions` / git / npm-alias entries, with no spurious churn (real-world locks round-trip unchanged).
 > - **Single direct-patch flow** — the legacy `convert` flow and the `--flow` switch (and `synp` conversion) are removed.
 > - **Registry-direct audit** — advisories come from the registry's bulk endpoint instead of spawning `yarn`/`npm audit`: works with custom/in-house registries and inherits auth from `.npmrc` / `.yarnrc`. The run is now async (`runSync` removed).
@@ -277,7 +276,7 @@ Individual stages (`resolveBins`, `patchLockfile`, `yarnInstall`, …) are expor
 
 With a single flow, the flow abstraction itself is gone: `getFlow`, the `TFlow` / `TStage` types, and the optional custom-flow argument to `run` are removed. Call `run(flags)` — the patch pipeline is inlined. The individual stages are still exported if you want to assemble your own.
 
-Adds first-class Yarn 4+ support ([#248](https://github.com/antongolub/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`lockgraph`](https://github.com/lockgraph/lockgraph), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Each vulnerable package is upgraded graph-natively to the lowest published version that clears its advisory, and the fix version's **new transitive dependencies are pulled into the lockfile** (resolved from the registry) — so an upgrade that changes a package's dependency set no longer leaves the lockfile incomplete.
+Adds first-class Yarn 4+ support ([#248](https://github.com/lockgraph/yarn-audit-fix/issues/248)). The bespoke v1/v2 lockfile adapters are replaced with [`lockgraph`](https://github.com/lockgraph/lockgraph), which auto-detects every yarn schema (classic + berry v4–v10). The audit parser handles both the yarn 2/3 `{advisories: …}` shape and yarn 4's NDJSON, deriving `patched_versions` from `Vulnerable Versions` when the field is absent. Each vulnerable package is upgraded graph-natively to the lowest published version that clears its advisory, and the fix version's **new transitive dependencies are pulled into the lockfile** (resolved from the registry) — so an upgrade that changes a package's dependency set no longer leaves the lockfile incomplete.
 
 **BREAKING:** `yarn-audit-fix` no longer runs a reconcile `yarn install`. The lockfile is patched and completed entirely in place — fix versions, their new transitive closure, and (for yarn berry) the recomputed package checksums all come straight from the registry. yaf no longer shells out to yarn, and a `node_modules` directory is no longer required to run it.
 
@@ -308,7 +307,7 @@ import {run} from 'yarn-audit-fix'
 ```
 
 ### ^6.0.0
-Default fix strategy [has been changed](https://github.com/antongolub/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. The previous _legacy_ `convert` flow was opt-in via `--flow=convert` until v11, where it was removed entirely.
+Default fix strategy [has been changed](https://github.com/lockgraph/yarn-audit-fix/releases/tag/v6.0.0) to direct lockfile patching with `yarn audit --json` data. The previous _legacy_ `convert` flow was opt-in via `--flow=convert` until v11, where it was removed entirely.
 
 ### ^4.0.0
 The `--npm-v7` flag is redundant. From v4.0.0 the package's own **npm** is used by default. You can still pick the system default with `--npm-path=system`, or a custom one with `--npm-path=/another/npm/bin`.

@@ -1,0 +1,47 @@
+# Static analysis of the GitHub Actions workflows themselves (zizmor): catches
+# script injection, credential persistence, over-broad permissions, unpinned
+# actions and similar CI supply-chain issues. Findings land in the Security tab.
+name: Zizmor
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '35 11 * * 4'
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    name: Analyze workflows
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write # upload SARIF to code scanning
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Installed via pipx (preinstalled on GitHub runners) rather than a
+      # third-party action — one less unvetted dependency in the pipeline that
+      # exists to vet the pipeline.
+      - name: Install zizmor
+        run: pipx install zizmor
+
+      - name: Run zizmor
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: zizmor --config .github/zizmor.yml --format sarif . > zizmor.sarif
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor
