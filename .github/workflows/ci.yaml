@@ -45,6 +45,7 @@ jobs:
             target/esm
             target/ts
             target/dts
+            target/docs
             buildstamp.json
             package.json
           retention-days: 1
@@ -146,6 +147,24 @@ jobs:
           GIT_COMMITTER_EMAIL: ${{ vars.GIT_COMMITTER_EMAIL }}
           GIT_SIGN_KEY: ${{ secrets.GIT_SIGN_KEY }}
         run: npx zx-semrel
+
+      # gh-pages is the only place the API reference is reachable from; nothing
+      # else publishes it. Runs after zx-semrel so the site matches the cut version.
+      - name: Publish docs to gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          GIT_AUTHOR_NAME: ${{ vars.GIT_AUTHOR_NAME }}
+          GIT_AUTHOR_EMAIL: ${{ vars.GIT_AUTHOR_EMAIL }}
+          GIT_COMMITTER_NAME: ${{ vars.GIT_COMMITTER_NAME }}
+          GIT_COMMITTER_EMAIL: ${{ vars.GIT_COMMITTER_EMAIL }}
+        run: |
+          # ggcp exits 0 even when it matches nothing, so assert the input exists
+          # rather than trust the exit code.
+          test -f target/docs/index.html
+          npm_config_yes=true npx ggcp@1.11.0 'target/docs>**/*' \
+            "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git/gh-pages" \
+            --message='docs: update api reference'
 
   post-release:
     name: Post-release

@@ -37,7 +37,7 @@
     "build:ts": "cpy --cwd=src/main/ts . ../../../../../../target/ts/",
     "build:esm": "node ./src/scripts/build.cjs --entry=\"./src/main/ts/index.ts:./src/main/ts/cli.ts\"",
     "build:dts": "tsc --emitDeclarationOnly --skipLibCheck --outDir target/dts",
-    "build:docs": "typedoc --options src/main/typedoc",
+    "build:docs": "npm_config_yes=true npx -p typedoc@0.28.20 -p typescript@6.0.3 typedoc --options src/main/typedoc",
     "postupdate": "yarn && yarn build && yarn test",
     "publish:beta": "npm publish --no-git-tag-version --tag beta",
     "publish:rc": "npm publish --no-git-tag-version --tag rc",
@@ -86,8 +86,7 @@
     "rimraf": "^6.1.3",
     "rollup": "^4.63.1",
     "ts-node": "^10.9.2",
-    "typedoc": "^0.28.20",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "vitest": "^4.1.11"
   },
   "repository": {
@@ -98,5 +97,5 @@
   "bugs": {
     "url": "https://github.com/lockgraph/yarn-audit-fix/issues"
   },
-  "packageManager": "yarn@4.17.0"
+  "packageManager": "yarn@4.18.0"
 }
