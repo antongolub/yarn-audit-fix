@@ -281,6 +281,66 @@ describe('patch', () => {
       expect(out).toContain('version "2.0.0"') // bump stays within the pin
     })
 
+    // `toPolicy` normalises the declared-override block of EVERY ecosystem, not just
+    // yarn's — npm nests (`{parent: {vuln: "2"}}`), pnpm separates on `>`, yarn on `/`
+    // — and a scope has to survive the split (`@scope/pkg` is one segment, not two).
+    // Only the yarn path was exercised, so the npm/pnpm normalisers and the scope
+    // re-merge were carried untested.
+    it('normalises declared overrides across ecosystems (npm nesting, pnpm `>`, scoped keys)', () => {
+      // npm: nested blocks flatten to one constraint per leaf, parents accumulated
+      const npmLock = JSON.stringify({
+        name: 'root',
+        version: '1.0.0',
+        lockfileVersion: 3,
+        packages: {
+          '': { name: 'root', version: '1.0.0', dependencies: { vuln: '^1.0.0' } },
+          'node_modules/vuln': {
+            version: '1.0.0',
+            resolved: 'https://registry.npmjs.org/vuln/-/vuln-1.0.0.tgz',
+            integrity: `sha512-${'A'.repeat(86)}==`,
+          },
+        },
+      })
+      const npmOvr = parse(npmLock, getLockfileType(npmLock), undefined, {
+        overrides: { top: '3.0.0', parent: { vuln: '2.0.0' } },
+      }).overrides()
+      expect(npmOvr).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'top', to: '3.0.0', origin: 'npm', parentPath: [] }),
+          expect.objectContaining({ name: 'vuln', to: '2.0.0', origin: 'npm', parentPath: ['parent'] }),
+        ]),
+      )
+
+      // pnpm: flat block, `>` separator
+      const pnpmLock = `lockfileVersion: '9.0'
+importers:
+  .:
+    dependencies:
+      vuln:
+        specifier: ^1.0.0
+        version: 1.0.0
+packages:
+  vuln@1.0.0:
+    resolution: {integrity: sha512-${'A'.repeat(86)}==}
+snapshots:
+  vuln@1.0.0: {}
+`
+      const pnpmOvr = parse(pnpmLock, getLockfileType(pnpmLock), undefined, {
+        pnpm: { overrides: { 'parent>vuln': '2.0.0' } },
+      }).overrides()
+      expect(pnpmOvr).toEqual([
+        expect.objectContaining({ name: 'vuln', to: '2.0.0', origin: 'pnpm', parentPath: ['parent'] }),
+      ])
+
+      // yarn: `/` separator, and a scoped parent stays ONE segment. `**` is dropped.
+      const yarnOvr = parse(lf, fmt, undefined, {
+        resolutions: { '**/@scope/parent/vuln': '2.0.0' },
+      }).overrides()
+      expect(yarnOvr).toEqual([
+        expect.objectContaining({ name: 'vuln', to: '2.0.0', origin: 'yarn', parentPath: ['@scope/parent'] }),
+      ])
+    })
+
     it('leaves a package under a DEEP-scope override untouched (v1 under-match guard)', async () => {
       const g = parse(lf, fmt, undefined, { resolutions: { 'a/b/vuln': '2.0.0' } })
       // ≥2 ancestors → the lib's single-level matcher under-matches, so we can't

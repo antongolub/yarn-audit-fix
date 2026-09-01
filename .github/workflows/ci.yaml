@@ -71,6 +71,13 @@ jobs:
         # The full suite already runs on ubuntu/24 in `build`; here that pair
         # would be a duplicate, so it only carries the integration check.
     steps:
+      # The real-world fixtures carry paths up to 308 chars (aws-cdk snapshot
+      # assets), past Windows' 260-char MAX_PATH — checkout itself fails with
+      # exit 128 without the extended-length git API. Must precede checkout.
+      - name: Enable git long paths (Windows)
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
