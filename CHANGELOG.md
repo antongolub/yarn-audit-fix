@@ -1,3 +1,9 @@
+## [11.0.2](https://github.com/lockgraph/yarn-audit-fix/compare/v11.0.1...v11.0.2) (2026-09-01)
+
+### Fixes & improvements
+* refactor: simplify internals ([266b797](https://github.com/lockgraph/yarn-audit-fix/commit/266b797e276bcfc2c60507af93d65bfc2e9c27b8))
+* docs: update migration notes ([0583363](https://github.com/lockgraph/yarn-audit-fix/commit/058336323e5eb58974982a0e90a9658dc89844a1))
+
 ## [11.0.1](https://github.com/lockgraph/yarn-audit-fix/compare/v11.0.0...v11.0.1) (2026-09-01)
 
 ### Fixes & improvements
