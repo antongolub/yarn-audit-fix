@@ -17,19 +17,6 @@
 
 The missing `yarn audit fix`
 
-> [!IMPORTANT]
-> **v11 is not released yet.** The current stable line is **v10.x** (`npm i -D yarn-audit-fix`).
-> v11 is published under the npm **`snapshot`** dist-tag, where experimental builds land for early testing:
-> ```sh
-> yarn add -D yarn-audit-fix@snapshot   # or: npm i -D yarn-audit-fix@snapshot
-> ```
-> **What v11 brings** — see [Migration notes](#1100) for the full breaking-change list:
-> - **New lockfile engine** on [`lockgraph`](https://github.com/lockgraph/lockgraph): patches the lockfile **graph directly**, auto-detecting every yarn schema — Classic + Berry **v4–v10** ([#248](https://github.com/lockgraph/yarn-audit-fix/issues/248)).
-> - **Faithful lockfile handling** — preserves checksums, integrity, `conditions`/`dependenciesMeta`/`peerDependenciesMeta`, and `patch:` / `resolutions` / git / npm-alias entries, with no spurious churn (real-world locks round-trip unchanged).
-> - **Single direct-patch flow** — the legacy `convert` flow and the `--flow` switch (and `synp` conversion) are removed.
-> - **Registry-direct audit** — advisories come from the registry's bulk endpoint instead of spawning `yarn`/`npm audit`: works with custom/in-house registries and inherits auth from `.npmrc` / `.yarnrc`. The run is now async (`runSync` removed).
-> - **Slimmer footprint** — `jest`→`vitest`; dropped `lodash-es` / `fs-extra` / `chalk` / `js-yaml`; `commander`→`minimist`. Runs on Node **≥ 18.12**, no `engines` pin.
-
 - [Digest](#digest)
    - [Problem](#problem)
    - [Solution](#solution)
@@ -283,6 +270,13 @@ Adds first-class Yarn 4+ support ([#248](https://github.com/lockgraph/yarn-audit
 **BREAKING:** advisories are now fetched **straight from the registry** (the npm bulk advisory endpoint) instead of spawning `yarn audit` / `npm audit`. This fixes audit against custom/in-house registries ([yarn#7012](https://github.com/yarnpkg/yarn/issues/7012)) and is faster (the lockfile graph is already parsed). The registry, per-scope registries and auth are inherited from `.npmrc` / `.yarnrc.yml` / `.yarnrc` (project then global) + env, or overridden with `--registry`. Auth tokens are bound to the host that declared them and only sent over HTTPS.
 
 **BREAKING:** because the fetch is over HTTP, the run is now async — **`runSync` is removed**. Use `await run(flags)` (the CLI is unchanged). The exported stages are still available if you assemble your own pipeline.
+
+**Lockfile fidelity:** checksums, integrity, `conditions` / `dependenciesMeta` /
+`peerDependenciesMeta`, and `patch:` / `resolutions` / git / npm-alias entries are all
+preserved — real-world locks round-trip unchanged, so a fix produces no spurious churn.
+
+**Slimmer footprint:** `jest`→`vitest`; dropped `lodash-es` / `fs-extra` / `chalk` /
+`js-yaml`; `commander`→`minimist`.
 
 **Node floor / `engines`:** v11 no longer declares `engines.node`, so installing yarn-audit-fix never warns `EBADENGINE` on its own behalf. The effective runtime floor is **Node ≥ 14.18**, inherited from [`lockgraph`](https://github.com/lockgraph/lockgraph). The CLI argument parser also moved off `commander` (which had been ratcheting its own Node floor up) to a tiny `minimist`-based parser — flags, env vars and `--help` are unchanged.
 
