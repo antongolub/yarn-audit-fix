@@ -8,4 +8,4 @@
 
 ## Reporting a Vulnerability
 
-Feel free [to create an issue](https://github.com/antongolub/yarn-audit-fix/issues) or send an email. Pull request would be nice too.
+Feel free [to create an issue](https://github.com/lockgraph/yarn-audit-fix/issues) or send an email. Pull request would be nice too.

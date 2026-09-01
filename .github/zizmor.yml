@@ -1,0 +1,15 @@
+# zizmor policy.
+#
+# The org pins actions by tag rather than by hash (see lockgraph/lockgraph's
+# ci.yaml), so a blanket hash-pin requirement would flag every workflow in every
+# repo. Instead: allow tag refs for the first-party publishers we already trust
+# to move a tag responsibly, and require a hash for everything else — which is
+# where an unreviewed tag move actually hurts.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        actions/*: ref-pin
+        github/*: ref-pin
+        qltysh/*: ref-pin
+        "*": hash-pin
