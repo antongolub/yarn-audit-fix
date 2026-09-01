@@ -1,3 +1,50 @@
+## [11.0.0](https://github.com/lockgraph/yarn-audit-fix/compare/v10.1.1...v11.0.0) (2026-09-01)
+
+### Features
+* feat(cli): `--json` machine-readable remediation outcome ([ab9b0dc](https://github.com/lockgraph/yarn-audit-fix/commit/ab9b0dcc69d4c454ef4cb91a64ccda0331c92972))
+* feat(audit): scope fixes to production deps / selected workspaces ([8f6764f](https://github.com/lockgraph/yarn-audit-fix/commit/8f6764f0cae5971208b2fdbe420203fbce886690))
+* feat(audit): package-type (cjs) constraint + --safe bundle ([8975216](https://github.com/lockgraph/yarn-audit-fix/commit/89752165528801afaf6828dc42c34f6400eaae28))
+* feat(audit): --engines.<engine>=floor scans workspace manifests too ([58c8264](https://github.com/lockgraph/yarn-audit-fix/commit/58c8264c49741b9ee3770632f9e3e56a5a2fbc32))
+* feat(audit): monorepo-aware manifest gate ([c9bfa92](https://github.com/lockgraph/yarn-audit-fix/commit/c9bfa9264fb2f0f7bf94850d1af262d270ef6051))
+* feat(audit): --engines.<engine>=floor infers the target from the tree ([e537628](https://github.com/lockgraph/yarn-audit-fix/commit/e537628f92fe9c4e4c881cf508cc9a043e5f80be))
+* feat(audit): gate the fix version itself, not just its closure ([45de57a](https://github.com/lockgraph/yarn-audit-fix/commit/45de57a1f4c99f196f262e59bb390e6d308664ad))
+* feat(audit): license allow/deny constraint for remediation ([0aafc8b](https://github.com/lockgraph/yarn-audit-fix/commit/0aafc8bc245ddcc58bff8f16f1ac837a2afc3aab))
+* feat(audit): opt-in engine constraints for remediation ([b9ec4c8](https://github.com/lockgraph/yarn-audit-fix/commit/b9ec4c81596b96db25b832fdf8414e5b7ca023b8))
+* feat(audit): pin berry cache checksums across all yarn generations ([af49c96](https://github.com/lockgraph/yarn-audit-fix/commit/af49c9679eeb24c6b57dda36f3c44af87f41b262))
+* feat(audit): overrides/resolutions during remediation imprs ([7ab7b0c](https://github.com/lockgraph/yarn-audit-fix/commit/7ab7b0c386a09502c2fa2578dc3956ba8e6be994))
+* feat(audit): honor package overrides/resolutions during remediation ([52733fa](https://github.com/lockgraph/yarn-audit-fix/commit/52733fadbbbfa169196e5915fdf50711bb6ee7cf))
+* feat: live progress for the resolve/complete phase ([9975233](https://github.com/lockgraph/yarn-audit-fix/commit/99752337a23779e92af9f5650103926e7601684d))
+* feat: cooperative sigint — AbortSignal cancels in-flight registry HTTP ([6e8f2e9](https://github.com/lockgraph/yarn-audit-fix/commit/6e8f2e9758d8d46bda25affc896b76aa3be63ef9))
+* feat: complete install-free patch (lockfile .73) + progress spinner ([2eba1af](https://github.com/lockgraph/yarn-audit-fix/commit/2eba1afe35b7dc375cd081faa26ee071998525b5))
+* feat: apply --exclude/--ignore client-side (package globs / advisory ids) ([5800983](https://github.com/lockgraph/yarn-audit-fix/commit/580098326d7ce3b837f2b65db32e3b6d29250e3d))
+* feat(audit): annotate each upgrade with severity, CVSS and CVE/GHSA refs ([b02c61f](https://github.com/lockgraph/yarn-audit-fix/commit/b02c61f6fd288309ecb7d5d361ee0e01e2038691))
+* feat(audit): yarn 4+ support ([47875a0](https://github.com/lockgraph/yarn-audit-fix/commit/47875a0f74171ffda64a01b080dc3c4f421013b5))
+
+### Fixes & improvements
+* perf(audit): bound registry concurrency + cache packument GETs ([ecc6ad6](https://github.com/lockgraph/yarn-audit-fix/commit/ecc6ad6896846c3ceb2b57ddbe21f53c1f77bb81))
+* fix(audit): correct yarn-classic resolved host + sha1 in remediation output ([9ec30bf](https://github.com/lockgraph/yarn-audit-fix/commit/9ec30bf8696e3df4a0df6db9ce2927ac0476fa20))
+* refactor(audit): drop the in-house registry client — delegate to @antongolub/lockfile ([c2b79ac](https://github.com/lockgraph/yarn-audit-fix/commit/c2b79acf8480718d29b2a15c51788b9a3369e514))
+* fix(audit): yarn-berry .yarnrc.yml npmAuthToken was silently dropped ([fb42cf6](https://github.com/lockgraph/yarn-audit-fix/commit/fb42cf60cec17c41ca543007ed254395e473b168))
+* refactor: remove dead code — spawn-era flag helpers ([2e9b630](https://github.com/lockgraph/yarn-audit-fix/commit/2e9b6307e031c8958e0dbbd7d53261763eab23ae))
+* refactor: drop the PM-CLI audit-output parsers ([a726924](https://github.com/lockgraph/yarn-audit-fix/commit/a726924da80bd66ac6e7a7dfabea431a547a9e2c))
+* fix(deps): bump @antongolub/lockfile to 0.0.0-snapshot.80 + preserve base danglers on prune ([0ae1fcc](https://github.com/lockgraph/yarn-audit-fix/commit/0ae1fcc68aa4ad5d667a0438cd830b134b570bf6))
+* refactor: drop the yarn/npm binaries entirely — spawn-free, registry-only ([e87361e](https://github.com/lockgraph/yarn-audit-fix/commit/e87361ef9efccfa27fc8c6f19ec622e985e070da))
+* refactor: drop npm/yarn bins + versions from the runtime digest ([c559507](https://github.com/lockgraph/yarn-audit-fix/commit/c5595075366addeabb654f3d32b706aa32b76cfa))
+* fix(deps): bump @antongolub/lockfile to 0.0.0-snapshot.76 (yarn-3 refurbish) ([dfce044](https://github.com/lockgraph/yarn-audit-fix/commit/dfce044cb5e9618e6494cf91af805fc8e085aa93))
+* fix(deps): bump @antongolub/lockfile to 0.0.0-snapshot.69; regen goldens ([1864cc9](https://github.com/lockgraph/yarn-audit-fix/commit/1864cc94a99c351d50d828d623d6eb01e9fec104))
+* fix: handle Ctrl+C/SIGINT gracefully ([9592d71](https://github.com/lockgraph/yarn-audit-fix/commit/9592d718ab6692c247eca8d27b9fde8492fa7757))
+* refactor: replace commander with a tiny minimist-based CLI parser ([8daf188](https://github.com/lockgraph/yarn-audit-fix/commit/8daf188722b96c3ff961cecf223e44ef305f78c2))
+* docs: v11 announce ([f54a8ed](https://github.com/lockgraph/yarn-audit-fix/commit/f54a8ed953e03bc1fd68a58fea58bd56fa482ba4))
+* docs: tighten code comments and README ([64078e9](https://github.com/lockgraph/yarn-audit-fix/commit/64078e9adfde0ac34859b38b8ce4732249dacc83))
+* fix: enhance semver range protection ([ccd46ec](https://github.com/lockgraph/yarn-audit-fix/commit/ccd46ec19a888a440429552c2276558be950d9e1))
+* fix(patch): phase graph mutation so parent+child upgrades never reject ([ac9177c](https://github.com/lockgraph/yarn-audit-fix/commit/ac9177cee1ec2a70198930b28c8b73d980ba0b29))
+* fix(patch): handle vulnerable parent + child in one upgrade pass ([e022b80](https://github.com/lockgraph/yarn-audit-fix/commit/e022b80b205c73b8cfe382242b276959334e2d89))
+* refactor: separate v4 advisory flow ([a715a62](https://github.com/lockgraph/yarn-audit-fix/commit/a715a62f0ba6570aea94edfbb265c9a0f5bc77c4))
+* fix(audit): resolve fix versions against the registry; idempotent yarn 4 runs ([491985f](https://github.com/lockgraph/yarn-audit-fix/commit/491985fff5ddefb2a4ccdb2a7cd939cc1d0c746b))
+
+### BREAKING CHANGES
+* significant parts have replaced via `@antongolub/lockfile`, backward compatibility cannot be guaranteed ([47875a0](https://github.com/lockgraph/yarn-audit-fix/commit/47875a0f74171ffda64a01b080dc3c4f421013b5))
+
 ## [10.1.1](https://github.com/antongolub/yarn-audit-fix/compare/v10.1.0...v10.1.1) (2024-11-29)
 
 ### Fixes & improvements

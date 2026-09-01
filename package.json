@@ -1,6 +1,6 @@
 {
   "name": "yarn-audit-fix",
-  "version": "11.0.0-snapshot.24",
+  "version": "11.0.0",
   "publishConfig": {
     "access": "public"
   },
