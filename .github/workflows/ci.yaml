@@ -102,6 +102,7 @@ jobs:
       checks: read
       statuses: write
       contents: write
+      packages: write # zx-semrel also publishes the org-scoped alias to GH Packages
       id-token: write # OIDC to the npm registry — passwordless publish + provenance
     steps:
       - name: Checkout

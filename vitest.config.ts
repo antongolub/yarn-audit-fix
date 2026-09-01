@@ -12,6 +12,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reportsDirectory: './target/coverage',
+      // `lcov` is not in the v8 default set; the coverage upload needs it.
+      reporter: ['text', 'html', 'clover', 'json', 'lcov'],
       include: ['src/main/**/*.ts'],
       // ifaces.ts is type-only (erased at compile) — nothing executable to cover.
       exclude: ['src/main/ts/ifaces.ts'],
