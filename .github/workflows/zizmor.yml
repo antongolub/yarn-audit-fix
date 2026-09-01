@@ -32,7 +32,7 @@ jobs:
       # third-party action — one less unvetted dependency in the pipeline that
       # exists to vet the pipeline.
       - name: Install zizmor
-        run: pipx install zizmor
+        run: pipx install zizmor==1.30.0
 
       - name: Run zizmor
         env:

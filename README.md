@@ -28,7 +28,7 @@ The missing `yarn audit fix`
 > - **Faithful lockfile handling** — preserves checksums, integrity, `conditions`/`dependenciesMeta`/`peerDependenciesMeta`, and `patch:` / `resolutions` / git / npm-alias entries, with no spurious churn (real-world locks round-trip unchanged).
 > - **Single direct-patch flow** — the legacy `convert` flow and the `--flow` switch (and `synp` conversion) are removed.
 > - **Registry-direct audit** — advisories come from the registry's bulk endpoint instead of spawning `yarn`/`npm audit`: works with custom/in-house registries and inherits auth from `.npmrc` / `.yarnrc`. The run is now async (`runSync` removed).
-> - **Slimmer footprint** — `jest`→`vitest`; dropped `lodash-es` / `fs-extra` / `chalk` / `js-yaml`; `commander`→`minimist`. Runs on Node **≥ 14.18**, no `engines` pin.
+> - **Slimmer footprint** — `jest`→`vitest`; dropped `lodash-es` / `fs-extra` / `chalk` / `js-yaml`; `commander`→`minimist`. Runs on Node **≥ 18.12**, no `engines` pin.
 
 - [Digest](#digest)
    - [Problem](#problem)
@@ -85,7 +85,7 @@ Full description: [dev.to/yarn-audit-fix-for-yarn-2-berry](https://dev.to/antong
 
 ## Getting started
 ### Requirements
-Node.js: `>=14.18` — inherited from [`lockgraph`](https://github.com/lockgraph/lockgraph)
+Node.js: `>=18.12` — the highest floor in the shipped dependency closure (`@yarnpkg/libzip` / `@yarnpkg/fslib`); [`lockgraph`](https://github.com/lockgraph/lockgraph) itself needs only `>=14.18`. yaf declares no `engines` of its own.
 
 ### Install
 ```sh

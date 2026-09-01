@@ -185,15 +185,10 @@ describe('patch', () => {
     expect(out).not.toContain('funding') // dropped, not emitted into the lock
   })
 
-  // Regression guard: when the lock ALREADY contains the fix version as its own node,
-  // `replaceVersion` collapses the vulnerable node into it instead of creating one —
-  // and comes back with an empty `frontier.added`. Completion seeds its BFS from that
-  // set, so the whole `complete({seed, pruneOrphans})` stage no-ops: any dep the
-  // surviving node declares but the lock lacks is never pulled in, and we emit a lock
-  // whose `dependencies:` reference an entry that doesn't exist. Silent, exit 0.
-  //
-  // Every other merge-branch case in this suite happens to have its closure already
-  // present, so none of them exercise completion through a merge — hence this one.
+  // When the fix version is already in the lock, `replaceVersion` merges into it
+  // rather than creating a node, so `frontier.added` comes back empty. Completion
+  // seeds off that set — if it no-ops, a dep the surviving node declares but the
+  // lock lacks is never pulled in and the emitted lock references a missing entry.
   it('completes the closure when the fix version already exists in the lock', async () => {
     const out = await run(
       lock([
@@ -234,7 +229,7 @@ describe('patch', () => {
 
     // With a `resolutions` pin: `new-dep` is forced to 2.0.0 — OUTSIDE `^1.0.0`
     // (override replaces the range, not constrains it). Capture mirrors the runtime
-    // wiring: parse(manifest) → overridesOf → patch(overrides).
+    // wiring: parse(manifest) → graph.overrides() → patch(overrides).
     const graph = parse(lf, fmt, undefined, { resolutions: { 'new-dep': '2.0.0' } })
     const overrides = graph.overrides()
     expect(overrides.map((o) => `${o.name}@${o.to}`)).toEqual(['new-dep@2.0.0'])
@@ -281,11 +276,8 @@ describe('patch', () => {
       expect(out).toContain('version "2.0.0"') // bump stays within the pin
     })
 
-    // `toPolicy` normalises the declared-override block of EVERY ecosystem, not just
-    // yarn's — npm nests (`{parent: {vuln: "2"}}`), pnpm separates on `>`, yarn on `/`
-    // — and a scope has to survive the split (`@scope/pkg` is one segment, not two).
-    // Only the yarn path was exercised, so the npm/pnpm normalisers and the scope
-    // re-merge were carried untested.
+    // `toPolicy` normalises declared overrides per ecosystem: npm nests, pnpm splits
+    // on `>`, yarn on `/` — and `@scope/pkg` must survive the split as one segment.
     it('normalises declared overrides across ecosystems (npm nesting, pnpm `>`, scoped keys)', () => {
       // npm: nested blocks flatten to one constraint per leaf, parents accumulated
       const npmLock = JSON.stringify({
@@ -811,17 +803,11 @@ describe('refurbish', () => {
     expect(checksumIn(out, 'has-flag')).toBeUndefined()
   })
 
-  // Every other lockfile fixture we own is PARSE-derived, and a parsed node carries
-  // exactly one integrity origin (`berry-zip`) and one resolution carrier by
-  // construction. A whole defect class needs TWO — it only shows up on a node MINTED
-  // from a packument (which contributes `sri`/`registry` + a `#shasum` url fragment)
-  // and then repaired by `refurbish` (which adds `berry-zip`). That combination shipped
-  // broken twice without a single red here: the projection either mis-classified the
-  // second origin as an irreducible loss, or the still-missing checksum masked it
-  // behind ENRICH_REQUIRED so the real verdict never surfaced.
-  //
-  // So: mint `color-name` from a packument carrying integrity, repair it from the
-  // committed tarball, and require STRICT emit to succeed — no `strict:false` fallback.
+  // A parsed node carries one integrity origin and one resolution carrier; only a
+  // node MINTED from a packument (`sri`/`registry` + `#shasum`) and then repaired by
+  // `refurbish` (`berry-zip`) carries two, which is what strict projection has to
+  // handle. Every other fixture here is parse-derived, so this is the only one that
+  // exercises it — hence the STRICT emit assertion, no `strict:false` fallback.
   it('mints a node from a packument, repairs it, and still emits strictly', async () => {
     const v4 = path.resolve(__dirname, '../fixtures/lockfile/v4/yarn.lock')
     const known = checksumIn(readFileSync(v4, 'utf-8'), 'color-name')!
