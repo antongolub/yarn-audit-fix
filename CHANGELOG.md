@@ -1,3 +1,8 @@
+## [11.0.1](https://github.com/lockgraph/yarn-audit-fix/compare/v11.0.0...v11.0.1) (2026-09-01)
+
+### Fixes & improvements
+* fix: restore gh registry grants ([def353e](https://github.com/lockgraph/yarn-audit-fix/commit/def353e11490e4de2c2b5bc530e92948577030f2))
+
 ## [11.0.0](https://github.com/lockgraph/yarn-audit-fix/compare/v10.1.1...v11.0.0) (2026-09-01)
 
 ### Features
