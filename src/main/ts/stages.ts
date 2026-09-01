@@ -91,8 +91,8 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
   // Pass cwd as workspaceRoot so the berry adapter resolves builtin patch hashes,
   // and the project manifest so the graph carries its declared overrides/resolutions.
   const lockfile = lf.parse(raw, lockfileType, cwd, ctx.manifest)
-  // Capture the declared pins off the fresh parse (they drop after the patch's
-  // mutate); thread them into completion (honor) + stringify (re-emit pnpm's block).
+  // Captured off the fresh parse because `patch` returns a different graph. Not
+  // passed to `format` — lockgraph carries the override policy and re-emits it.
   const overrides = lockfile.overrides()
   // audit / patch / refurbish are all silent registry HTTP, so drive a spinner
   // to show what's happening (no-op off a TTY or under --silent). The pipeline

@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   build:
-    name: Build & test (Node 24)
+    name: Build & test (Node 26)
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -24,16 +24,15 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
 
-      - name: Enable Corepack
-        run: corepack enable
+      # `corepack yarn`, not `yarn`: the Windows runner preinstalls yarn 1.x, which
+      # shadows the corepack shim on PATH. Going through corepack needs no shims.
+      - run: corepack yarn install --immutable
 
-      - run: yarn install --immutable
+      - run: corepack yarn build
 
-      - run: yarn build
-
-      - run: yarn test
+      - run: corepack yarn test
 
       # This phase runs untrusted deps + code (install, full suite), so it holds
       # NO secrets. It only *generates* the package and the coverage report and
@@ -66,14 +65,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-latest]
-        node-version: [24, 22, 20]
-        # The full suite already runs on ubuntu/24 in `build`; here that pair
-        # would be a duplicate, so it only carries the integration check.
+        os: [ubuntu-26.04, windows-latest]
+        node-version: [26, 20]
+        # `build` runs the full suite; these cells only smoke the ends of the range.
     steps:
-      # The real-world fixtures carry paths up to 308 chars (aws-cdk snapshot
-      # assets), past Windows' 260-char MAX_PATH — checkout itself fails with
-      # exit 128 without the extended-length git API. Must precede checkout.
+      # real-world fixtures exceed Windows' 260-char MAX_PATH; checkout fails
+      # without this. Must precede checkout.
       - name: Enable git long paths (Windows)
         if: runner.os == 'Windows'
         run: git config --system core.longpaths true
@@ -86,14 +83,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Enable Corepack
-        run: corepack enable
+      # `corepack yarn`, not `yarn`: the Windows runner preinstalls yarn 1.x, which
+      # shadows the corepack shim on PATH. Going through corepack needs no shims.
+      - run: corepack yarn install --immutable
 
-      - run: yarn install --immutable
+      - run: corepack yarn build
 
-      - run: yarn build
-
-      - run: yarn test:integration
+      - run: corepack yarn test:integration
 
   release:
     name: Release ${{ github.ref }}
@@ -117,7 +113,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 24
+          node-version: 26
 
       - uses: actions/download-artifact@v8
         with:
@@ -158,13 +154,17 @@ jobs:
     steps:
       - uses: actions/setup-node@v7
         with:
-          node-version: 20 # the lowest supported
+          node-version: '18.12' # highest engines.node floor in the shipped closure (@yarnpkg/libzip)
 
       - name: Check running via npx
         run: npm_config_yes=true npx yarn-audit-fix@latest --version
 
+      # Installs from the registry on purpose: this checks the published artifact,
+      # not the local tree.
       - name: Check global install
+        run: npm i -g yarn-audit-fix@latest # zizmor: ignore[adhoc-packages]
+
+      - name: Verify the installed binary
         run: |
-          npm i -g yarn-audit-fix@latest
           which yarn-audit-fix
           yarn-audit-fix --version

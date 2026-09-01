@@ -563,12 +563,11 @@ export const _patch = async (
       applied.push(u)
     }
     if (recentlyAdded.size > 0 || recentlyOrphaned.size > 0) {
-      // `pruneOrphans` sweeps the old closure a dep-changing bump stranded — a
-      // ref-counted cascade seeded from `seed.orphaned`, so it needs no workspace
-      // anchor (works on rootless yarn-classic locks). `frontier.orphaned` is a set of
-      // LIVE final GC seeds (nodes that had incoming edges before and none after), so a
-      // pre-existing dangler yarn keeps — fsevents patch base, catalog: target — can
-      // never enter it; no preserve set needed on our side.
+      // `pruneOrphans` sweeps the closure a dep-changing bump stranded: a ref-counted
+      // cascade off `seed.orphaned`, so it needs no workspace anchor and works on
+      // rootless yarn-classic locks. `frontier.orphaned` holds only nodes that HAD
+      // incoming edges and now have none, so danglers yarn keeps (fsevents patch base,
+      // catalog: target) can't enter it — no preserve set needed here.
       const completion = await complete(graph, {
         target: lockfileType as FormatId,
         sources: { packuments: [registry] },
