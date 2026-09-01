@@ -43,6 +43,33 @@ const latestPublished = async (
   }
 }
 
+/**
+ * Print the digest: JSON with the punctuation stripped, masking any URL userinfo on
+ * the way out. A registry URL can carry basic-auth (`https://user:token@host`, via
+ * `--registry` / `YAF_REGISTRY`), and this printer echoes whatever it is handed —
+ * so it masks at serialisation, covering every value at any depth rather than one
+ * field someone remembered to scrub.
+ */
+const printDigest = (data: Record<string, unknown>): void =>
+  console.log(
+    JSON.stringify(
+      data,
+      (_key, value) => {
+        if (typeof value !== 'string') return value
+        try {
+          const u = new URL(value)
+          if (!u.username && !u.password) return value
+          u.username = '***'
+          u.password = ''
+          return u.toString()
+        } catch {
+          return value // not a URL — nothing to mask
+        }
+      },
+      2,
+    ).replace(/[",:{}]/g, ''),
+  )
+
 /** Print the runtime digest and version warnings. */
 export const printRuntimeDigest: TCallback = ({
   cwd,
@@ -61,18 +88,7 @@ export const printRuntimeDigest: TCallback = ({
     )
   }
 
-  console.log(
-    JSON.stringify(
-      {
-        isMonorepo,
-        versions,
-        cwd,
-        flags,
-      },
-      undefined,
-      2,
-    ).replace(/[",:{}]/g, ''),
-  )
+  printDigest({ isMonorepo, versions, cwd, flags })
 }
 
 /** Set the process exit code from the error (printing is handled by `run`). */
