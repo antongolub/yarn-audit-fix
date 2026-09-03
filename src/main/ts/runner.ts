@@ -17,18 +17,33 @@ import { bold, getSelfManifest, normalizeFlags, readJson } from './util'
  * which is noise to print raw (the child already streamed its error to the
  * terminal). Prefer captured output / an Error message, else a terse code.
  */
+/**
+ * How to describe a thrown value, most specific first: a nested cause, whatever the
+ * child process printed, the signal that killed it, its exit code, then any message.
+ * Each probe returns `undefined` when it doesn't apply, so the first hit wins.
+ */
+const ERROR_PROBES: ((r: Record<string, any>) => string | undefined)[] = [
+  (r) =>
+    r.error
+      ? r.error instanceof Error
+        ? r.error.message
+        : String(r.error)
+      : undefined,
+  (r) =>
+    r.stderr?.toString?.().trim() || r.stdout?.toString?.().trim() || undefined,
+  (r) => (r.signal ? `interrupted (${r.signal})` : undefined),
+  (r) =>
+    'status' in r ? `command failed (exit code ${r.status ?? 1})` : undefined,
+  (r) => (r.message ? String(r.message) : undefined),
+]
+
 const formatError = (err: unknown): string => {
   if (err instanceof Error) return err.message
-  if (err && typeof err === 'object') {
-    const r = err as Record<string, any>
-    if (r.error)
-      return r.error instanceof Error ? r.error.message : String(r.error)
-    const captured =
-      r.stderr?.toString?.().trim() || r.stdout?.toString?.().trim()
-    if (captured) return captured
-    if (r.signal) return `interrupted (${r.signal})`
-    if ('status' in r) return `command failed (exit code ${r.status ?? 1})`
-    if (r.message) return String(r.message)
+  if (!err || typeof err !== 'object') return String(err)
+  const r = err as Record<string, any>
+  for (const probe of ERROR_PROBES) {
+    const described = probe(r)
+    if (described) return described
   }
   return String(err)
 }

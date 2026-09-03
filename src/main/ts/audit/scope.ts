@@ -1,56 +1,11 @@
-import path from 'node:path'
-
-import type { Graph } from 'lockgraph'
-import sv from 'semver'
-
 import { globToRegExp, split } from './filter'
+import { seedRoots, walkClosure } from './closure'
+import type { Graph } from 'lockgraph'
 
-type NodeId = Parameters<Graph['getNode']>[0]
-type GNode = NonNullable<ReturnType<Graph['getNode']>>
+import { PROD_FIELDS, dirOf, namesIn, norm, truthy } from './scope-util'
+import type { GNode, NodeId, TManifestFile } from './scope-util'
 
-/** Root + workspace manifests, as collected by `collectManifestFiles`. */
-export type TManifestFile = { file: string; manifest: Record<string, any> }
-
-// Production = everything a `--omit=dev` install materializes: dependencies,
-// optionalDependencies, peerDependencies. Only a *dev-only* direct dep is dropped
-// (a name in dependencies AND devDependencies is production). yarn.lock carries no
-// dev/prod signal — every edge is `dep` — so this classification lives in the
-// package.json fields, never in the graph.
-const PROD_FIELDS = ['dependencies', 'optionalDependencies', 'peerDependencies']
-const ALL_FIELDS = [...PROD_FIELDS, 'devDependencies']
-
-/** `YAF_PRODUCTION=false` must not read truthy (env values arrive as strings). */
-const truthy = (v: unknown): boolean =>
-  v === true ||
-  (typeof v === 'string' && v !== '' && v !== 'false' && v !== '0')
-
-const namesIn = (
-  manifest: Record<string, any> | undefined,
-  fields: readonly string[],
-): Set<string> => {
-  const out = new Set<string>()
-  for (const f of fields) {
-    const deps = manifest?.[f]
-    if (deps && typeof deps === 'object')
-      for (const name of Object.keys(deps)) out.add(name)
-  }
-  return out
-}
-
-/** Strip yarn's `npm:` alias; return a usable semver range or undefined. */
-const normalizeRange = (raw: unknown): string | undefined => {
-  if (typeof raw !== 'string') return undefined
-  const r = raw.startsWith('npm:') ? raw.slice(4) : raw
-  return sv.validRange(r) ? r : undefined
-}
-
-/** A workspace node's path or a manifest dir, normalized to `/`-joined, no trailing slash. */
-const norm = (p: string): string =>
-  p.split(path.sep).join('/').replace(/\/+$/, '')
-
-/** Workspace dir of a manifest file, relative to cwd (`''` = root). */
-const dirOf = (cwd: string | undefined, file: string): string =>
-  norm(cwd ? path.relative(cwd, path.dirname(file)) : path.dirname(file))
+export type { TManifestFile }
 
 /** A short human summary of the active scope, for the report header. */
 export const describeScope = (flags: Record<string, any>): string =>
@@ -111,101 +66,6 @@ const selectWorkspaceDirs = (
     selected = [...manifestByDir.keys()]
   }
   return selected
-}
-
-/**
- * yarn classic has no workspace node to read out-edges from, so resolve each declared
- * dep by name and keep every graph node whose version satisfies the declared range.
- */
-const seedByNameAndRange = (
-  graph: Graph,
-  manifest: Record<string, any> | undefined,
-  production: boolean,
-  seeds: Set<NodeId>,
-): void => {
-  for (const field of production ? PROD_FIELDS : ALL_FIELDS) {
-    const deps = manifest?.[field]
-    if (!deps || typeof deps !== 'object') continue
-    for (const [name, range] of Object.entries(deps)) {
-      const r = normalizeRange(range)
-      for (const id of graph.byName(name)) {
-        const node = graph.getNode(id)
-        if (
-          node &&
-          (!r || (sv.valid(node.version) && sv.satisfies(node.version, r)))
-        )
-          seeds.add(id)
-      }
-    }
-  }
-}
-
-/**
- * The scope roots: each selected workspace's direct deps resolved to node ids. Uses
- * the workspace node's own out-edges where the lockfile has one; falls back to
- * resolving declared deps by name + range on yarn classic, which has none.
- */
-const seedRoots = (
-  graph: Graph,
-  selected: string[],
-  manifestByDir: Map<string, Record<string, any>>,
-  wsNodeByDir: Map<string, GNode>,
-  production: boolean,
-): Set<NodeId> => {
-  // Seed: each selected workspace's direct deps → their resolved nodes.
-  const seeds = new Set<NodeId>()
-  for (const dir of selected) {
-    const manifest = manifestByDir.get(dir)
-    const seedNames = namesIn(manifest, production ? PROD_FIELDS : ALL_FIELDS)
-    if (seedNames.size === 0) continue
-    const wsNode = wsNodeByDir.get(dir)
-    if (wsNode) {
-      // Precise: this workspace's own out-edges (exact resolved versions).
-      for (const e of graph.out(wsNode.id)) {
-        const dst = graph.getNode(e.target)
-        if (dst && seedNames.has(dst.name)) seeds.add(e.target)
-      }
-    } else {
-      seedByNameAndRange(graph, manifest, production, seeds)
-    }
-  }
-  return seeds
-}
-
-/**
- * Walk out from the roots: every edge of a regular node, but only production edges
- * of a workspace reached transitively — one workspace's dev tree is not part of
- * another's closure.
- */
-const walkClosure = (
-  graph: Graph,
-  seeds: Set<NodeId>,
-  prodNamesByDir: Map<string, Set<string>>,
-): Set<NodeId> => {
-  // Walk out: all edges from a regular node; only production edges from a workspace
-  // reached transitively (its dev tree isn't part of the depending closure).
-  const inScope = new Set<NodeId>(seeds)
-  const queue = [...seeds]
-  while (queue.length > 0) {
-    const id = queue.pop() as NodeId
-    const node = graph.getNode(id)
-    if (!node) continue
-    let edges = graph.out(id)
-    if (node.workspacePath !== undefined) {
-      const prod = prodNamesByDir.get(norm(node.workspacePath))
-      if (prod)
-        edges = edges.filter((e) => {
-          const dst = graph.getNode(e.target)
-          return dst ? prod.has(dst.name) : false
-        })
-    }
-    for (const e of edges)
-      if (!inScope.has(e.target)) {
-        inScope.add(e.target)
-        queue.push(e.target)
-      }
-  }
-  return inScope
 }
 
 export const resolveScope = (

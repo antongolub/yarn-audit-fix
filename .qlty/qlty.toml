@@ -92,3 +92,16 @@ name = "trufflehog"
 
 [[plugin]]
 name = "yamllint"
+
+# Thresholds we hold ourselves to. qlty's defaults (file ~50, function 18) sit below
+# this repo's average file, so they flag almost everything with substance and stop
+# being a signal. These are set once, deliberately, and the code is under all of
+# them today — anything that trips one is a real regression, not a backlog item.
+[smells.file_complexity]
+threshold = 100
+[smells.function_complexity]
+threshold = 25
+[smells.function_parameters]
+threshold = 7
+[smells.return_statements]
+threshold = 7

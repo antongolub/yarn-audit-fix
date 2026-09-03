@@ -1,5 +1,3 @@
-import path from 'node:path'
-
 import {
   detect,
   LockfileError,
@@ -7,14 +5,7 @@ import {
   refurbish as lfRefurbish,
   stringify as lfStringify,
 } from 'lockgraph'
-import type {
-  Condition,
-  FormatId,
-  Graph,
-  NodeId,
-  OverrideConstraint,
-  PmConfigEvidence,
-} from 'lockgraph'
+import type { FormatId, Graph, NodeId, OverrideConstraint } from 'lockgraph'
 import sv from 'semver'
 
 import {
@@ -22,18 +13,14 @@ import {
   buildTarballSource,
   ecosystemFor,
 } from './audit/adapter'
-import {
-  buildConstraints,
-  describeConstraints,
-  resolveEngineTargets,
-  resolveLicensePolicy,
-  resolvePackageType,
-} from './audit/constraints'
-import type { TEngineTargets } from './audit/constraints'
+import { collectManifestFiles, manifestDirectRanges } from './audit/manifest'
+import { toPolicy } from './audit/overrides'
+import { resolvePolicy } from './audit/policy'
 import { parsePackageRules } from './audit/filter'
 import { resolveScope } from './audit/scope'
 import { applyBatch, applyConstrained } from './audit/apply'
-import { gateByConsumers, gateByManifest, planUpgrades } from './audit/plan'
+import { gateByConsumers, gateByManifest } from './audit/gates'
+import { planUpgrades } from './audit/plan'
 import type { ApplyDeps } from './audit/apply'
 import { buildSummary, renderReport } from './audit/report'
 import type { ConstraintSkip, Ledger, Plan } from './audit/report'
@@ -45,101 +32,9 @@ import {
   TLockfileType,
   TManifestEdit,
 } from './ifaces'
-import { attempt, getWorkspaces, readJson } from './util'
 
 export const getLockfileType = (lockfile: string): TLockfileType =>
   detect(lockfile)
-
-type OverrideOrigin = NonNullable<OverrideConstraint['origin']>
-
-// Split an override key into package segments, re-merging a scope onto the next
-// segment (`@scope/pkg` is one package, not `@scope` then `pkg`), and dropping the
-// `**` wildcard. yarn keys separate on `/`, pnpm on `>`.
-const overrideSegments = (key: string, sep: '/' | '>'): string[] => {
-  const raw = key.split(sep)
-  const segs: string[] = []
-  for (let i = 0; i < raw.length; i++) {
-    if (sep === '/' && raw[i].startsWith('@') && i + 1 < raw.length) {
-      segs.push(`${raw[i]}/${raw[i + 1]}`)
-      i++
-    } else segs.push(raw[i])
-  }
-  return segs.filter((s) => s && s !== '**')
-}
-
-// A flat `{ "a/b": "1", "foo": "2" }` block (yarn `resolutions` `/`, pnpm `>`) — the
-// last segment is the pinned package, the rest its parent path.
-const flatOverrides = (
-  block: Record<string, unknown>,
-  sep: '/' | '>',
-  origin: OverrideOrigin,
-): OverrideConstraint[] =>
-  Object.entries(block).flatMap(([key, to]) => {
-    if (typeof to !== 'string') return []
-    const segs = overrideSegments(key, sep)
-    return segs.length === 0
-      ? []
-      : [
-          {
-            name: segs[segs.length - 1],
-            parentPath: segs.slice(0, -1),
-            to,
-            origin,
-          },
-        ]
-  })
-
-// npm's nested `{ foo: { bar: "1" } }` → one constraint per leaf, parents accumulated.
-const nestedOverrides = (
-  block: Record<string, unknown>,
-  parents: string[],
-): OverrideConstraint[] =>
-  Object.entries(block).flatMap(([key, val]) =>
-    typeof val === 'string'
-      ? [{ name: key, parentPath: parents, to: val, origin: 'npm' as const }]
-      : val && typeof val === 'object'
-        ? nestedOverrides(val as Record<string, unknown>, [...parents, key])
-        : [],
-  )
-
-/**
- * The project's declared overrides as a `PmConfigEvidence` policy, so `parse` captures
- * them onto the graph (`graph.overrides()` then carries the pins) per ecosystem — npm
- * `overrides`, yarn/bun `resolutions`, pnpm `pnpm.overrides`. Absent block → `undefined`
- * (parse runs override-free, identical to before). 0.6.1's `captureOverrides` is
- * internal, so we build the `OverrideConstraint[]` here.
- */
-const toPolicy = (
-  manifest: Record<string, any> | undefined,
-  ecosystem: ReturnType<typeof ecosystemFor>,
-): PmConfigEvidence | undefined => {
-  if (!manifest) return undefined
-  let overrides: OverrideConstraint[] = []
-  let manager: PmConfigEvidence['manager']
-  if (ecosystem === 'yarn-classic' || ecosystem === 'yarn-berry') {
-    manager = 'yarn'
-    if (manifest.resolutions)
-      overrides = flatOverrides(manifest.resolutions, '/', 'yarn')
-  } else if (ecosystem === 'pnpm') {
-    manager = 'pnpm'
-    if (manifest.pnpm?.overrides)
-      overrides = flatOverrides(manifest.pnpm.overrides, '>', 'pnpm')
-  } else {
-    manager = 'npm'
-    if (manifest.overrides) overrides = nestedOverrides(manifest.overrides, [])
-  }
-  return overrides.length > 0
-    ? {
-        kind: 'pm-config',
-        manager,
-        version: '0.0.0',
-        source: 'package.json',
-        surface: 'overrides',
-        coverage: 'complete',
-        overrides,
-      }
-    : undefined
-}
 
 export const _parse = (
   lockfile: string,
@@ -189,68 +84,6 @@ export const _format = (
   }
 }
 
-/** A manifest file whose direct-dep ranges the gate consults, paired with its
- *  parsed content. `file` is where a --force rewrite lands. */
-type TManifestFile = { file: string; manifest: Record<string, any> }
-
-/**
- * The manifest files the gate consults: the root package.json + every workspace
- * package.json (monorepo, discovered from the root `workspaces` globs). The root
- * reuses the already-parsed `ctx.manifest`; each workspace is read best-effort (an
- * unreadable one is skipped). Absent cwd (direct/test calls) → the root alone.
- */
-const collectManifestFiles = (
-  cwd: string | undefined,
-  rootManifest: Record<string, any> | undefined,
-): TManifestFile[] => {
-  const root = rootManifest ?? {}
-  if (!cwd) return [{ file: 'package.json', manifest: root }]
-  const files: TManifestFile[] = [
-    { file: path.join(cwd, 'package.json'), manifest: root },
-  ]
-  for (const wf of getWorkspaces(cwd, root)) {
-    const manifest = attempt(() => readJson(wf))
-    if (manifest && typeof manifest === 'object')
-      files.push({ file: wf, manifest })
-  }
-  return files
-}
-
-/**
- * Direct-dep declared ranges across the root + workspace manifests, keyed by name
- * → every `{ range, file }` that declares it (first of dependencies →
- * devDependencies → optionalDependencies → peerDependencies wins *within* one
- * manifest; separate entries *across* manifests). The gate consults these: a DIRECT
- * dep whose declared range can't admit the fix is flagged (default) or rewritten in
- * that file (--force). Non-semver ranges (`workspace:`, `npm:` alias, git/file, `*`)
- * are left alone by the caller's `sv.validRange` guard.
- */
-const manifestDirectRanges = (
-  files: TManifestFile[],
-): Map<string, { range: string; file: string }[]> => {
-  const out = new Map<string, { range: string; file: string }[]>()
-  for (const { file, manifest } of files) {
-    const seen = new Set<string>() // first-field-wins within this manifest
-    for (const field of [
-      'dependencies',
-      'devDependencies',
-      'optionalDependencies',
-      'peerDependencies',
-    ]) {
-      const deps = manifest?.[field]
-      if (deps && typeof deps === 'object')
-        for (const [name, range] of Object.entries(deps))
-          if (typeof range === 'string' && !seen.has(name)) {
-            seen.add(name)
-            const list = out.get(name) ?? []
-            list.push({ range, file })
-            out.set(name, list)
-          }
-    }
-  }
-  return out
-}
-
 /** Report suffix naming the manifest file — empty for the root, `in <rel>` for a
  *  workspace, so a monorepo skip/rewrite says which package.json it means. */
 
@@ -262,52 +95,6 @@ const manifestDirectRanges = (
  * deps, `pruneOrphans` retires the old closure the upgrade stranded. Async since
  * the registry is hit over HTTP.
  */
-
-type Policy = {
-  constraints: readonly Condition[]
-  constraintSummary: string
-  engineTargets: TEngineTargets | undefined
-  onConflict: 'skip' | 'stop'
-}
-
-/**
- * Resolve the opt-in remediation constraints up front, before any network work — a
- * bad range or unsupported keyword throws here. Empty `constraints` ⇒ completion runs
- * exactly as it did before the gates existed.
- *
- * `--safe` is the opposite of `--force`: it FILLS the axes you didn't set — hold the
- * tree's engine floor if it declares one, keep the closure require-able in a CommonJS
- * project — but never overrides an axis you set explicitly. License stays yours.
- */
-const resolvePolicy = (ctx: TContext): Policy => {
-  const { flags } = ctx
-  if (flags.safe && flags.force)
-    throw new Error('--safe and --force are opposites; pass one, not both')
-  let engineTargets = resolveEngineTargets(flags.engines, ctx.cwd)
-  let packageType = resolvePackageType(flags['package-type'])
-  if (flags.safe) {
-    if (!engineTargets) {
-      try {
-        engineTargets = resolveEngineTargets({ node: 'floor' }, ctx.cwd)
-      } catch {
-        /* nothing declares engines.node → no floor to hold, best-effort */
-      }
-    }
-    if (!packageType && (ctx.manifest as { type?: unknown })?.type !== 'module')
-      packageType = 'cjs'
-  }
-  const licensePolicy = resolveLicensePolicy(flags.license)
-  return {
-    constraints: buildConstraints(engineTargets, licensePolicy, packageType),
-    constraintSummary: describeConstraints(
-      engineTargets,
-      licensePolicy,
-      packageType,
-    ),
-    engineTargets,
-    onConflict: flags['on-conflict'] === 'stop' ? 'stop' : 'skip',
-  }
-}
 
 export const _patch = async (
   lockfile: TLockfileObject,
@@ -389,7 +176,7 @@ export const _patch = async (
       .sort(sv.compare)[0] // undefined ⇒ nothing published clears it
   }
 
-  const plans = await planUpgrades(
+  const plans = await planUpgrades({
     graph,
     report,
     ctx,
@@ -398,7 +185,7 @@ export const _patch = async (
     excludeRules,
     lowestFix,
     ledger,
-  )
+  })
   const gatedPlans = gateByManifest(plans, directRanges, flags, ledger)
   if (manifestEdits.length > 0) ctx.manifestEdits = manifestEdits
   const upgrades = gateByConsumers(graph, gatedPlans, flags, ledger)
@@ -446,15 +233,15 @@ export const _patch = async (
   ctx.summary = buildSummary(!!flags['dry-run'], ledger, applied, report)
 
   if (!flags.silent && !flags.json)
-    renderReport(
+    renderReport({
       ctx,
-      { constraintSummary, engineTargets },
+      policy: { constraintSummary, engineTargets },
       ledger,
       applied,
       report,
       inScope,
       completionDiagnostics,
-    )
+    })
 
   return graph
 }
