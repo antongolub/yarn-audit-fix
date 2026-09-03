@@ -11,7 +11,6 @@ import { format, getLockfileType } from './lockfile'
 import { createProgress } from './ui'
 import { applyManifestEdit, getSelfManifest } from './util'
 
-
 /** Resolve the runtime + yaf versions (latest yaf straight from the registry). */
 export const resolveBins: TCallback = async ({ ctx }) => {
   const { name, version } = getSelfManifest()
@@ -123,7 +122,13 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // _patch refines this with live sub-phase counts (Resolving fixes X/Y →
     // Completing the tree N).
     progress.label('Resolving fixes…')
-    const patched = await lf.patch(lockfile, report, ctx, lockfileType, overrides)
+    const patched = await lf.patch(
+      lockfile,
+      report,
+      ctx,
+      lockfileType,
+      overrides,
+    )
     // Then fill any install-required field the edit left missing (the yarn-berry
     // zip checksum) straight from the registry, so the result is a complete
     // lockfile needing no reconcile `yarn install` (no-op for yarn-classic).
@@ -161,7 +166,9 @@ export const patchLockfile: TCallback = async ({ cwd, flags, ctx }) => {
     // `--json`: emit the machine-readable outcome as the only stdout (human logs
     // and the spinner are suppressed above). `--dry-run --json` = the preview form.
     if (flags.json)
-      console.log(JSON.stringify(ctx.summary ?? { dryRun: !!flags['dry-run'] }, null, 2))
+      console.log(
+        JSON.stringify(ctx.summary ?? { dryRun: !!flags['dry-run'] }, null, 2),
+      )
   } finally {
     progress.stop()
     ctx.progress = undefined

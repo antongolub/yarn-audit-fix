@@ -36,7 +36,10 @@ export const ecosystemFor = (fmt: TLockfileType): RegistryConfigDialect =>
 
 // Registry+auth resolved from the project's PM config — the lib owns the parsing
 // and the host-bound, https-only auth (`.npmrc`/`.yarnrc.yml`/`.yarnrc`+env).
-const registryConfig = (ctx: TContext, ecosystem: RegistryConfigDialect): RegistryConfig =>
+const registryConfig = (
+  ctx: TContext,
+  ecosystem: RegistryConfigDialect,
+): RegistryConfig =>
   resolveRegistry(ctx.cwd ?? process.cwd(), {
     config: ecosystem,
     registry: ctx.flags?.registry,

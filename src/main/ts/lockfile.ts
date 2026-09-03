@@ -1,13 +1,10 @@
 import path from 'node:path'
 
 import {
-  complete,
   detect,
   LockfileError,
-  modify,
   parse as lfParse,
   refurbish as lfRefurbish,
-  selectConstrained,
   stringify as lfStringify,
 } from 'lockgraph'
 import type {
@@ -17,11 +14,14 @@ import type {
   NodeId,
   OverrideConstraint,
   PmConfigEvidence,
-  RegistryAdapter,
 } from 'lockgraph'
 import sv from 'semver'
 
-import { buildRegistry, buildTarballSource, ecosystemFor } from './audit/adapter'
+import {
+  buildRegistry,
+  buildTarballSource,
+  ecosystemFor,
+} from './audit/adapter'
 import {
   buildConstraints,
   describeConstraints,
@@ -30,9 +30,13 @@ import {
   resolvePackageType,
 } from './audit/constraints'
 import type { TEngineTargets } from './audit/constraints'
-import { matchesPackage, parsePackageRules } from './audit/filter'
-import { formatAdvisoryMeta } from './audit/meta'
-import { describeScope, resolveScope } from './audit/scope'
+import { parsePackageRules } from './audit/filter'
+import { resolveScope } from './audit/scope'
+import { applyBatch, applyConstrained } from './audit/apply'
+import { gateByConsumers, gateByManifest, planUpgrades } from './audit/plan'
+import type { ApplyDeps } from './audit/apply'
+import { buildSummary, renderReport } from './audit/report'
+import type { ConstraintSkip, Ledger, Plan } from './audit/report'
 import { auditViaRegistry } from './audit/registry'
 import {
   TAuditReport,
@@ -75,7 +79,14 @@ const flatOverrides = (
     const segs = overrideSegments(key, sep)
     return segs.length === 0
       ? []
-      : [{ name: segs[segs.length - 1], parentPath: segs.slice(0, -1), to, origin }]
+      : [
+          {
+            name: segs[segs.length - 1],
+            parentPath: segs.slice(0, -1),
+            to,
+            origin,
+          },
+        ]
   })
 
 // npm's nested `{ foo: { bar: "1" } }` → one constraint per leaf, parents accumulated.
@@ -107,7 +118,8 @@ const toPolicy = (
   let manager: PmConfigEvidence['manager']
   if (ecosystem === 'yarn-classic' || ecosystem === 'yarn-berry') {
     manager = 'yarn'
-    if (manifest.resolutions) overrides = flatOverrides(manifest.resolutions, '/', 'yarn')
+    if (manifest.resolutions)
+      overrides = flatOverrides(manifest.resolutions, '/', 'yarn')
   } else if (ecosystem === 'pnpm') {
     manager = 'pnpm'
     if (manifest.pnpm?.overrides)
@@ -170,16 +182,11 @@ export const _format = (
     // the lock and let the user finish with `yarn install` (`refurbish` already
     // reported it). Any other error (e.g. `IRREDUCIBLE_LOSS`) still fails closed.
     if (e instanceof LockfileError && e.code === 'ENRICH_REQUIRED')
-      return lfStringify(lockfile as Graph, lockfileType as FormatId, { strict: false })
+      return lfStringify(lockfile as Graph, lockfileType as FormatId, {
+        strict: false,
+      })
     throw e
   }
-}
-
-/** Strip yarn's `npm:` protocol; return a usable semver range or undefined. */
-const normalizeRange = (raw?: string): string | undefined => {
-  if (!raw) return undefined
-  const r = raw.startsWith('npm:') ? raw.slice(4) : raw
-  return sv.validRange(r) ? r : undefined
 }
 
 /** A manifest file whose direct-dep ranges the gate consults, paired with its
@@ -203,7 +210,8 @@ const collectManifestFiles = (
   ]
   for (const wf of getWorkspaces(cwd, root)) {
     const manifest = attempt(() => readJson(wf))
-    if (manifest && typeof manifest === 'object') files.push({ file: wf, manifest })
+    if (manifest && typeof manifest === 'object')
+      files.push({ file: wf, manifest })
   }
   return files
 }
@@ -243,21 +251,8 @@ const manifestDirectRanges = (
   return out
 }
 
-/** Widen a declared range to admit `fix`, preserving the pin operator
- * (`^`/`~`/exact; anything else → caret): `4.17.11`→`4.18.0`, `~4.1`→`~4.18.0`. */
-const widenRange = (declared: string, fix: string): string => {
-  const t = declared.trim()
-  const op = t.startsWith('^') ? '^' : t.startsWith('~') ? '~' : /^\d/.test(t) ? '' : '^'
-  return op + fix
-}
-
 /** Report suffix naming the manifest file — empty for the root, `in <rel>` for a
  *  workspace, so a monorepo skip/rewrite says which package.json it means. */
-const manifestWhere = (file: string, cwd?: string): string => {
-  if (!cwd) return ''
-  const rel = path.relative(cwd, file)
-  return rel === 'package.json' || rel === '' ? '' : ` in ${rel}`
-}
 
 /**
  * Upgrade every vulnerable node to the lowest published version that clears its
@@ -267,654 +262,29 @@ const manifestWhere = (file: string, cwd?: string): string => {
  * deps, `pruneOrphans` retires the old closure the upgrade stranded. Async since
  * the registry is hit over HTTP.
  */
-/** One vulnerable package, its minimal fix, and the nodes to rebind. */
-type Plan = {
-  name: string
-  fromRange: string
-  fix: string
-  froms: { id: NodeId; version: string }[]
-}
 
-/** Why a fix was dropped by the engines/license gate. */
-type ConstraintSkip = {
-  seed?: boolean // true = the fix version itself was rejected (not a transitive)
-  depName?: string
-  range?: string
-  rejected?: readonly {
-    version: string
-    by?: string
-    condition?: string
-    reason?: string
-  }[]
-}
-
-/** Everything the patch decided NOT to do, and why — the ledgers the report reads. */
-type Ledger = {
-  excluded: Set<string>
-  noFix: Set<string>
-  scopeSkipped: Set<string>
-  pinned: Map<string, string>
-  incompatible: Map<string, Set<string>>
-  manifestPinned: Map<string, { range: string; file: string }[]>
-  constraintSkipped: Map<string, ConstraintSkip>
-  manifestEdits: TManifestEdit[]
+type Policy = {
+  constraints: readonly Condition[]
+  constraintSummary: string
+  engineTargets: TEngineTargets | undefined
+  onConflict: 'skip' | 'stop'
 }
 
 /**
- * Machine-readable outcome (`--json`): what was (or, under `--dry-run`, would be)
- * upgraded, and what was skipped and why. Built from the same ledgers `renderReport`
- * reads, so the two can never diverge.
+ * Resolve the opt-in remediation constraints up front, before any network work — a
+ * bad range or unsupported keyword throws here. Empty `constraints` ⇒ completion runs
+ * exactly as it did before the gates existed.
+ *
+ * `--safe` is the opposite of `--force`: it FILLS the axes you didn't set — hold the
+ * tree's engine floor if it declares one, keep the closure require-able in a CommonJS
+ * project — but never overrides an axis you set explicitly. License stays yours.
  */
-const buildSummary = (
-  dryRun: boolean,
-  ledger: Ledger,
-  applied: readonly Plan[],
-  report: TAuditReport,
-): NonNullable<TContext['summary']> => {
-  const seen = new Set<string>()
-  return {
-    dryRun,
-    upgraded: applied.flatMap((u) => {
-      const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
-      if (seen.has(head)) return []
-      seen.add(head)
-      return [
-        { name: u.name, from: u.froms[0].version, to: u.fix, severity: report[u.name]?.severity },
-      ]
-    }),
-    skipped: [
-      ...[...ledger.incompatible.keys()].map((p) => ({ package: p, reason: 'consumer-range' })),
-      ...[...ledger.pinned.keys()].map((p) => ({ package: p, reason: 'override-pin' })),
-      ...[...ledger.manifestPinned.keys()].map((p) => ({ package: p, reason: 'manifest-pin' })),
-      ...[...ledger.constraintSkipped.keys()].map((p) => ({ package: p, reason: 'constraint' })),
-      ...[...ledger.scopeSkipped].map((p) => ({ package: p, reason: 'out-of-scope' })),
-    ].sort((a, b) => a.package.localeCompare(b.package)),
-    excluded: [...ledger.excluded].sort(),
-    noFix: [...ledger.noFix].sort(),
-  }
-}
-
-/**
- * The human-readable outcome: what was upgraded, what was skipped and why, plus any
- * completion diagnostics. Pure output — reads the ledgers, mutates nothing.
- */
-/**
- * The active constraint policy, and where an inferred engine target came from — a
- * range taken from the running process can differ from the project's own target.
- */
-const printConstraints = (
-  log: (s: string) => void,
-  flags: TContext['flags'],
-  constraintSummary: string,
-  engineTargets: TEngineTargets | undefined,
-): void => {
-  if (constraintSummary) {
-    log(`Constraints${flags.safe ? ' (--safe)' : ''}: ${constraintSummary}`)
-    const runtimeEngines = engineTargets
-      ? Object.keys(engineTargets).filter((e) => {
-          const v = (flags.engines as Record<string, unknown> | undefined)?.[e]
-          return v === true || v === 'runtime'
-        })
-      : []
-    if (runtimeEngines.length > 0)
-      log(
-        `  (${runtimeEngines.join(', ')} = the running process — may differ from your project's target; pass --engines.${runtimeEngines[0]}='<range>' to pin it)`,
-      )
-    const floorEngines = engineTargets
-      ? Object.keys(engineTargets).filter(
-          (e) =>
-            (flags.engines as Record<string, unknown> | undefined)?.[e] ===
-            'floor',
-        )
-      : []
-    if (floorEngines.length > 0)
-      log(`  (${floorEngines.join(', ')} = inferred from the installed tree)`)
-  }
-}
-
-/** Everything the run declined to fix, grouped by reason. */
-/** Skips that need no action: nothing published, `--exclude`d, or out of scope. */
-const printInfoSkips = (
-  log: (s: string) => void,
-  flags: TContext['flags'],
-  ledger: Ledger,
-): void => {
-  const { excluded, noFix, scopeSkipped } = ledger
-  if (noFix.size > 0) {
-    log('No fix available: ' + [...noFix].sort().join(', '))
-  }
-  if (excluded.size > 0) {
-    log('Excluded (per --exclude): ' + [...excluded].sort().join(', '))
-  }
-  // Out-of-scope advisories can be a whole dev tree — a count by default, the
-  // full list only under --verbose.
-  if (scopeSkipped.size > 0) {
-    if (flags.verbose)
-      log(
-        `Skipped (outside ${describeScope(flags)} scope): ` +
-          [...scopeSkipped].sort().join(', '),
-      )
-    else
-      log(
-        `Skipped ${scopeSkipped.size} package(s) outside ${describeScope(flags)} scope (--verbose to list)`,
-      )
-  }
-}
-
-/** Skips the engineer has to act on — each names what to change to remediate. */
-const printActionableSkips = (
-  log: (s: string) => void,
-  warn: (s: string) => void,
-  ctx: TContext,
-  ledger: Ledger,
-  constraintSummary: string,
-): void => {
+const resolvePolicy = (ctx: TContext): Policy => {
   const { flags } = ctx
-  const { pinned, incompatible, manifestPinned, constraintSkipped, manifestEdits } = ledger
-  if (incompatible.size > 0) {
-    warn(
-      'Skipped (fix breaks a consumer\'s declared range; re-run with --force to apply):',
-    )
-    for (const [spec, consumers] of [...incompatible].sort()) {
-      warn(`  ${spec}`)
-      for (const c of [...consumers].sort()) warn(`    - ${c}`)
-    }
-  }
-  if (pinned.size > 0) {
-    warn(
-      'Skipped (pinned by an override/resolution the fix can\'t satisfy; update the override to remediate):',
-    )
-    for (const [spec, to] of [...pinned].sort()) {
-      warn(`  ${spec} (pinned → ${to})`)
-    }
-  }
-  if (manifestPinned.size > 0) {
-    warn(
-      'Skipped (package.json pins these to a range the fix can\'t satisfy; re-run with --force to update package.json, or widen the range yourself):',
-    )
-    for (const [name, decls] of [...manifestPinned].sort()) {
-      for (const d of decls)
-        warn(`  ${name} (pinned → "${d.range}"${manifestWhere(d.file, ctx.cwd)})`)
-    }
-  }
-  if (constraintSkipped.size > 0) {
-    warn(
-      `Skipped (constraints — no fix keeps the closure within the policy [${constraintSummary}]; relax it, --exclude the package, or accept the newer dep):`,
-    )
-    for (const [head, data] of [...constraintSkipped].sort()) {
-      const need = data.seed
-        ? ' — the fix version itself is not permitted'
-        : data.depName
-          ? ` — needs ${data.depName}${data.range ? `@${data.range}` : ''}`
-          : ''
-      warn(`  ${head}${need}`)
-      if (flags.verbose && data.rejected?.length) {
-        for (const r of data.rejected)
-          warn(`    - ${data.depName}@${r.version}: ${r.reason ?? r.condition ?? r.by}`)
-      }
-    }
-  }
-  if (manifestEdits.length > 0) {
-    log('Updated package.json ranges (--force):')
-    for (const e of [...manifestEdits].sort((a, b) => a.name.localeCompare(b.name))) {
-      log(`  ${e.name}: "${e.from}" → "${e.to}"${manifestWhere(e.file, ctx.cwd)}`)
-    }
-  }
-}
-
-
-const printSkips = (
-  log: (s: string) => void,
-  warn: (s: string) => void,
-  ctx: TContext,
-  ledger: Ledger,
-  constraintSummary: string,
-): void => {
-  printInfoSkips(log, ctx.flags, ledger)
-  printActionableSkips(log, warn, ctx, ledger, constraintSummary)
-}
-
-
-const renderReport = (
-  ctx: TContext,
-  policy: { constraintSummary: string; engineTargets: TEngineTargets | undefined },
-  ledger: Ledger,
-  applied: readonly Plan[],
-  report: TAuditReport,
-  inScope: ReadonlySet<NodeId> | undefined,
-  completionDiagnostics: readonly { severity: string; code: string; message: string }[],
-): void => {
-  const { flags } = ctx
-  const { constraintSummary, engineTargets } = policy
-  // Route through the spinner when one is active (clears → prints → redraws);
-  // plain console otherwise (direct/test calls).
-  const log = ctx.progress ? ctx.progress.log : console.log
-  const warn = ctx.progress ? ctx.progress.log : console.warn
-  // Surface the active constraints first — and when an engine target was inferred
-  // from the running process, flag that it may differ from the project's target.
-  printConstraints(log, flags, constraintSummary, engineTargets)
-  // Surface the active fix scope so a reduced fix set is never a silent surprise.
-  if (inScope) log(`Scope: ${describeScope(flags)}`)
-  // Dedupe by from→to; annotate with severity / CVSS / CVE refs.
-  const seen = new Set<string>()
-  const lines: string[] = []
-  for (const u of applied) {
-    const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
-    if (seen.has(head)) continue
-    seen.add(head)
-    lines.push(head + formatAdvisoryMeta(report[u.name]))
-  }
-  lines.sort()
-  if (lines.length > 0) {
-    log(`Upgraded deps (${lines.length}):`)
-    for (const line of lines) log(`  ${line}`)
-  } else {
-    log('Upgraded deps: <none>')
-  }
-  printSkips(log, warn, ctx, ledger, constraintSummary)
-  // info-level COMPLETION_NODE_ADDED is success noise — only surface real gaps.
-  reportDiagnostics(
-    completionDiagnostics.filter((d) => d.severity !== 'info'),
-    flags.verbose,
-    warn,
-  )
-}
-
-/** The shared wiring both apply paths need to reach the registry and report progress. */
-type ApplyDeps = {
-  target: FormatId
-  registry: RegistryAdapter
-  overrideList: readonly OverrideConstraint[]
-  onCompletionDiag: (d: { code?: string }) => void
-}
-
-type ApplyResult = {
-  graph: Graph
-  applied: Plan[]
-  diagnostics: { severity: string; code: string; message: string }[]
-}
-
-/**
- * Default path: rebind every fix, then ONE batch completion — fast, because the
- * parallel packument prefetch batches across all upgrades.
- */
-const applyBatch = async (
-  input: Graph,
-  upgrades: readonly Plan[],
-  { target, registry, overrideList, onCompletionDiag }: ApplyDeps,
-): Promise<ApplyResult> => {
-  let graph = input
-  const applied: Plan[] = []
-  const diagnostics: ApplyResult['diagnostics'] = []
-  // Default path: rebind every fix, then ONE batch completion — fast, and the
-  // parallel packument prefetch batches across all upgrades.
-  const recentlyAdded = new Set<NodeId>()
-  const recentlyOrphaned = new Set<NodeId>()
-  for (const u of upgrades) {
-    const res = await modify(
-      graph,
-      {
-        kind: 'replaceVersion',
-        selector: { name: u.name, fromRange: u.fromRange },
-        to: u.fix,
-      },
-      { target, sources: { packuments: [registry] } },
-    )
-    graph = res.graph
-    res.frontier.added.forEach((id) => recentlyAdded.add(id))
-    res.frontier.orphaned.forEach((id) => recentlyOrphaned.add(id))
-    applied.push(u)
-  }
-  if (recentlyAdded.size > 0 || recentlyOrphaned.size > 0) {
-    // `pruneOrphans` sweeps the closure a dep-changing bump stranded: a ref-counted
-    // cascade off `seed.orphaned`, so it needs no workspace anchor and works on
-    // rootless yarn-classic locks. `frontier.orphaned` holds only nodes that HAD
-    // incoming edges and now have none, so danglers yarn keeps (fsevents patch base,
-    // catalog: target) can't enter it — no preserve set needed here.
-    const completion = await complete(graph, {
-      target,
-      sources: { packuments: [registry] },
-      seed: { added: recentlyAdded, orphaned: recentlyOrphaned },
-      overrides: overrideList,
-      pruneOrphans: true,
-      onDiagnostic: onCompletionDiag,
-    })
-    graph = completion.graph
-    diagnostics.push(...completion.diagnostics)
-  }
-  return { graph, applied, diagnostics }
-}
-
-/**
- * Constrained path (opt-in: engines and/or license). Apply + complete each upgrade
- * tentatively and commit it only if its closure resolves under the constraints.
- */
-const applyConstrained = async (
-  input: Graph,
-  upgrades: readonly Plan[],
-  { target, registry, overrideList, onCompletionDiag }: ApplyDeps,
-  policy: {
-    constraints: readonly Condition[]
-    constraintSummary: string
-    onConflict: 'skip' | 'stop'
-  },
-  constraintSkipped: Map<string, ConstraintSkip>,
-): Promise<ApplyResult> => {
-  let graph = input
-  const applied: Plan[] = []
-  const diagnostics: ApplyResult['diagnostics'] = []
-  const { constraints, constraintSummary, onConflict } = policy
-  // Constrained path (opt-in: engines and/or license). Apply + complete each
-  // upgrade tentatively and commit it only if its closure resolves under the
-  // constraints. A COMPLETION_NO_CANDIDATE means a new transitive has no
-  // constraint-satisfying version in range → the fix's closure can't be completed
-  // → skip the whole fix (leave the vuln, report it) or error under
-  // --on-conflict=stop. replaceVersion/completeTransitives are immutable, so a
-  // rejected upgrade's tentative graphs are simply dropped and `graph` is unchanged.
-  let touched = false
-  for (const u of upgrades) {
-    const head = `${u.name}@${u.froms[0].version} → ${u.fix}`
-    // Seed gate: the fix VERSION itself must pass the constraints. Completion
-    // only gates the transitives it resolves, never the replaceVersion target, so
-    // without this a fix that bumps a package TO an engine-/license-violating
-    // version would slip through (only its deps would be checked).
-    const seedSel = await selectConstrained(u.name, u.fix, {
-      registry,
-      conditions: constraints,
-      onUnevaluable: 'reject',
-    })
-    if (!seedSel.selected) {
-      if (onConflict === 'stop')
-        throw new Error(
-          `Constraints (${constraintSummary}): the fix ${head} itself doesn't satisfy the policy. Re-run with --on-conflict=skip to leave it, or relax the constraint.`,
-        )
-      constraintSkipped.set(head, {
-        seed: true,
-        depName: u.name,
-        range: u.fix,
-        rejected: seedSel.rejected,
-      })
-      continue
-    }
-    const res = await modify(
-      graph,
-      {
-        kind: 'replaceVersion',
-        selector: { name: u.name, fromRange: u.fromRange },
-        to: u.fix,
-      },
-      { target, sources: { packuments: [registry] } },
-    )
-    if (res.frontier.added.size === 0 && res.frontier.orphaned.size === 0) {
-      applied.push(u) // no-op bump (already at the fix); nothing to complete
-      continue
-    }
-    const completion = await complete(res.graph, {
-      target,
-      sources: { packuments: [registry] },
-      seed: res.frontier,
-      overrides: overrideList,
-      constraints,
-      pruneOrphans: true,
-      onDiagnostic: onCompletionDiag,
-    })
-    // An override forces a version a constraint vetoes — a user-config
-    // contradiction (npm parity holds the pin verbatim, but it breaks the
-    // target). Nothing to skip: always hard-fail.
-    const conflict = completion.diagnostics.find(
-      (d: { code?: string }) =>
-        d.code === 'COMPLETION_OVERRIDE_CONSTRAINT_CONFLICT',
-    ) as { data?: { depName?: string; forced?: string } } | undefined
-    if (conflict)
-      throw new Error(
-        `An override pins ${conflict.data?.depName ?? '?'}@${conflict.data?.forced ?? '?'}, which violates the active constraints (${constraintSummary}). Reconcile the override or drop the constraint.`,
-      )
-    const noCandidate = completion.diagnostics.filter(
-      (d: { code?: string }) => d.code === 'COMPLETION_NO_CANDIDATE',
-    ) as {
-      data?: {
-        depName?: string
-        range?: string
-        rejected?: readonly {
-          version: string
-          by?: string
-          condition?: string
-          reason?: string
-        }[]
-      }
-    }[]
-    if (noCandidate.length > 0) {
-      if (onConflict === 'stop')
-        throw new Error(
-          `Constraints (${constraintSummary}): no in-range version of ${noCandidate[0].data?.depName ?? '?'} satisfies the policy for ${head}. Re-run with --on-conflict=skip to leave it, or relax the constraint.`,
-        )
-      constraintSkipped.set(head, noCandidate[0].data ?? {})
-      continue // drop u: keep the pre-u graph, leave the vuln in place
-    }
-    graph = completion.graph
-    diagnostics.push(...completion.diagnostics)
-    touched = true
-    applied.push(u)
-  }
-  void touched // each per-upgrade completion prunes its own orphans (seed-scoped)
-  return { graph, applied, diagnostics }
-}
-
-/**
- * Pass 1 — for each advisory: find the vulnerable nodes, drop the ones `--exclude`
- * or the fix scope rules out, resolve the minimal published fix, and honor a
- * declared override that the fix cannot satisfy. Records every skip in `ledger`.
- */
-/**
- * Override authority (`npm audit fix --force` parity): a root override / resolution
- * is the user's deliberate pin. Returns the pinned target when it governs `name` and
- * the fix can't satisfy it — the package is then left untouched and reported, because
- * npm does not rewrite an override even under `--force`. Returns `undefined` when no
- * pin governs it, or when a range pin ADMITS the fix (the bump stays inside it).
- */
-const blockingOverride = (
-  graph: Graph,
-  name: string,
-  kept: readonly { id: unknown; name: string; version: string }[],
-  overrides: readonly OverrideConstraint[],
-  fix: string,
-): string | undefined => {
-  if (overrides.length === 0) return undefined
-  let pinTo = graph.governingOverride(name, [])?.to // bare / tree-wide
-  if (pinTo === undefined) {
-    // single-parent-scoped (matches the lib's consumerPath = [immediate parent])
-    pinScan: for (const n of kept) {
-      for (const e of graph.in(n.id as NodeId)) {
-        const consumer = graph.getNode(e.source)
-        const g = consumer && graph.governingOverride(name, [consumer.name])
-        if (g) {
-          pinTo = g.to
-          break pinScan
-        }
-      }
-    }
-  }
-  // v1 safety: the lib's matcher only sees one consumer level, so a DEEP scope
-  // (>=2 ancestors, e.g. npm `a>b>foo`) under-matches. We can't prove which subtree
-  // it governs -> treat it as authoritative-but-unverifiable and leave the package
-  // be, rather than emit a bump a deep override could revert on install. (Drop this
-  // once the lib threads a full consumer path.)
-  if (pinTo === undefined)
-    return overrides.find((c) => c.name === name && (c.parentPath?.length ?? 0) >= 2)?.to
-  // A range pin that ADMITS the fix falls through (bump stays within it); an exact /
-  // non-semver pin the fix can't satisfy is left as-is.
-  const pinRange = normalizeRange(pinTo)
-  return pinRange === undefined || !sv.satisfies(fix, pinRange) ? pinTo : undefined
-}
-
-const planUpgrades = async (
-  graph: Graph,
-  report: TAuditReport,
-  ctx: TContext,
-  overrides: readonly OverrideConstraint[],
-  inScope: ReadonlySet<NodeId> | undefined,
-  excludeRules: ReturnType<typeof parsePackageRules>,
-  lowestFix: (name: string, range: string) => Promise<string | undefined>,
-  ledger: Ledger,
-): Promise<Plan[]> => {
-  const { excluded, noFix, scopeSkipped, pinned } = ledger
-// Pass 1: per vulnerable package, resolve the minimal fix and the nodes to bump.
-const plans: Plan[] = []
-const advisoryCount = Object.keys(report).length
-let resolving = 0
-for (const [name, advisory] of Object.entries(report)) {
-  ctx.progress?.label(`Resolving fixes… ${++resolving}/${advisoryCount}`)
-  const vuln = [...graph.nodes()].filter(
-    (n) =>
-      n.name === name && sv.satisfies(n.version, advisory.vulnerable_versions),
-  )
-  if (vuln.length === 0) continue
-
-  const kept = vuln.filter((n) => {
-    if (
-      excludeRules.length > 0 &&
-      matchesPackage(n.name, n.version, excludeRules)
-    ) {
-      excluded.add(`${n.name}@${n.version}`)
-      return false
-    }
-    if (inScope && !inScope.has(n.id)) {
-      scopeSkipped.add(`${n.name}@${n.version}`)
-      return false
-    }
-    return true
-  })
-  if (kept.length === 0) continue
-
-  const fix = await lowestFix(name, advisory.patched_versions)
-  if (fix === undefined) {
-    kept.forEach((n) => noFix.add(`${n.name}@${n.version}`))
-    continue
-  }
-
-    const blockedBy = blockingOverride(graph, name, kept, overrides, fix)
-    if (blockedBy !== undefined) {
-      kept.forEach((n) => pinned.set(`${n.name}@${n.version}`, blockedBy))
-      continue
-    }
-
-  // skip versions already at/above the fix — keeps re-runs idempotent
-  const froms = kept.filter((n) => sv.lt(n.version, fix))
-  if (froms.length === 0) continue
-
-  plans.push({
-    name,
-    fromRange: advisory.vulnerable_versions,
-    fix,
-    froms: froms.map((n) => ({ id: n.id as NodeId, version: n.version })),
-  })
-}
-  return plans
-}
-
-/**
- * A DIRECT dep whose declared package.json range can't admit the fix. Default →
- * flag + skip (surface it, the engineer widens the range); `--force` → rewrite the
- * range in each declaring manifest and let the bump proceed.
- */
-const gateByManifest = (
-  plans: readonly Plan[],
-  directRanges: Map<string, { range: string; file: string }[]>,
-  flags: TContext['flags'],
-  ledger: Ledger,
-): Plan[] => {
-  const { manifestPinned, manifestEdits } = ledger
-// Manifest gate: a DIRECT dep whose declared package.json range can't admit the
-// fix. Default → flag + skip (like `npm audit fix` without --force: surface it,
-// the engineer widens the range). --force → rewrite the range in package.json
-// (npm audit fix --force parity) + let the bump proceed. Works for EVERY format:
-// a yarn-classic lock has no root edge, so Pass 2's edge gate can't see direct
-// deps — this can. Non-semver ranges (workspace:/npm:alias/git/file) skip via the
-// validRange guard; `*` admits every fix so it never trips.
-const gatedPlans: Plan[] = []
-for (const p of plans) {
-  // Every declaration (root + workspaces) whose declared range can't admit the
-  // fix — a semver-major bump outside a `^`/exact pin, in any manifest.
-  const blocking = (directRanges.get(p.name) ?? []).filter(
-    (d) => sv.validRange(d.range) && !sv.satisfies(p.fix, d.range),
-  )
-  if (blocking.length > 0) {
-    if (!flags.force) {
-      manifestPinned.set(p.name, blocking)
-      continue
-    }
-    for (const d of blocking)
-      manifestEdits.push({
-        name: p.name,
-        from: d.range,
-        to: widenRange(d.range, p.fix),
-        file: d.file,
-      })
-  }
-  gatedPlans.push(p)
-}
-  return gatedPlans
-}
-
-/**
- * Pass 2 — skip a fix that falls outside a *surviving* consumer's declared range
- * (unless `--force`). A consumer that is itself being bumped is exempt: its deps are
- * re-derived from the registry.
- */
-const gateByConsumers = (
-  graph: Graph,
-  gatedPlans: readonly Plan[],
-  flags: TContext['flags'],
-  ledger: Ledger,
-): Plan[] => {
-  const { incompatible } = ledger
-// Pass 2: compat gate. Skip a fix outside a *surviving* consumer's declared
-// range (unless --force); a consumer that is itself being bumped is exempt —
-// replaceVersion + completeTransitives re-derive its deps from the registry.
-const planNames = new Set(gatedPlans.map((p) => p.name))
-const upgrades: Plan[] = []
-for (const p of gatedPlans) {
-  let breaks: Set<string> | undefined
-  if (!flags.force) {
-    for (const from of p.froms) {
-      for (const edge of graph.in(from.id)) {
-        const consumer = graph.getNode(edge.source)
-        if (consumer && planNames.has(consumer.name)) continue // bumped too
-        const range = normalizeRange(edge.attributes?.range)
-        if (range && !sv.satisfies(p.fix, range)) {
-          ;(breaks ??= new Set()).add(`${edge.source} wants "${edge.attributes!.range}"`)
-        }
-      }
-    }
-  }
-  if (breaks?.size) {
-    incompatible.set(`${p.name}@${p.froms[0].version} → ${p.fix}`, breaks)
-    continue
-  }
-  upgrades.push(p)
-}
-  return upgrades
-}
-
-export const _patch = async (
-  lockfile: TLockfileObject,
-  report: TAuditReport,
-  ctx: TContext,
-  lockfileType: TLockfileType,
-  overrides: readonly OverrideConstraint[] = [],
-): Promise<TLockfileObject> => {
-  const { flags } = ctx
-  // Opt-in remediation constraints: resolve them up front (a bad range / unsupported
-  // keyword throws here, before any network work). `constraints` empty ⇒ the
-  // completion runs exactly as before.
   if (flags.safe && flags.force)
     throw new Error('--safe and --force are opposites; pass one, not both')
   let engineTargets = resolveEngineTargets(flags.engines, ctx.cwd)
   let packageType = resolvePackageType(flags['package-type'])
-  // --safe: fix only what's safe on every automatable axis (the opposite of
-  // --force). It FILLS the axes you didn't set — hold the tree's engine floor (if it
-  // declares one) and keep the closure require-able in a CommonJS project — but never
-  // overrides an axis you set explicitly. License stays a policy you set yourself.
   if (flags.safe) {
     if (!engineTargets) {
       try {
@@ -927,16 +297,36 @@ export const _patch = async (
       packageType = 'cjs'
   }
   const licensePolicy = resolveLicensePolicy(flags.license)
-  const constraints = buildConstraints(engineTargets, licensePolicy, packageType)
-  const constraintSummary = describeConstraints(
+  return {
+    constraints: buildConstraints(engineTargets, licensePolicy, packageType),
+    constraintSummary: describeConstraints(
+      engineTargets,
+      licensePolicy,
+      packageType,
+    ),
     engineTargets,
-    licensePolicy,
-    packageType,
-  )
-  const onConflict: 'skip' | 'stop' =
-    flags['on-conflict'] === 'stop' ? 'stop' : 'skip'
+    onConflict: flags['on-conflict'] === 'stop' ? 'stop' : 'skip',
+  }
+}
+
+export const _patch = async (
+  lockfile: TLockfileObject,
+  report: TAuditReport,
+  ctx: TContext,
+  lockfileType: TLockfileType,
+  overrides: readonly OverrideConstraint[] = [],
+): Promise<TLockfileObject> => {
+  const { flags } = ctx
+  const { constraints, constraintSummary, engineTargets, onConflict } =
+    resolvePolicy(ctx)
   if (Object.keys(report).length === 0) {
-    ctx.summary = { dryRun: !!flags['dry-run'], upgraded: [], skipped: [], excluded: [], noFix: [] }
+    ctx.summary = {
+      dryRun: !!flags['dry-run'],
+      upgraded: [],
+      skipped: [],
+      excluded: [],
+      noFix: [],
+    }
     !flags.silent && !flags.json && console.log('Audit check found no issues')
     return lockfile
   }
@@ -970,18 +360,28 @@ export const _patch = async (
   const constraintSkipped = new Map<string, ConstraintSkip>()
 
   const ledger: Ledger = {
-    excluded, noFix, scopeSkipped, pinned,
-    incompatible, manifestPinned, constraintSkipped, manifestEdits,
+    excluded,
+    noFix,
+    scopeSkipped,
+    pinned,
+    incompatible,
+    manifestPinned,
+    constraintSkipped,
+    manifestEdits,
   }
 
   // Lowest published version that clears the advisory (minimal bump), read from
   // the registry packument.
-  const packCache = new Map<string, Awaited<ReturnType<typeof registry.packument>>>()
+  const packCache = new Map<
+    string,
+    Awaited<ReturnType<typeof registry.packument>>
+  >()
   const lowestFix = async (
     name: string,
     range: string,
   ): Promise<string | undefined> => {
-    if (!packCache.has(name)) packCache.set(name, await registry.packument(name))
+    if (!packCache.has(name))
+      packCache.set(name, await registry.packument(name))
     const pack = packCache.get(name)
     if (!pack) return undefined
     return Object.keys(pack.versions)
@@ -990,7 +390,14 @@ export const _patch = async (
   }
 
   const plans = await planUpgrades(
-    graph, report, ctx, overrides, inScope, excludeRules, lowestFix, ledger,
+    graph,
+    report,
+    ctx,
+    overrides,
+    inScope,
+    excludeRules,
+    lowestFix,
+    ledger,
   )
   const gatedPlans = gateByManifest(plans, directRanges, flags, ledger)
   if (manifestEdits.length > 0) ctx.manifestEdits = manifestEdits
@@ -1092,13 +499,18 @@ export const _refurbish = async (
   // Live count of recomputed checksums — the tarball fetches are the slowest
   // phase, so surface progress as each one lands.
   let filled = 0
-  const result = await lfRefurbish(lockfile as Graph, lockfileType as FormatId, source, {
-    seed: base && addedNodes(base as Graph, lockfile as Graph),
-    onDiagnostic: (d: { code?: string }) => {
-      if (d.code === 'ENRICH_FIELD_FILLED')
-        ctx.progress?.label(`Recomputing checksums… ${++filled}`)
+  const result = await lfRefurbish(
+    lockfile as Graph,
+    lockfileType as FormatId,
+    source,
+    {
+      seed: base && addedNodes(base as Graph, lockfile as Graph),
+      onDiagnostic: (d: { code?: string }) => {
+        if (d.code === 'ENRICH_FIELD_FILLED')
+          ctx.progress?.label(`Recomputing checksums… ${++filled}`)
+      },
     },
-  })
+  )
 
   if (!ctx.flags.silent) {
     const warn = ctx.progress ? ctx.progress.log : console.warn

@@ -34,7 +34,12 @@ export type TContext = {
 
 // A package.json direct-dep range rewrite: `"<name>": "<from>"` → `"<name>": "<to>"`,
 // in the manifest `file` that declared it (the root or a workspace package.json).
-export type TManifestEdit = { name: string; from: string; to: string; file: string }
+export type TManifestEdit = {
+  name: string
+  from: string
+  to: string
+  file: string
+}
 
 // Machine-readable remediation outcome for `--json` — what was (or, under
 // `--dry-run`, would be) upgraded, and what was skipped and why. Built by `_patch`

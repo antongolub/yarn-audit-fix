@@ -41,12 +41,16 @@ export const getTarball = (
     } catch {
       return resolve(undefined)
     }
-    if (u.protocol !== 'https:' && u.protocol !== 'http:') return resolve(undefined)
+    if (u.protocol !== 'https:' && u.protocol !== 'http:')
+      return resolve(undefined)
     const mod = u.protocol === 'https:' ? https : http
 
-    const headers: Record<string, string> = { accept: 'application/octet-stream' }
+    const headers: Record<string, string> = {
+      accept: 'application/octet-stream',
+    }
     // Host-binding is the caller's job; here just never send auth over http.
-    if (authHeader && u.protocol === 'https:') headers.authorization = authHeader
+    if (authHeader && u.protocol === 'https:')
+      headers.authorization = authHeader
 
     const req = mod.request(
       u,
@@ -100,40 +104,55 @@ const advisoryIds = (a: any): string[] => {
  * advisories (npm id / GHSA) before the per-package merge; below-`--audit-level`
  * severities are filtered.
  */
+/**
+ * One advisory → one report entry, or `undefined` when it is filtered out: no
+ * vulnerable range to act on, below `--audit-level`, or matched by `--ignore`.
+ */
+const toEntry = (
+  name: string,
+  a: any,
+  minRank: number,
+  ignoreGlobs: RegExp[],
+): TAuditReport[string] | undefined => {
+  const vuln: string | undefined = a?.vulnerable_versions
+  if (!vuln) return undefined
+  if (rank(a.severity) < minRank) return undefined
+  if (matchesId(advisoryIds(a), ignoreGlobs)) return undefined
+  return {
+    module_name: name,
+    vulnerable_versions: vuln,
+    patched_versions: derivePatchedVersions(vuln),
+    severity: a.severity,
+    cvss: typeof a.cvss === 'number' ? a.cvss : a.cvss?.score || undefined,
+    refs: extractRefs(a.cves, a.url, a.title),
+    url: a.url,
+  }
+}
+
+/** Several advisories on one package: OR the vulnerable ranges, AND the patched ones. */
+const mergeEntries = (
+  prev: TAuditReport[string],
+  entry: TAuditReport[string],
+): TAuditReport[string] => ({
+  ...entry,
+  ...mergeMeta(prev, entry),
+  vulnerable_versions: `${prev.vulnerable_versions} || ${entry.vulnerable_versions}`,
+  patched_versions: joinAnd(prev.patched_versions, entry.patched_versions),
+})
+
 export const toReport = (
   raw: Record<string, any[]>,
   minRank: number,
   ignoreGlobs: RegExp[] = [],
 ): TAuditReport => {
   const report: TAuditReport = {}
-  for (const [name, advs] of Object.entries(raw)) {
+  for (const [name, advs] of Object.entries(raw))
     for (const a of advs) {
-      const vuln: string | undefined = a?.vulnerable_versions
-      if (!vuln) continue
-      if (rank(a.severity) < minRank) continue
-      if (matchesId(advisoryIds(a), ignoreGlobs)) continue
-      const cvss =
-        typeof a.cvss === 'number' ? a.cvss : a.cvss?.score || undefined
-      const entry = {
-        module_name: name,
-        vulnerable_versions: vuln,
-        patched_versions: derivePatchedVersions(vuln),
-        severity: a.severity,
-        cvss,
-        refs: extractRefs(a.cves, a.url, a.title),
-        url: a.url,
-      }
+      const entry = toEntry(name, a, minRank, ignoreGlobs)
+      if (!entry) continue
       const prev = report[name]
-      report[name] = prev
-        ? {
-            ...entry,
-            ...mergeMeta(prev, entry),
-            vulnerable_versions: `${prev.vulnerable_versions} || ${vuln}`,
-            patched_versions: joinAnd(prev.patched_versions, entry.patched_versions),
-          }
-        : entry
+      report[name] = prev ? mergeEntries(prev, entry) : entry
     }
-  }
   return report
 }
 
@@ -182,7 +201,8 @@ export const auditViaRegistry = async (
     const slice: Record<string, readonly string[]> = {}
     for (const name of names) slice[name] = packages[name]
     const res = await reg.audit(slice)
-    for (const [name, advs] of Object.entries(res)) (raw[name] ??= []).push(...advs)
+    for (const [name, advs] of Object.entries(res))
+      (raw[name] ??= []).push(...advs)
   }
 
   return toReport(

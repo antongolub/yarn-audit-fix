@@ -11,7 +11,15 @@ import { getSelfManifest } from './util'
 // Declarative option spec (keeps `parse` small and the Node floor low — see the
 // v11 migration note): value-taking vs boolean flags, their `YAF_*` env-var
 // fallbacks, and the allowed values for the enum-like ones.
-const BOOLEAN = ['dry-run', 'force', 'json', 'production', 'safe', 'silent', 'verbose']
+const BOOLEAN = [
+  'dry-run',
+  'force',
+  'json',
+  'production',
+  'safe',
+  'silent',
+  'verbose',
+]
 const STRING = [
   'audit-level',
   'cwd',
@@ -91,6 +99,66 @@ Every flag also reads a YAF_<FLAG> env var (e.g. YAF_AUDIT_LEVEL).`
  * rest. `--version` / `--help` short-circuit.
  * Throws on an out-of-range `choices` value.
  */
+/** Explicit flags, in first-seen order; a `--no-x` / `--x=false` boolean is off. */
+const collectExplicit = (
+  flags: TFlags,
+  argv: string[],
+  raw: Record<string, any>,
+  known: Set<string>,
+): void => {
+  for (const token of argv) {
+    if (!token.startsWith('--')) continue
+    const key = token.replace(/^--(no-)?/, '').split('=')[0]
+    if (known.has(key) && !(key in flags) && raw[key] !== false)
+      flags[key] = raw[key]
+  }
+}
+
+/** `YAF_*` fallback for whatever the argv pass left unset. */
+const applyEnvFallback = (
+  flags: TFlags,
+  env: NodeJS.ProcessEnv,
+  known: Set<string>,
+): void => {
+  for (const key of known) {
+    const name = ENV[key]
+    if (name && !(key in flags) && env[name] !== undefined)
+      flags[key] = env[name]
+  }
+}
+
+/**
+ * Flags minimist nests natively, which the token-keyed allowlist above cannot see:
+ * `--engines.<engine>[=<range>|runtime|floor]`, `--license.allow/.deny` (or a bare
+ * `--license=MIT,ISC`), and `--prod`, which is aliased to `--production` by minimist
+ * but never appears as the literal token. Values are validated later — by
+ * `resolveEngineTargets` (which also guards the keys against proto-pollution) and
+ * `resolveLicensePolicy`.
+ */
+const liftNestedFlags = (flags: TFlags, raw: Record<string, any>): void => {
+  if (
+    raw.engines &&
+    typeof raw.engines === 'object' &&
+    !Array.isArray(raw.engines)
+  )
+    flags.engines = raw.engines
+  if (raw.license !== undefined && raw.license !== false)
+    flags.license = raw.license
+  if (raw.production === true && !('production' in flags))
+    flags.production = true
+}
+
+/** Reject a value outside the flag's documented choices. */
+const assertChoices = (flags: TFlags): void => {
+  for (const [key, allowed] of Object.entries(CHOICES)) {
+    const value = flags[key]
+    if (value !== undefined && !allowed.includes(String(value)))
+      throw new Error(
+        `Invalid value for --${key}: "${value}". Expected one of: ${allowed.join(', ')}`,
+      )
+  }
+}
+
 export const parse = (
   argv: string[] = process.argv.slice(2),
   env: NodeJS.ProcessEnv = process.env,
@@ -105,44 +173,10 @@ export const parse = (
 
   const known = new Set([...BOOLEAN, ...STRING])
   const flags: TFlags = {}
-
-  // Explicit flags, in first-seen order; a `--no-x` / `--x=false` boolean is off.
-  for (const token of argv) {
-    if (!token.startsWith('--')) continue
-    const key = token.replace(/^--(no-)?/, '').split('=')[0]
-    if (known.has(key) && !(key in flags) && raw[key] !== false) flags[key] = raw[key]
-  }
-  // `YAF_*` fallback for whatever is still unset.
-  for (const key of known) {
-    const name = ENV[key]
-    if (name && !(key in flags) && env[name] !== undefined) flags[key] = env[name]
-  }
-
-  // Engine constraints (opt-in): `--engines.<engine>[=<range>|runtime|floor]`.
-  // minimist nests the dot natively (`--engines.node` → raw.engines.node), so the
-  // allowlist loop above (which keys off the literal token) can't see it — lift
-  // the object across here. Values are resolved + validated later in
-  // `resolveEngineTargets`, which also guards the keys against proto-pollution.
-  if (raw.engines && typeof raw.engines === 'object' && !Array.isArray(raw.engines))
-    flags.engines = raw.engines
-
-  // License policy (opt-in): `--license.allow=MIT,ISC --license.deny=GPL-3.0` (or a
-  // bare `--license=MIT,ISC` allow list). Same minimist-nesting caveat as engines;
-  // resolveLicensePolicy validates + splits the lists.
-  if (raw.license !== undefined && raw.license !== false) flags.license = raw.license
-
-  // `--prod` is an alias for `--production`; minimist maps it via `alias`, but the
-  // token-keyed allowlist above only recognizes the literal `--production`.
-  if (raw.production === true && !('production' in flags)) flags.production = true
-
-  for (const [key, allowed] of Object.entries(CHOICES)) {
-    const value = flags[key]
-    if (value !== undefined && !allowed.includes(String(value)))
-      throw new Error(
-        `Invalid value for --${key}: "${value}". Expected one of: ${allowed.join(', ')}`,
-      )
-  }
-
+  collectExplicit(flags, argv, raw, known)
+  applyEnvFallback(flags, env, known)
+  liftNestedFlags(flags, raw)
+  assertChoices(flags)
   return flags
 }
 

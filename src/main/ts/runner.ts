@@ -27,8 +27,7 @@ const formatError = (err: unknown): string => {
       r.stderr?.toString?.().trim() || r.stdout?.toString?.().trim()
     if (captured) return captured
     if (r.signal) return `interrupted (${r.signal})`
-    if ('status' in r)
-      return `command failed (exit code ${r.status ?? 1})`
+    if ('status' in r) return `command failed (exit code ${r.status ?? 1})`
     if (r.message) return String(r.message)
   }
   return String(err)
@@ -65,7 +64,8 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
 
   const flags = normalizeFlags(_flags)
   const ctx = getContext(flags)
-  const log = (note: string) => !flags.silent && !flags.json && console.log(bold(note))
+  const log = (note: string) =>
+    !flags.silent && !flags.json && console.log(bold(note))
 
   // Cooperative Ctrl+C / kill. An AbortSignal is threaded into the registry HTTP
   // (advisory POST, tarball GET — see `audit/registry`) so the first interrupt
@@ -88,10 +88,7 @@ export const run = async (_flags: TFlags = {}): Promise<void> => {
     controller?.abort() // cancel in-flight registry requests → pipeline rejects
     // Guaranteed exit if cancellation can't unwind in time. unref'd so a clean
     // cooperative unwind exits first.
-    setTimeout(
-      () => process.exit(process.exitCode || 130),
-      1000,
-    ).unref?.()
+    setTimeout(() => process.exit(process.exitCode || 130), 1000).unref?.()
   }
   process.on('SIGINT', onAbort)
   process.on('SIGTERM', onAbort)

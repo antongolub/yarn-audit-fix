@@ -79,7 +79,8 @@ export const attempt = <T>(f: () => T): T | null => {
   }
 }
 
-export const getSelfManifest = () => readJson(findClosest('package.json') as string)
+export const getSelfManifest = () =>
+  readJson(findClosest('package.json') as string)
 
 const findParent = (dir: string, target: string): string | null => {
   if (fs.existsSync(path.join(dir, target))) {

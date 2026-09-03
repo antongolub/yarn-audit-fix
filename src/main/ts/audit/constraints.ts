@@ -42,7 +42,9 @@ export const resolveEngineTargets = (
 ): TEngineTargets | undefined => {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined
   const out: TEngineTargets = {}
-  for (const [engine, value] of Object.entries(raw as Record<string, unknown>)) {
+  for (const [engine, value] of Object.entries(
+    raw as Record<string, unknown>,
+  )) {
     if (FORBIDDEN.has(engine) || !SAFE_ENGINE.test(engine)) continue
     out[engine] = resolveOne(engine, value, cwd)
   }
@@ -75,7 +77,8 @@ const listPackageDirs = (nodeModules: string): string[] => {
     const full = path.join(nodeModules, entry)
     if (entry.startsWith('@')) {
       try {
-        for (const member of fs.readdirSync(full)) out.push(path.join(full, member))
+        for (const member of fs.readdirSync(full))
+          out.push(path.join(full, member))
       } catch {
         /* not a readable scope dir */
       }
@@ -154,7 +157,8 @@ export const resolveLicensePolicy = (
   raw: unknown,
 ): TLicensePolicy | undefined => {
   if (raw === undefined || raw === null || raw === false) return undefined
-  const obj = typeof raw === 'object' ? (raw as Record<string, unknown>) : undefined
+  const obj =
+    typeof raw === 'object' ? (raw as Record<string, unknown>) : undefined
   const allow = splitList(obj ? obj.allow : raw)
   const deny = splitList(obj ? obj.deny : undefined)
   if (allow.length === 0 && deny.length === 0) return undefined
@@ -179,7 +183,8 @@ export type TPackageType = 'cjs'
 /** Resolve `--package-type`. v1 accepts `cjs` (keep the closure require-able);
  *  anything else is an explicit error rather than a silent no-op. */
 export const resolvePackageType = (raw: unknown): TPackageType | undefined => {
-  if (raw === undefined || raw === null || raw === false || raw === '') return undefined
+  if (raw === undefined || raw === null || raw === false || raw === '')
+    return undefined
   if (raw === 'cjs') return 'cjs'
   throw new Error(
     `--package-type: "${String(raw)}" is not supported (only "cjs" for now)`,
@@ -202,8 +207,7 @@ const commonjsCompatible = (): Condition => ({
   cost: 10,
   async evaluate(ctx: ConditionContext) {
     const m = (await ctx.manifest()) as
-      | { type?: unknown; main?: unknown; exports?: unknown }
-      | undefined
+      { type?: unknown; main?: unknown; exports?: unknown } | undefined
     if (m === undefined)
       return { ok: 'unevaluable', reason: 'no manifest()-capable registry' }
     if (m.type !== 'module') return { ok: true } // CJS by default → requireable

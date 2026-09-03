@@ -49,7 +49,9 @@ export const createLimiter = (concurrency: number): Limiter => {
  * independently; error responses (`!ok`) and network failures are evicted so a
  * transient 5xx / dropped socket never poisons the rest of the run.
  */
-export const cachingFetch = (base: typeof fetch = defaultFetch): typeof fetch => {
+export const cachingFetch = (
+  base: typeof fetch = defaultFetch,
+): typeof fetch => {
   const cache = new Map<string, Promise<Response>>()
   const wrapped = (
     input: Parameters<typeof fetch>[0],
