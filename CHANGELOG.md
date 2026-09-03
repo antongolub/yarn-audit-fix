@@ -1,3 +1,8 @@
+## [11.0.4](https://github.com/lockgraph/yarn-audit-fix/compare/v11.0.3...v11.0.4) (2026-09-03)
+
+### Fixes & improvements
+* refactor: split the audit pipeline into focused modules ([bcf22a2](https://github.com/lockgraph/yarn-audit-fix/commit/bcf22a23d95c8cdac8149e79fc1753f1c42030d0))
+
 ## [11.0.3](https://github.com/lockgraph/yarn-audit-fix/compare/v11.0.2...v11.0.3) (2026-09-03)
 
 ### Fixes & improvements
