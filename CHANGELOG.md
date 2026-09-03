@@ -1,3 +1,8 @@
+## [11.0.3](https://github.com/lockgraph/yarn-audit-fix/compare/v11.0.2...v11.0.3) (2026-09-03)
+
+### Fixes & improvements
+* refactor(lockfile): split the patch pipeline into plan/apply/report ([82e6274](https://github.com/lockgraph/yarn-audit-fix/commit/82e6274a6cab50efeac2748a038367456f26cd75))
+
 ## [11.0.2](https://github.com/lockgraph/yarn-audit-fix/compare/v11.0.1...v11.0.2) (2026-09-01)
 
 ### Fixes & improvements
