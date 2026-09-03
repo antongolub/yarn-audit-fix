@@ -15,8 +15,10 @@ permissions: {}
 jobs:
   build:
     name: Build & test (Node 26)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
+    permissions:
+      contents: read # checkout
     steps:
       - uses: actions/checkout@v7
         with:
@@ -63,6 +65,8 @@ jobs:
     name: PR (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    permissions:
+      contents: read # checkout
     strategy:
       fail-fast: false
       matrix:
@@ -96,7 +100,7 @@ jobs:
     name: Release ${{ github.ref }}
     needs: build
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     environment: release # dedicated env: scopes QLTY_COVERAGE_TOKEN + branch protection
     timeout-minutes: 15
     permissions:
@@ -169,7 +173,7 @@ jobs:
   post-release:
     name: Post-release
     needs: release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/setup-node@v7

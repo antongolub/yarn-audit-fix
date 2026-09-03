@@ -11,13 +11,12 @@ on:
   schedule:
     - cron: '35 11 * * 4'
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   zizmor:
     name: Analyze workflows
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
       security-events: write # upload SARIF to code scanning
